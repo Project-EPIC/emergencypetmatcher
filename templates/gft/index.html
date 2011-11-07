@@ -1,0 +1,88 @@
+<html>
+    <head>
+        <title>GFT Project Epic Demo</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript"></script>
+        <script src="http://code.google.com/apis/gears/gears_init.js" type="text/javascript" charset="utf-8"></script>
+        <script src="http://barronsoftware.com/static/js/geo.js" type="text/javascript" charset="utf-8"></script>
+    <body>
+    <h1>Report a Lost or Found Pet</h1>
+
+    <p>Use the form below to submit a report about a lost or stolen pet to our database.</p>
+    <form action="/dynamic/submit/" method="post">
+        {% csrf_token %}
+        <table>
+            <tr>
+                <td>
+                    Pet's Name
+                </td>
+                <td>
+                    <input type="text" name="pet_name" />
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    Contact Information
+                </td>
+                <td>
+                    <input type="text" name="contact" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Lost or Found?
+                </td>
+                <td>
+                    <input type="radio" name="lostfound" id="choice0" value="Lost" />
+                    <label for="choice0">I have lost this pet</label><br />
+                    <input type="radio" name="lostfound" id="choice1" value="Found" />
+                    <label for="choice1">I have found this pet</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Tags
+                </td>
+                <td>
+                    <input type="text" name="tags" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Location
+                </td>
+                <td>
+                    <input type="text" id="lat" name="latitude" />&nbsp;,&nbsp;
+                    <input type="text" id="long" name="longitude" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Link to Photograph
+                </td>
+                <td>
+                    <input type="text" name="photograph" />
+                </td>
+            </tr>    
+        </table>
+        <input type="submit" value="Submit" />
+    </form>
+    </body>
+    <script type="text/javascript">
+    $(document).ready(function () {
+        if (geo_position_js.init()) {
+            geo_position_js.getCurrentPosition(success_callback, error_callback, {enableHighAccuracy:true, options:5000});
+        }
+
+        function success_callback(p)
+        {
+            $("#lat").val(p.coords.latitude);
+            $("#long").val(p.coords.longitude);
+        }
+
+        function error_callback(p)
+        {
+            alert('error='+p.message);
+        }
+    });
+    </script>
+</html>
