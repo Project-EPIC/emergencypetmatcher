@@ -4,11 +4,11 @@ from django.conf.urls.defaults import patterns, include, url
 # from django.contrib import admin
 # admin.autodiscover()
 
+from reporting.views import home, upvote 
+
 urlpatterns = patterns('',
-    url(r'^reporting/', include('reporting.urls')),
-    url(r'^auth/', include('auth.urls')),
-    url(r'', include('social_auth.urls')),
-    url(r'^$', 'auth.views.home', name="home"),
+    url(r'^$', home, name='home'),
+    url(r'^upvote/(.+)$', upvote, name="upvote")
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 

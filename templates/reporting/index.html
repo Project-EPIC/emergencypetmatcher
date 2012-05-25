@@ -1,0 +1,139 @@
+{% extends "master.html" %}
+
+{% block title %}NPLH: Report a lost pet{% endblock %}
+
+{% block menu %}
+<ul>
+	<li><a href="#">Match Pets</a></li>
+	<li><a href="#">Verify Matches</a></li>
+	<li class="active"><a href="#">Submit Lost/Found Pet</a></li>
+	<li><a href="#">My Profile</a></li>
+	<li><a href="#">About</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div id="wrap" style="width:85%; margin: 0 auto; text-align:center">
+{% if thankyou %}
+<div style="background: black; color: white; padding: 2px 0 2px 0;">
+	<p>Thanks for updating that report!</p>
+</div>
+{% endif %}
+{% if matching %}
+	<h2>Please create a Found Pet report</h2>
+	<p style="text-align: left">Take a look at the picture below; pretend you have just found this animal on your property or that you are going through a shelter taking pictures of displaced pets in a disaster.
+Fill out the fields of the pet report to the best of your ability based on the photograph provided, and then click the Submit Changes button.</p>
+{% else %}
+	<h2>Is this pet report complete and informative?</h2>
+	<p style="text-align: left">Please review the pet report below to determine its quality.  Review with consideration
+to quantity of information (are all the fields filled in?), quality of information (is the picture relevant? is the description
+free of fluff and to the point?), and general correctness (is everything spelled correctly?).  If the pet report meets these criteria,
+click the link below.  If it needs changes to meet the criteria, make these changes by editing the report below and then clicking
+the "Submit Changes" button at the bottom of this page.</p>
+	<a href="{% url reporting.views.upvote pet_id %}">YES, this pet report is complete</a><br/>
+	<p>(if not, edit it below and then submit your changes!)</p>
+{% endif %}
+	<br/>
+	<div id="imgblock" style="float:left; margin-right:15px; 
+					width:50%; border-right: 1px solid #ffffff; padding-right:15px;">
+		<img src="http://barronsoftware.com/images/pets/{{pet.img}}" style="max-width:100%" />
+	</div>
+	<div id="detail" style="float:left;max-width:45%;">
+		<form method="POST" action="{% url reporting.views.home %}">
+			{% csrf_token %}
+			<input type="hidden" name="id" value="{{ pet_id }}" />
+			<input type="hidden" name="matching" value="{{ matching }}" />
+		<table>
+			<colgroup>
+				<col style="text-align: right; width:100px" />
+				<col style="text-align: left;" />
+			</colgroup>
+			<tr>
+				<td colspan="2">
+					<span style="font-weight: bold; text-align:left;">Pet Details:</span>
+				</td>
+			<tr>
+				<td style="text-align: right;">
+					Image is useful: 
+				</td>
+				<td style="text-align:left; padding-left: 10px;">
+					<input type="radio" value="True" name="img_useful" {% if pet.img_useful and not matching %} checked="true" {% endif %}/> Yes
+					<input type="radio" value="False" name="img_useful" {% if not pet.img_useful and not matching %} checked="true" {% endif %}/> No
+				</td>
+			</tr>
+			<tr style="text-align:left;">
+				<td></td>
+				<td>
+					<span style="font-size:xx-small; font-style:italic">(if the image to the left is relevant
+ to this report, select 'Yes', otherwise select 'No')</span>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">
+					<span>Lost / Found:</span>
+				</td>
+				<td style="text-align:left; padding-left: 10px;">
+					<span style="font-weight: bold">{% if pet.lost and not matching %}Lost{% else %}Found{% endif %}</span>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">
+					<span>Breed:</span>
+				</td>
+				<td style="text-align:left; padding-left: 10px;">
+					<input type="text" name="breed" value="{% if not matching %}{{ pet.breed }}{% endif %}" />
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">
+					<span>Color:</span>
+				</td>
+				<td style="text-align:left; padding-left: 10px;">
+					<input type="text" name="color" value="{% if not matching %}{{ pet.color }}{% endif %}" />
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">
+					<span>Size:</span>
+				</td>
+				<td style="text-align:left; padding-left: 10px;">
+					<input type="text" name="size" value="{% if not matching %}{{ pet.size }}{% endif %}" />
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">
+					<span>Age:</span>
+				</td>
+				<td style="text-align:left; padding-left: 10px;">
+					<input type="text" name="age" value="{% if not matching %}{{ pet.age }}{% endif %}" />
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">
+					<span>Description:</span>
+				</td>
+				<td style="text-align:left; padding-left: 10px;">
+					<textarea rows="8" cols="30" name="description">{% if not matching %}{{ pet.comments }}{% endif %}</textarea>
+				</td>
+			</tr>
+			<tr style="text-align:left;">
+				<td></td>
+				<td>
+					<span style="font-size:xx-small; font-style:italic">(a relevant description of the animal, i.e., "large black spot
+on left leg", not "cutest dog ever!")</span>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+					<input type="submit" value="Submit Changes"/>
+				</td>
+			</tr>
+		</table>	
+		</form>
+	</div>
+
+
+
+</div>
+{% endblock %}
