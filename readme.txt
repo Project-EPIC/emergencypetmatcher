@@ -1,12 +1,23 @@
+EmergencyPetMatcher (EPM) : No Place Like Home (NPLH) : Project README
+
+Make sure you have the 'pip' package manager installed before continuing.
+Make sure you have Django (1.3) installed before continuing.
+
 Project Dependencies
 ======================================
-Django-MongoDB-Engine (http://django-mongodb.org/topics/setup.html)
+
+1) Django-MongoDB-Engine (http://django-mongodb.org/topics/setup.html)
 --- directly depends on Django-nonrel and djangotoolbox
 
-After you have Django installed, just do:
+	After you have Django installed, just do:
 
+Django NonRel - Django 1.3 fork that supports non-relational databases like MongoDB and AppEngine
 pip install hg+https://bitbucket.org/wkornewald/django-nonrel
+
+Django ToolBox - extra tools needed for non-relational database support.
 pip install hg+https://bitbucket.org/wkornewald/djangotoolbox
+
+MongoDB Engine
 pip install git+https://github.com/django-nonrel/mongodb-engine
 
 DjangoSocialAuth - handles social network authentication
