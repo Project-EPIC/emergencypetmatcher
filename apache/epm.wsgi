@@ -16,6 +16,7 @@ workspace = os.path.dirname(apache_folder)
 project = workspace + PROJECT_NAME
 
 #We append the EPM directory path to SYS PATH.
+sys.path.append(project)
 sys.path.append(workspace)
 #sys.path.append('/home/jbarron/public_html/barronsoftware.com/nplh/')
 
@@ -23,7 +24,7 @@ sys.path.append(workspace)
 site.addsitedir(workspace + SITE_PACKAGES)
 
 #Some general important settings.
-os.environ['DJANGO_SETTINGS_MODULE'] = 'project.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 application = django.core.handlers.wsgi.WSGIHandler()
 
 #This is how you can test if its working. You should get a "Hello World!" to the browser screen.
