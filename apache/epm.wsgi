@@ -3,7 +3,7 @@ import site
 import django.core.handlers.wsgi
 
 #Path Constants (relative to project directory) - edit this to reflect changes in project WSGI script.
-PROJECT_NAME = '/epm'
+PROJECT_NAME = '/project'
 SITE_PACKAGES = '/lib/python2.7/site-packages'
 
 #This is the apache configuration folder path where the mod_wsgi script lives. It should be outside of the project directory.
@@ -23,7 +23,7 @@ sys.path.append(workspace)
 site.addsitedir(workspace + SITE_PACKAGES)
 
 #Some general important settings.
-os.environ['DJANGO_SETTINGS_MODULE'] = 'epm.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'project.settings'
 application = django.core.handlers.wsgi.WSGIHandler()
 
 #This is how you can test if its working. You should get a "Hello World!" to the browser screen.

@@ -26,5 +26,4 @@ class PetReport(models.Model):
     size = models.CharField()
     revision = models.IntegerField()
     upvotes = ListField()
-
     objects = MongoDBManager()
