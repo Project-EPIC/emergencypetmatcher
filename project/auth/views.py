@@ -36,7 +36,7 @@ def error(request):
 def logout(request):
     """Logs out user"""
     auth_logout(request)
-    return HttpResponseRedirect('/nplh')
+    return HttpResponseRedirect('/epm')
 
 
 def form(request):

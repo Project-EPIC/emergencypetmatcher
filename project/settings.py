@@ -1,4 +1,4 @@
-# Django settings for nplh project.
+# Django settings for the EPM project.
 
 import social_auth
 
@@ -16,7 +16,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django_mongodb_engine', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'nplh_db'#,                      # Or path to database file if using sqlite3.
+        'NAME': 'epm_db'#,                      # Or path to database file if using sqlite3.
         #'USER': '',                      # Not used with sqlite3.
         #'PASSWORD': '',                  # Not used with sqlite3.
         #'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -64,7 +64,7 @@ STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/nplh/static/'
+STATIC_URL = '/project/static/'
 
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
@@ -104,13 +104,14 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'nplh.urls'
+ROOT_URLCONF = 'project.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths
-    '/home/jbarron/public_html/barronsoftware.com/nplh/templates/',
+    #'/home/jbarron/public_html/barronsoftware.com/nplh/templates/',
+    '/srv/epm/project/templates'
 )
 
 INSTALLED_APPS = (
@@ -121,8 +122,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'social_auth',
-    'nplh.auth',
-    'nplh.reporting'
+    'project.auth',
+    'project.reporting'
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:

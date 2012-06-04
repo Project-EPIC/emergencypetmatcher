@@ -25,7 +25,7 @@ def home(request, include_ty=False):
             #else:
             return disp_pet(request, include_ty)
     else:
-        return redirect('/nplh')
+        return redirect('/epm')
 
 def disp_match(request, include_ty = False):
     candidates = Pets.objects.filter(match = None)
@@ -80,4 +80,4 @@ def upvote(request, pet_id):
     x.entries[-1].upvotes.append(request.user.username)
     x.revisions = x.revisions + 1
     x.save()
-    return redirect('/nplh/reporting')
+    return redirect('/epm/reporting')

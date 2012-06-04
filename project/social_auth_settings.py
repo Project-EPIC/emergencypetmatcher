@@ -5,9 +5,9 @@ FACEBOOK_API_SECRET         = '0106dd00c7a51e98fccbbd99e6b89db3'
 GOOGLE_OAUTH2_CLIENT_ID     = ''
 GOOGLE_OAUTH2_CLIENT_SECRET = ''
 
-LOGIN_URL = 'nplh/auth/'
-LOGIN_REDIRECT_URL = '/nplh/auth/done'
-LOGIN_ERROR_URL = '/nplh/auth/login-error/'
+LOGIN_URL = 'epm/auth/'
+LOGIN_REDIRECT_URL = '/epm/auth/done'
+LOGIN_ERROR_URL = '/epm/auth/login-error/'
 
 SOCIAL_AUTH_ERROR_KEY = 'social_errors'
 
