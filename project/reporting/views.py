@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
@@ -25,7 +25,8 @@ def home(request, include_ty=False):
             #else:
             return disp_pet(request, include_ty)
     else:
-        return redirect('/epm')
+        return HttpResponse("You are currently not authenticated. Please try again.")
+        #return redirect('/epm')
 
 def disp_match(request, include_ty = False):
     candidates = Pets.objects.filter(match = None)
