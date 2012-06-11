@@ -5,7 +5,7 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 
-import unittest
+from django.utils import unittest
 from django.test import TestCase
 from home.models import *
 
@@ -13,6 +13,14 @@ class ModelTesting (unittest.TestCase):
 
 	#Control Variable
 	NUMBER_OF_TESTS = 100
+
+	#User Vars
+	USERNAME = "TEST_USER_NAME"
+	PASSWORD = "TEST_PASSWORD"
+	FIRST_NAME = "TEST_FIRST_NAME"
+	LAST_NAME = "TEST_LAST_NAME"
+	EMAIL = "TEST@TEST.COM"
+	
 
 	def setUp(self):
 		#Get rid of all objects in the QuerySet.
@@ -107,7 +115,7 @@ class ModelTesting (unittest.TestCase):
 		for i in range (self.NUMBER_OF_TESTS):
 
 			#First, create the PetMatch object.
-			pm = PetMatch( 	lost_pet = PetReport(lost = True), 
+			pm = PetMatch ( lost_pet = PetReport(lost = True), 
 							found_pet = PetReport (lost = False), 
 							proposed_by = User(name= "testUser"),
 							score = i )
@@ -196,6 +204,12 @@ class ModelTesting (unittest.TestCase):
 
 		for i in range(self.NUMBER_OF_TESTS):
 
+			user = User (	username = self.TEST_USER_NAME,
+							password = self.PASSWORD,
+							first_name = self.TEST_FIRST_NAME,
+							last_name = self.TEST_LAST_NAME,
+							email = self.EMAIL )
+			
 			pr = PetReport(lost=True)
 			chat = Chat(pet_report = pr)
 			chat.save()

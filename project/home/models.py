@@ -7,11 +7,11 @@ class PetReport(models.Model):
     #Required Fields
     pet_type = models.CharField(max_length=30,null=False)
     lost = models.BooleanField(null=False)
-    proposed_by = models.CharField(max_length=100, null=False)
-    location = models.CharField(max_length=25,null=False)
+    proposed_by = EmbeddedModelField('User', null=False)
 
     #Non-Required Fields
     pet_name=models.CharField(max_length=30,null=True) 
+    location = models.CharField(max_length=25,null=True)
     color = models.CharField(max_length=20,null=True)
     age = models.IntegerField(null=True)
     breed = models.CharField(max_length=30,null=True)
@@ -29,7 +29,7 @@ class PetReport(models.Model):
     chat = EmbeddedModelField('Chat', null=True)
 
     def __unicode__(self):
-        return 'PetReport{%s, lost:%s contact: %s}' % (self.pet_type, self.lost, self.proposed_by)
+        return ' {type:%s, lost:%s, contact: %s}' % (self.pet_type, self.lost, self.proposed_by)
 
 
 #The User Object Model.
@@ -72,7 +72,7 @@ class Chat (models.Model):
         models.CharField(max_length=1000, blank=True), models.DateTimeField(auto_now_add=True)))
 
     def __unicode__ (self):
-        return 'Chat {pet_report:%s}' % (self.pet_report)
+        return ' {pet_report:%s}' % (self.pet_report)
 
 
 #The Pet Match Object Model
@@ -93,5 +93,5 @@ class PetMatch(models.Model):
     down_votes = ListField(EmbeddedModelField('User', null=True))
 
     def __unicode__ (self):
-        return 'PetMatch {%s:%s}' % (self.lost_pet, self.found_pet)
+        return ' {%s:%s}' % (self.lost_pet, self.found_pet)
 
