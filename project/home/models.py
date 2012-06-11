@@ -19,63 +19,52 @@ class PetReport(models.Model):
     description   = models.CharField(max_length=300,null=True)
     revision_number = models.IntegerField(null=True) #update revision using view
     SEX_CHOICES=(
-        ('m','Male'),
-        ('f','Female'),
+        ('Male','Male'),
+        ('Female','Female')
         )
-    sex = models.CharField(max_length=6,choices=SEX_CHOICES)
-    date_lostOrFound = models.DateTimeField(auto_now_add=True)
+    sex = models.CharField(max_length=6, choices=SEX_CHOICES)
+    date_lost_or_found = models.DateTimeField(auto_now_add=True)
     proposed_matches = ListField(EmbeddedModelField('PetMatch', null=True))
     workers = ListField(EmbeddedModelField('User', null=True))
-    chat = EmbeddedModelField('Chat',null=True)
+    chat = EmbeddedModelField('Chat', null=True)
 
     def __unicode__(self):
-        return '{ %s lost:%s contact: %s}' % (self.pet_type, self.lost, self.proposed_by)
+        return 'PetReport{%s, lost:%s contact: %s}' % (self.pet_type, self.lost, self.proposed_by)
+
 
 #The User Object Model.
-class User(models.Model):
+class User (models.Model):
 
     #Required Fields
-    username = models.CharField(max_length=100)
-    password = models.CharField(max_length=100)
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    email = models.EmailField(max_length=100)
+    username = models.CharField(max_length=100, null=False)
+    password = models.CharField(max_length=100, null=False)
+    first_name = models.CharField(max_length=100, null=False)
+    last_name = models.CharField(max_length=100, null=False)
+    email = models.EmailField(max_length=100, null=False)
 
     #Non-Required Fields
-    facebook_cred = models.CharField(max_length=100)
-    twitter_cred = models.CharField(max_length=100)
-    friends = ListField('self', null=True)
-    chats = ListField(EmbeddedModelField('Chat'))
-    working_on = ListField(EmbeddedModelField('PetReport'))
-    submitted = ListField(EmbeddedModelField('PetReport'))
-    matches = ListField(EmbeddedModelField('PetReport'))
-    fr = ListField(models.CharField(max_length=100))
-    reputation = models.IntegerField(null=True, default=0)
+    facebook_cred = models.CharField(max_length=100, null=True)
+    twitter_cred = models.CharField(max_length=100, null=True)
+    reputation = models.IntegerField(default=0, null=True)
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
-
-
-#The Pet Match Object Model
-class PetMatch(models.Model):
-    lost_pet = EmbeddedModelField('PetReport', null=False)
-    found_pet = EmbeddedModelField('PetReport', null=False)
-    proposed_by = EmbeddedModelField('User', null=False)
-    proposed_date = models.DateTimeField(auto_now_add = True)
-    is_open = models.BooleanField(default=True)
-    #It is OK that this field is null (initially)
-    up_votes = ListField(EmbeddedModelField('User'), null=True)
-    down_votes = ListField(EmbeddedModelField('User'), null=True)
-    score = models.IntegerField(default=0)
-    closed_by = EmbeddedModelField(User, null=True)
-    closed_date = models.DateTimeField(null=True)
-
-    def __unicode__ (self):
-        return 'PetMatch {%s:%s}' % (self.lost_pet, self.found_pet)
+    friends = ListField(EmbeddedModelField('User', null=True))
+    chats = ListField(EmbeddedModelField('Chat', null=True))
+    reports_working_on = ListField(EmbeddedModelField('PetReport', null=True))
+    reports_submitted = ListField(EmbeddedModelField('PetReport', null=True))
+    matches_proposed = ListField(EmbeddedModelField('PetMatch', null=True))
+    
+    #fr = ListField(models.CharField(max_length=100))
+    
 
 
 #The Chat Object Model
 class Chat (models.Model):
+
+    #Required Fields
     pet_report = EmbeddedModelField('PetReport', null=False)
+
+    #Non-Required Fields
     current_users = ListField(EmbeddedModelField('User', null=True))
     #content has a List of DictFields of {User, text, date+time}. Note that the auto_now option means that
     #once a dictfield has been added or edited to this object instance, the date and time is recorded here.
@@ -84,4 +73,25 @@ class Chat (models.Model):
 
     def __unicode__ (self):
         return 'Chat {pet_report:%s}' % (self.pet_report)
+
+
+#The Pet Match Object Model
+class PetMatch(models.Model):
+
+    #Required Fields
+    lost_pet = EmbeddedModelField('PetReport', null=False)
+    found_pet = EmbeddedModelField('PetReport', null=False)
+    proposed_by = EmbeddedModelField('User', null=False)
+    
+    #Non-Required Fields
+    proposed_date = models.DateTimeField(auto_now_add = True)
+    is_open = models.BooleanField(default=True)
+    score = models.IntegerField(default=0)
+    closed_by = EmbeddedModelField(User, null=True)
+    closed_date = models.DateTimeField(null=True)
+    up_votes = ListField(EmbeddedModelField('User', null=True))
+    down_votes = ListField(EmbeddedModelField('User', null=True))
+
+    def __unicode__ (self):
+        return 'PetMatch {%s:%s}' % (self.lost_pet, self.found_pet)
 

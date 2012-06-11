@@ -5,7 +5,11 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 
+import unittest
 from django.test import TestCase
+from home.models import *
+
+class ModelTesting (unittest.TestCase):
 
 	#Control Variable
 	NUMBER_OF_TESTS = 100
@@ -25,72 +29,71 @@ from django.test import TestCase
 		PetReport.objects.all().delete()
 		Chat.objects.all().delete()
 
-
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
 	CRUD Tests for: User
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
  	def test_saveUser(self):
-       	self.user.save()
+ 		self.user.save()
 
 
-    def test_reading_user_from_database(self):
+	def test_reading_user_from_database(self):
 
-        # check we can find the user in the database again
-        all_users = User.objects.all()
-        self.assertEquals(len(all_users), 1)
-        only_user = all_users[0]
-        self.assertEquals(only_user, self.user)
+    	# check we can find the user in the database again
+		all_users = User.objects.all()
+		self.assertEquals(len(all_users), 1)
+		only_user = all_users[0]
+		self.assertEquals(only_user, self.user)
 
-        # check that its correct attributes are retrieved:
-        self.assertEquals(only_user.userid, 1)
-        self.assertEquals(only_user.username, 'user1')
-        self.assertEquals(only_user.password, '1234') 
+		# check that its correct attributes are retrieved:
+		self.assertEquals(only_user.userid, 1)
+		self.assertEquals(only_user.username, 'user1')
+		self.assertEquals(only_user.password, '1234') 
 
-        # or ..................................
-        #temp_user = User.objects.get(pk=1) ???
-        temp_user = User.objects.get(userid=1)
-        self.assertEquals(temp_user.username, 'user1')
-        self.assertEquals(temp_user.password, '1234')
-        self.assertEquals(temp_user.first_name, 'Ken')
-        self.assertEquals(temp_user.last_name, 'Anderson')
-        self.assertEquals(temp_user.email, 'ken.anderson@gmail.com')
-        self.assertEquals(temp_user.rebutation, 0)
-
-
-
-    def test_updateUser(self):
-        # check we can update the user's attibutes
-        self.user.first_name = 'Sahar'
-        self.assertNotEquals(self.user.first_name, 'Ken')
-        self.assertEquals(self.user.first_name, 'Sahar')
-
-        # or do we need to read in temp_user
-        temp_user = User.objects.get(userid=1)
-        temp_user.last_name = 'Jambi'
-        self.assertNotEquals(temp_user.last_name, 'Anderson')
-        self.assertEquals(temp_user.last_name, 'Jambi')
-        
-        # try to update the user's friends embedded list
-        user2 = User.objects.create(userid=22)
-        user3 = User.objects.create()
-        #user2.save()
-        #user3.save()
-        temp_user.friends = [user2, user3]
-        self.assertEquals(temp_user.friends, [user2, user3])
-
-        # try to update the user's working_on pets embedded list
-        pet1 = Pet.objects.create()
-        pet2 = Pet.objects.create()
-        temp_user.working_on = [pet1]
-        self.assertEquals(temp_user.working_on, [pet1])
-        self.assertNotEquals(temp_user.working_on, [pet2])
+		# or ..................................
+		#temp_user = User.objects.get(pk=1) ???
+		temp_user = User.objects.get(userid=1)
+		self.assertEquals(temp_user.username, 'user1')
+		self.assertEquals(temp_user.password, '1234')
+		self.assertEquals(temp_user.first_name, 'Ken')
+		self.assertEquals(temp_user.last_name, 'Anderson')
+		self.assertEquals(temp_user.email, 'ken.anderson@gmail.com')
+		self.assertEquals(temp_user.rebutation, 0)
 
 
-    def test_deleteUser(self):
-        # check we can delete the user
-        self.user.delete()
-        all_users = User.objects.all()
-        self.assertEquals(len(all_users), 0)
+
+	def test_updateUser(self):
+		# check we can update the user's attibutes
+		self.user.first_name = 'Sahar'
+		self.assertNotEquals(self.user.first_name, 'Ken')
+		self.assertEquals(self.user.first_name, 'Sahar')
+
+		# or do we need to read in temp_user
+		temp_user = User.objects.get(userid=1)
+		temp_user.last_name = 'Jambi'
+		self.assertNotEquals(temp_user.last_name, 'Anderson')
+		self.assertEquals(temp_user.last_name, 'Jambi')
+
+		# try to update the user's friends embedded list
+		user2 = User.objects.create(userid=22)
+		user3 = User.objects.create()
+		#user2.save()
+		#user3.save()
+		temp_user.friends = [user2, user3]
+		self.assertEquals(temp_user.friends, [user2, user3])
+
+		# try to update the user's working_on pets embedded list
+		pet1 = Pet.objects.create()
+		pet2 = Pet.objects.create()
+		temp_user.working_on = [pet1]
+		self.assertEquals(temp_user.working_on, [pet1])
+		self.assertNotEquals(temp_user.working_on, [pet2])
+
+
+	def test_deleteUser(self):
+		# check we can delete the user
+		self.user.delete()
+		all_users = User.objects.all()
+		self.assertEquals(len(all_users), 0)
 
 
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -104,10 +107,10 @@ from django.test import TestCase
 		for i in range (self.NUMBER_OF_TESTS):
 
 			#First, create the PetMatch object.
-			pm = PetMatch(	lost_pet = PetReport(lost = True), 
-				found_pet = PetReport (lost = False), 
-				proposed_by = User(name= "testUser"),
-				score = i )
+			pm = PetMatch( 	lost_pet = PetReport(lost = True), 
+							found_pet = PetReport (lost = False), 
+							proposed_by = User(name= "testUser"),
+							score = i )
 
 			#Save it to the database.
 			pm.save()
@@ -128,9 +131,9 @@ from django.test import TestCase
 
 			#First, create and save the PetMatch object.
 			pm = PetMatch.objects.create (	lost_pet = PetReport(lost = True), 
-				found_pet = PetReport (lost = False), 
-				proposed_by = User(name= "testUser"),
-				score = i )
+			found_pet = PetReport (lost = False), 
+			proposed_by = User(name= "testUser"),
+			score = i )
 
 			#UPDATE: score
 			pm.score = i - 1
@@ -151,9 +154,9 @@ from django.test import TestCase
 
 			#First, create the PetMatch object.
 			pm = PetMatch.objects.create (	lost_pet = PetReport(lost = True), 
-				found_pet = PetReport (lost = False), 
-				proposed_by = User(name= "testUser"),
-				score = i )
+			found_pet = PetReport (lost = False), 
+			proposed_by = User(name= "testUser"),
+			score = i )
 
 			PetMatch.objects.all().get(score = i).delete()
 
@@ -166,21 +169,21 @@ from django.test import TestCase
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
 	CRUD Tests for: PetReport
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
-    def test_savePetReport(self):
-    	print '>>>> Testing test_savePetReport for %d iterations' % self.NUMBER_OF_TESTS
+	def test_savePetReport(self):
+		print '>>>> Testing test_savePetReport for %d iterations' % self.NUMBER_OF_TESTS
 
 		user1=User.objects.create()
 		user1.name="User1"
 		user1.save()
 		self.dog=PetReport.objects.create(pet_type="dog",pet_name="Jackie",author=user1,
-			lost=True,color='brown',breed="Labrador",sex='f',location="Boulder",size="1 foot tall")
+		lost=True,color='brown',breed="Labrador",sex='f',location="Boulder",size="1 foot tall")
 		self.dog.save()
-		
+
 		print "unicode: "+self.dog+"\n"
 		self.dog.description="Shaggy dog"
-		
-	    self.assertEqual(self.dog.pet_type,"dog")
-	    self.assertEqual(self.dog.pet_name,"Jackie")
+
+		self.assertEqual(self.dog.pet_type,"dog")
+		self.assertEqual(self.dog.pet_name,"Jackie")
 
 
 
@@ -215,7 +218,7 @@ from django.test import TestCase
 			chatContent = chat.content
 			self.assertTrue(len(chatContent) == 0)
 			chatContent.append({'user': User(name="testUser"), 
-				'content': "TEST_CONTENT", 'date': datetime.datetime.now()})
+			'content': "TEST_CONTENT", 'date': datetime.datetime.now()})
 
 			#Save it to the database.
 			chat.save()
@@ -224,7 +227,7 @@ from django.test import TestCase
 			#Now assert that the updated Chat matches the one we've just updated.
 			self.assertEqual(chat, chat_updated)
 
-		
+
 	def test_deleteChat(self):
 		print '>>>> Testing test_deleteChat for %d iterations' % self.NUMBER_OF_TESTS
 
