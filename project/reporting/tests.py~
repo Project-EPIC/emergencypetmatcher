@@ -36,6 +36,6 @@ class SimpleTest(TestCase):
 	
     	self.assertEqual(self.dog.pet_type,"dog")
     	self.assertEqual(self.dog.pet_name,"Jackie")
-	
+	self.dog.delete()
     	
 

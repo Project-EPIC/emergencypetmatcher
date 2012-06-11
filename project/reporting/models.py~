@@ -2,7 +2,7 @@ from django.db import models
 from djangotoolbox.fields import ListField, EmbeddedModelField
 from django_mongodb_engine.contrib import MongoDBManager
 from auth.models import User
-from matching.models import Chat,PetMatch
+from matching.models import *
 
 class PetReport(models.Model):
     pet_type = models.CharField(max_length=30,null=False)
