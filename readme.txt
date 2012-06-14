@@ -7,9 +7,10 @@ This document is primarily for developers, designers, and administrators of the 
 - Make sure that you have the following installed on your development machine before continuing:
 	- Python (2.7)
 	- Pip (2.7)
+	- Mercurial (2.2.2) (for recognizing 'hg' - not for version control)
 	- Django (1.3)
 	- MongoDB (2.x)
-	- git (1.7)
+	- git (1.7) (version control)
 
 --------------------- Project Technologies --------------------- 
 
