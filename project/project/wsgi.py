@@ -14,7 +14,7 @@ framework.
 
 """
 
-import os, sys
+import os, sys, django
 import site
 from django.core.wsgi import get_wsgi_application
 
@@ -22,7 +22,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "project.settings")
 
 #Path Constants (relative to project directory) - edit this to reflect changes in project WSGI script.
 PROJECT_NAME = '/project'
-#SITE_PACKAGES = '/lib/python2.7/site-packages'
+SITE_PACKAGES = '/lib/python2.7/site-packages'
 
 #This is the project_settings folder (django 1.4) that hosts the settings.py, urls.py, and ''this'' file.
 project_settings_folder = os.path.dirname(__file__)
@@ -34,12 +34,14 @@ project_folder = os.path.dirname(project_settings_folder)
 workspace = os.path.dirname(project_folder)
 
 #We append the EPM directory path to SYS PATH.
-sys.path.append(project)
+sys.path.append(project_folder)
+sys.path.append(project_folder)
 sys.path.append(workspace)
+sys.path.append(workspace + SITE_PACKAGES)
 #sys.path.append('/home/jbarron/public_html/barronsoftware.com/nplh/')
 
 #We need to make sure we add in all of our local Python modules here.
-#site.addsitedir(workspace + SITE_PACKAGES)
+site.addsitedir(workspace + SITE_PACKAGES)
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
