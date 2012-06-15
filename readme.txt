@@ -7,28 +7,17 @@ This document is primarily for developers, designers, and administrators of the 
 - Make sure that you have the following installed on your development machine before continuing:
 	- Python (2.7)
 	- Pip (2.7)
-	- Mercurial (2.2.2) (for recognizing 'hg' - not for version control)
-	- Django (1.3)
-	- MongoDB (2.x)
+	- Django (1.4)
 	- git (1.7) (version control)
 
 --------------------- Project Technologies --------------------- 
 
 The following must be installed in order to set up the development environment for the EPM Django Project:
 
-1) Django NonRel - Django 1.3 fork that supports non-relational databases like MongoDB and AppEngine
-pip install hg+https://bitbucket.org/wkornewald/django-nonrel
-
-2) Django ToolBox - extra tools needed for non-relational database support.
-pip install hg+https://bitbucket.org/wkornewald/djangotoolbox
-
-3) Django-MongoDB Engine
-pip install git+https://github.com/django-nonrel/mongodb-engine
-
-4) DjangoSocialAuth - handles social network authentication
+1) DjangoSocialAuth - handles social network authentication
 pip install django-social-auth
 
-5) mod_wsgi - WSGI module that allows Apache to run Python projects
+2) mod_wsgi - WSGI module that allows Apache to run Python projects
 download and install: http://code.google.com/p/modwsgi/
 
 Existing settings should work.
