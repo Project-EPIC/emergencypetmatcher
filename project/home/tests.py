@@ -5,8 +5,9 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 
-from django.test import TestCase
 from home.models import *
+from django.contrib.auth import authenticate
+import unittest, string, random, sys
 
 class ModelTesting (unittest.TestCase):
 
@@ -14,93 +15,136 @@ class ModelTesting (unittest.TestCase):
 	NUMBER_OF_TESTS = 100
 
 	#User Vars
-	USERNAME = "TEST_USER_NAME"
-	PASSWORD = "TEST_PASSWORD"
-	FIRST_NAME = "TEST_FIRST_NAME"
-	LAST_NAME = "TEST_LAST_NAME"
-	EMAIL = "TEST@TEST.COM"
-	
+	USERNAME = None
+	PASSWORD = None
+	FIRST_NAME = None
+	LAST_NAME = None
+	EMAIL = None
 
+	def generate_string (self, size, chars = string.ascii_uppercase + string.digits):
+		return ''.join(random.choice(chars) for i in range(size))
+
+	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		#Get rid of all objects in the QuerySet.
 		User.objects.all().delete()
+		UserProfile.objects.all().delete()
 		PetMatch.objects.all().delete()
 		PetReport.objects.all().delete()
 		Chat.objects.all().delete()
+		ChatLine.objects.all().delete()
 
-
+	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		#Get rid of all objects in the QuerySet.
 		User.objects.all().delete()
+		UserProfile.objects.all().delete()
 		PetMatch.objects.all().delete()
 		PetReport.objects.all().delete()
 		Chat.objects.all().delete()
+		ChatLine.objects.all().delete()
+
+	#Keep the user/tester updated.
+	def output_update (self, i):	
+		output = "%d of %d iterations complete" % (i, self.NUMBER_OF_TESTS)
+		sys.stdout.write("\r\x1b[K"+output.__str__())
+		sys.stdout.flush()
+
 
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	CRUD Tests for: User
+	CRUD Tests for: UserProfile + User
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
  	def test_saveUser(self):
- 		self.user.save()
+ 		print '>>> Testing test_saveUser for %d iterations' % self.NUMBER_OF_TESTS
+
+ 		for i in range (self.NUMBER_OF_TESTS):
+
+ 			self.USERNAME = self.generate_string(10)
+		   	self.PASSWORD = self.generate_string(10)
+		   	self.EMAIL = self.generate_string(6) + '@' + 'test.com'
+
+			user = User.objects.create_user(username = self.USERNAME, email = self.EMAIL, password = self.PASSWORD)
+			user_profile = UserProfile (user = user)
+			user_profile.save()
+
+			# check we can find the user in the database again
+			user_prof = UserProfile.objects.get(user = user)
+			self.assertEquals(user_profile, user_prof)
+
+			user = user_prof.user
+			self.assertEquals(user.username, self.USERNAME)
+			self.assertEquals(user.email, self.EMAIL)
+
+			#Now, use the authenticate function
+			userObject = authenticate (username = self.USERNAME, password = self.PASSWORD)
+			self.assertTrue(userObject is not None)
+
+			self.output_update (i + 1)
+
+		self.assertTrue (len(UserProfile.objects.all()) == self.NUMBER_OF_TESTS)
+		self.assertTrue (len(User.objects.all()) == self.NUMBER_OF_TESTS)
+		print ''
 
 
-	def test_reading_user_from_database(self):
+	def test_updateUser (self):
+		print '>>> Testing test_updateUser for %d iterations' % self.NUMBER_OF_TESTS
 
-    	# check we can find the user in the database again
-		all_users = User.objects.all()
-		self.assertEquals(len(all_users), 1)
-		only_user = all_users[0]
-		self.assertEquals(only_user, self.user)
+		for i in range (self.NUMBER_OF_TESTS):
 
-		# check that its correct attributes are retrieved:
-		self.assertEquals(only_user.userid, 1)
-		self.assertEquals(only_user.username, 'user1')
-		self.assertEquals(only_user.password, '1234') 
+			self.USERNAME = self.generate_string(10)
+			self.PASSWORD = self.generate_string(10)
+			self.EMAIL = self.generate_string(6) + '@' + 'test.com'
+			user = User.objects.create_user(username = self.USERNAME, email = self.EMAIL, password = self.PASSWORD)
+			user_profile = UserProfile (user = user)
+			user_profile.save()
 
-		# or ..................................
-		#temp_user = User.objects.get(pk=1) ???
-		temp_user = User.objects.get(userid=1)
-		self.assertEquals(temp_user.username, 'user1')
-		self.assertEquals(temp_user.password, '1234')
-		self.assertEquals(temp_user.first_name, 'Ken')
-		self.assertEquals(temp_user.last_name, 'Anderson')
-		self.assertEquals(temp_user.email, 'ken.anderson@gmail.com')
-		self.assertEquals(temp_user.rebutation, 0)
+			# check that we can read the saved User and update its username
+			changed_username = self.generate_string(10)
+			user_profile = UserProfile.objects.get(user = user)
+			user = user_profile.user
 
+			self.assertTrue (user.username, self.USERNAME)
+			user.username = changed_username
+			user.save()
 
+			user_profile = UserProfile.objects.get(user = user)
+			user = user_profile.user
+			self.assertEqual (user.username, changed_username)
+			self.assertNotEqual (user.username, self.USERNAME)
 
-	def test_updateUser(self):
-		# check we can update the user's attibutes
-		self.user.first_name = 'Sahar'
-		self.assertNotEquals(self.user.first_name, 'Ken')
-		self.assertEquals(self.user.first_name, 'Sahar')
+			#Now, use the authenticate function
+			userObject = authenticate (username = changed_username, password = self.PASSWORD)
+			self.assertTrue(userObject is not None)
 
-		# or do we need to read in temp_user
-		temp_user = User.objects.get(userid=1)
-		temp_user.last_name = 'Jambi'
-		self.assertNotEquals(temp_user.last_name, 'Anderson')
-		self.assertEquals(temp_user.last_name, 'Jambi')
+			self.output_update (i + 1)
 
-		# try to update the user's friends embedded list
-		user2 = User.objects.create(userid=22)
-		user3 = User.objects.create()
-		#user2.save()
-		#user3.save()
-		temp_user.friends = [user2, user3]
-		self.assertEquals(temp_user.friends, [user2, user3])
-
-		# try to update the user's working_on pets embedded list
-		pet1 = Pet.objects.create()
-		pet2 = Pet.objects.create()
-		temp_user.working_on = [pet1]
-		self.assertEquals(temp_user.working_on, [pet1])
-		self.assertNotEquals(temp_user.working_on, [pet2])
-
+		self.assertTrue (len(UserProfile.objects.all()) == self.NUMBER_OF_TESTS)
+		self.assertTrue (len(User.objects.all()) == self.NUMBER_OF_TESTS)
+		print ''
 
 	def test_deleteUser(self):
-		# check we can delete the user
-		self.user.delete()
-		all_users = User.objects.all()
-		self.assertEquals(len(all_users), 0)
+		print '>>> Testing test_deleteUser for %d iterations' % self.NUMBER_OF_TESTS
+
+		for i in range (self.NUMBER_OF_TESTS):
+
+			self.USERNAME = self.generate_string(10)
+			self.PASSWORD = self.generate_string(10)
+			self.EMAIL = self.generate_string(6) + '@' + 'test.com'
+			user = User.objects.create_user(username = self.USERNAME, email = self.EMAIL, password = self.PASSWORD)
+			user_profile = UserProfile (user = user)
+			user_profile.save()
+
+			UserProfile.objects.get(user = user).delete()
+			User.objects.get(username = self.USERNAME).delete()
+			self.assertTrue(len(UserProfile.objects.all()) == 0)
+			self.assertTrue(len(User.objects.all()) == 0)
+
+			#Now, use the authenticate function
+			userObject = authenticate (username = self.USERNAME, password = self.PASSWORD)
+			self.assertTrue(userObject is None)
+
+			self.output_update(i)
+
+		self.assertTrue(len(UserProfile.objects.all()) == 0)
+		self.assertTrue(len(User.objects.all()) == 0)
 
 
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
