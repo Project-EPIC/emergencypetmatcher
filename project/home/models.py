@@ -7,30 +7,24 @@ class PetReport(models.Model):
     PET_TYPES = (('Dog', 'Dog'), ('Cat', 'Cat'), ('Other', 'Other'))
 
     '''Required Fields'''
-    pet_type = models.CharField(max_length=30,null=False, default=None)
+    pet_type = models.CharField(max_length=10, choices = PET_TYPES, null=False, default=None)
     lost = models.BooleanField(null=False, default=None)
     #ForeignKey: Many-to-one relationship with User
     proposed_by = models.ForeignKey('UserProfile', null=False, default=None)
 
     '''Non-Required Fields'''
-    pet_name=models.CharField(max_length=30,null=True) 
-    location = models.CharField(max_length=25,null=True)
+    pet_name = models.CharField(max_length=50,null=True) 
+    description   = models.CharField(max_length=300,null=True)
+    sex = models.CharField(max_length=6, choices=SEX_CHOICES)
+    location = models.CharField(max_length=50,null=True)
     color = models.CharField(max_length=20,null=True)
-    age = models.IntegerField(null=True)
     breed = models.CharField(max_length=30,null=True)
     size = models.CharField(max_length=30, null=True)
-    description   = models.CharField(max_length=300,null=True)
+    age = models.IntegerField(null=True)
     revision_number = models.IntegerField(null=True) #update revision using view
-    sex = models.CharField(max_length=6, choices=SEX_CHOICES)
     date_lost_or_found = models.DateTimeField(auto_now_add=True)
-    #proposed_matches = models.ForeignKey('PetMatch', null=True)
-
     #Many-to-Many relationship with User
     workers = models.ManyToManyField('UserProfile', null=True, related_name='%(app_label)s_%(class)s_workers_related')
-    #One-to-One relationship with Chat
-    chat = models.OneToOneField('Chat', null=True)
-    #Many-to-One (Foreign Key) Relationship with User
-    reports_submitted = models.ForeignKey('UserProfile', null=True, related_name ='%(app_label)s_%(class)s_reports_submitted_related')
 
     def __unicode__(self):
         return ' PetReport {pet_type:%s, lost:%s, contact: %s}' % (self.pet_type, self.lost, self.proposed_by)
@@ -55,38 +49,16 @@ class UserProfile (models.Model):
     def __unicode__ (self):
         return ' User {username:%s, first_name:%s, last_name:%s, email:%s}' % (self.user.username, self.user.first_name, self.user.last_name, self.user.email)
 
-#The Chat Object Model
-class Chat (models.Model):
-    pass
-
-    #Required Fields
-
-    #Non-Required Fields
-
-    #content has a List of DictFields of {User, text, date+time}. Note that the auto_now option means that
-    #once a dictfield has been added or edited to this object instance, the date and time is recorded here.
-
-    def __unicode__ (self):
-        return ' Chat {pet_report:%s}' % (self.pet_report)
-
-
-#The Chat Line Object Model
-class ChatLine (models.Model):
-    '''Required Fields'''
-    userprofile = models.ForeignKey('Chat', null=False, default=None)
-    text = models.CharField (max_length=10000, blank=True, null=False, default=None)
-    date = models.DateTimeField(auto_now_add=True)
-
 
 #The Pet Match Object Model
 class PetMatch(models.Model):
 
-    #Required Fields
+    '''Required Fields'''
     lost_pet = models.OneToOneField('PetReport', null=False, related_name='%(app_label)s_%(class)s_lost_pet_related')
     found_pet = models.OneToOneField('PetReport', null=False, related_name='%(app_label)s_%(class)s_found_pet_related')
     proposed_by = models.OneToOneField('UserProfile', null=False, related_name='%(app_label)s_%(class)s_proposed_by_related')
     
-    #Non-Required Fields
+    '''Non-Required Fields'''
     proposed_date = models.DateTimeField(auto_now_add = True)
     is_open = models.BooleanField(default=True)
     score = models.IntegerField(default=0)
@@ -98,4 +70,24 @@ class PetMatch(models.Model):
 
     def __unicode__ (self):
         return ' PetMatch {lost:%s, found:%s, proposed_by:%s}' % (self.lost_pet, self.found_pet, self.proposed_by)
+
+#The Chat Object Model
+class Chat (models.Model):
+
+    '''Required Fields'''
+    #One-to-One relationship with PetReport
+    pet_report = models.OneToOneField('PetReport', null=False, default=None)
+
+    def __unicode__ (self):
+        return ' Chat {pet_report:%s}' % (self.pet_report)
+
+
+#The Chat Line Object Model
+class ChatLine (models.Model):
+
+    '''Required Fields'''
+    chat = models.ForeignKey('Chat', null=False, default=None)
+    userprofile = models.ForeignKey('UserProfile', null=False, default=None)
+    text = models.CharField (max_length=10000, blank=True, null=False, default=None)
+    date = models.DateTimeField(auto_now_add=True)
 
