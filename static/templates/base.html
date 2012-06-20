@@ -60,7 +60,7 @@ Description: A two-column web design, best for your personal and business bloggi
 		</script>
 		{% endblock js %}
 
-		{% block libs %} {% endblock libs %}
+		{% block headers %} {% endblock headers %}
 
 	</head>
 
@@ -68,15 +68,20 @@ Description: A two-column web design, best for your personal and business bloggi
 	<!-- start header with PROTOTYPE TITLE and NAVIGATION MENU -->
 	<div id="header">
 		<div id="logo">
-			<h1><a href="#">EmergencyPetMatcher</a></h1>
+			<h1><a href="/">EmergencyPetMatcher</a></h1>
 				<p> <a href = "http://epic.cs.colorado.edu"> Project EPIC </a></p>
 		</div>
 		<div id="menu">
 			<ul>
 				{% block menu %}
-				<li class="active"><a href="">Home</a></li>
-				<li class="active"><a href="#">Login</a></li>
-				<li><a href="#">My Profile</a></li>
+				<li class="active"><a href="/">Home</a></li>
+
+				{% if request.user.is_authenticated %}
+				<form method = "post" action= "/logout/"> {% csrf_token %}<input type="submit" value="Logout"/></form>
+				{% else %}
+				<li class="active"><a href="login_page">Login</a></li>
+				{% endif %}
+
 				<li><a href="#">Submit Lost/Found Pet</a></li>
 				<li><a href="#">Verify Matches</a></li>
 				<li><a href="#">About</a></li>
@@ -90,6 +95,10 @@ Description: A two-column web design, best for your personal and business bloggi
 	<!-- start page -->
 	<div id="wrapper">
 		<div id="main">
+
+			{% block info_message %}{% endblock info_message %}
+			{% block error_message %}{% endblock error_message %}
+			{% block header_title %}{% endblock header_title %}
 			{% block content %}
 			<!-- start content -->
 			<div id="head">

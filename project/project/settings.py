@@ -134,12 +134,15 @@ INSTALLED_APPS = (
     'matching',
     'reporting',
     'social_auth',
+    'registration',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
     
 )
+
+ACCOUNT_ACTIVATION_DAYS = 1 # One-week activation window; you may, of course, use a different value.
 
 AUTHENTICATION_BACKENDS = (
 
