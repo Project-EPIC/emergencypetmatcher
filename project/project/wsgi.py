@@ -35,10 +35,7 @@ workspace = os.path.dirname(project_folder)
 
 #We append the EPM directory path to SYS PATH.
 sys.path.append(project_folder)
-sys.path.append(project_folder)
-sys.path.append(workspace)
-sys.path.append(workspace + SITE_PACKAGES)
-#sys.path.append('/home/jbarron/public_html/barronsoftware.com/nplh/')
+sys.path.append(project_settings_folder)
 
 #We need to make sure we add in all of our local Python modules here.
 site.addsitedir(workspace + SITE_PACKAGES)

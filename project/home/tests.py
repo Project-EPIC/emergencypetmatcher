@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate
 import unittest, string, random, sys
 #sys.path.append('')
 
-class Test (unittest.TestCase):
+class ModelTesting (unittest.TestCase):
 
 	#Control Variable
 	NUMBER_OF_TESTS = 100

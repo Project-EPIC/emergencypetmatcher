@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+
+Title      : Simpleton 
+Version    : 1.0
+Released   : 20110315
+Description: A two-column web design, best for your personal and business blogging.
+
+-->
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<!--- <html class="no-js" lang="en"> [endif]-->
+<html lang = "en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<title>EmergencyPetMatcher</title>
+		<meta name="keywords" content="" />
+		<meta name="description" content="" />
+		<!-- CSS Reset -->
+		<link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/style.css">
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
+		<script src="js/jquery.hoverIntent.js" type="text/javascript"></script>
+
+		{% block js %}
+		<script type="text/javascript">
+		//This function allows us to prepare a popup upon clicking several elements.
+		$(document).ready(function(){
+		
+			//This one is for the Toto picture; we want a popup for the Toto PRDP page:
+			$('#toto a').each(function(){
+			
+				var $link = $(this);
+			    	var $dialog = $('<div></div>')
+					.load ($link.attr('href') + ' #prdpback')
+					.dialog ({
+					
+						autoOpen: false,
+						title: $link.attr('title'),
+						width: 700
+						
+					});
+				
+				$link.click( function(){	
+					$dialog.dialog('open');
+					return false;
+				
+				});
+			});
+		});
+		</script>
+		{% endblock js %}
+
+		{% block libs %} {% endblock libs %}
+
+	</head>
+
+	<body>
+	<!-- start header with PROTOTYPE TITLE and NAVIGATION MENU -->
+	<div id="header">
+		<div id="logo">
+			<h1><a href="#">EmergencyPetMatcher</a></h1>
+				<p> <a href = "http://epic.cs.colorado.edu"> Project EPIC </a></p>
+		</div>
+		<div id="menu">
+			<ul>
+				{% block menu %}
+				<li class="active"><a href="">Home</a></li>
+				<li class="active"><a href="#">Login</a></li>
+				<li><a href="#">My Profile</a></li>
+				<li><a href="#">Submit Lost/Found Pet</a></li>
+				<li><a href="#">Verify Matches</a></li>
+				<li><a href="#">About</a></li>
+				{% endblock menu %}
+			</ul>
+		</div>
+	</div>
+	<br/><br/><br/><br/>
+	<!-- end header -->
+
+	<!-- start page -->
+	<div id="wrapper">
+		<div id="main">
+			{% block content %}
+			<!-- start content -->
+			<div id="head">
+				<header id="nav">
+					<ul>
+						<li><a href="#">Friends</a></li>
+						<li class="active"><a href="#">Newly Added</a></li>
+						<li><a href="#">Bookmarked</a></li>
+						<li><a href="#">Advanced Search</a></li>
+					</ul>
+				</header>
+			</div>
+			
+			<div id="container">
+				<ul id="tiles">
+
+					{% block friends_activity_feed %}
+					<li class="item feed">
+						<h3>Friends' Activity</h3>
+						<ul class="feedlist">
+							<li>Josh improved 6 <a href="#">pet reports</a>. </li>
+							<li class="alternate">Jo started working on <a href="#">Lost Labrador</a>.</li>
+							<li>Mario proposed a <a href="#">match</a>. </li>
+							<li class="alternate">Leysia commented on <a href="#">found pug</a>.</li>
+							<li>Josh improved 6 <a href="#">pet reports</a>. </li>
+							<li class="alternate">Jo's <a href="#">match</a> was confirmed!</li>
+							<li>Mario proposed a <a href="#">match</a>. </li>
+							<li class="alternate">One of your bookmarked pets, <a href="#">Toto</a>, had a match proposed for it.</li>
+						</ul>
+					</li>
+					{% endblock friends_activity_feed %}
+	
+					<li class="item"> <img src="images/bailey1.jpg"/></li>
+					<li class="item"><img src="images/dog1.jpg"></li>
+					<li class="item"><img src="images/cat1.jpg"></li>
+					<li class="item"><img src="images/dog2.jpg"></li>
+					<li class="item"><img src="images/dog3.jpg"></li>
+					<li class="item"><img src="images/cat2.jpg"></li>
+					<li class="item"><img src="images/dog4.jpg"></li>
+					<li class="item" id="hover1"><img src="images/cat3.jpg">
+					<div class="hdetail" style="display:none">
+					<i>Nobody is working on this pet!</i>
+					</div>
+					</li>
+					<!-- Toto is right here -->
+					<li class="item" id="toto"><a href="petreport.html"> <img src="images/toto.jpg"/> </a>
+					<div class="hdetail" style="display:none">
+					<i>People working on this pet:</i><br/>
+					<image src="images/jo.png" style="width:32px; margin-right: 2px; float:left" />
+					<image src="images/prototype_profiles/EPICDorothysquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="images/prototype_profiles/EPICstrawmansquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="images/prototype_profiles/EPICGlindagoodwitchnorthsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="images/prototype_profiles/EPICwizardsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					</div>
+					</li>
+					<li class="item" id="hover2"><img src="images/bailey2.jpg">
+					<div class="hdetail" style="display:none">
+					<i>People working on this pet:</i><br/>
+					<image src="images/prototype_profiles/EPICmunchkin1square.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="images/prototype_profiles/EPICtinmansquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="images/prototype_profiles/EPICwickedwitchsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="images/prototype_profiles/EPICCowardlyLionsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="images/mario.png" style="width:32px; margin-right: 2px; float:left" />
+					<br/><br/><i>and 6 more...</i>
+					</div>
+					</li>
+					<li class="item"><img src="images/dog5.jpg"></li>
+					<li class="item"><img src="images/dog6.jpg"></li>
+					<li class="item"><img src="images/cat4.jpg"></li>
+					<li class="item"><img src="images/dog7.jpg"></li>
+					<li class="item"><img src="images/cat5.jpg"></li>
+					<li class="item"><img src="images/cat6.jpg"></li>
+					<li class="item"><img src="images/dog8.jpg"></li>
+					<li class="item"><img src="images/cat7.jpg"></li>
+					<li class="item"><img src="images/cat8.jpg"></li>
+					<li class="item"><img src="images/dog9.jpg"></li>
+					<li class="item"><img src="images/dog10.jpg"></li>
+					<li class="item"><img src="images/dog11.jpg"></li>
+				</ul>	
+			</div>
+		<br style="clear: both;" />
+			{% endblock content %}
+		</div>
+	</div>
+	<div id="chat">
+		{% block chat %} {% endblock chat %}
+	<!--implement chat here; chat should seamlessly always be part of all web pages. -->
+	</div>
+	<!-- end page -->
+	
+	
+	
+	<!-- start footer -->
+	<div id="footer">
+		<p id="legal"> &copy;2012 Project EPIC . All Rights Reserved.
+	</div>
+	<!-- Include the imagesLoaded plug-in -->
+	<script src="js/jquery.imagesloaded.js"></script>
+	
+	<!-- Include the plug-in -->
+	<script src="js/jquery.wookmark.js"></script>
+	
+	<script type="text/javascript">
+	var hand = 0;
+		$('#tiles').imagesLoaded(function() {
+		
+			// Prepare layout options.
+			var options = {
+				autoResize: true, // This will auto-update the layout when the browser window is resized.
+				container: $('#container'), // Optional, used for some extra CSS styling
+				offset: 2, // Optional, the distance between grid items
+				itemWidth: 210 // Optional, the width of a grid item
+			};
+			
+			// Get a reference to your grid items.
+			var handler = $('#tiles li.item');
+			hand = handler;
+			// Call the layout function.
+			handler.wookmark(options);
+			
+			
+	});
+		$(function() {
+			$("#hover1, #hover2, #toto").hoverIntent(
+				function() {
+					$(".hdetail", this).show();
+					var h = $(this).height() + 30;
+					hand.wookmark();
+				},
+				function() {
+					
+					var h = $(this).height() - 30;
+					$(".hdetail", this).hide();
+					hand.wookmark();
+				}
+			);
+		});
+	</script>
+
+	</body>
+</html>
