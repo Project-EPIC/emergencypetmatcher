@@ -63,7 +63,7 @@ STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/srv/epm/static/'
+STATIC_URL = '/srv/epm/static/' 
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -133,8 +133,8 @@ INSTALLED_APPS = (
     'home',
     'matching',
     'reporting',
-    'social_auth',
     'registration',
+    'social_auth',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -143,6 +143,17 @@ INSTALLED_APPS = (
 )
 
 ACCOUNT_ACTIVATION_DAYS = 1 # One-week activation window; you may, of course, use a different value.
+
+'''Email Settings'''
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_HOST = 'localhost'
+#EMAIL_PORT = 1025
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
+EMAIL_HOST_PASSWORD = '3m3rgEncY'
+EMAIL_PORT = 587
 
 AUTHENTICATION_BACKENDS = (
 

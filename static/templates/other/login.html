@@ -1,0 +1,56 @@
+{% extends "index.html" %}
+
+{% block title %} EPM - Login {% endblock title %}
+
+{% block headers %}
+<style type="text/css">
+
+	.form_container {
+		width: 300px;
+		border: 1px solid black;
+	}
+	.form_container label {
+		padding-left: 5px;
+		width: 30%;
+
+	}
+	.form_container input {
+		float:right;
+		padding-right: 5px;
+		padding-bottom: 5px;
+		width: 50%;
+	}
+
+</style>
+
+<script src="https://browserid.org/include.js" type="text/javascript"></script>
+{% endblock headers %}
+
+
+{% block header_title %}
+<h3> Log in below </h3>
+{% endblock header_title %}
+
+{% block content %}
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+	<div class = "form_container">
+		<form method="post" action="/login">
+		{% csrf_token %}
+
+			<br><label for="username">Username</label>
+		    <input type="text" name="username" id="username"/></br>
+		    <br><label for="password">Password</label>
+		    <input type='password' name='password' id='password'/></br>
+
+			<br><input type="submit" value="Login"/> </br>
+		</form>
+	</div>
+	<p/>
+	<a href = "/register_page">Need to register? Sign up here</a> 
+
+	<p/>
+	Twitter: <a rel="nofollow" href="{% url socialauth_begin 'twitter' %}">Enter using Twitter</a><br/>
+	Facebook: <a rel="nofollow" href="{% url socialauth_begin 'facebook' %}">Enter using Facebook</a><br/>
+
+{% endblock content %}

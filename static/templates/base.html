@@ -20,7 +20,7 @@ Description: A two-column web design, best for your personal and business bloggi
 <html lang = "en">
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-		<title>EmergencyPetMatcher</title>
+		<title>{% block title %} EmergencyPetMatcher (EPM) {% endblock title %}</title>
 		<meta name="keywords" content="" />
 		<meta name="description" content="" />
 		<!-- CSS Reset -->
@@ -76,10 +76,10 @@ Description: A two-column web design, best for your personal and business bloggi
 				{% block menu %}
 				<li class="active"><a href="/">Home</a></li>
 
-				{% if request.user.is_authenticated %}
-				<form method = "post" action= "/logout/"> {% csrf_token %}<input type="submit" value="Logout"/></form>
+				{% if user.is_authenticated %}
+				<form method = "post" action= "logout"> {% csrf_token %}<input type="submit" value="Logout"/></form>
 				{% else %}
-				<li class="active"><a href="login_page">Login</a></li>
+				<li class="active"><a href="login_page">Login/Register</a></li>
 				{% endif %}
 
 				<li><a href="#">Submit Lost/Found Pet</a></li>
