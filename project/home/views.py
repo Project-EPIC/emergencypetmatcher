@@ -16,26 +16,27 @@ from django.core.urlresolvers import reverse
 from registration.forms import RegistrationForm
 import re
 
-'''Goto Home Page'''
+"""Home view, displays login mechanism"""
 def home (request):
-    return render_to_response('index.html', RequestContext(request))
+    if request.user.is_authenticated():
+        return social_login(request)
+        #return HttpResponseRedirect('social_login')
+    else:
+        return render_to_response('index.html', {'version': version},
+                                  RequestContext(request))
 
 @login_required
-def done(request):
+def social_login(request):
     """Login complete view, displays user data"""
     ctx = {
         'version': version,
         'last_login': request.session.get('social_auth_last_login_backend')
     }
-    return render_to_response('home/done.html', ctx, RequestContext(request))
+    return render_to_response('index.html', ctx, RequestContext(request))
 
-def error(request):
-    """Error view"""
-    messages = get_messages(request)
-    return render_to_response('home/error.html', {'version': version,
-                                             'messages': messages},
-                              RequestContext(request))
 
+''' Used by social auth pipeline  
+    to get a username value when authenticate a social user for the first time '''
 def form(request):
     if request.method == 'POST' and request.POST.get('username'):
         name = setting('SOCIAL_AUTH_PARTIAL_PIPELINE_KEY', 'partial_pipeline')
@@ -43,4 +44,4 @@ def form(request):
         backend = request.session[name]['backend']
         return redirect('socialauth_complete', backend=backend)
     else:
-        return render_to_response('home/form.html', {}, RequestContext(request))
+        return render_to_response('form.html', {}, RequestContext(request))

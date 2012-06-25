@@ -74,7 +74,7 @@ Description: A two-column web design, best for your personal and business bloggi
 		<div id="menu">
 			<ul>
 				{% block menu %}
-				<li class="active"><a href="/">Home</a></li>
+				<li class="active"><a href="/"> Home</a></li>
 
 				{% if user.is_authenticated %}
 				<li class="active"><a href= '#'>{{ user.username }}</a></li>
@@ -84,6 +84,7 @@ Description: A two-column web design, best for your personal and business bloggi
 				<li><a href="#">Submit Lost/Found Pet</a></li>
 				<li><a href="#">Verify Matches</a></li>
 				<li><a href="#">About</a></li>
+
 				{% else %}
 				<li class="active"><a href= {% url auth_login %}>Login/Register</a></li>
 				<li><a href="#">About</a></li>

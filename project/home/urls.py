@@ -8,5 +8,8 @@ from home.models import *
 urlpatterns = patterns('home.views',
 
 	url (r'^$','home', name='home'),
+	url (r'^$', 'social_login', name='social_login'),
+	url (r'^', include('social_auth.urls')),
+	url(r'^form/$', 'form', name='form'),
 	
 )
