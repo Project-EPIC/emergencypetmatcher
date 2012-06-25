@@ -155,13 +155,14 @@ EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
 EMAIL_HOST_PASSWORD = '3m3rgEncY'
 EMAIL_PORT = 587
 
+
 AUTHENTICATION_BACKENDS = (
 
     'django.contrib.auth.backends.ModelBackend',
     'social_auth.backends.twitter.TwitterBackend',
     'social_auth.backends.facebook.FacebookBackend',
-
 )
+
 
 SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter', 'facebook',)
 
@@ -170,6 +171,7 @@ SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter', 'facebook',)
 # the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -193,3 +195,11 @@ LOGGING = {
         },
     }
 }
+
+
+
+try:
+    from social_auth_settings import *
+except:
+    pass
+

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 
 class PetReport(models.Model):
 
@@ -45,6 +46,15 @@ class UserProfile (models.Model):
     reputation = models.IntegerField(default=0, null=True)
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
+
+    def is_authenticated(self):
+        return True
+
+    def create_user_profile(sender, instance, created, **kwargs): 
+        if created: 
+            UserProfile.objects.create(user=instance) 
+    post_save.connect(create_user_profile, sender=User) 
+
 
     def __unicode__ (self):
         return ' User {username:%s, first_name:%s, last_name:%s, email:%s}' % (self.user.username, self.user.first_name, self.user.last_name, self.user.email)
