@@ -142,6 +142,16 @@ INSTALLED_APPS = (
     
 )
 
+#Variable to specify location of redirection after a successful login
+LOGIN_REDIRECT_URL = '/'
+#Variable to specify location of login
+LOGIN_URL = '/login'
+#Variable to specify location of logout
+LOGOUT_URL = '/'
+
+#Variable that specifies the exact model representing the user profile for the auth.User model.
+AUTH_PROFILE_MODULE = 'home.UserProfile'
+
 ACCOUNT_ACTIVATION_DAYS = 1 # One-week activation window; you may, of course, use a different value.
 
 '''Email Settings'''

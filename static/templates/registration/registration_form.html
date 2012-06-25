@@ -1,0 +1,37 @@
+{% extends "index.html" %}
+
+
+{% block title %} EPM - Register {% endblock title %}
+
+{% block headers %}
+
+
+<script src="https://browserid.org/include.js" type="text/javascript"></script>
+{% endblock headers %}
+
+{% block header_title %}
+<h3> Please register below with username, email, and password. </h3>
+{% endblock header_title %}
+
+{% block content %}
+{% if form.errors %}<p><strong>{{ form.errors }}</strong></p>{% endif %}
+	
+	<div class="form_container">
+		<form action = {% url registration_register %} method = "post">
+			{% csrf_token %}
+			<table>
+				{% for field in form %}
+				<tr>
+			    	<td><strong>{{ field.label_tag }} </strong></td>
+			    	<td>{{ field }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+	 		<br><input type="submit" value="Register" /></br>
+		</form>
+	</div>
+	<p/>
+	Twitter: <a rel="nofollow" href="{% url socialauth_begin 'twitter' %}">Enter using Twitter</a><br/>
+	Facebook: <a rel="nofollow" href="{% url socialauth_begin 'facebook' %}">Enter using Facebook</a><br/>
+
+{% endblock content %}

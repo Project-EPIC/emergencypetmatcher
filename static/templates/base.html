@@ -77,14 +77,18 @@ Description: A two-column web design, best for your personal and business bloggi
 				<li class="active"><a href="/">Home</a></li>
 
 				{% if user.is_authenticated %}
-				<form method = "post" action= "logout"> {% csrf_token %}<input type="submit" value="Logout"/></form>
-				{% else %}
-				<li class="active"><a href="login_page">Login/Register</a></li>
-				{% endif %}
-
+				<li class="active"><a href= '#'>{{ user.username }}</a></li>
+				<form method = "post" action= {% url auth_logout %}> 
+					{% csrf_token %}<input type="submit" value="Logout"/>
+				</form>
 				<li><a href="#">Submit Lost/Found Pet</a></li>
 				<li><a href="#">Verify Matches</a></li>
 				<li><a href="#">About</a></li>
+				{% else %}
+				<li class="active"><a href= {% url auth_login %}>Login/Register</a></li>
+				<li><a href="#">About</a></li>
+				{% endif %}
+				
 				{% endblock menu %}
 			</ul>
 		</div>
