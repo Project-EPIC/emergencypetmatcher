@@ -10,6 +10,10 @@ from django.contrib.auth import authenticate
 import unittest, string, random, sys
 #sys.path.append('')
 
+
+def start_test(self):
+	print 'hello there'
+
 class ModelTesting (unittest.TestCase):
 
 	#Control Variable

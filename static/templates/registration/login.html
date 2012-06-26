@@ -1,4 +1,5 @@
 {% extends "index.html" %}
+{% load url from future %}
 
 {% block title %} EPM - Login {% endblock title %}
 
@@ -18,27 +19,27 @@
 {% endif %}
 
 <div class="form_container">
-	<form method="post" action={% url auth_login %}>
+	<form method="post" action={% url 'auth_login' %}>
 		{% csrf_token %}
-		<table>
-		<tr>
-		    <td>{{ form.username.label_tag }}</td>
-		    <td>{{ form.username }}</td>
-		</tr>
-		<tr>
-		    <td>{{ form.password.label_tag }}</td>
-		    <td>{{ form.password }}</td>
-		</tr>
-		</table>
-		<input type="submit" value="Login" float="right"/>
+			<table>
+				{% for field in form %}
+				<tr>
+			    	<td><strong>{{ field.label_tag }} </strong></td>
+			    	<td>{{ field }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		<input type="submit" value="Login"/>
 		<!-- <input type="hidden" name="next" value="{{ next }}" /> -->
 	</form>
 </div>
 <br/>
-<p/> <h3> <a href = {% url registration_register %}> Register Here </a></h3>
+<p/><a href = {% url 'auth_password_reset' %}> Forgot your Password? </a>
 
-<p/>Twitter: <a rel="nofollow" href={% url socialauth_begin 'twitter' %}>Enter using Twitter</a><br/>
-<p/>Facebook: <a rel="nofollow" href={% url socialauth_begin 'facebook' %}>Enter using Facebook</a><br/>
+<p/> <h3> <a href = {% url 'registration_register' %}> Register Here </a></h3>
+
+<p/>Twitter: <a rel="nofollow" href={% url 'users_social_auth_login' 'twitter' %}>Enter using Twitter</a><br/>
+<p/>Facebook: <a rel="nofollow" href={% url 'users_social_auth_login' 'facebook' %}>Enter using Facebook</a><br/>
 
 {% endblock content %}
 

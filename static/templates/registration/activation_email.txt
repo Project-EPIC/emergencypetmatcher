@@ -11,4 +11,4 @@ Thank you,
 ---------------------
 The EPM Team
 Project EPIC
-(http://cs.colorado.edu)
+(http://epic.cs.colorado.edu)

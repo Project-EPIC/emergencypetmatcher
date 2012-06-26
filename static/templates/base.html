@@ -1,3 +1,6 @@
+{% load url from future %} <!-- Need this for forward (future) compatibility with django 1.5 and beyond. -->
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!--
 
@@ -78,7 +81,7 @@ Description: A two-column web design, best for your personal and business bloggi
 
 				{% if user.is_authenticated %}
 				<li class="active"><a href= '#'>{{ user.username }}</a></li>
-				<form method = "post" action= {% url auth_logout %}> 
+				<form method = "post" action= {% url 'auth_logout' %}> 
 					{% csrf_token %}<input type="submit" value="Logout"/>
 				</form>
 				<li><a href="#">Submit Lost/Found Pet</a></li>
@@ -86,7 +89,7 @@ Description: A two-column web design, best for your personal and business bloggi
 				<li><a href="#">About</a></li>
 
 				{% else %}
-				<li class="active"><a href= {% url auth_login %}>Login/Register</a></li>
+				<li class="active"><a href= {% url 'auth_login' %}>Login/Register</a></li>
 				<li><a href="#">About</a></li>
 				{% endif %}
 				

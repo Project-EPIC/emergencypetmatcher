@@ -8,6 +8,7 @@ from django.shortcuts import render_to_response, redirect
 from django.contrib.messages.api import get_messages
 from social_auth import __version__ as version
 from social_auth.utils import setting
+from social_auth.views import auth
 from django.db import IntegrityError
 from home.models import *
 from django.http import Http404
@@ -24,6 +25,26 @@ def home (request):
     else:
         return render_to_response('index.html', {'version': version},
                                   RequestContext(request))
+
+def social_auth_login(request, backend):
+    """
+        This view is a wrapper to social_auths auth
+        It is required, because social_auth just throws ValueError and gets user to 500 error
+        after every unexpected action. This view handles exceptions in human friendly way.
+        See https://convore.com/django-social-auth/best-way-to-handle-exceptions/
+    """
+    try:
+        # if everything is ok, then original view gets returned, no problem
+        return auth(request, backend)
+    except IntegrityError, error:
+        print "HELLLLLLLLLLLLLLLLLLLLLLLLLLLLooooo!"
+        return render_to_response('registration/social_auth_username_form.html', locals(), RequestContext(request))
+    except ValueError, error:
+        # in case of errors, let's show a special page that will explain what happened
+        return render_to_response('users/login_error.html',
+                                  locals(),
+                                  context_instance=RequestContext(request))
+
 
 @login_required
 def social_login(request):
@@ -44,4 +65,4 @@ def form(request):
         backend = request.session[name]['backend']
         return redirect('socialauth_complete', backend=backend)
     else:
-        return render_to_response('form.html', {}, RequestContext(request))
+        return render_to_response('registration/social_auth_username_form.html', {}, RequestContext(request))

@@ -156,14 +156,11 @@ ACCOUNT_ACTIVATION_DAYS = 1 # One-week activation window; you may, of course, us
 
 '''Email Settings'''
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_HOST = 'localhost'
-#EMAIL_PORT = 1025
-
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
 EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
 EMAIL_HOST_PASSWORD = '3m3rgEncY'
-EMAIL_PORT = 587
 
 
 AUTHENTICATION_BACKENDS = (
