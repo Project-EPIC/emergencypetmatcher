@@ -1,0 +1,31 @@
+{% extends 'index.html' %}
+{% load url from future %}
+
+{% block head_title %}EPM - Report a Lost/Found Pet{% endblock head_title %}
+{% block content_title %} Report a Lost/Found Pet {% endblock content_title %}
+
+{% block content %}
+
+	<p> To create a pet report, please fill in the following fields and submit a picture of the lost or found pet to the best of your ability. Once you have finished, review the pet report to determine its quality. Review with consideration to the quantity of information (are all the fields filled in?), quality of information (is the picture relevant and helpful? Is the description free of general 'fluff' and to the point?), and general correctness (is everything spelled correctly?). If the pet report meets these criteria, click the 'Submit' button at the end of the form. </p>
+
+	<div id="detail">
+
+		{% if form.errors %} <strong> {{ form.errors }} </strong> {% endif %}
+
+		<form method="POST" action={% url 'submit_petreport' %}>
+			{% csrf_token %}
+			<table>
+				{% for field in form %}
+				<tr>
+			    	<td><strong>{{ field.label_tag }} </strong></td>
+			    	<td>{{ field }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+			<input type="submit" value="Submit"/>
+		</form>
+	</div>
+
+{% endblock content %}
+
+

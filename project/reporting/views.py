@@ -1,19 +1,42 @@
 # Create your views here.
 from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout, login, authenticate 
+from django.contrib.auth.forms import *
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect
 from django.contrib.messages.api import get_messages
 from django.db.models import Min
-
 from social_auth import __version__ as version
 from social_auth.utils import setting
-
-from home.models import PetReport
+from django.contrib.messages.api import get_messages
+from social_auth.views import auth
+from django.db import IntegrityError
+from home.models import *
+from django.http import Http404
+from django.core import mail
+from django.core.urlresolvers import reverse
+from registration.forms import RegistrationForm
 from random import choice, uniform
+import re
 
 
+def submit_petreport(request):
+
+    if request.method == "POST":
+        form = PetReportForm(request.POST) #Bound Form to the input form data.
+        if form.is_valid():
+            p = form.save(commit=False) #Create (but do not save) the Pet Report Object associated wit this form data.
+            p.proposed_by = request.user.get_profile()
+            p.save() #Now save the Pet Report.
+            msg = 'Thank you for submitting a %s pet report' % (p.lost)
+            return redirect('/', info_message=msg)
+    else:
+        form = PetReportForm() #Unbound Form
+    return render_to_response('reporting/petreport_form.html', {'form':form}, RequestContext(request))
+
+
+'''
 def home(request, include_ty=False):
     """Home view, displays login mechanism"""
     if request.user.is_authenticated():
@@ -70,3 +93,4 @@ def upvote(request, pet_id):
     x.revisions = x.revisions + 1
     x.save()
     return redirect('/epm/reporting')
+'''

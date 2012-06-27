@@ -1,15 +1,13 @@
 {% extends "base.html" %}
+{% load url from future %}
 
-{% block heading %}User basic form{% endblock %}
-{% block title %} EPM - Fill out Username {% endblock title %}
-
-{% block header_title %}
-<h3> Please give us a Username for your social media account so that we can create a full profile for you.</h3>
-{% endblock header_title %}
-
-{% if form.errors %} {{ form.errors }} {% endif %}
+{% block head_title %} EPM - Fill out Username {% endblock head_title %}
+{% block content_title %} Fill out your Username {% endblock content_title %}
+{% block content_subtitle %} Please give us a Username for your social media account so that we can create a full profile for you. {% endblock content_subtitle %}
 
 {% block content %}
+{% if form.errors %} {{ form.errors }} {% endif %}
+
 <form action="" method="post">
     {% csrf_token %}
     <p>

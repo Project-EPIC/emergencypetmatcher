@@ -21,7 +21,6 @@ import re
 def home (request):
     if request.user.is_authenticated():
         return social_login(request)
-        #return HttpResponseRedirect('social_login')
     else:
         return render_to_response('index.html', {'version': version},
                                   RequestContext(request))
@@ -37,13 +36,16 @@ def social_auth_login(request, backend):
         # if everything is ok, then original view gets returned, no problem
         return auth(request, backend)
     except IntegrityError, error:
-        print "HELLLLLLLLLLLLLLLLLLLLLLLLLLLLooooo!"
         return render_to_response('registration/social_auth_username_form.html', locals(), RequestContext(request))
     except ValueError, error:
         # in case of errors, let's show a special page that will explain what happened
         return render_to_response('users/login_error.html',
                                   locals(),
                                   context_instance=RequestContext(request))
+
+@login_required
+def submit_petreport(request):
+    return render_to_response('reporting/petreport_form.html', {}, RequestContext(request))
 
 
 @login_required

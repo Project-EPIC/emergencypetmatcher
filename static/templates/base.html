@@ -23,7 +23,7 @@ Description: A two-column web design, best for your personal and business bloggi
 <html lang = "en">
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-		<title>{% block title %} EmergencyPetMatcher (EPM) {% endblock title %}</title>
+		<title>{% block head_title %} EmergencyPetMatcher (EPM) {% endblock head_title %}</title>
 		<meta name="keywords" content="" />
 		<meta name="description" content="" />
 		<!-- CSS Reset -->
@@ -84,7 +84,7 @@ Description: A two-column web design, best for your personal and business bloggi
 				<form method = "post" action= {% url 'auth_logout' %}> 
 					{% csrf_token %}<input type="submit" value="Logout"/>
 				</form>
-				<li><a href="#">Submit Lost/Found Pet</a></li>
+				<li><a href= {% url 'submit_petreport' %}>Submit a Lost/Found Pet Report</a></li>
 				<li><a href="#">Verify Matches</a></li>
 				<li><a href="#">About</a></li>
 
@@ -104,9 +104,10 @@ Description: A two-column web design, best for your personal and business bloggi
 	<div id="wrapper">
 		<div id="main">
 
-			{% block info_message %}{% endblock info_message %}
-			{% block error_message %}{% endblock error_message %}
-			{% block header_title %}{% endblock header_title %}
+			<strong>{% block message %}{% endblock message %}<strong>
+			<h2>{% block content_title %}{% endblock content_title %}</h2>
+			<h3>{% block content_subtitle %}{% endblock content_subtitle %}</h3>
+
 			{% block content %}
 			<!-- start content -->
 			<div id="head">
