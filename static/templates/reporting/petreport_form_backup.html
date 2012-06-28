@@ -1,25 +1,19 @@
-{% extends "master.html" %}
+{% extends 'index.html' %}
+{% load url from future %}
 
-{% block title %}NPLH: Report a lost pet{% endblock %}
-
-{% block menu %}
-<ul>
-	<li><a href="#">Match Pets</a></li>
-	<li><a href="#">Verify Matches</a></li>
-	<li class="active"><a href="#">Submit Lost/Found Pet</a></li>
-	<li><a href="#">My Profile</a></li>
-	<li><a href="#">About</a></li>
-</ul>
-{% endblock %}
+{% block head_title %}EPM - Report a Lost/Found Pet{% endblock head_title %}
+{% block content_title %} Report a Lost/Found Pet {% endblock content_title %}
 
 {% block content %}
-<div id="wrap" style="width:85%; margin: 0 auto; text-align:center">
-{% if thankyou %}
-<div style="background: black; color: white; padding: 2px 0 2px 0;">
-	<p>Thanks for updating that report!</p>
-</div>
-{% endif %}
-{% if matching %}
+
+	<div id="wrap" style="width:85%; margin: 0 auto; text-align:center">
+	{% if thankyou %}
+		<div style="background: black; color: white; padding: 2px 0 2px 0;">
+			<p>Thanks for updating that report!</p>
+		</div>
+	{% endif %}
+
+	{% block header_title %} {% endblock header_title %}
 	<h2>Please create a Found Pet report</h2>
 	<p style="text-align: left">Take a look at the picture below; pretend you have just found this animal on your property or that you are going through a shelter taking pictures of displaced pets in a disaster.
 Fill out the fields of the pet report to the best of your ability based on the photograph provided, and then click the Submit Changes button.</p>

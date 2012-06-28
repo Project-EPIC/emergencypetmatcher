@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block head_title %} EPM - Fill out Username {% endblock head_title %}
+{% block content_title %} Fill out your Username {% endblock content_title %}
+{% block content_subtitle %} Please give us a Username for your social media account so that we can create a full profile for you. {% endblock content_subtitle %}
+
+{% block content %}
+{% if form.errors %} {{ form.errors }} {% endif %}
+
+<form action="" method="post">
+    {% csrf_token %}
+    <p>
+        <label for="id_username">Username</label>
+        <input type="text" name="username" id="id_username" value="" />
+    </p>
+
+    <input type="submit" value="Submit" />
+</form>
+{% endblock %}

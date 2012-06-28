@@ -6,8 +6,8 @@ admin.autodiscover()
 urlpatterns = patterns('',
 
 	url (r'^', include ('home.urls')),
-	url (r'^', include('social_auth.urls')),
 	url (r'^accounts/', include('registration.backends.default.urls')),
+	url (r'^reporting/', include('reporting.urls')),
 	#url(r'^reporting/', include ('reporting.urls')),
 	#url(r'^matching/', include ('matching.urls')),
 	# Uncomment the next line to enable the admin:

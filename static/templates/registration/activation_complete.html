@@ -1,0 +1,12 @@
+{% extends "index.html" %}
+{% load url from future %}
+
+{% block head_title %} EPM - Successfully Registered {% endblock head_title %}
+{% block headers %} <script src="https://browserid.org/include.js" type="text/javascript"></script> {% endblock headers %}
+
+{% block content_title %} Successfully Registered! {% endblock content_title %}
+{% block content_subtitle %} Alright, you are all set registering! You may now login to the system. {% endblock content_subtitle %}
+
+{% block content %}
+	<h3> <a href = {% url 'auth_login' %}> Login </a> </h3>
+{% endblock content %}

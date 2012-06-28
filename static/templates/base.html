@@ -1,3 +1,6 @@
+{% load url from future %} <!-- Need this for forward (future) compatibility with django 1.5 and beyond. -->
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!--
 
@@ -20,7 +23,7 @@ Description: A two-column web design, best for your personal and business bloggi
 <html lang = "en">
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-		<title>{% block title %} EmergencyPetMatcher (EPM) {% endblock title %}</title>
+		<title>{% block head_title %} EmergencyPetMatcher (EPM) {% endblock head_title %}</title>
 		<meta name="keywords" content="" />
 		<meta name="description" content="" />
 		<!-- CSS Reset -->
@@ -74,17 +77,22 @@ Description: A two-column web design, best for your personal and business bloggi
 		<div id="menu">
 			<ul>
 				{% block menu %}
-				<li class="active"><a href="/">Home</a></li>
+				<li class="active"><a href="/"> Home</a></li>
 
 				{% if user.is_authenticated %}
-				<form method = "post" action= "logout"> {% csrf_token %}<input type="submit" value="Logout"/></form>
-				{% else %}
-				<li class="active"><a href="login_page">Login/Register</a></li>
-				{% endif %}
-
-				<li><a href="#">Submit Lost/Found Pet</a></li>
+				<li class="active"><a href= '#'>{{ user.username }}</a></li>
+				<form method = "post" action= {% url 'auth_logout' %}> 
+					{% csrf_token %}<input type="submit" value="Logout"/>
+				</form>
+				<li><a href= {% url 'submit_petreport' %}>Submit a Lost/Found Pet Report</a></li>
 				<li><a href="#">Verify Matches</a></li>
 				<li><a href="#">About</a></li>
+
+				{% else %}
+				<li class="active"><a href= {% url 'auth_login' %}>Login/Register</a></li>
+				<li><a href="#">About</a></li>
+				{% endif %}
+				
 				{% endblock menu %}
 			</ul>
 		</div>
@@ -96,9 +104,10 @@ Description: A two-column web design, best for your personal and business bloggi
 	<div id="wrapper">
 		<div id="main">
 
-			{% block info_message %}{% endblock info_message %}
-			{% block error_message %}{% endblock error_message %}
-			{% block header_title %}{% endblock header_title %}
+			<strong>{% block message %}{% endblock message %}<strong>
+			<h2>{% block content_title %}{% endblock content_title %}</h2>
+			<h3>{% block content_subtitle %}{% endblock content_subtitle %}</h3>
+
 			{% block content %}
 			<!-- start content -->
 			<div id="head">

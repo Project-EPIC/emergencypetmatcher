@@ -142,26 +142,34 @@ INSTALLED_APPS = (
     
 )
 
+#Variable to specify location of redirection after a successful login
+LOGIN_REDIRECT_URL = '/'
+#Variable to specify location of login
+LOGIN_URL = '/login'
+#Variable to specify location of logout
+LOGOUT_URL = '/'
+
+#Variable that specifies the exact model representing the user profile for the auth.User model.
+AUTH_PROFILE_MODULE = 'home.UserProfile'
+
 ACCOUNT_ACTIVATION_DAYS = 1 # One-week activation window; you may, of course, use a different value.
 
 '''Email Settings'''
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_HOST = 'localhost'
-#EMAIL_PORT = 1025
-
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
 EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
 EMAIL_HOST_PASSWORD = '3m3rgEncY'
-EMAIL_PORT = 587
+
 
 AUTHENTICATION_BACKENDS = (
 
     'django.contrib.auth.backends.ModelBackend',
     'social_auth.backends.twitter.TwitterBackend',
     'social_auth.backends.facebook.FacebookBackend',
-
 )
+
 
 SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter', 'facebook',)
 
@@ -170,6 +178,7 @@ SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter', 'facebook',)
 # the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -193,3 +202,11 @@ LOGGING = {
         },
     }
 }
+
+
+
+try:
+    from social_auth_settings import *
+except:
+    pass
+

@@ -1,0 +1,14 @@
+Hi there, 
+
+This message is to inform you that you have created an account for the EmergencyPetMatcher system. Please complete your account verification by clicking on the link below:
+
+http://localhost:8000{% url registration_activate activation_key %}
+
+The link is valid for {{ expiration_days }} day.
+
+Thank you,
+
+---------------------
+The EPM Team
+Project EPIC
+(http://epic.cs.colorado.edu)
