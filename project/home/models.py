@@ -23,6 +23,7 @@ class PetReport(models.Model):
     age = models.IntegerField(null=True)
     revision_number = models.IntegerField(null=True) #update revision using view
     date_lost_or_found = models.DateTimeField(auto_now_add=True)
+    img_path=models.CharField(max_length=100,null=True)
     #Many-to-Many relationship with User
     workers = models.ManyToManyField('UserProfile', null=True, related_name='%(app_label)s_%(class)s_workers_related')
 

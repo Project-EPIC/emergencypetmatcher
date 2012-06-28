@@ -11,12 +11,12 @@ from django.db import IntegrityError
 from home.models import *
 from django.http import Http404
 from django.core import mail
-import re
 
 '''Goto Home Page'''
 def home (request):
     print request
-    return render_to_response('index.html', RequestContext(request))
+    pet_reports_list = PetReport.objects.all()
+    return render_to_response('index.html', {'pet_reports_list':pet_reports_list},RequestContext(request))
 
 '''Goto Signup Page'''
 def register_page (request):
