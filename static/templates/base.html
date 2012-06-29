@@ -10,7 +10,7 @@ Released for free under a Creative Commons Attribution 2.5 License
 
 Title      : Simpleton 
 Version    : 1.0
-Released   : 20110315
+Released    :20110315
 Description: A two-column web design, best for your personal and business blogging.
 
 -->
@@ -27,12 +27,12 @@ Description: A two-column web design, best for your personal and business bloggi
 		<meta name="keywords" content="" />
 		<meta name="description" content="" />
 		<!-- CSS Reset -->
-		<link rel="stylesheet" href="css/reset.css">
-		<link rel="stylesheet" href="css/style.css">
+		<link rel="stylesheet" href="{{ STATIC_URL }}/css/reset.css">
+		<link rel="stylesheet" href="{{ STATIC_URL }}/css/style.css">
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
-		<script src="js/jquery.hoverIntent.js" type="text/javascript"></script>
+		<script src="{{ STATIC_URL }}/js/jquery.hoverIntent.js" type="text/javascript"></script>
 
 		{% block js %}
 		<script type="text/javascript">
@@ -140,52 +140,54 @@ Description: A two-column web design, best for your personal and business bloggi
 					</li>
 					{% endblock friends_activity_feed %}
 	
-					<li class="item"> <img src="images/bailey1.jpg"/></li>
-					<li class="item"><img src="images/dog1.jpg"></li>
-					<li class="item"><img src="images/cat1.jpg"></li>
-					<li class="item"><img src="images/dog2.jpg"></li>
-					<li class="item"><img src="images/dog3.jpg"></li>
-					<li class="item"><img src="images/cat2.jpg"></li>
-					<li class="item"><img src="images/dog4.jpg"></li>
-					<li class="item" id="hover1"><img src="images/cat3.jpg">
+					{%  block pet_reports_content %}
+					<li class="item"> <img src="{{ STATIC_URL }}/images/bailey1.jpg"/></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/dog1.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/cat1.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/dog2.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/dog3.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/cat2.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/dog4.jpg"></li>
+					<li class="item" id="hover1"><img src="{{ STATIC_URL }}/images/cat3.jpg">
 					<div class="hdetail" style="display:none">
 					<i>Nobody is working on this pet!</i>
 					</div>
 					</li>
 					<!-- Toto is right here -->
-					<li class="item" id="toto"><a href="petreport.html"> <img src="images/toto.jpg"/> </a>
+					<li class="item" id="toto"><a href="{{ STATIC_URL }}/petreport.html"> <img src="{{ STATIC_URL }}/images/toto.jpg"/> </a>
 					<div class="hdetail" style="display:none">
 					<i>People working on this pet:</i><br/>
-					<image src="images/jo.png" style="width:32px; margin-right: 2px; float:left" />
-					<image src="images/prototype_profiles/EPICDorothysquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-					<image src="images/prototype_profiles/EPICstrawmansquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-					<image src="images/prototype_profiles/EPICGlindagoodwitchnorthsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-					<image src="images/prototype_profiles/EPICwizardsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="{{ STATIC_URL }}/images/jo.png" style="width:32px; margin-right: 2px; float:left" />
+					<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICDorothysquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICstrawmansquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICGlindagoodwitchnorthsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICwizardsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
 					</div>
 					</li>
-					<li class="item" id="hover2"><img src="images/bailey2.jpg">
+					<li class="item" id="hover2"><img src="{{ STATIC_URL }}/images/bailey2.jpg">
 					<div class="hdetail" style="display:none">
 					<i>People working on this pet:</i><br/>
-					<image src="images/prototype_profiles/EPICmunchkin1square.jpg" style="width:32px; margin-right: 2px; float:left" />
-					<image src="images/prototype_profiles/EPICtinmansquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-					<image src="images/prototype_profiles/EPICwickedwitchsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-					<image src="images/prototype_profiles/EPICCowardlyLionsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-					<image src="images/mario.png" style="width:32px; margin-right: 2px; float:left" />
+					<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICmunchkin1square.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICtinmansquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICwickedwitchsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICCowardlyLionsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
+					<image src="{{ STATIC_URL }}/images/mario.png" style="width:32px; margin-right: 2px; float:left" />
 					<br/><br/><i>and 6 more...</i>
 					</div>
 					</li>
-					<li class="item"><img src="images/dog5.jpg"></li>
-					<li class="item"><img src="images/dog6.jpg"></li>
-					<li class="item"><img src="images/cat4.jpg"></li>
-					<li class="item"><img src="images/dog7.jpg"></li>
-					<li class="item"><img src="images/cat5.jpg"></li>
-					<li class="item"><img src="images/cat6.jpg"></li>
-					<li class="item"><img src="images/dog8.jpg"></li>
-					<li class="item"><img src="images/cat7.jpg"></li>
-					<li class="item"><img src="images/cat8.jpg"></li>
-					<li class="item"><img src="images/dog9.jpg"></li>
-					<li class="item"><img src="images/dog10.jpg"></li>
-					<li class="item"><img src="images/dog11.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/dog5.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/dog6.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/cat4.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/dog7.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/cat5.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/cat6.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/dog8.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/cat7.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/cat8.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/dog9.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/dog10.jpg"></li>
+					<li class="item"><img src="{{ STATIC_URL }}/images/dog11.jpg"></li>
+					{% endblock pet_reports_content %}
 				</ul>	
 			</div>
 		<br style="clear: both;" />
@@ -205,10 +207,10 @@ Description: A two-column web design, best for your personal and business bloggi
 		<p id="legal"> &copy;2012 Project EPIC . All Rights Reserved.
 	</div>
 	<!-- Include the imagesLoaded plug-in -->
-	<script src="js/jquery.imagesloaded.js"></script>
+	<script src="{{ STATIC_URL }}/js/jquery.imagesloaded.js"></script>
 	
 	<!-- Include the plug-in -->
-	<script src="js/jquery.wookmark.js"></script>
+	<script src="{{ STATIC_URL }}/js/jquery.wookmark.js"></script>
 	
 	<script type="text/javascript">
 	var hand = 0;

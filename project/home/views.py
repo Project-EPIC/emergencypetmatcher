@@ -15,13 +15,24 @@ from django.http import Http404
 from django.core import mail
 from django.core.urlresolvers import reverse
 from registration.forms import RegistrationForm
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 """Home view, displays login mechanism"""
 def home (request):
+    pet_reports = PetReport.objects.all()
+    paginator = Paginator(pet_reports, 50)
+    page = request.GET.get('page')
+    try:
+        pet_reports_list = paginator.page(page)
+    except PageNotAnInteger:
+        pet_reports_list = paginator.page(1)
+    except EmptyPage:
+        pet_reports_list = paginator.page(paginator.num_pages)
+        
     if request.user.is_authenticated():
-        return social_login(request)
+        return social_login(request, pet_reports_list)
     else:
-        return render_to_response('index.html', {'version': version}, RequestContext(request))
+        return render_to_response('index.html', {'version': version, 'pet_reports_list': pet_reports_list}, RequestContext(request))
 
 def social_auth_login(request, backend):
     """
@@ -40,11 +51,12 @@ def social_auth_login(request, backend):
         return render_to_response('registration/login_errors.html', locals(), context_instance=RequestContext(request))
 
 @login_required
-def social_login(request):
+def social_login(request,pet_reports_list):
     """Login complete view, displays user data"""
     ctx = {
         'version': version,
-        'last_login': request.session.get('social_auth_last_login_backend')
+        'last_login': request.session.get('social_auth_last_login_backend'),
+        'pet_reports_list': pet_reports_list
     }
     return render_to_response('index.html', ctx, RequestContext(request))
 

@@ -177,23 +177,19 @@ class ModelTesting (unittest.TestCase):
 	def test_savePetReport(self):
 		print '>>>> Testing test_savePetReport for %d iterations' % NUMBER_OF_TESTS
 
-		choices = ['dog', 'cat', 'turtle', 'other']
-		sex = ['Male', 'Female']
-
 		for i in range (NUMBER_OF_TESTS):
-
 			#Create the essential ingredients for the PetReport object.
-			pet_type = random.choice(choices)
-			status = u'%s' % (random.choice(LOST_OR_FOUND_CHOICES)[0])
 			username = generate_string(10) + str(i)
 			password = generate_string(10)
 			email = generate_string(10) + '@' + 'test.com'
 			user = User.objects.create_user(username = username, email = email, password = password)
 
+			pet_type = random.choice(PET_TYPE_CHOICES [1:])[0]
+			status = u'%s' % random.choice(STATUS_CHOICES [1:])[0]
 			pr = PetReport (pet_type = pet_type, status = status, proposed_by = user.get_profile())
 			pr.pet_name = generate_string(30)
 			pr.description = generate_string(300)
-			pr.sex = random.choice(sex)
+			pr.sex = random.choice(SEX_CHOICES [1:])[0]
 			pr.location = generate_string(50)
 			pr.color = generate_string(20)
 			pr.breed = generate_string(30)
@@ -224,23 +220,19 @@ class ModelTesting (unittest.TestCase):
 	def test_updatePetReport(self):
 		print '>>>> Testing test_updatePetReport for %d iterations' % NUMBER_OF_TESTS
 
-		choices = ['dog', 'cat', 'turtle', 'other']
-		sex = ['Male', 'Female']
-		lostOrTrue = [True, False]
-
 		for i in range (NUMBER_OF_TESTS):
-
 			#Create the essential ingredients for the PetReport object.
-			pet_type = random.choice(choices)
-			status = u'%s' % (random.choice(LOST_OR_FOUND_CHOICES)[0])
 			username = generate_string(10) + str(i)
 			password = generate_string(10)
 			email = generate_string(10) + '@' + 'test.com'
 			user = User.objects.create_user(username = username, email = email, password = password)
+
+			pet_type = random.choice(PET_TYPE_CHOICES[1:])[0]
+			status = u'%s' % random.choice(STATUS_CHOICES[1:])[0]
 			pr = PetReport (pet_type = pet_type, status = status, proposed_by = user.get_profile())
 			pr.pet_name = generate_string(30)
 			pr.description = generate_string(300)
-			pr.sex = random.choice(sex)
+			pr.sex = random.choice(SEX_CHOICES [1:])[0]
 			pr.location = generate_string(50)
 			pr.color = generate_string(20)
 			pr.breed = generate_string(30)
@@ -251,7 +243,7 @@ class ModelTesting (unittest.TestCase):
 			#UPDATES
 			pr.pet_name = generate_string(30)
 			pr.description = generate_string(300)
-			pr.sex = random.choice(sex)
+			pr.sex = random.choice(SEX_CHOICES [1:])[0]
 			pr.location = generate_string(50)
 			pr.color = generate_string(20)
 			pr.breed = generate_string(30)
@@ -283,15 +275,10 @@ class ModelTesting (unittest.TestCase):
 	def test_deletePetReport(self):
 		print '>>>> Testing test_deletePetReport for %d iterations' % NUMBER_OF_TESTS
 
-		choices = ['dog', 'cat', 'turtle', 'other']
-		sex = ['Male', 'Female']
-		lostOrTrue = [True, False]
-
 		for i in range (NUMBER_OF_TESTS):
-
 			#Create the essential ingredients for the PetReport object.
-			pet_type = random.choice(choices)
-			status = u'%s' % (random.choice(LOST_OR_FOUND_CHOICES)[0])
+			pet_type = random.choice(PET_TYPE_CHOICES[1:])[0]
+			status = u'%s' % random.choice(STATUS_CHOICES[1:])[0]
 			username = generate_string(10) + str(i)
 			password = generate_string(10)
 			email = generate_string(10) + '@' + 'test.com'
@@ -299,7 +286,7 @@ class ModelTesting (unittest.TestCase):
 			pr = PetReport (pet_type = pet_type, status = status, proposed_by = user.get_profile())
 			pr.pet_name = generate_string(30)
 			pr.description = generate_string(300)
-			pr.sex = random.choice(sex)
+			pr.sex = random.choice(SEX_CHOICES[1:])[0]
 			pr.location = generate_string(50)
 			pr.color = generate_string(20)
 			pr.breed = generate_string(30)

@@ -4,20 +4,22 @@ from django.forms import ModelForm
 from django import forms
 from django.db.models.signals import post_save
 
-
-SEX_CHOICES=(('M','Male'),('F','Female'))
-SIZE_CHOICES = (('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)'))
-PET_TYPE_CHOICES = ((None, 'Select'), ('Dog', 'Dog'), ('Cat', 'Cat'), ('Other', 'Other'))
-LOST_OR_FOUND_CHOICES = (('Lost','Lost'),('Found','Found'))
-BREED_CHOICES = (('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador'))
-
+'''Enums for Various Model Choice Fields'''
+PET_TYPE_CHOICES = [(None, 'Select'), ('Dog', 'Dog'), ('Cat', 'Cat'), ('Other', 'Other')]
+STATUS_CHOICES = [(None, 'Select'),('Lost','Lost'),('Found','Found')]
+SEX_CHOICES=[(None, 'Select'), ('M','Male'),('F','Female')]
+SIZE_CHOICES = [(None, 'Select'), ('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)')]
+BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador')]
 
 class PetReport(models.Model):
 
     '''Required Fields'''
     pet_type = models.CharField(max_length=10, choices = PET_TYPE_CHOICES, null=False, default=None)
-    status = models.CharField(max_length = 5, choices = LOST_OR_FOUND_CHOICES, null=False, default=None)
+    status = models.CharField(max_length = 5, choices = STATUS_CHOICES, null=False, default=None)
     date_lost_or_found = models.DateTimeField(auto_now_add=True, null=False)
+    sex = models.CharField(max_length=6, choices=SEX_CHOICES, null=False, default=None)
+    size = models.CharField(max_length=50, choices = SIZE_CHOICES, null=False, default=None)
+    location = models.CharField(max_length=50, null=False, default=None)
 
     #ForeignKey: Many-to-one relationship with User
     proposed_by = models.ForeignKey('UserProfile', null=False, default=None)
@@ -25,20 +27,17 @@ class PetReport(models.Model):
     '''Non-Required Fields'''
     pet_name = models.CharField(max_length=50,null=True) 
     age = models.IntegerField(null=True)
-    sex = models.CharField(max_length=6, choices=SEX_CHOICES)
     color = models.CharField(max_length=20,null=True)
     breed = models.CharField(max_length=30,null=True)
-    size = models.CharField(max_length=50, choices = SIZE_CHOICES, null=True)
-    location = models.CharField(max_length=50,null=True)
     revision_number = models.IntegerField(null=True) #update revision using view
+    img_path=models.CharField(max_length=100,null=True)
     description   = models.CharField(max_length=300, null=True)
-    
     #Many-to-Many relationship with User
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
 
 
     def __unicode__(self):
-        return ' PetReport {pet_type:%s, lost:%s, contact: %s}' % (self.pet_type, self.status, self.proposed_by)
+        return ' PetReport {pet_type:%s, status:%s, contact: %s}' % (self.pet_type, self.status, self.proposed_by)
 
 
 #The User Profile Model containing a 1-1 association with the 
@@ -118,17 +117,17 @@ class PetReportForm (ModelForm):
 
     '''Required Fields'''
     pet_type = forms.ChoiceField(label = 'Pet Type', choices = PET_TYPE_CHOICES, required = True)
-    status = forms.ChoiceField(label = "Lost/Found", choices = LOST_OR_FOUND_CHOICES, required = True)
+    status = forms.ChoiceField(label = "Lost/Found", choices = STATUS_CHOICES, required = True)
     date_lost_or_found = forms.DateTimeField(label = "Date Lost/Found", required = True)
+    sex = forms.ChoiceField(label = "Sex", choices=SEX_CHOICES, required = True)
+    size = forms.ChoiceField(label = "Size of Pet", choices = SIZE_CHOICES, required = True)
+    location = forms.CharField(label = "Location", max_length=50, required = True)
 
     '''Non-Required Fields'''
     pet_name = forms.CharField(label = "Pet Name", max_length=50, required = False) 
-    sex = forms.ChoiceField(label = "Sex", choices=SEX_CHOICES, required = False)
     age = forms.IntegerField(label = "Age", required = False)
     breed = forms.CharField(label = "Breed", max_length=30, required = False)
-    size = forms.ChoiceField(label = "Size of Pet", choices = SIZE_CHOICES, required = False)
     color = forms.CharField(label = "Coat Color(s)", max_length=20, required = False)
-    location = forms.CharField(label = "Location", max_length=50, required = False)
     description  = forms.CharField(label = "Description", max_length=300, required = False, widget=forms.Textarea)
 
     class Meta:
