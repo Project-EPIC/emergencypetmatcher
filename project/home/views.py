@@ -15,15 +15,13 @@ from django.http import Http404
 from django.core import mail
 from django.core.urlresolvers import reverse
 from registration.forms import RegistrationForm
-import re
 
 """Home view, displays login mechanism"""
 def home (request):
     if request.user.is_authenticated():
         return social_login(request)
     else:
-        return render_to_response('index.html', {'version': version},
-                                  RequestContext(request))
+        return render_to_response('index.html', {'version': version}, RequestContext(request))
 
 def social_auth_login(request, backend):
     """
@@ -39,14 +37,7 @@ def social_auth_login(request, backend):
         return render_to_response('registration/social_auth_username_form.html', locals(), RequestContext(request))
     except ValueError, error:
         # in case of errors, let's show a special page that will explain what happened
-        return render_to_response('users/login_error.html',
-                                  locals(),
-                                  context_instance=RequestContext(request))
-
-@login_required
-def submit_petreport(request):
-    return render_to_response('reporting/petreport_form.html', {}, RequestContext(request))
-
+        return render_to_response('registration/login_errors.html', locals(), context_instance=RequestContext(request))
 
 @login_required
 def social_login(request):

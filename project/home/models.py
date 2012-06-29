@@ -5,9 +5,9 @@ from django import forms
 from django.db.models.signals import post_save
 
 
-SEX_CHOICES=(('Male','Male'),('Female','Female'))
-SIZE_CHOICES = (('Large (100+ lbs.)', 'Large'), ('Medium (10 - 100 lbs.', 'Medium'), ('Small (0 - 10 lbs.)', 'Small'))
-PET_TYPE_CHOICES = (('Dog', 'Dog'), ('Cat', 'Cat'), ('Other', 'Other'))
+SEX_CHOICES=(('M','Male'),('F','Female'))
+SIZE_CHOICES = (('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)'))
+PET_TYPE_CHOICES = ((None, 'Select'), ('Dog', 'Dog'), ('Cat', 'Cat'), ('Other', 'Other'))
 LOST_OR_FOUND_CHOICES = (('Lost','Lost'),('Found','Found'))
 BREED_CHOICES = (('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador'))
 
@@ -16,7 +16,7 @@ class PetReport(models.Model):
 
     '''Required Fields'''
     pet_type = models.CharField(max_length=10, choices = PET_TYPE_CHOICES, null=False, default=None)
-    lost = models.CharField(max_length = 5, choices = LOST_OR_FOUND_CHOICES, null=False, default=None)
+    status = models.CharField(max_length = 5, choices = LOST_OR_FOUND_CHOICES, null=False, default=None)
     date_lost_or_found = models.DateTimeField(auto_now_add=True, null=False)
 
     #ForeignKey: Many-to-one relationship with User
@@ -38,7 +38,7 @@ class PetReport(models.Model):
 
 
     def __unicode__(self):
-        return ' PetReport {pet_type:%s, lost:%s, contact: %s}' % (self.pet_type, self.lost, self.proposed_by)
+        return ' PetReport {pet_type:%s, lost:%s, contact: %s}' % (self.pet_type, self.status, self.proposed_by)
 
 
 #The User Profile Model containing a 1-1 association with the 
@@ -118,7 +118,7 @@ class PetReportForm (ModelForm):
 
     '''Required Fields'''
     pet_type = forms.ChoiceField(label = 'Pet Type', choices = PET_TYPE_CHOICES, required = True)
-    lost = forms.ChoiceField(label = "Lost/Found", choices = LOST_OR_FOUND_CHOICES, required = True)
+    status = forms.ChoiceField(label = "Lost/Found", choices = LOST_OR_FOUND_CHOICES, required = True)
     date_lost_or_found = forms.DateTimeField(label = "Date Lost/Found", required = True)
 
     '''Non-Required Fields'''
@@ -134,6 +134,11 @@ class PetReportForm (ModelForm):
     class Meta:
         model = PetReport
         exclude = ("proposed_by", "workers", "revision_number")
+
+    def __init__(self, *args, **kwargs):
+        super(PetReportForm, self).__init__(*args, **kwargs)
+        self.fields.keyOrder = [ 'pet_type','status', 'date_lost_or_found', 'pet_name', 
+        'sex', 'age', 'breed', 'size', 'color', 'location', 'description']
 
 
 #The UserProfile ModelForm

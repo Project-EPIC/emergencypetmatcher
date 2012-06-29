@@ -104,7 +104,7 @@ Description: A two-column web design, best for your personal and business bloggi
 	<div id="wrapper">
 		<div id="main">
 
-			<strong>{% block message %}{% endblock message %}<strong>
+			<strong>{% block message_block %}{% if message %} {{ request.message }} {% endif %}{% endblock message_block %}<strong>
 			<h2>{% block content_title %}{% endblock content_title %}</h2>
 			<h3>{% block content_subtitle %}{% endblock content_subtitle %}</h3>
 

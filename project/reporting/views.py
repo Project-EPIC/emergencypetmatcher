@@ -21,20 +21,26 @@ from random import choice, uniform
 import re
 
 
+@login_required
 def submit_petreport(request):
 
     if request.method == "POST":
-        form = PetReportForm(request.POST) #Bound Form to the input form data.
-        if form.is_valid():
-            p = form.save(commit=False) #Create (but do not save) the Pet Report Object associated wit this form data.
-            p.proposed_by = request.user.get_profile()
-            p.save() #Now save the Pet Report.
-            msg = 'Thank you for submitting a %s pet report' % (p.lost)
-            return redirect('/', info_message=msg)
+        form = PetReportForm(request.POST)
+
+        if form.is_valid() == True:
+            pr = form.save(commit=False)
+            #Create (but do not save) the Pet Report Object associated wit this form data.
+            pr.proposed_by = request.user.get_profile()
+            pr.save() #Now save the Pet Report.
+            if pr.status == 'Lost':
+                request.session ['message'] = 'Thank you for your submission! Your contribution will go a long way towards helping people find your lost pet.'
+            else:
+                request.session ['message'] = 'Thank you for your submission! Your contribution will go a long way towards helping others match lost and found pets.'
+            return redirect('/')
     else:
         form = PetReportForm() #Unbound Form
-    return render_to_response('reporting/petreport_form.html', {'form':form}, RequestContext(request))
 
+    return render_to_response('reporting/petreport_form.html', {'form':form}, RequestContext(request))
 
 '''
 def home(request, include_ty=False):
