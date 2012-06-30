@@ -25,7 +25,7 @@ import re
 def submit_petreport(request):
 
     if request.method == "POST":
-        form = PetReportForm(request.POST)
+        form = PetReportForm(request.POST, request.FILES)
 
         if form.is_valid() == True:
             pr = form.save(commit=False)

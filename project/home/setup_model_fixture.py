@@ -51,34 +51,20 @@ def create_petreport(user):
 '''''''''''''''''''''''''''''''''''''''''''''''''''
 When Executed: Setup our fixture
 '''''''''''''''''''''''''''''''''''''''''''''''''''
-if len(sys.argv) < 2 or len(sys.argv) > 2:
-	print '[ERROR]: You must specify exactly one argument:'
-	print "\t'setup' for setting up all data"
-	print "\t'wipeout' for wiping out all data"
-	sys.exit()
 
-if sys.argv[1] == 'wipeout':
-		delete_all()
-		print '[OK]: All data from User, UserProfile, PetMatch, PetReport, Chat, and ChatLine have been wiped out.'
-		sys.exit()
+print '\nSetting up model fixture....'
+delete_all()
+users = []
+passwords = []
+for i in range (NUM_USERS):
+	user, pwd = create_user()
+	users.append(user)
+	passwords.append(pwd)
 
-elif sys.argv[1] == 'setup':
-	print '\nSetting up model fixture....'
-	delete_all()
-	users = []
-	passwords = []
-	for i in range (NUM_USERS):
-		user, pwd = create_user()
-		users.append(user)
-		passwords.append(pwd)
+for i in range (NUM_PETREPORTS):
+	create_petreport(random.choice(users))
 
-	for i in range (NUM_PETREPORTS):
-		create_petreport(random.choice(users))
-
-	print '%d users created, %s pet reports created' % (NUM_USERS, NUM_PETREPORTS)
-	print 'usernames with passwords are:'
-	for i in range (NUM_USERS):
-		print '<%s, %s>' % (users[i].username, passwords[i])
-
-else:
-	print '[ERROR]: Invalid argument. Try again.'
+print '%d users created, %s pet reports created' % (NUM_USERS, NUM_PETREPORTS)
+print 'usernames with passwords are:'
+for i in range (NUM_USERS):
+	print '<%s, %s>' % (users[i].username, passwords[i])

@@ -3,9 +3,13 @@ from django.contrib.auth.models import User
 from django.forms import ModelForm
 from django import forms
 from django.db.models.signals import post_save
+import PIL
+from django.core.files.storage import FileSystemStorage
+
+#fs = FileSystemStorage(location='/srv/epm/static/petreport_images')
 
 '''Enums for Various Model Choice Fields'''
-PET_TYPE_CHOICES = [(None, 'Select'), ('Dog', 'Dog'), ('Cat', 'Cat'), ('Other', 'Other')]
+PET_TYPE_CHOICES = [(None, 'Select'), ('Dog', 'Dog'), ('Cat', 'Cat'), ('Turtle', 'Turtle'), ('Rabbit', 'Rabbit'), ('Other', 'Other')]
 STATUS_CHOICES = [(None, 'Select'),('Lost','Lost'),('Found','Found')]
 SEX_CHOICES=[(None, 'Select'), ('M','Male'),('F','Female')]
 SIZE_CHOICES = [(None, 'Select'), ('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)')]
@@ -25,12 +29,12 @@ class PetReport(models.Model):
     proposed_by = models.ForeignKey('UserProfile', null=False, default=None)
 
     '''Non-Required Fields'''
+    img_path = models.ImageField(upload_to='images/petreport_images', null=True)
     pet_name = models.CharField(max_length=50,null=True) 
     age = models.IntegerField(null=True)
     color = models.CharField(max_length=20,null=True)
     breed = models.CharField(max_length=30,null=True)
     revision_number = models.IntegerField(null=True) #update revision using view
-    img_path=models.CharField(max_length=100,null=True)
     description   = models.CharField(max_length=300, null=True)
     #Many-to-Many relationship with User
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
@@ -64,7 +68,7 @@ class UserProfile (models.Model):
     post_save.connect(create_user_profile, sender=User)
 
     def __unicode__ (self):
-        return ' User {username:%s, first_name:%s, last_name:%s, email:%s}' % (self.user.username, self.user.first_name, self.user.last_name, self.user.email)
+        return ' User {username:%s, email:%s}' % (self.user.username, self.user.email)
 
 
 #The Pet Match Object Model
@@ -108,6 +112,9 @@ class ChatLine (models.Model):
     text = models.CharField (max_length=10000, blank=True, null=False, default=None)
     date = models.DateTimeField(auto_now_add=True)
 
+    def __unicode__ (self):
+        return ' ChatLine {text:%s}' % (self.text)
+
 
 ''' Form Models - These Models nicely organize the model-related data into Django Form objects that have built-in validation
 functionality and can be passed around via POST requests. Order of Fields matter.'''
@@ -124,6 +131,7 @@ class PetReportForm (ModelForm):
     location = forms.CharField(label = "Location", max_length=50, required = True)
 
     '''Non-Required Fields'''
+    img_path = forms.ImageField(label = "Upload an Image ", required=False)
     pet_name = forms.CharField(label = "Pet Name", max_length=50, required = False) 
     age = forms.IntegerField(label = "Age", required = False)
     breed = forms.CharField(label = "Breed", max_length=30, required = False)
@@ -136,23 +144,6 @@ class PetReportForm (ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(PetReportForm, self).__init__(*args, **kwargs)
-        self.fields.keyOrder = [ 'pet_type','status', 'date_lost_or_found', 'pet_name', 
-        'sex', 'age', 'breed', 'size', 'color', 'location', 'description']
-
-
-#The UserProfile ModelForm
-class UserForm (ModelForm):
-    #first_name = forms.CharField(label = "First Name", required = False)
-    #last_name = forms.CharField(label = "Last Name", required = False)
-    password_again = forms.CharField(label = "Password (again)", required = True, widget = forms.PasswordInput())
-
-    class Meta:
-        model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'password', 'password_again')
-        widgets = {
-            'password': forms.PasswordInput()
-        }
-
-
-
+        self.fields.keyOrder = [ 'img_path', 'pet_type','status', 'date_lost_or_found', 'location', 'pet_name', 
+        'sex', 'age', 'size', 'breed', 'color', 'description']
 

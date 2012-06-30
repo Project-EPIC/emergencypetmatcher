@@ -12,7 +12,7 @@
 
 		{% if form.errors %} <strong> {{ form.errors }} </strong> {% endif %}
 
-		<form method="POST" action={% url 'submit_petreport' %}>
+		<form enctype="multipart/form-data" method="POST" action={% url 'submit_petreport' %}>
 			{% csrf_token %}
 			<table>
 				{% for field in form %}
