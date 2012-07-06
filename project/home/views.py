@@ -16,6 +16,7 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from registration.forms import RegistrationForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.shortcuts import get_object_or_404
 
 """Home view, displays login mechanism"""
 def home (request):
@@ -71,3 +72,12 @@ def form(request):
         return redirect('socialauth_complete', backend=backend)
     else:
         return render_to_response('registration/social_auth_username_form.html', {}, RequestContext(request))
+
+@login_required
+def detail(request, userprofile_id):   
+    u = get_object_or_404(UserProfile, pk=userprofile_id) 
+    if request.user.is_authenticated():        
+        return render_to_response('detail.html', {'loggedin':u}, context_instance=RequestContext(request))
+    else: 
+        """else doesn't work"""
+        return render_to_response('user.html', {'account':u}, context_instance=RequestContext(request))
