@@ -1,0 +1,69 @@
+{% extends 'index.html' %}
+{% load url from future %}
+
+{% block head_title %}EPM - User Profile: {{ loggedin.user.username }} {% endblock head_title %}
+{% block content_title %} User Profile {% endblock content_title %}
+
+{% if error_message %}<p><srtong>{{ error_message }}</strong></p> {% endif %}
+
+{% block content %}
+
+<h2><i>Hi, {{ loggedin.user.username }}</i></h2>
+<h4>User data:</h4>
+<table>
+    <tr align="left" class="odd"><th>Id:</th> <td>{{ loggedin.user.id }}</td></tr>
+    <tr align="left" class="even"><th>Username:</th> <td>{{ loggedin.user.username }}</td></tr>
+    <tr align="left" class="odd"><th>Email:</th> <td>{{ loggedin.user.email|default:"Not provided" }}</td></tr>
+    <tr align="left" class="even"><th>First name:</th> <td>{{ loggedin.user.first_name|default:"Not provided" }}</td></tr>
+    <tr align="left" class="odd"><th>Last name:</th> <td>{{ loggedin.user.last_name|default:"Not provided" }}</td></tr>
+    <tr align="left" class="even"><th>Last login:</th> <td>{{ last_login }}</td></tr>
+</table>
+
+
+{% if user.is_authenticated %}
+
+<div>
+<h4>Proposed Pet Reports:</h4>
+{% for petreport in loggedin.petreport_set.all %}
+	<ul>
+	<li>{{ petreport.status }} {{ petreport.pet_type }} (id: {{ petreport.id }}) reported in {{ petreport.date_lost_or_found }} -- 
+
+		 Name: {{ petreport.pet_name }}, Sex: {{ petreport.sex }}, Size: {{ petreport.size }}, Location: {{ petreport.location }}
+	</li>
+	</ul>
+{% endfor %}
+</div>
+
+<div>
+<h4>Proposed Pet Matches:</h4>
+{% for petmatch in loggedin.proposed_by_related.all %}
+	<ul>
+	<li>Lost: {{ petmatch.lost_pet.pet_type }} (id: {{ petmatch.lost_pet.id}}) --
+		Found: {{ petmatch.found_pet.pet_type }} (id: {{ petmatch.found_pet.id}}) 
+	</li>
+	</ul>
+{% endfor %}
+</div>
+
+<div>
+<h4>Working-On Pet Reports:</h4>
+{% for petreport in loggedin.workers_related.all %}
+	<ul>
+	<li>(id: {{ petreport.id }}) {{ petreport.status }} {{ petreport.pet_type }}, Name: {{ petreport.pet_name }} 
+	</li>
+	</ul>
+{% endfor %}
+</div>
+
+<div>
+<h4>Friends:</h4>
+{% for friend in loggedin.friends.all %}
+	<ul>
+	<li><a href={% url 'detail' friend.user.id %}>(id: {{ friend.user.id }}), Username: {{ friend.user.username }}</a> </li>
+	</ul>
+{% endfor %}
+</div>
+
+{% endif %}
+
+{% endblock %}

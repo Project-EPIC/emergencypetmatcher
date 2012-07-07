@@ -9,7 +9,17 @@
 	{% if pet_reports_list %}
 	    {% for pet_report in pet_reports_list %}
 	    	{% if pet_report.img_path %}
-				<li class="item"> <img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/></li>
+	    		<li class="item"> 
+		    		{% if pet_report.status %}
+							Lost : 
+					{% else %}
+							Found : 
+					{% endif %}
+						{{ pet_report.pet_type }}
+						<br />
+						Contact : {{  pet_report.proposed_by.user.username}}
+					<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
+				</li>
 			{% else %}
 				<li class="item"> 
 					{% if pet_report.status %}
@@ -19,12 +29,18 @@
 					{% endif %}
 					{{ pet_report.pet_type }}
 					<br />
-					Contact : To be Updated
+					Contact : {{  pet_report.proposed_by.user.username }}
 					{% ifequal pet_report.pet_type "Dog" %}
 						<img src="{{ STATIC_URL }}/images/dog-sil.jpg"/>
 					{% endifequal %}
 					{% ifequal pet_report.pet_type "Cat" %}
 						<img src="{{ STATIC_URL }}/images/cat-sil.png"/>
+					{% endifequal %}
+					{% ifequal pet_report.pet_type "Turtle" %}
+						<img src="{{ STATIC_URL }}/images/turtle-sil.jpg"/>
+					{% endifequal %}
+					{% ifequal pet_report.pet_type "Rabbit" %}
+						<img src="{{ STATIC_URL }}/images/rabbit-sil.gif"/>
 					{% endifequal %}
 					{% ifequal pet_report.pet_type "None" %}
 						NOTHING
@@ -36,20 +52,21 @@
 			{% endif %}
 		{% endfor %}	
 		<div class="pagination" align="left">
-   			<span class="step-links" id="footer">
+   			<div class="step-links" id="footer" align="left">
         		{% if pet_reports_list.has_previous %}
            			<a href="?page={{ pet_reports_list.previous_page_number }}">previous</a>
         		{% endif %}
+        	</div>	
 
-       		<span class="current" id="footer">
+       		<div class="current" id="footer" align="left">
             	Page {{ pet_reports_list.number }} of {{ pet_reports_list.paginator.num_pages }}.
-        </span>
-
-        {% if pet_reports_list.has_next %}
-            <a href="?page={{ pet_reports_list.next_page_number }}">next</a>
-        {% endif %}
-    </span>
-</div>
+        	</div>
+        	<div class="step-links" id="footer" align="left">	
+        		{% if pet_reports_list.has_next %}
+            		<a href="?page={{ pet_reports_list.next_page_number }}">next</a>
+        		{% endif %}
+        	</div>		
+    	</div>
 	{% else %}
 	    <p>No pet reports are available.</p>
 	{% endif %}
