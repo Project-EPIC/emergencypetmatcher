@@ -19,9 +19,12 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 """Home view, displays login mechanism"""
 def home (request):
+
+    #Get Pet Report objects and organize them into a Paginator Object.
     pet_reports = PetReport.objects.all()
     paginator = Paginator(pet_reports, 50)
     page = request.GET.get('page')
+    
     try:
         pet_reports_list = paginator.page(page)
     except PageNotAnInteger:
