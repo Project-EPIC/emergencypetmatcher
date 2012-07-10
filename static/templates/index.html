@@ -4,7 +4,6 @@
 {% block info_message %}
 	{% if info_message %} <h3> {{ info_message }} </h3> {% endif %}
 {% endblock info_message %}
-
 {% block pet_reports_content %}
 	{% if pet_reports_list %}
 	    {% for pet_report in pet_reports_list %}
@@ -21,7 +20,6 @@
 					<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
 				</li>
 			{% else %}
-				<li class="item"> 
 					{% if pet_report.status %}
 						Lost : 
 					{% else %}
