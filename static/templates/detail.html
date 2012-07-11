@@ -26,7 +26,7 @@
 <h4>Proposed Pet Reports:</h4>
 {% for petreport in loggedin.petreport_set.all %}
 	<ul>
-	<li>{{ petreport.status }} {{ petreport.pet_type }} (id: {{ petreport.id }}) reported in {{ petreport.date_lost_or_found }} -- 
+	<li>{{ petreport.status }} {{ petreport.pet_type }} (id: {{ petreport.id }}) reported on: {{ petreport.date_lost_or_found }} -- 
 
 		 Name: {{ petreport.pet_name }}, Sex: {{ petreport.sex }}, Size: {{ petreport.size }}, Location: {{ petreport.location }}
 	</li>

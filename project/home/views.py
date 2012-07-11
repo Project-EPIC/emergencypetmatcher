@@ -38,6 +38,7 @@ def home (request):
     else:
         return render_to_response('index.html', {'version': version, 'pet_reports_list': pet_reports_list}, RequestContext(request))
 
+
 def social_auth_login(request, backend):
     """
         This view is a wrapper to social_auths auth
