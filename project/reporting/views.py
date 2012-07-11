@@ -42,6 +42,11 @@ def submit_petreport(request):
 
     return render_to_response('reporting/petreport_form.html', {'form':form}, RequestContext(request))
 
+def disp_petreport(request,petreport_id):
+    pet_report = PetReport.objects.get(pk = petreport_id)
+    return render_to_response('reporting/petreport.html',{'pet_report': pet_report}, RequestContext(request))
+
+
 '''
 def home(request, include_ty=False):
     """Home view, displays login mechanism"""

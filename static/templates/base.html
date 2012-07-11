@@ -80,7 +80,7 @@ Description: A two-column web design, best for your personal and business bloggi
 				<li class="active"><a href="/"> Home</a></li>
 
 				{% if user.is_authenticated %}
-				<li class="active"><a href= '#'>{{ user.username }}</a></li>
+				<li class="active"><a href= {% url 'detail' user.id %}>{{ user.username }}</a></li>
 				<form method = "post" action= {% url 'auth_logout' %}> 
 					{% csrf_token %}<input type="submit" value="Logout"/>
 				</form>

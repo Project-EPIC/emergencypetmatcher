@@ -7,18 +7,18 @@
 {% block pet_reports_content %}
 	{% if pet_reports_list %}
 	    {% for pet_report in pet_reports_list %}
+	    	<li class="item" ><a href= "reporting/petreport/{{ pet_report.id }}">>  
 	    	{% if pet_report.img_path %}
-	    		<li class="item"> 
-		    		{% if pet_report.status %}
+	    			{% if pet_report.status %}
 							Lost : 
 					{% else %}
 							Found : 
-					{% endif %}
+					{% endif %}  		<!--<div id="prdp_title"> Toto </div>-->
+
 						{{ pet_report.pet_type }}
 						<br />
 						Contact : {{  pet_report.proposed_by.user.username}}
 					<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
-				</li>
 			{% else %}
 					{% if pet_report.status %}
 						Lost : 
@@ -46,8 +46,8 @@
 					{% ifequal pet_report.pet_type "Other" %}
 						OTHER
 					{% endifequal %}
-				</li>
 			{% endif %}
+			</li></a>
 		{% endfor %}	
 		<div class="pagination" align="left">
    			<div class="step-links" id="footer" align="left">
