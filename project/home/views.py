@@ -20,9 +20,12 @@ from django.shortcuts import get_object_or_404
 
 """Home view, displays login mechanism"""
 def home (request):
+
+    #Get Pet Report objects and organize them into a Paginator Object.
     pet_reports = PetReport.objects.all()
     paginator = Paginator(pet_reports, 50)
     page = request.GET.get('page')
+    
     try:
         pet_reports_list = paginator.page(page)
     except PageNotAnInteger:
@@ -34,6 +37,7 @@ def home (request):
         return social_login(request, pet_reports_list)
     else:
         return render_to_response('index.html', {'version': version, 'pet_reports_list': pet_reports_list}, RequestContext(request))
+
 
 def social_auth_login(request, backend):
     """
