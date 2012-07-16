@@ -80,8 +80,18 @@ def form(request):
 @login_required
 def detail(request, userprofile_id):   
     u = get_object_or_404(UserProfile, pk=userprofile_id) 
-    if request.user.is_authenticated():        
-        return render_to_response('detail.html', {'loggedin':u}, context_instance=RequestContext(request))
-    else: 
-        """else doesn't work"""
-        return render_to_response('user.html', {'account':u}, context_instance=RequestContext(request))
+    return render_to_response('detail.html', {'userprofile':u}, context_instance=RequestContext(request))
+ 
+
+import urllib
+# import settings
+import oauth2 as oauth
+@login_required
+def share(request, petreport_id): 
+    p = get_object_or_404(PetReport, pk=petreport_id) 
+    u = p.proposed_by
+
+    # To be completed
+    
+    return render_to_response('detail.html', {'userprofile':u}, context_instance=RequestContext(request))
+

@@ -1,10 +1,10 @@
 
 TWITTER_CONSUMER_KEY        = 'ssl0g9FopCG1zsItjarBJg'
 TWITTER_CONSUMER_SECRET     = 'eDRctXylxlXxHuFQqrLSXcRtTkY1CVMpZtdaM46Wg'
-FACEBOOK_APP_ID             = '294682853930535'
-FACEBOOK_API_SECRET         = '0106dd00c7a51e98fccbbd99e6b89db3'
-#FACEBOOK_APP_ID             = '353116464761714'
-#FACEBOOK_API_SECRET         = '2c622aaf22b268d4e26583548ed0a3b1'
+# FACEBOOK_APP_ID             = '294682853930535'
+# FACEBOOK_API_SECRET         = '0106dd00c7a51e98fccbbd99e6b89db3'
+FACEBOOK_APP_ID             = '353116464761714'
+FACEBOOK_API_SECRET         = '2c622aaf22b268d4e26583548ed0a3b1'
 
 SOCIAL_AUTH_ERROR_KEY = 'social_errors'
 
@@ -31,8 +31,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_auth.backends.pipeline.social.load_extra_data',
     'social_auth.backends.pipeline.user.update_user_details',
     'social_auth.backends.pipeline.misc.save_status_to_session',
-    # 'home.pipeline.redirect_to_form2',
-    # 'home.pipeline.first_name',
+    'home.pipeline.get_user_avatar',
 )
 
 

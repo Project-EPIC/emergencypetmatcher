@@ -54,12 +54,13 @@ class UserProfile (models.Model):
 
     '''Required Fields'''
     user = models.OneToOneField(User, null=False, default=None)
+    photo = models.ImageField(upload_to='images/profile_images', null=True)
 
     '''Non-Required Fields'''
     friends = models.ManyToManyField('self', null=True)
     chats = models.ManyToManyField('Chat', null=True)
-    facebook_cred = models.CharField(max_length=100, null=True)
-    twitter_cred = models.CharField(max_length=100, null=True)
+    # facebook_cred = models.CharField(max_length=100, null=True)
+    # twitter_cred = models.CharField(max_length=100, null=True)
     reputation = models.IntegerField(default=0, null=True)
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
