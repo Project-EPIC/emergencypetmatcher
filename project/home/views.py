@@ -17,13 +17,13 @@ from django.core.urlresolvers import reverse
 from registration.forms import RegistrationForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
+from django.contrib import messages
 
 """Home view, displays login mechanism"""
 def home (request):
-
     #Get Pet Report objects and organize them into a Paginator Object.
     pet_reports = PetReport.objects.all()
-    paginator = Paginator(pet_reports, 50)
+    paginator = Paginator(pet_reports, 100)
     page = request.GET.get('page')
     
     try:
@@ -38,6 +38,37 @@ def home (request):
     else:
         return render_to_response('index.html', {'version': version, 'pet_reports_list': pet_reports_list}, RequestContext(request))
 
+def login_user(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        print request.REQUEST
+
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                redirect_to = request.REQUEST ['next']
+                print request
+                print request.REQUEST
+                messages.success(request, 'Welcome, %s!' % (username))
+                return redirect(redirect_to)
+
+            else:
+                messages.error(request, 'There seems to be a problem with the account. Please try re-registering.')
+                
+        else:
+            print "PROBLEMO"
+            messages.error(request, 'Invalid Login credentials. Please try again.')
+    
+    form = AuthenticationForm()
+    return render_to_response('registration/login.html', {'form':form}, RequestContext(request, {'next':request.REQUEST ['next']}))
+
+
+def logout_user(request):
+    logout(request)
+    messages.success(request, "You have successfully logged out.")
+    return redirect('/')
 
 def social_auth_login(request, backend):
     """
@@ -85,3 +116,44 @@ def detail(request, userprofile_id):
     else: 
         """else doesn't work"""
         return render_to_response('user.html', {'account':u}, context_instance=RequestContext(request))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

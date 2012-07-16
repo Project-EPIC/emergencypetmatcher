@@ -13,7 +13,7 @@
 	{% if form.errors %} <p>Your username and password didn't match. Please try again.</p> {% endif %}
 
 	<div class="form_container">
-		<form method="post" action={% url 'auth_login' %}>
+		<form method="post" action= "{% url 'login_user' %}">
 			{% csrf_token %}
 				<table>
 					{% for field in form %}
@@ -23,17 +23,17 @@
 					</tr>
 					{% endfor %}
 				</table>
+			<input type="hidden" name="next" value="{{ next }}" />
 			<input type="submit" value="Login"/>
-			<!-- <input type="hidden" name="next" value="{{ next }}" /> -->
 		</form>
 	</div>
 	<br/>
-	<p/><a href = {% url 'auth_password_reset' %}> Forgot your Password? </a>
+	<p/><a href = "{% url 'auth_password_reset' %}"> Forgot your Password? </a>
 
-	<p/> <h3> <a href = {% url 'registration_register' %}> Register Here </a></h3>
+	<p/> <h3> <a href = "{% url 'registration_register' %}"> Register Here </a></h3>
 
-	<p/>Twitter: <a rel="nofollow" href={% url 'socialauth_begin' 'twitter' %}>Enter using Twitter</a><br/>
-	<p/>Facebook: <a rel="nofollow" href={% url 'socialauth_begin' 'facebook' %}>Enter using Facebook</a><br/>
+	<p/>Twitter: <a rel="nofollow" href="{% url 'socialauth_begin' 'twitter' %}">Enter using Twitter</a><br/>
+	<p/>Facebook: <a rel="nofollow" href="{% url 'socialauth_begin' 'facebook' %}">Enter using Facebook</a><br/>
 
 {% endblock content %}
 

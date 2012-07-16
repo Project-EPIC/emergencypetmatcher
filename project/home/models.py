@@ -7,7 +7,7 @@ from django.core.files.storage import FileSystemStorage
 import PIL
 
 '''Enums for Various Model Choice Fields'''
-PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Turtle', 'Turtle'), ('Rabbit', 'Rabbit'), ('Other', 'Other')]
+PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Turtle', 'Turtle'), ('Snake', 'Snake'), ('Horse', 'Horse'),('Rabbit', 'Rabbit'), ('Other', 'Other')]
 STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
 SEX_CHOICES=[('M','Male'),('F','Female')]
 SIZE_CHOICES = [('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)')]
@@ -36,6 +36,11 @@ class PetReport(models.Model):
     description   = models.CharField(max_length=300, null=True)
     #Many-to-Many relationship with User
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
+
+    def has_image(self):
+        if self.img_path == None:
+            return False
+        return True
 
     def __unicode__(self):
         return 'PetReport {pet_type: %s, status: %s, proposed_by: %s}' % (self.pet_type, self.status, self.proposed_by)

@@ -84,7 +84,7 @@ class ReportingTesting (unittest.TestCase):
 		self.assertTrue(len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS)
 		utils.performance_report(iteration_time)
 
-
+		
 
 
 

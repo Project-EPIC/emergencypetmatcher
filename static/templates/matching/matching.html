@@ -1,163 +1,159 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<!--
+{% extends 'index.html' %}
+{% load url from future %}
 
-Design by Free CSS Templates
-http://www.freecsstemplates.org
-Released for free under a Creative Commons Attribution 2.5 License
+{% block js %}{% endblock js %}
 
-Title      : Simpleton 
-Version    : 1.0
-Released   : 20110315
-Description: A two-column web design, best for your personal and business blogging.
+{% block head_title %}EPM - Matching {% endblock head_title %}
+{% block content_title %} The Matching Interface {% endblock content_title %}
 
--->
-<!doctype html>
-<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
-<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
-<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<title>Project EPIC PetMatch</title>
-<meta name="keywords" content="" />
-<meta name="description" content="" />
-<!-- CSS Reset -->
-<link rel="stylesheet" href="css/reset.css">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.17/themes/smoothness/jquery-ui.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
+{% if error_message %}<p><srtong>{{ error_message }}</strong></p> {% endif %}
 
-<script type="text/javascript">
+{% block content %}
 
-</script>
-</head>
-<body>
-<!-- start header -->
-<div id="header">
-	<div id="logo">
-		<h1><a href="#">There's No Place Like Home</a></h1>
-		<p>project epic</p>
-	</div>
-	<div id="menu">
+<p> The matching page allows you to click and drag potential pet reports to the workspace, which contains empty squares to put potential matches onto. To begin, survey the pet reports on the right that have been analyzed and ranked by the system to resemble a match and place them onto the workspace. When you feel that a potential match can be made, click on the "Propose Pet Match" button in the workspace. Good luck matching!</p>
+
+<div id="head">
+		<header id="nav">
 		<ul>
-			<li class="active"><a href="#">Match Pets</a></li>
-			<li><a href="#">Verify Matches</a></li>
-			<li><a href="#">Submit Lost/Found Pet</a></li>
-			<li><a href="#">My Profile</a></li>
-			<li><a href="#">About</a></li>
+			<li class="active"><a href="#">Suggested Pets</a></li>
+			<li><a href="#">Manual Search</a></li>
 		</ul>
+		</header>
 	</div>
-</div>
-<br/><br/><br/><br/>
-<!-- end header -->
-<!-- start page -->
-<div id="wrapper">
-	<div id="main">
-		<!-- start content -->
-		<div id="head">
-			<header id="nav">
-			<ul>
-				<li class="active"><a href="#">Suggested Pets</a></li>
-				<li><a href="#">Manual Search</a></li>
-			</ul>
-			</header>
-		</div>
 
-		<div id="working" style="float: left; width: 30%;position:fixed">
-			<div id="petdetail">
-				<div style="float:left; width:40%;">
-				<img src="http://barronsoftware.com/images/toto.jpg" style="max-width:150px; float:left">
-				</div>
-				<div id="working_des" style="float:right; width: 60%;">
-    		                  <span><b>Name:</b> Toto</span><br/>
-              	    	    <span><b>Breed:</b> cairn terrier</span><br/>
-  		                  <span><b>Color:</b> black</span><br/>
-                   		    <span><b>Sex:</b> Male</span><br/>
-				</div>
-				<span><b>Description:</b> small yorkshire terrier with black beady eyes, small nose</b> </span>
-            </div>
-            <div id="workspace" style="clear:both; height: 110px;">
-                <br/>
-                <div class="droppable" style="border-style:dotted; width:28%; margin-right: 10px; float:left; height: 100px;"><div style="text-align: center; margin-top:40px">drag a pet here</div></div>
-                <div class="droppable" style="border-style:dotted; width:28%; margin-right: 10px; float:left; height: 100px;"><div style="text-align: center; margin-top:40px">drag a pet here</div></div>
-                <div class="droppable" style="border-style:dotted; width:28%; margin-right: 10px; float:left; height: 100px;"><div style="text-align: center; margin-top:40px">drag a pet here</div></div>
-		  <br/>
-			<br/><br/><br/><br/><br/><br/><br/>
-                <div class="droppable" style="border-style:dotted; width:28%; margin-right: 10px; float:left; height: 100px;"><div style="text-align: center; margin-top:40px">drag a pet here</div></div>
-                <div class="droppable" style="border-style:dotted; width:28%; margin-right: 10px; float:left; height: 100px;"><div style="text-align: center; margin-top:40px">drag a pet here</div></div>
-                <div class="droppable" style="border-style:dotted; width:28%; margin-right: 10px; float:left; height: 100px;"><div style="text-align: center; margin-top:40px">drag a pet here</div></div>
-            </div>	
-		<br/><br/><br/><br/><br/><br/><br/><br/>
-            <div id="wsdetail" style="clear:both; margin-top:20px; display:none">
-                <input id="propose" type="button" value="Propose Match" />&nbsp;
-                <input type="button" value="Bookmark Pet" /><br/><br/>
-				<div style="float:left; width:40%;">
-				<img src="images/prototype_pets/EPICtoto.jpg" style="max-width:150px; float:left">
-				</div>
-				<div id="working_des" style="float:right; width: 60%;">
-                    <span><b>Breed:</b> terrier</span><br/>
-                    <span><b>Color:</b> black</span><br/>
-                    <span><b>Sex:</b> Male</span><br/>
-				</div>
-				<span><b>Description:</b> little black dog with long silky hair, small eyes</span>
-            </div>
-		</div>
-		<div id="container" style="width: 70%; float:right;">
-			<ul id="tiles">
-
-		       	
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto2.jpg"></li>
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto3.jpg"></li>
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto4.jpg"></li>
-		       	<li class="item"><img src="images/dog3.jpg"></li>
-				<li class="item"><img src="images/prototype_pets/EPICtoto.jpg"></li>
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto5.jpeg"></li>
-				<li class="item"><img src="images/prototype_pets/EPICtoto1.jpg"></li>
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto6.jpg"></li>
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto7.jpeg"></li>
-		       	<li class="item"><img src="images/dog1.jpg"></li>
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto8.jpg"></li>
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto9.jpg"></li>
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto10.jpg"></li>
-		       	<li class="item"><img src="images/bailey1.jpg"></li>
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto11.jpg"></li>
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto12.jpg"></li>
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto13.jpg"></li>
-		       	<li class="item"><img src="images/dog2.jpg"></li>
-		       	<li class="item"><img src="images/prototype_pets/EPICtoto14.jpeg"></li>
-			</ul>
-		</div>
-		<br style="clear: both;" />
+	<div id="working" style="float: left; width: 30%;position:fixed">
+		<div id="petdetail">
+			<div style="float:left; width:40%;">
+			<img src="{{ STATIC_URL }}/images/toto.jpg" style="max-width:150px; float:left">
+			</div>
+			<div id="working_des" style="float:right; width: 60%;">
+		                  <span><b>Name:</b> Toto</span><br/>
+          	    	    <span><b>Breed:</b> cairn terrier</span><br/>
+		                  <span><b>Color:</b> black</span><br/>
+               		    <span><b>Sex:</b> Male</span><br/>
+			</div>
+			<span><b>Description:</b> small yorkshire terrier with black beady eyes, small nose</b> </span>
+        </div>
+        <div id="workspace" style="clear:both; height: 110px;">
+            <br/>
+            <div class="droppable" style="border-style:dotted; width:28%; margin-right: 10px; float:left; height: 100px;"><div style="text-align: center; margin-top:40px">Drag a Pet Report Here</div></div>
+            <div class="droppable" style="border-style:dotted; width:28%; margin-right: 10px; float:left; height: 100px;"><div style="text-align: center; margin-top:40px">Drag a Pet Report Here</div></div>
+            <div class="droppable" style="border-style:dotted; width:28%; margin-right: 10px; float:left; height: 100px;"><div style="text-align: center; margin-top:40px">Drag a Pet Report Here</div></div>
+	  <br/>
+		<br/><br/><br/><br/><br/><br/><br/>
+            <div class="droppable" style="border-style:dotted; width:28%; margin-right: 10px; float:left; height: 100px;"><div style="text-align: center; margin-top:40px">Drag a Pet Report Here</div></div>
+            <div class="droppable" style="border-style:dotted; width:28%; margin-right: 10px; float:left; height: 100px;"><div style="text-align: center; margin-top:40px">Drag a Pet Report Here</div></div>
+            <div class="droppable" style="border-style:dotted; width:28%; margin-right: 10px; float:left; height: 100px;"><div style="text-align: center; margin-top:40px">Drag a Pet Report Here</div></div>
+        </div>	
+	<br/><br/><br/><br/><br/><br/><br/><br/>
+        <div id="wsdetail" style="clear:both; margin-top:20px; display:none">
+            <input id="propose" type="button" value="Propose Match" />&nbsp;
+            <input type="button" value="Bookmark Pet" /><br/><br/>
+			<div style="float:left; width:40%;">
+			<img src="{{ STATIC_URL}}/images/prototype_pets/EPICtoto.jpg" style="max-width:150px; float:left">
+			</div>
+			<div id="working_des" style="float:right; width: 60%;">
+                <span><b>Breed:</b> terrier</span><br/>
+                <span><b>Color:</b> black</span><br/>
+                <span><b>Sex:</b> Male</span><br/>
+			</div>
+			<span><b>Description:</b> little black dog with long silky hair, small eyes</span>
+        </div>
 	</div>
+	<div id="container" style="width: 70%; float:right;">
+		<ul id="tiles">
+			{% block pet_reports_content %}
+				{% if pet_reports_list %}
+					{% for pet_report in pet_reports_list %}
+						<li class="item"> 
+							{% if pet_report.status %} Lost : {{ pet_report.pet_type }}
+							{% else %} Found : {{ pet_report.pet_type }}
+							{% endif %} <br />
+							Contact : {{  pet_report.proposed_by.user.username}}
+							{% if pet_report.img_path %}
+								<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
+									{% else %}
+										{% ifequal pet_report.pet_type "Dog" %}
+											<img src="{{ STATIC_URL }}/images/defaults/dog_silhouette.jpg"/>
+										{% endifequal %}
+										{% ifequal pet_report.pet_type "Cat" %}
+											<img src="{{ STATIC_URL }}/images/defaults/cat_silhouette.jpg"/>
+										{% endifequal %}
+										{% ifequal pet_report.pet_type "Turtle" %}
+											<img src="{{ STATIC_URL }}/images/defaults/turtle_silhouette.jpg"/>
+										{% endifequal %}
+										{% ifequal pet_report.pet_type "Rabbit" %}
+											<img src="{{ STATIC_URL }}/images/defaults/rabbit_silhouette.jpg"/>
+										{% endifequal %}
+										{% ifequal pet_report.pet_type "Snake" %}
+											<img src="{{ STATIC_URL }}/images/defaults/snake_silhouette.jpg"/>
+										{% endifequal %}
+										{% ifequal pet_report.pet_type "Horse" %}
+											<img src="{{ STATIC_URL }}/images/defaults/horse_silhouette.jpg"/>
+										{% endifequal %}
+										{% ifequal pet_report.pet_type "Other" %}
+											OTHER
+										{% endifequal %}
+									</li>
+							{% endif %}
+					{% endfor %}	
+					<div class="pagination" align="left">
+			   			<div class="step-links" id="footer" align="left">
+			        		{% if pet_reports_list.has_previous %}
+			           			<a href="?page={{ pet_reports_list.previous_page_number }}">previous</a>
+			        		{% endif %}
+			        	</div>	
+			       		<div class="current" id="footer" align="left">
+			            	Page {{ pet_reports_list.number }} of {{ pet_reports_list.paginator.num_pages }}.
+			        	</div>
+			        	<div class="step-links" id="footer" align="left">	
+			        		{% if pet_reports_list.has_next %}
+			            		<a href="?page={{ pet_reports_list.next_page_number }}">next</a>
+			        		{% endif %}
+			        	</div>		
+			    	</div>
+				{% else %}
+				    <p>No pet reports are available.</p>
+				{% endif %}
+			{% endblock pet_reports_content %}
+		</ul>	
+	</div>
+	<br style="clear: both;" />
 </div>
+</div>
+{% endblock content %}
+
+{% block chat %}
 <div id="chat" style="display:none">
-<img src="images/prototype_pets/EPICtoto.jpg" style="max-width:150px; float:left; margin-right: 20px;">
-<img src="images/prototype_pets/EPICtoto1.jpg" style="max-width:150px; float:left">
+<img src="{{ STATIC_URL }}/images/prototype_pets/EPICtoto.jpg" style="max-width:150px; float:left; margin-right: 20px;">
+<img src="{{ STATIC_URL }}/images/prototype_pets/EPICtoto1.jpg" style="max-width:150px; float:left">
 <br/><br/><br/><br/><br/><br/><br/><br/><br/>
 <input type="button" value="Cancel" /><input type="button" value="Confirm Match" /><br/><br/>
 </div>
-<!-- end page -->
+
 <div id="chat" style="width: 100%; position:fixed; bottom:0px; left:0px; z-index:1">
 	<div id="chatacc">
 		<h3><a href="#">Chat</a></h3>
 		<div>
-			<img src="images/chat.png" />
+			<img src="{{ STATIC_URL }}/images/chat.png" />
 		</div>
 	</div>
 </div>
+{% endblock chat %}
+
+{% block footer %}
 <!-- start footer -->
 <div id="footer" >
 <p id="legal"> &copy;2012 Project EPIC . All Rights Reserved.
 </div>
-<div id="dialog-confirm" title="Propose Match?" style="background: #ECF0EC url(../images/img01.gif) repeat;">
-	<img src="images/verify.png">
+<div id="dialog-confirm" title="Propose Match?" style="background: #ECF0EC url({{ STATIC_URL}}/images/img01.gif) repeat;">
+	<img src="{{ STATIC_URL}}/images/verify.png">
 </div>
   <!-- Include the imagesLoaded plug-in -->
-  <script src="js/jquery.imagesloaded.js"></script>
+  <script src="{{ STATIC_URL }}/js/jquery.imagesloaded.js"></script>
   
   <!-- Include the plug-in -->
-  <script src="js/jquery.wookmark.js"></script>
+  <script src="{{ STATIC_URL }}/js/jquery.wookmark.js"></script>
 
 <script type="text/javascript">
     $('#tiles').imagesLoaded(function() {
@@ -193,7 +189,7 @@ Description: A two-column web design, best for your personal and business bloggi
 		$(".droppable").click(function() {
 			$(this).css("border-color", "yellow");
 			$("#wsdetail").show();
-		});
+		});	
 		var $dialog = $("#dialog-confirm").dialog({
 			resizable: false,
 			autoOpen: false,
@@ -220,5 +216,11 @@ Description: A two-column web design, best for your personal and business bloggi
 	});
 </script>
 
-</body>
-</html>
+{% endblock footer %}
+
+
+
+
+
+
+

@@ -1,7 +1,6 @@
 from home.models import *
 from django.contrib.auth import authenticate
-import string, random, sys, os
-import test_utils as utils
+import test_utils as utils, string, random, sys, os
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 setup_model_fixture.py: Setup sample (random) data for your dev env.

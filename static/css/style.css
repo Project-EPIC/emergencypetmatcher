@@ -44,11 +44,11 @@ margin: 1px 0 2px 0;
 }
 
 h1.lost {
-background: #ECF0EC url(../images/gradient4.png) repeat;
+background: #ECF0EC url(../images/gradients/gradient_lost.png) repeat;
 }
 
 h1.found {
-background: #ECF0EC url(../images/gradient5.png) repeat;
+background: #ECF0EC url(../images/gradients/gradient_found.png) repeat;
 }
 
 #feedlist {
@@ -87,7 +87,7 @@ html {
 }
 
 body {
-background: #ECF0EC url(../images/img01.gif) repeat;
+background: #ECF0EC url(../images/background.gif) repeat;
 font: 13px Arial, Helvetica, sans-serif;
 color: #787878;
 }
