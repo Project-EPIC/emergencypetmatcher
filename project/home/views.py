@@ -18,6 +18,8 @@ from registration.forms import RegistrationForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+import urllib
+import oauth2 as oauth
 
 """Home view, displays login mechanism"""
 def home (request):
@@ -43,14 +45,11 @@ def login_user(request):
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
-        print request.REQUEST
 
         if user is not None:
             if user.is_active:
                 login(request, user)
                 redirect_to = request.REQUEST ['next']
-                print request
-                print request.REQUEST
                 messages.success(request, 'Welcome, %s!' % (username))
                 return redirect(redirect_to)
 
@@ -58,11 +57,15 @@ def login_user(request):
                 messages.error(request, 'There seems to be a problem with the account. Please try re-registering.')
                 
         else:
-            print "PROBLEMO"
             messages.error(request, 'Invalid Login credentials. Please try again.')
     
+    try: 
+        next = request.REQUEST ['next']
+    except KeyError: #This only happens if the user tries to plug in the login URL without a 'next' parameter...
+        next = '/'
+
     form = AuthenticationForm()
-    return render_to_response('registration/login.html', {'form':form}, RequestContext(request, {'next':request.REQUEST ['next']}))
+    return render_to_response('registration/login.html', {'form':form}, RequestContext(request, {'next': next}))
 
 
 def logout_user(request):
@@ -111,49 +114,14 @@ def form(request):
 @login_required
 def detail(request, userprofile_id):   
     u = get_object_or_404(UserProfile, pk=userprofile_id) 
-    if request.user.is_authenticated():        
-        return render_to_response('detail.html', {'loggedin':u}, context_instance=RequestContext(request))
-    else: 
-        """else doesn't work"""
-        return render_to_response('user.html', {'account':u}, context_instance=RequestContext(request))
+    return render_to_response('detail.html', {'userprofile':u}, context_instance=RequestContext(request))
+ 
+@login_required
+def share(request, petreport_id): 
+    p = get_object_or_404(PetReport, pk=petreport_id) 
+    u = p.proposed_by
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    # To be completed
+    
+    return render_to_response('detail.html', {'userprofile':u}, context_instance=RequestContext(request))
 

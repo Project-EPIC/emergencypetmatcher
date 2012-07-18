@@ -15,6 +15,13 @@ NUMBER_OF_TESTS = 100
 NAMES = ['Jacob', 'Emily', 'Joshua', 'Madison', 'Matthew', 'Olivia', 'Daniel', 'Hannah', 
 'Chris', 'Abby', 'Andrew', 'Isabella', 'Mario', 'Sahar', 'Amrutha', 'Leysia', 'Ken', 'Abe']
 
+#URLS
+TEST_LOGIN_URL = '/login'
+TEST_HOME_URL = '/'
+TEST_SUBMIT_PETREPORT_URL ='/reporting/submit_petreport'
+TEST_PETREPORT_URL ='/reporting/petreport/'
+TEST_USERPROFILE_URL = '/users/'
+
 #Generate a random alpha-numeric string.
 def generate_string (size, chars = string.ascii_uppercase + string.digits):
 	return ''.join(random.choice(chars) for i in range(size))
@@ -45,9 +52,10 @@ def create_random_User(i, pretty_name=True):
 #Create Random Object for: PetReport
 def create_random_PetReport(user):
 	pet_type = random.choice(PET_TYPE_CHOICES)[0]
-	status = u'%s' % random.choice(STATUS_CHOICES)[0]
+	status = random.choice(STATUS_CHOICES)[0]
 	pr = PetReport (pet_type = pet_type, status = status, proposed_by = user.get_profile())
 	pr.pet_name = generate_string(30)
+	pr.date_lost_or_found = "2012-07-18"
 	pr.description = generate_string(300)
 	pr.sex = random.choice(SEX_CHOICES)[0]
 	pr.location = generate_string(50)

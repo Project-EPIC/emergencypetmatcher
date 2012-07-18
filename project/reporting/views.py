@@ -18,6 +18,7 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from registration.forms import RegistrationForm
 from random import choice, uniform
+from django.contrib import messages
 import re
 
 
@@ -25,18 +26,24 @@ import re
 def submit_petreport(request):
 
     if request.method == "POST":
-        form = PetReportForm(request.POST, request.FILES)
 
+        form = PetReportForm(request.POST, request.FILES)
+        
         if form.is_valid() == True:
             pr = form.save(commit=False)
             #Create (but do not save) the Pet Report Object associated wit this form data.
             pr.proposed_by = request.user.get_profile()
             pr.save() #Now save the Pet Report.
             if pr.status == 'Lost':
-                request.session ['message'] = 'Thank you for your submission! Your contribution will go a long way towards helping people find your lost pet.'
+                messages.success (request, 'Thank you for your submission! Your contribution will go a long way towards helping people find your lost pet.')
             else:
-                request.session ['message'] = 'Thank you for your submission! Your contribution will go a long way towards helping others match lost and found pets.'
+                messages.success (request, 'Thank you for your submission! Your contribution will go a long way towards helping others match lost and found pets.')                
+            print "+++++++++++++++++++++++++ [SUCCESS]: Pet Report submitted successfully +++++++++++++++++++++++++ " 
             return redirect('/')
+        else:
+            print "+++++++++++++++++++++++++ [ERROR]: Pet Report not submitted successfully +++++++++++++++++++++++++ " 
+            print form.errors
+            print form.non_field_errors()
     else:
         form = PetReportForm() #Unbound Form
 

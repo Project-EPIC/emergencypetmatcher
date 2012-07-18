@@ -1,3 +1,6 @@
+import os
+os.environ['DJANGO_SETTINGS_MODULE'] = 'project.settings'
+
 from home.models import *
 from django.contrib.auth import authenticate
 import test_utils as utils, string, random, sys, os
