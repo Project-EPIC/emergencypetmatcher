@@ -258,9 +258,9 @@ class ModelTesting (unittest.TestCase):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User objects.
-			user, password = utils.create_random_User(i)
-			user2, password2 = utils.create_random_User(i)
-			user3, password3 = utils.create_random_User(i)
+			user, password = utils.create_random_User(str(i) + 'a')
+			user2, password2 = utils.create_random_User(str(i) + 'b')
+			user3, password3 = utils.create_random_User(str(i) + 'c')
 
 			#Create the essential ingredients for the PetReport objects.
 			pr1 = utils.create_random_PetReport(user2)
@@ -295,9 +295,9 @@ class ModelTesting (unittest.TestCase):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User objects.
-			user, password = utils.create_random_User(i)
-			user2, password2 = utils.create_random_User(i)
-			user3, password3 = utils.create_random_User(i)
+			user, password = utils.create_random_User(str(i) + 'a')
+			user2, password2 = utils.create_random_User(str(i) + 'b')
+			user3, password3 = utils.create_random_User(str(i) + 'c')
 
 			#Create the essential ingredients for the PetReport objects.
 			pr1 = utils.create_random_PetReport(user2)
@@ -338,9 +338,9 @@ class ModelTesting (unittest.TestCase):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User objects.
-			user, password = utils.create_random_User(i)
-			user2, password2 = utils.create_random_User(i)
-			user3, password3 = utils.create_random_User(i)
+			user, password = utils.create_random_User(str(i) + 'a')
+			user2, password2 = utils.create_random_User(str(i) + 'b')
+			user3, password3 = utils.create_random_User(str(i) + 'c')
 
 			#Create the essential ingredients for the PetReport objects.
 			pr1 = utils.create_random_PetReport(user2)
@@ -677,7 +677,7 @@ class UserProfileTesting (unittest.TestCase):
 		ChatLine.objects.all().delete()
 
 	def test_render_UserProfile_page(self):
-		print ">>>> Testing 'test_redirect_to_UserProfile_page' for %d iterations" % utils.NUMBER_OF_TESTS
+		print ">>>> Testing 'test_render_UserProfile_page' for %d iterations" % utils.NUMBER_OF_TESTS
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate accessing UserProfile pages.

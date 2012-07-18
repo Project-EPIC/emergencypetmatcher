@@ -12,7 +12,7 @@ When writing your test file (tests.py), make sure to have the following import:
 #Control Variable
 NUMBER_OF_TESTS = 100
 #Small List of Names
-NAMES = ['Jacob', 'Emily', 'Joshua', 'Madison', 'Matthew', 'Olivia', 'Daniel', 'Hannah', 
+NAMES = ['Jacob', 'Emily', 'Joshua', 'Madison', 'Kenneth', 'Mark', 'Dave', 'Angela', '' 'Matthew', 'Olivia', 'Daniel', 'Hannah', 
 'Chris', 'Abby', 'Andrew', 'Isabella', 'Mario', 'Sahar', 'Amrutha', 'Leysia', 'Ken', 'Abe']
 
 #URLS
