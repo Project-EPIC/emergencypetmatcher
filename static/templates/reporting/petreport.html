@@ -14,38 +14,42 @@
     <meta name="description" content="" />
     <!-- CSS Reset -->
     <link rel="stylesheet" href="{{ STATIC_URL }}/css/reset.css"/>
-    <link rel="stylesheet" href="{{ STATIC_URL }}/css/style.css"/>
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
-    <script type="text/javascript"> </script>
+    <script type="text/javascript"> 
+    </script>
   </head>
 
   <body>
     {%  block petreportcontent %}
-      <div id="prdpback" class="prdpback">
+      <li  ><!-- class="item" -->
+      <div id="prdpback"> <!-- id="prdpback" --><!-- class="prdpback">-->
         {% if pet_report %}
-          <div id="prdp_title"> 
-            {% if pet_report.pet_name %}
-              {{ pet_report.pet_name }} :
-            {% endif %}
-            {% if pet_report.status %}
-              Lost : 
+          <div id="prdp_title"> <!-- id="prdp_title" -->
+            {% if pet_report.pet_name %}x
+              {{ pet_report.pet_name }}
             {% else %}
-              Found : 
+              {% if pet_report.status %}
+                Lost : 
+              {% else %}
+                Found : 
+              {% endif %}
+              {{ pet_report.pet_type }}
             {% endif %}
-            {{ pet_report.pet_type }}
-  		    <div id="prdp_picwrapper">
+          </div>
+  		    <div id="prdp_picwrapper"><!-- id="prdp_picwrapper">-->
           {% if pet_report.img_path %}  
-  			       <img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
+  			       <img  src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
           {% else %}
                 {% ifequal pet_report.pet_type "Dog" %}
-                   <img src="{{ STATIC_URL }}/images/dog-sil.jpg"/>
+                   <img  src="{{ STATIC_URL }}/images/dog-sil.jpg"/>
                 {% endifequal %}
                 {% ifequal pet_report.pet_type "Cat" %}
-                   <img src="{{ STATIC_URL }}/images/cat-sil.png"/>
+                   <img  src="{{ STATIC_URL }}/images/cat-sil.png"/>
                 {% endifequal %}
                 {% ifequal pet_report.pet_type "Turtle" %}
-                   <img src="{{ STATIC_URL }}/images/turtle-sil.jpg"/>
+                   <img  src="{{ STATIC_URL }}/images/turtle-sil.jpg"/>
                 {% endifequal %}
                 {% ifequal pet_report.pet_type "Rabbit" %}
                     <img src="{{ STATIC_URL }}/images/rabbit-sil.gif"/>
@@ -57,9 +61,54 @@
                     OTHER
                 {% endifequal %}
           {% endif %}
+          </div><br>
+          <div id="prdpinfo">
+              <b>Pet Name:</b> 
+              {% if pet_report.pet_name %}
+                {{ pet_report.pet_name }}
+              {% else %}
+                unknown
+              {% endif %}<br>
+              <b>Lost/Found: </b> 
+              {% if pet_report.status %}
+                Lost 
+              {% else %}
+                Found
+              {% endif %}
+              <br>
+              <b>Sex:</b>  {{ pet_report.sex }}<br>
+              <b>Breed:</b> 
+              {% if pet_report.breed %}
+                {{ pet_report.breed }}
+              {% else %}
+                unknown
+              {% endif %}
+              <br> 
+              <b>Color:</b> 
+              {% if pet_report.color %}
+                {{ pet_report.color }} 
+              {% else %}
+                unknown
+              {% endif %}
+              <br>
+              <b>Contact:</b>  {{  pet_report.proposed_by.user.username }}<br>
+          </div>    
+          <div id="prdp_ppm_wk"><!-- id="prdp_ppm_wk" -->
+              <div id="prdp_subtitle"> <!-- id="prdp_subtitle" -->
+                Proposed Matches
+              </div>          
           </div>
-        {% endif %}		    
-      </div>
+          <div id="prdp_ppm_wk"><!-- id="prdp_wk" -->
+              <div id="prdp_subtitle">
+                People working on this pet
+              </div>
+              {% for worker in pet_report.workers.all  %}
+                  {{ worker.user.username }}, 
+              {% endfor %}
+          </div> 
+
+        {% endif %}		 
+     </li>      
     {%  endblock petreportcontent %}
 
   </body>

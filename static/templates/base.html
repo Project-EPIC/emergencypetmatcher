@@ -37,29 +37,33 @@ Description: A two-column web design, best for your personal and business bloggi
 		{% block js %}
 		<script type="text/javascript">
 		//This function allows us to prepare a popup upon clicking several elements.
-		$(document).ready(function(){
+			$(document).ready(function(){
 		
 			//This one is for the Toto picture; we want a popup for the Toto PRDP page:
-			$('#toto a').each(function(){
-			
-				var $link = $(this);
-			    	var $dialog = $('<div></div>')
-					.load ($link.attr('href') + ' #prdpback')
-					.dialog ({
-					
-						autoOpen: false,
-						title: $link.attr('title'),
-						width: 700
+				$('#prdpdialog a').each(function(){
+				
+					var $link = $(this);
+				    var $dialog = $('<li></li>')
+						.load ($link.attr('href'))// + ' #prdpback')
+						.dialog ({
 						
+							autoOpen: false,
+							closeOnEscape: true,
+							title: $link.attr('title'),
+							height: "auto",
+							//modal: true,
+							width: 700
+							
+						});
+					
+					$link.click( function(){
+							//		alert ("We are trying to execute this function");	
+						$dialog.dialog('open');
+						return false;
+					
 					});
-				
-				$link.click( function(){	
-					$dialog.dialog('open');
-					return false;
-				
 				});
 			});
-		});
 		</script>
 		{% endblock js %}
 
@@ -121,13 +125,33 @@ Description: A two-column web design, best for your personal and business bloggi
 					</ul>
 				</header>
 			</div>
-			
+			<div class="pagination" align="left">
+   				
+       			<div class="current" id="footer" align="left">
+            		Page {{ pet_reports_list.number }} of {{ pet_reports_list.paginator.num_pages }}.
+        		</div>
+        		<div class="step-links" id="footer" align="left">	
+        			{% if pet_reports_list.has_previous %}
+           				<a href="?page={{ pet_reports_list.previous_page_number }}"> previous |</a>
+        			{% endif %}
+
+         			{% for i in pet_reports_list.paginator.page_range %}
+           				<a href="?page={{ i }}"> {{ i }} | </a>
+        			{% endfor %}
+        			{% if pet_reports_list.has_next %}
+            			<a href="?page={{ pet_reports_list.next_page_number }}"> next </a>
+        			{% endif %}
+        		</div>	
+        		</div>		
+    		</div>
+
 			<div id="container">
 				<ul id="tiles">
 
 					{% block friends_activity_feed %}
 						<li class="item feed">
 							<h3>Friends' Activity</h3>
+							<!--
 							<ul class="feedlist">
 								<li>Josh improved 6 <a href="#">pet reports</a>. </li>
 								<li class="alternate">Jo started working on <a href="#">Lost Labrador</a>.</li>
@@ -138,56 +162,59 @@ Description: A two-column web design, best for your personal and business bloggi
 								<li>Mario proposed a <a href="#">match</a>. </li>
 								<li class="alternate">One of your bookmarked pets, <a href="#">Toto</a>, had a match proposed for it.</li>
 							</ul>
+						-->
 						</li>
 					{% endblock friends_activity_feed %}
 	
 					{%  block pet_reports_content %}
-						<li class="item"> <img src="{{ STATIC_URL }}/images/bailey1.jpg"/></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/dog1.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/cat1.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/dog2.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/dog3.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/cat2.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/dog4.jpg"></li>
-						<li class="item" id="hover1"><img src="{{ STATIC_URL }}/images/cat3.jpg">
-						<div class="hdetail" style="display:none">
-						<i>Nobody is working on this pet!</i>
-						</div>
-						</li>
-						<!-- Toto is right here -->
-						<li class="item" id="toto"><a href="{{ STATIC_URL }}/petreport.html"> <img src="{{ STATIC_URL }}/images/toto.jpg"/> </a>
-						<div class="hdetail" style="display:none">
-						<i>People working on this pet:</i><br/>
-						<image src="{{ STATIC_URL }}/images/jo.png" style="width:32px; margin-right: 2px; float:left" />
-						<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICDorothysquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-						<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICstrawmansquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-						<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICGlindagoodwitchnorthsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-						<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICwizardsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-						</div>
-						</li>
-						<li class="item" id="hover2"><img src="{{ STATIC_URL }}/images/bailey2.jpg">
-						<div class="hdetail" style="display:none">
-						<i>People working on this pet:</i><br/>
-						<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICmunchkin1square.jpg" style="width:32px; margin-right: 2px; float:left" />
-						<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICtinmansquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-						<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICwickedwitchsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-						<image src="{{ STATIC_URL }}/images/prototype_profiles/EPICCowardlyLionsquare.jpg" style="width:32px; margin-right: 2px; float:left" />
-						<image src="{{ STATIC_URL }}/images/mario.png" style="width:32px; margin-right: 2px; float:left" />
-						<br/><br/><i>and 6 more...</i>
-						</div>
-						</li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/dog5.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/dog6.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/cat4.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/dog7.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/cat5.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/cat6.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/dog8.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/cat7.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/cat8.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/dog9.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/dog10.jpg"></li>
-						<li class="item"><img src="{{ STATIC_URL }}/images/dog11.jpg"></li>
+						{% if pet_reports_list %}
+						    {% for pet_report in pet_reports_list %}
+						    	<li class="item" id="prdpdialog"><a href= "reporting/petreport/{{ pet_report.id }}">  
+						    	{% if pet_report.img_path %}
+						    			{% if pet_report.status %}
+												Lost : 
+							
+										{% else %}
+												Found : 
+										{% endif %}  		
+
+											{{ pet_report.pet_type }}
+											<br />
+											Contact : {{  pet_report.proposed_by.user.username}}
+										<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
+								{% else %}
+										{% if pet_report.status %}
+											Lost : 
+										{% else %}
+											Found : 
+										{% endif %}
+										{{ pet_report.pet_type }}
+										<br />
+										Contact : {{  pet_report.proposed_by.user.username }}
+										{% ifequal pet_report.pet_type "Dog" %}
+											<img src="{{ STATIC_URL }}/images/dog-sil.jpg"/>
+										{% endifequal %}
+										{% ifequal pet_report.pet_type "Cat" %}
+											<img src="{{ STATIC_URL }}/images/cat-sil.png"/>
+										{% endifequal %}
+										{% ifequal pet_report.pet_type "Turtle" %}
+											<img src="{{ STATIC_URL }}/images/turtle-sil.jpg"/>
+										{% endifequal %}
+										{% ifequal pet_report.pet_type "Rabbit" %}
+											<img src="{{ STATIC_URL }}/images/rabbit-sil.gif"/>
+										{% endifequal %}
+										{% ifequal pet_report.pet_type "None" %}
+											NOTHING
+										{% endifequal %}
+										{% ifequal pet_report.pet_type "Other" %}
+											OTHER
+										{% endifequal %}
+								{% endif %}
+								</a></li>
+							{% endfor %}	
+						{% else %}
+						    <p>No pet reports are available.</p>
+						{% endif %}
 					{% endblock pet_reports_content %}
 				</ul>	
 			</div>
