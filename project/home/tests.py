@@ -1,5 +1,6 @@
 from home.models import *
 from django.contrib.auth import authenticate
+from django.test.client import Client
 import unittest, string, random, sys, time
 import test_utils as utils
 
@@ -257,9 +258,9 @@ class ModelTesting (unittest.TestCase):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User objects.
-			user, password = utils.create_random_User(i)
-			user2, password2 = utils.create_random_User(i)
-			user3, password3 = utils.create_random_User(i)
+			user, password = utils.create_random_User(str(i) + 'a')
+			user2, password2 = utils.create_random_User(str(i) + 'b')
+			user3, password3 = utils.create_random_User(str(i) + 'c')
 
 			#Create the essential ingredients for the PetReport objects.
 			pr1 = utils.create_random_PetReport(user2)
@@ -294,9 +295,9 @@ class ModelTesting (unittest.TestCase):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User objects.
-			user, password = utils.create_random_User(i)
-			user2, password2 = utils.create_random_User(i)
-			user3, password3 = utils.create_random_User(i)
+			user, password = utils.create_random_User(str(i) + 'a')
+			user2, password2 = utils.create_random_User(str(i) + 'b')
+			user3, password3 = utils.create_random_User(str(i) + 'c')
 
 			#Create the essential ingredients for the PetReport objects.
 			pr1 = utils.create_random_PetReport(user2)
@@ -337,9 +338,9 @@ class ModelTesting (unittest.TestCase):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User objects.
-			user, password = utils.create_random_User(i)
-			user2, password2 = utils.create_random_User(i)
-			user3, password3 = utils.create_random_User(i)
+			user, password = utils.create_random_User(str(i) + 'a')
+			user2, password2 = utils.create_random_User(str(i) + 'b')
+			user3, password3 = utils.create_random_User(str(i) + 'c')
 
 			#Create the essential ingredients for the PetReport objects.
 			pr1 = utils.create_random_PetReport(user2)
@@ -569,4 +570,159 @@ class ModelTesting (unittest.TestCase):
 		self.assertTrue(len(ChatLine.objects.all()) == 0)
 		utils.performance_report(iteration_time)
 
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+LoginTesting: Testing for EPM Logging In/Out
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+class LoginTesting (unittest.TestCase):
+
+	#Get rid of all objects in the QuerySet.
+	def setUp(self):
+		User.objects.all().delete()
+		UserProfile.objects.all().delete()
+		PetMatch.objects.all().delete()
+		PetReport.objects.all().delete()
+		Chat.objects.all().delete()
+		ChatLine.objects.all().delete()
+
+	#Get rid of all objects in the QuerySet.
+	def tearDown(self):
+		User.objects.all().delete()
+		UserProfile.objects.all().delete()
+		PetMatch.objects.all().delete()
+		PetReport.objects.all().delete()
+		Chat.objects.all().delete()
+		ChatLine.objects.all().delete()
+
+	def test_login_Users_successfully(self):
+		print ">>>> Testing 'test_login_Users' for %d iterations" % utils.NUMBER_OF_TESTS
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		clients = [ None for i in range (utils.NUMBER_OF_TESTS) ]
+		users = [ None for i in range (utils.NUMBER_OF_TESTS) ]
+		passwords = [ None for i in range (utils.NUMBER_OF_TESTS) ]
+		user_count = 0
+		client_count = 0
+
+		for i in range (utils.NUMBER_OF_TESTS):
+			start_time = time.clock()
+			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			user = users [user_i]
+			client = clients [client_i]
+
+			if user is None:
+				user, password = utils.create_random_User(i, pretty_name=True)
+				users [user_i] = user
+				passwords [user_i] = password
+				user_count += 1
+
+			if client is None:
+				client = Client (enforce_csrf_checks=False)
+				clients [client_i] = client
+				client_count += 1
+
+			print "\n%s logs onto %s and attempts to login..." % (user, client)
+
+			#Go to the Login Page
+			response = client.get(utils.TEST_LOGIN_URL)
+			next = response.context ['next']
+			self.assertTrue(response.status_code == 200)
+			self.assertTrue(response.request ['PATH_INFO'] == utils.TEST_LOGIN_URL)
+			self.assertTrue(next == utils.TEST_HOME_URL)
+
+			#Submit Login information
+			response = client.post (utils.TEST_LOGIN_URL, 
+				{'username':users [user_i].username, 'password': passwords [user_i], 'next': next}, follow=True)
+
+			#Get Redirected back to the home page.
+			self.assertTrue(response.status_code == 200)
+			self.assertTrue(len(response.redirect_chain) == 1)
+			self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/')
+			self.assertTrue(response.redirect_chain[0][1] == 302)
+			self.assertTrue(response.request ['PATH_INFO'] == utils.TEST_HOME_URL)
+			client.logout()
+
+			utils.output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		self.assertTrue(len(UserProfile.objects.all()) <= utils.NUMBER_OF_TESTS and user_count <= utils.NUMBER_OF_TESTS)	
+		self.assertTrue(len(User.objects.all()) <= utils.NUMBER_OF_TESTS)	
+		utils.performance_report(iteration_time)
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+UserProfileTesting: Testing for EPM User Profile Page
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+class UserProfileTesting (unittest.TestCase):
+
+	#Get rid of all objects in the QuerySet.
+	def setUp(self):
+		User.objects.all().delete()
+		UserProfile.objects.all().delete()
+		PetMatch.objects.all().delete()
+		PetReport.objects.all().delete()
+		Chat.objects.all().delete()
+		ChatLine.objects.all().delete()
+
+	#Get rid of all objects in the QuerySet.
+	def tearDown(self):
+		User.objects.all().delete()
+		UserProfile.objects.all().delete()
+		PetMatch.objects.all().delete()
+		PetReport.objects.all().delete()
+		Chat.objects.all().delete()
+		ChatLine.objects.all().delete()
+
+	def test_render_UserProfile_page(self):
+		print ">>>> Testing 'test_render_UserProfile_page' for %d iterations" % utils.NUMBER_OF_TESTS
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate accessing UserProfile pages.
+		clients = [ None for i in range (utils.NUMBER_OF_TESTS) ]
+		users = [ None for i in range (utils.NUMBER_OF_TESTS) ]
+		passwords = [ None for i in range (utils.NUMBER_OF_TESTS) ]
+		user_count = 0
+		client_count = 0
+
+		for i in range (utils.NUMBER_OF_TESTS):
+			start_time = time.clock()
+			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			user = users [user_i]
+			client = clients [client_i]
+
+			if user is None:
+				user, password = utils.create_random_User(i, pretty_name=True)
+				users [user_i] = user
+				passwords [user_i] = password
+				user_count += 1
+
+			if client is None:
+				client = Client (enforce_csrf_checks=False)
+				clients [client_i] = client
+				client_count += 1
+
+			print "\n%s logs onto %s to render the profile page..." % (user, client)
+
+			loggedin = client.login(username = users [user_i].username, password = passwords[user_i])
+			self.assertTrue(loggedin == True)
+			response = client.get(utils.TEST_USERPROFILE_URL + str(user.id) + '/')
+			self.assertTrue(response.status_code == 200)
+			#We should have the base.html -> index.html -> detail.html
+			self.assertTrue(len(response.templates) == 3)
+			self.assertTrue(len(User.objects.all()) == user_count)
+			self.assertTrue(len(UserProfile.objects.all()) == user_count)
+
+			client.logout()
+			utils.output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		self.assertTrue(len(UserProfile.objects.all()) <= utils.NUMBER_OF_TESTS and user_count <= utils.NUMBER_OF_TESTS)	
+		self.assertTrue(len(User.objects.all()) <= utils.NUMBER_OF_TESTS)	
+		utils.performance_report(iteration_time)
 

@@ -1,25 +1,6 @@
 {% load url from future %} <!-- Need this for forward (future) compatibility with django 1.5 and beyond. -->
 
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<!--
-
-Design by Free CSS Templates
-http://www.freecsstemplates.org
-Released for free under a Creative Commons Attribution 2.5 License
-
-Title      : Simpleton 
-Version    : 1.0
-Released    :20110315
-Description: A two-column web design, best for your personal and business blogging.
-
--->
-<!doctype html>
-<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
-<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
-<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!-->
-<!--- <html class="no-js" lang="en"> [endif]-->
 <html lang = "en">
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -72,62 +53,117 @@ Description: A two-column web design, best for your personal and business bloggi
 	</head>
 
 	<body>
-	<!-- start header with PROTOTYPE TITLE and NAVIGATION MENU -->
-	<div id="header">
-		<div id="logo">
-			<h1><a href="/">EmergencyPetMatcher</a></h1>
-				<p> <a href = "http://epic.cs.colorado.edu"> Project EPIC </a></p>
-		</div>
-		<div id="menu">
-			<ul>
-				{% block menu %}
-				<li class="active"><a href="/"> Home</a></li>
-
-				{% if user.is_authenticated %}
-				<li class="active"><a href= {% url 'detail' user.id %}>{{ user.username }}</a></li>
-				<form method = "post" action= {% url 'auth_logout' %}> 
-					{% csrf_token %}<input type="submit" value="Logout"/>
-				</form>
-				<li><a href= {% url 'submit_petreport' %}>Submit a Lost/Found Pet Report</a></li>
-				<li><a href="#">Verify Matches</a></li>
-				<li><a href="#">About</a></li>
-
-				{% else %}
-				<li class="active"><a href= {% url 'auth_login' %}>Login/Register</a></li>
-				
-				<li><a href="#">About</a></li>
-				{% endif %}
-				
-				{% endblock menu %}
-			</ul>
-		</div>
-	</div>
-	<br/><br/><br/><br/>
-	<!-- end header -->
-
-	<!-- start page -->
-	<div id="wrapper">
-		<div id="main">
-
-			<strong>{% block message_block %}{% if message %} {{ request.message }} {% endif %}{% endblock message_block %}<strong>
-			<h2>{% block content_title %}{% endblock content_title %}</h2>
-			<h3>{% block content_subtitle %}{% endblock content_subtitle %}</h3>
-
-			{% block content %}
-			<!-- start content -->
-			<div id="head">
-				<header id="nav">
-					<ul>
-						<li><a href="#">Friends</a></li>
-						<li class="active"><a href="#">Newly Added</a></li>
-						<li><a href="#">Bookmarked</a></li>
-						<li><a href="#">Advanced Search</a></li>
-					</ul>
-				</header>
+		<!-- start header with TITLE and NAVIGATION MENU -->
+		<div id="header">
+			<div id="logo">
+				<h1><a href="{% url 'home' %}">EmergencyPetMatcher</a></h1>
+					<p> <a href = "http://epic.cs.colorado.edu"> Project EPIC </a></p>
 			</div>
-			<div class="pagination" align="left">
-   				
-       			<div class="current" id="footer" align="left">
+
+			<div id="menu">
+				<ul>
+					{% block menu %}
+					<li class="active"><a href="{% url 'home' %}"> Home</a></li>
+
+					{% if user.is_authenticated %}
+					<li class="active"><a href= "{% url 'detail' user.id %}">{{ user.username }}</a></li>
+					<form method = "post" action= "{% url 'logout' %}"> 
+						{% csrf_token %}<input type="submit" value="Logout"/>
+					</form>
+					<li><a href= "{% url 'submit_petreport' %}">Submit a Lost/Found Pet Report</a></li>
+					<li><a href= "{% url 'matching' %}">Matching</a></li>
+					{% else %}
+					<li class="active"><a href= "{% url 'login_user' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
+					{% endif %}
+
+					<li><a href="#">About</a></li>
+					
+					{% endblock menu %}
+				</ul>
+<!-- >>>>>>> e999c319b8fbecf2f73e8cc7fba90aaf6e694d20
+ -->			</div>
+		</div>
+		<br/><br/><br/><br/>
+		<!-- end header -->
+
+		<!-- start page -->
+		<div id="wrapper">
+			<div id="main">
+
+				<h2>{% block content_title %}{% endblock content_title %}</h2>
+				<h3>{% block content_subtitle %}{% endblock content_subtitle %}</h3>
+				<strong>					
+					{% if messages %} 
+    					{% for message in messages %} <p>{{ message }}</p> {% endfor %}
+					{% endif %}
+				</strong>		
+
+				{% block content %}
+				<!-- start content -->
+				<div id="head">
+					<header id="nav">
+						<ul>
+							<li><a href="#">Friends</a></li>
+							<li class="active"><a href="#">Newly Added</a></li>
+							<li><a href="#">Bookmarked</a></li>
+							<li><a href="#">Advanced Search</a></li>
+						</ul>
+					</header>
+				</div>
+				<div id="container">
+					<ul id="tiles">
+
+						{% block friends_activity_feed %}
+							<li class="item feed">
+								<h3>Friends' Activity</h3>
+								<ul class="feedlist"> <!-- <li>Josh improved 6 <a href="#">pet reports</a>. </li> --></ul>
+							</li>
+						{% endblock friends_activity_feed %}
+		
+						{% block pet_reports_content %}
+							{% if pet_reports_list %}
+								{% for pet_report in pet_reports_list %}
+									<li class="item" id="prdpdialog"><a href= "reporting/petreport/{{ pet_report.id }}">
+										{% if pet_report.status %} Lost : {{ pet_report.pet_type }}
+										{% else %} Found : {{ pet_report.pet_type }}
+										{% endif %} <br />
+										Contact : {{  pet_report.proposed_by.user.username}}
+										{% if pet_report.img_path %}
+											<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
+										{% else %}
+											{% ifequal pet_report.pet_type "Dog" %}
+												<img src="{{ STATIC_URL }}/images/defaults/dog_silhouette.jpg"/>
+											{% endifequal %}
+											{% ifequal pet_report.pet_type "Cat" %}
+												<img src="{{ STATIC_URL }}/images/defaults/cat_silhouette.jpg"/>
+											{% endifequal %}
+											{% ifequal pet_report.pet_type "Turtle" %}
+												<img src="{{ STATIC_URL }}/images/defaults/turtle_silhouette.jpg"/>
+											{% endifequal %}
+											{% ifequal pet_report.pet_type "Rabbit" %}
+												<img src="{{ STATIC_URL }}/images/defaults/rabbit_silhouette.jpg"/>
+											{% endifequal %}
+											{% ifequal pet_report.pet_type "Snake" %}
+												<img src="{{ STATIC_URL }}/images/defaults/snake_silhouette.jpg"/>
+											{% endifequal %}
+											{% ifequal pet_report.pet_type "Horse" %}
+												<img src="{{ STATIC_URL }}/images/defaults/horse_silhouette.jpg"/>
+											{% endifequal %}
+											{% ifequal pet_report.pet_type "Other" %}
+												OTHER
+											{% endifequal %}
+										</li>
+										{% endif %}
+								{% endfor %}							
+							{% else %}
+							    <p>No pet reports are available.</p>
+							{% endif %}
+						{% endblock pet_reports_content %}
+					</ul>	
+				</div>
+				<div class="pagination" align="center">
+		   			<div class="step-links" id="footer" align="center">
+		        				<div class="current" id="footer" align="left">
             		Page {{ pet_reports_list.number }} of {{ pet_reports_list.paginator.num_pages }}.
         		</div>
         		<div class="step-links" id="footer" align="left">	
@@ -141,141 +177,66 @@ Description: A two-column web design, best for your personal and business bloggi
         			{% if pet_reports_list.has_next %}
             			<a href="?page={{ pet_reports_list.next_page_number }}"> next </a>
         			{% endif %}
-        		</div>	
-        		</div>		
-    		</div>
+        		</div>
+		    	</div>
 
-			<div id="container">
-				<ul id="tiles">
-
-					{% block friends_activity_feed %}
-						<li class="item feed">
-							<h3>Friends' Activity</h3>
-							<!--
-							<ul class="feedlist">
-								<li>Josh improved 6 <a href="#">pet reports</a>. </li>
-								<li class="alternate">Jo started working on <a href="#">Lost Labrador</a>.</li>
-								<li>Mario proposed a <a href="#">match</a>. </li>
-								<li class="alternate">Leysia commented on <a href="#">found pug</a>.</li>
-								<li>Josh improved 6 <a href="#">pet reports</a>. </li>
-								<li class="alternate">Jo's <a href="#">match</a> was confirmed!</li>
-								<li>Mario proposed a <a href="#">match</a>. </li>
-								<li class="alternate">One of your bookmarked pets, <a href="#">Toto</a>, had a match proposed for it.</li>
-							</ul>
-						-->
-						</li>
-					{% endblock friends_activity_feed %}
-	
-					{%  block pet_reports_content %}
-						{% if pet_reports_list %}
-						    {% for pet_report in pet_reports_list %}
-						    	<li class="item" id="prdpdialog"><a href= "reporting/petreport/{{ pet_report.id }}">  
-						    	{% if pet_report.img_path %}
-						    			{% if pet_report.status %}
-												Lost : 
-							
-										{% else %}
-												Found : 
-										{% endif %}  		
-
-											{{ pet_report.pet_type }}
-											<br />
-											Contact : {{  pet_report.proposed_by.user.username}}
-										<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
-								{% else %}
-										{% if pet_report.status %}
-											Lost : 
-										{% else %}
-											Found : 
-										{% endif %}
-										{{ pet_report.pet_type }}
-										<br />
-										Contact : {{  pet_report.proposed_by.user.username }}
-										{% ifequal pet_report.pet_type "Dog" %}
-											<img src="{{ STATIC_URL }}/images/dog-sil.jpg"/>
-										{% endifequal %}
-										{% ifequal pet_report.pet_type "Cat" %}
-											<img src="{{ STATIC_URL }}/images/cat-sil.png"/>
-										{% endifequal %}
-										{% ifequal pet_report.pet_type "Turtle" %}
-											<img src="{{ STATIC_URL }}/images/turtle-sil.jpg"/>
-										{% endifequal %}
-										{% ifequal pet_report.pet_type "Rabbit" %}
-											<img src="{{ STATIC_URL }}/images/rabbit-sil.gif"/>
-										{% endifequal %}
-										{% ifequal pet_report.pet_type "None" %}
-											NOTHING
-										{% endifequal %}
-										{% ifequal pet_report.pet_type "Other" %}
-											OTHER
-										{% endifequal %}
-								{% endif %}
-								</a></li>
-							{% endfor %}	
-						{% else %}
-						    <p>No pet reports are available.</p>
-						{% endif %}
-					{% endblock pet_reports_content %}
-				</ul>	
+			<br style="clear: both;" />
+				{% endblock content %}
 			</div>
-		<br style="clear: both;" />
-			{% endblock content %}
 		</div>
-	</div>
-	<div id="chat">
-		{% block chat %} {% endblock chat %}
-	<!--implement chat here; chat should seamlessly always be part of all web pages. -->
-	</div>
-	<!-- end page -->
-	
-	
-	
-	<!-- start footer -->
-	<div id="footer">
-		<p id="legal"> &copy;2012 Project EPIC . All Rights Reserved.
-	</div>
-	<!-- Include the imagesLoaded plug-in -->
-	<script src="{{ STATIC_URL }}/js/jquery.imagesloaded.js"></script>
-	
-	<!-- Include the plug-in -->
-	<script src="{{ STATIC_URL }}/js/jquery.wookmark.js"></script>
-	
-	<script type="text/javascript">
-	var hand = 0;
-		$('#tiles').imagesLoaded(function() {
-		
-			// Prepare layout options.
-			var options = {
-				autoResize: true, // This will auto-update the layout when the browser window is resized.
-				container: $('#container'), // Optional, used for some extra CSS styling
-				offset: 2, // Optional, the distance between grid items
-				itemWidth: 210 // Optional, the width of a grid item
-			};
-			
-			// Get a reference to your grid items.
-			var handler = $('#tiles li.item');
-			hand = handler;
-			// Call the layout function.
-			handler.wookmark(options);
-			
-			
-	});
-		$(function() {
-			$("#hover1, #hover2, #toto").hoverIntent(
-				function() {
-					$(".hdetail", this).show();
-					var h = $(this).height() + 30;
-					hand.wookmark();
-				},
-				function() {
-					
-					var h = $(this).height() - 30;
-					$(".hdetail", this).hide();
-					hand.wookmark();
-				}
-			);
-		});
-	</script>
 
+		{% block chat %} 
+		<div id="chat">	
+		<!--implement chat here; chat should seamlessly always be part of all web pages. -->
+		</div>
+		{% endblock chat %}
+		<!-- end page -->
+		
+		<!-- start footer -->
+		<div id="footer">
+			<p id="legal"> &copy;2012 Project EPIC . All Rights Reserved.
+		</div>
+
+		<!-- Include the imagesLoaded plug-in -->
+		<script src="{{ STATIC_URL }}/js/jquery.imagesloaded.js"></script>
+		<!-- Include the plug-in -->
+		<script src="{{ STATIC_URL }}/js/jquery.wookmark.js"></script>
+		
+		<script type="text/javascript">
+		var hand = 0;
+			$('#tiles').imagesLoaded(function() {
+			
+				// Prepare layout options.
+				var options = {
+					autoResize: true, // This will auto-update the layout when the browser window is resized.
+					container: $('#container'), // Optional, used for some extra CSS styling
+					offset: 2, // Optional, the distance between grid items
+					itemWidth: 210 // Optional, the width of a grid item
+				};
+				
+				// Get a reference to your grid items.
+				var handler = $('#tiles li.item');
+				hand = handler;
+				// Call the layout function.
+				handler.wookmark(options);
+				
+				
+		});
+			$(function() {
+				$("#hover1, #hover2, #toto").hoverIntent(
+					function() {
+						$(".hdetail", this).show();
+						var h = $(this).height() + 30;
+						hand.wookmark();
+					},
+					function() {
+						
+						var h = $(this).height() - 30;
+						$(".hdetail", this).hide();
+						hand.wookmark();
+					}
+				);
+			});
+		</script>
 	</body>
 </html>

@@ -43,22 +43,25 @@
   			       <img  src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
           {% else %}
                 {% ifequal pet_report.pet_type "Dog" %}
-                   <img  src="{{ STATIC_URL }}/images/dog-sil.jpg"/>
+                    <img src="{{ STATIC_URL }}/images/defaults/dog_silhouette.jpg"/>
                 {% endifequal %}
                 {% ifequal pet_report.pet_type "Cat" %}
-                   <img  src="{{ STATIC_URL }}/images/cat-sil.png"/>
+                  <img src="{{ STATIC_URL }}/images/defaults/cat_silhouette.jpg"/>
                 {% endifequal %}
                 {% ifequal pet_report.pet_type "Turtle" %}
-                   <img  src="{{ STATIC_URL }}/images/turtle-sil.jpg"/>
+                  <img src="{{ STATIC_URL }}/images/defaults/turtle_silhouette.jpg"/>
                 {% endifequal %}
                 {% ifequal pet_report.pet_type "Rabbit" %}
-                    <img src="{{ STATIC_URL }}/images/rabbit-sil.gif"/>
+                  <img src="{{ STATIC_URL }}/images/defaults/rabbit_silhouette.jpg"/>
                 {% endifequal %}
-                {% ifequal pet_report.pet_type "None" %}
-                    NOTHING
+                {% ifequal pet_report.pet_type "Snake" %}
+                  <img src="{{ STATIC_URL }}/images/defaults/snake_silhouette.jpg"/>
+                {% endifequal %}
+                {% ifequal pet_report.pet_type "Horse" %}
+                  <img src="{{ STATIC_URL }}/images/defaults/horse_silhouette.jpg"/>
                 {% endifequal %}
                 {% ifequal pet_report.pet_type "Other" %}
-                    OTHER
+                  OTHER
                 {% endifequal %}
           {% endif %}
           </div><br>

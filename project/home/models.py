@@ -7,7 +7,7 @@ from django.core.files.storage import FileSystemStorage
 import PIL
 
 '''Enums for Various Model Choice Fields'''
-PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Turtle', 'Turtle'), ('Rabbit', 'Rabbit'), ('Other', 'Other')]
+PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Turtle', 'Turtle'), ('Snake', 'Snake'), ('Horse', 'Horse'),('Rabbit', 'Rabbit'), ('Other', 'Other')]
 STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
 SEX_CHOICES=[('M','Male'),('F','Female')]
 SIZE_CHOICES = [('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)')]
@@ -18,7 +18,7 @@ class PetReport(models.Model):
     '''Required Fields'''
     pet_type = models.CharField(max_length=10, choices = PET_TYPE_CHOICES, null=False, default=None)
     status = models.CharField(max_length = 5, choices = STATUS_CHOICES, null=False, default=None)
-    date_lost_or_found = models.DateTimeField(auto_now_add=True, null=False)
+    date_lost_or_found = models.DateField(null=False)
     sex = models.CharField(max_length=6, choices=SEX_CHOICES, null=False)
     size = models.CharField(max_length=50, choices = SIZE_CHOICES, null=False)
     location = models.CharField(max_length=50, null=False, default='N/A')
@@ -37,6 +37,11 @@ class PetReport(models.Model):
     #Many-to-Many relationship with User
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
 
+    def has_image(self):
+        if self.img_path == None:
+            return False
+        return True
+
     def __unicode__(self):
         return 'PetReport {pet_type: %s, status: %s, proposed_by: %s}' % (self.pet_type, self.status, self.proposed_by)
 
@@ -54,12 +59,13 @@ class UserProfile (models.Model):
 
     '''Required Fields'''
     user = models.OneToOneField(User, null=False, default=None)
+    photo = models.ImageField(upload_to='images/profile_images', null=True)
 
     '''Non-Required Fields'''
     friends = models.ManyToManyField('self', null=True)
     chats = models.ManyToManyField('Chat', null=True)
-    facebook_cred = models.CharField(max_length=100, null=True)
-    twitter_cred = models.CharField(max_length=100, null=True)
+    # facebook_cred = models.CharField(max_length=100, null=True)
+    # twitter_cred = models.CharField(max_length=100, null=True)
     reputation = models.IntegerField(default=0, null=True)
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
@@ -129,7 +135,7 @@ class PetReportForm (ModelForm):
     '''Required Fields'''
     pet_type = forms.ChoiceField(label = 'Pet Type', choices = PET_TYPE_CHOICES, required = True)
     status = forms.ChoiceField(label = "Status (Lost/Found)", choices = STATUS_CHOICES, required = True)
-    date_lost_or_found = forms.DateTimeField(label = "Date Lost/Found", required = True)
+    date_lost_or_found = forms.DateField(label = "Date Lost/Found", required = True)
     sex = forms.ChoiceField(label = "Sex", choices = SEX_CHOICES, required = True)
     size = forms.ChoiceField(label = "Size of Pet", choices = SIZE_CHOICES, required = True)
     location = forms.CharField(label = "Location", max_length = 50, required = True)
