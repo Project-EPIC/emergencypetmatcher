@@ -267,24 +267,69 @@ h1.found {
 	padding: 20px 0 0 0px;
 	letter-spacing: -1px;
 	font-size: 2em;
-	font-weight: normal;
+	font-weight: bold;
 	color: #000000;
 	padding-top:20px
 }
 
 #prdpback {
 
-	background: #ECF0EC url(../images/toto_prdp.png) no-repeat;
-	width: 700px;
-	height: 640px;
-	background-size: 100%;
-	padding-top:10px;
-	padding-left:20px;
-	padding-right:20px;
-	padding-bottom:20px;
+/*background: #ECF0EC url(../images/toto_prdp.png) no-repeat;*/
+background: #ECF0EC;
+/*width: 700px;
+height: 640px;*/
+width: auto;
+height: auto;
+/*background-size: 100%;*/
+padding-top:10px;
+padding-left:20px;
+padding-right:20px;
+padding-bottom:20px;
 }
 
-#prdp_picwrapper {
+#prdp_ppm_wk{
+
+	color: #000000;
+	border: 2px solid #ffffff;
+	width:auto;
+	height:auto;
+	padding-top:10px;
+	padding-left:10px;
+	padding-right:10px;
+	padding-bottom:10px;
+
+}
+
+#prdp_subtitle{
+
+	height: 40px;
+	padding: 10px 0 0 0px;
+	letter-spacing: -1px;
+	font-size: 2em;
+	font-weight: normal;
+	color: #000000;
+	padding-top:20px
+
+}
+
+#prdpinfo {
+	
+	position:absolute;
+	top:150px;
+	right:30px;
+	height: 20px;
+	font-weight: normal;
+	color: #000000;
+	border: 1px solid #ffffff;
+	width:auto;
+	height:auto;
+	padding-top:10px;
+	padding-left:10px;
+	padding-right:10px;
+	padding-bottom:10px;
+}
+
+/*#prdp_picwrapper img{
 
 	background: none;
 	width: 500px;
@@ -292,12 +337,16 @@ h1.found {
 	border: 1px solid #ffffff;
 
 }
-
+*/
 #prdp_picwrapper img{
 
 	background: none;
-	width: auto;
-	height: auto;
+	width: 200x;
+	height:250px;
+/*	width: auto;
+	height: auto;*/
+	width: 30%;
+	height: 30%;
 	border: 1px solid #ffffff;
 
 }

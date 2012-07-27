@@ -49,12 +49,14 @@ elif sys.argv[1] == 'setup':
 			user, pwd = utils.create_random_User(i)
 			users.append(user)
 			passwords.append(pwd)
+		utils.create_random_Userfriends()
 		print '%d Users created.' % (NUM_USERS)
 	else:
 		for i in range (NUM_USERS):
 			user, pwd = utils.create_random_User(i)
 			users.append(user)
 			passwords.append(pwd)
+		utils.create_random_Userfriends()
 		for i in range (NUM_PETREPORTS):
 			utils.create_random_PetReport(random.choice(users))
 		print '%d Users created, %s Pet Reports created' % (NUM_USERS, NUM_PETREPORTS)	

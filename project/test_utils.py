@@ -49,6 +49,18 @@ def create_random_User(i, pretty_name=True):
 	user = User.objects.create_user(username = username, email = email, password = password)
 	return (user, password)
 
+#Create random friends for all users
+def create_random_Userfriends():
+	users = UserProfile.objects.all()
+	for user in users:
+		userlist = create_random_Userlist()
+		try:
+			userlist.remove(user)
+		except ValueError:
+			continue
+		user.friends = userlist
+		user.save()		
+
 #Create Random Object for: PetReport
 def create_random_PetReport(user):
 	pet_type = random.choice(PET_TYPE_CHOICES)[0]
@@ -63,6 +75,8 @@ def create_random_PetReport(user):
 	pr.breed = generate_string(30)
 	pr.size = random.choice(SIZE_CHOICES)[0]
 	pr.age = random.randrange(0,15)
+	pr.save()
+	pr.workers = create_random_Userlist()
 	pr.save()
 	return pr
 
@@ -95,6 +109,13 @@ def delete_all(leave_users = False):
 	ChatLine.objects.all().delete()
 	if leave_users == False:
 		User.objects.all().delete()
+
+def create_random_Userlist():
+	allusers = UserProfile.objects.all()
+	numusers = random.randint(1,allusers.count())
+	return random.sample(allusers,numusers)
+
+
 
 
 

@@ -6,6 +6,7 @@ from home.models import *
 urlpatterns = patterns('reporting.views',
 
 	url (r'^submit_petreport', 'submit_petreport', name='submit_petreport'),
+	url (r'^petreport/(?P<petreport_id>\d+)/$','disp_petreport',name='disp_petreport'),
 )
 
 
