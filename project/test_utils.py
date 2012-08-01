@@ -49,17 +49,17 @@ def create_random_User(i, pretty_name=True):
 	user = User.objects.create_user(username = username, email = email, password = password)
 	return (user, password)
 
-#Create random friends for all users
-def create_random_Userfriends():
-	users = UserProfile.objects.all()
-	for user in users:
-		userlist = create_random_Userlist()
-		try:
-			userlist.remove(user)
-		except ValueError:
-			continue
-		user.friends = userlist
-		user.save()		
+# #Create random friends for all users
+# def create_random_Userfriends():
+# 	users = UserProfile.objects.all()
+# 	for user in users:
+# 		userlist = create_random_Userlist()
+# 		try:
+# 			userlist.remove(user)
+# 		except ValueError:
+# 			continue
+# 		user.friends = userlist
+# 		user.save()		
 
 #Create Random Object for: PetReport
 def create_random_PetReport(user):
@@ -110,10 +110,23 @@ def delete_all(leave_users = False):
 	if leave_users == False:
 		User.objects.all().delete()
 
-def create_random_Userlist():
+#returns a random list of users or a list of friends for a user (when friends = True)
+def create_random_Userlist(num_users = -1,friends=False,user=None):
 	allusers = UserProfile.objects.all()
-	numusers = random.randint(1,allusers.count())
-	return random.sample(allusers,numusers)
+	if(num_users==-1):
+		num_users = random.randint(1,allusers.count())
+	userlist = random.sample(allusers,num_users)
+	if(friends):
+		if(user!=None):
+			try:
+					userlist.remove(user)
+			except ValueError:
+				return userlist
+		elif (user==None):
+			print "Insufficient arguments, list of friends was not created successfully."
+			return userlist
+	return userlist
+
 
 
 
