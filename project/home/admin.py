@@ -8,7 +8,7 @@ class PetReportAdmin(admin.ModelAdmin):
         })
     ]
     
-    list_display = ('pet_type','proposed_by') 
+    list_display = ('pet_type', 'status', 'date_lost_or_found','proposed_by','sex','size','location','pet_name','age','color','breed') 
 admin.site.register(PetReport,PetReportAdmin)
 admin.site.register(UserProfile)
 admin.site.register(PetMatch)
