@@ -97,7 +97,7 @@ class PetMatch(models.Model):
     closed_date = models.DateField(null=True)
     up_votes = models.ManyToManyField('UserProfile', null=True, related_name='up_votes_related')
     down_votes = models.ManyToManyField('UserProfile', null=True, related_name='down_votes_related')
-    matches_proposed = models.ForeignKey('UserProfile', null=True, related_name='matches_proposed_related')
+    # matches_proposed = models.ForeignKey('UserProfile', null=True, related_name='matches_proposed_related')
 
     def __unicode__ (self):
         return 'PetMatch {lost:%s, found:%s, proposed_by:%s}' % (self.lost_pet, self.found_pet, self.proposed_by)
