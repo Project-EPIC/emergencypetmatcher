@@ -90,11 +90,11 @@ class PetMatch(models.Model):
     proposed_by = models.ForeignKey('UserProfile', null=False, related_name='proposed_by_related')
     
     '''Non-Required Fields'''
-    proposed_date = models.DateTimeField(auto_now_add = True)
+    proposed_date = models.DateField(null=True)
     is_open = models.BooleanField(default=True)
     score = models.IntegerField(default=0)
     closed_by = models.ForeignKey('UserProfile', null=True, related_name='closed_by_related')
-    closed_date = models.DateTimeField(null=True)
+    closed_date = models.DateField(null=True)
     up_votes = models.ManyToManyField('UserProfile', null=True, related_name='up_votes_related')
     down_votes = models.ManyToManyField('UserProfile', null=True, related_name='down_votes_related')
     matches_proposed = models.ForeignKey('UserProfile', null=True, related_name='matches_proposed_related')
