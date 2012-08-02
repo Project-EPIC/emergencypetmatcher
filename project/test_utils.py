@@ -49,18 +49,6 @@ def create_random_User(i, pretty_name=True):
 	user = User.objects.create_user(username = username, email = email, password = password)
 	return (user, password)
 
-# #Create random friends for all users
-# def create_random_Userfriends():
-# 	users = UserProfile.objects.all()
-# 	for user in users:
-# 		userlist = create_random_Userlist()
-# 		try:
-# 			userlist.remove(user)
-# 		except ValueError:
-# 			continue
-# 		user.friends = userlist
-# 		user.save()		
-
 #Create Random Object for: PetReport
 def create_random_PetReport(user):
 	pet_type = random.choice(PET_TYPE_CHOICES)[0]
@@ -76,17 +64,9 @@ def create_random_PetReport(user):
 	pr.size = random.choice(SIZE_CHOICES)[0]
 	pr.age = random.randrange(0,15)
 	pr.save()
-	pr.workers = create_random_Userlist()
+	pr.workers = create_random_Userlist(-1,False,None)
 	pr.save()
 	return pr
-
-#Create Random Object for: PetMatch
-def create_random_PetMatch(pr1, pr2, user):
-	pm = PetMatch (lost_pet = pr1, found_pet = pr2, proposed_by = user.get_profile())
-	pm.score = random.randrange(0, 10000)
-	pm.is_open = random.choice ([True, False])
-	pm.save()
-	return pm
 
 #Create Random Object for: Chat
 def create_random_Chat (pr):
@@ -122,10 +102,43 @@ def create_random_Userlist(num_users = -1,friends=False,user=None):
 					userlist.remove(user)
 			except ValueError:
 				return userlist
-		elif (user==None):
+		elif (user == None):
 			print "Insufficient arguments, list of friends was not created successfully."
 			return userlist
 	return userlist
+
+#Create Random Object for: PetMatch
+def create_random_PetMatch(lostpet=None,foundpet=None,user=None):
+	#to be modified to make unique petmatches
+	allpets = PetReport.objects.all()
+	prlost = allpets.filter(status = "Lost")
+	prfound = allpets.filter(status = "Found")
+	if(lostpet == None):
+		lostpet = random.choice(prlost)
+	if(foundpet == None):
+		foundpet = random.choice(prfound)
+	if(user == None):
+		user = random.choice(UserProfile.objects.all())
+	pm = PetMatch(lost_pet = lostpet, found_pet = foundpet, proposed_by = user)
+	pm.save()	
+	pm.score = random.randrange(0, 10000)
+	pm.is_open = random.choice ([True, False])
+	user_count = UserProfile.objects.all().count()
+	up_votes = create_random_Userlist(random.randint(1,((user_count/2)+1)),False,None)
+	down_votes = UserProfile.objects.all()	
+	for up_vote in up_votes:
+			try:
+				down_votes = down_votes.exclude(id  = up_vote.id)
+			except ValueError:
+				continue
+	pm.up_votes = up_votes
+	pm.down_votes = down_votes
+	pm.save()
+	return pm
+
+
+			
+
 
 
 

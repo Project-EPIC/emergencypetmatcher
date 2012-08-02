@@ -85,8 +85,8 @@ class UserProfile (models.Model):
 class PetMatch(models.Model):
 
     '''Required Fields'''
-    lost_pet = models.OneToOneField('PetReport', null=False, related_name='lost_pet_related')
-    found_pet = models.OneToOneField('PetReport', null=False, related_name='found_pet_related')
+    lost_pet = models.ForeignKey('PetReport', null=False, related_name='lost_pet_related')
+    found_pet = models.ForeignKey('PetReport', null=False, related_name='found_pet_related')
     proposed_by = models.ForeignKey('UserProfile', null=False, related_name='proposed_by_related')
     
     '''Non-Required Fields'''

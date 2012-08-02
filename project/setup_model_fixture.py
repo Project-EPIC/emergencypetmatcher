@@ -12,6 +12,7 @@ setup_model_fixture.py: Setup sample (random) data for your dev env.
 #Control Variables
 NUM_PETREPORTS = 100
 NUM_USERS = 5
+NUM_PETMATCHES = 25
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''
 When Executed: Setup our fixture
@@ -59,12 +60,15 @@ elif sys.argv[1] == 'setup':
 			users.append(user)
 			passwords.append(pwd)
 		allusers = UserProfile.objects.all()
+		print '%d Users created.' % (NUM_USERS)
 		for user in allusers:
 			user.friends = utils.create_random_Userlist(-1,True,user)#not working without supplying -1
 		for i in range (NUM_PETREPORTS):
 			utils.create_random_PetReport(random.choice(users))
-		print '%d Users created, %s Pet Reports created' % (NUM_USERS, NUM_PETREPORTS)	
-
+		print '%s Pet Reports created' % (NUM_PETREPORTS)	
+		for i in range (NUM_PETMATCHES):
+			utils.create_random_PetMatch(None,None,None)
+		print '%s Pet Matches created' % (NUM_PETMATCHES)	
 	
 	print 'usernames with passwords are:'
 
