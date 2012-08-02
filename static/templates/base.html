@@ -9,17 +9,18 @@
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<title>{% block head_title %} EmergencyPetMatcher (EPM) {% endblock head_title %}</title>
-		<meta name="keywords" content="" />
+		<meta name="keywords" content="pet-family reunification, emergency, research, software engineering, disaster"/>
 		<meta name="description" content="" />
 
-		<!-- CSS Reset -->
-		<link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">
-		<link rel="stylesheet" href="{{ STATIC_URL }}css/reset.css">
-		<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.17/themes/smoothness/jquery-ui.css">
+		<!-- CSS -->
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/style.css" type="text/css">
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/reset.css" type="text/css">
+		<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
 
+		<!-- Javascript & JQuery -->
+		<script src="https://browserid.org/include.js" type="text/javascript"></script> 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
-
 		<!-- Include the hoverIntent plug-in -->
 		<script src="{{ STATIC_URL }}js/jquery.hoverIntent.js" type="text/javascript"></script>
 		<!-- Include the waypoints plug-in -->
@@ -108,7 +109,6 @@
 
 	</head>
 	<body>
-
 		<!-- start header with TITLE and NAVIGATION MENU -->
 		<div id="header">
 			<div id="logo">
@@ -179,10 +179,11 @@
 						{% block pet_reports_content %}
 							{% if pet_reports_list %}
 								{% for pet_report in pet_reports_list %}
-									<li class="item" id="prdpdialog"><a href= "{% url 'disp_petreport' pet_report.id %}">
+									<li class="item" id="prdpdialog">
+										<a href= "{% url 'disp_petreport' pet_report.id %}"></a>
 										{% if pet_report.status %} Lost : {{ pet_report.pet_type }}
 										{% else %} Found : {{ pet_report.pet_type }}
-										{% endif %} <br />
+										{% endif %} <br/>
 										Contact : {{  pet_report.proposed_by.user.username}}
 										{% if pet_report.img_path %}
 											<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
@@ -208,8 +209,8 @@
 											{% ifequal pet_report.pet_type "Other" %}
 												OTHER
 											{% endifequal %}
-										</li>
 										{% endif %}
+									</li>	
 								{% endfor %}							
 							{% else %}
 							    <p>No pet reports are available.</p>
@@ -217,24 +218,22 @@
 						{% endblock pet_reports_content %}
 					</ul>	
 				</div>
-				<div class="pagination" align="center">
-		   			<div class="step-links" id="footer" align="center">
-		        				<div class="current" id="footer" align="left">
-            		Page {{ pet_reports_list.number }} of {{ pet_reports_list.paginator.num_pages }}.
-        		</div>
-        		<div class="step-links" id="footer" align="left">	
-        			{% if pet_reports_list.has_previous %}
-           				<a href="?page={{ pet_reports_list.previous_page_number }}"> previous |</a>
-        			{% endif %}
 
-         			{% for i in pet_reports_list.paginator.page_range %}
-           				<a href="?page={{ i }}"> {{ i }} | </a>
-        			{% endfor %}
-        			{% if pet_reports_list.has_next %}
-            			<a href="?page={{ pet_reports_list.next_page_number }}"> next </a>
-        			{% endif %}
-        		</div>
-		    	</div>
+				<div class="pagination" align="center">
+					Page {{ pet_reports_list.number }} of {{ pet_reports_list.paginator.num_pages }}.
+	        		<div class="step-links" style="float:center;">	
+	        			{% if pet_reports_list.has_previous %}
+	           				<a href="?page={{ pet_reports_list.previous_page_number }}"> previous |</a>
+	        			{% endif %}
+
+	         			{% for i in pet_reports_list.paginator.page_range %}
+	           				<a href="?page={{ i }}"> {{ i }} | </a>
+	        			{% endfor %}
+	        			{% if pet_reports_list.has_next %}
+	            			<a href="?page={{ pet_reports_list.next_page_number }}"> next </a>
+	        			{% endif %}
+	        		</div>
+	    		</div>
 
 			<br style="clear: both;" />
 				{% endblock content %}
