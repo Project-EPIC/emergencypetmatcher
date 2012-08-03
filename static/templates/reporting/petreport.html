@@ -72,11 +72,11 @@
                 unknown
               {% endif %}<br>
               <b>Lost/Found: </b> 
-              {% if pet_report.status %}
+              {% ifequal pet_report.status "Lost" %}
                 Lost 
               {% else %}
                 Found
-              {% endif %}
+              {% endifequal %}
               <br>
               <b>Sex:</b>  {{ pet_report.sex }}<br>
               <b>Breed:</b> 
@@ -109,7 +109,8 @@
               {% endfor %}
           </div> 
 
-        {% endif %}		  
+        {% endif %}
+        <a href="{% url 'matching' pet_report.id %}">work on this pet</a>		  
     {%  endblock petreportcontent %}
 
   </body>

@@ -5,7 +5,9 @@ from home.models import *
 
 urlpatterns = patterns('matching.views',
 
-	url (r'^$', 'matching', name='matching'),
+	# url (r'^$', 'matching', name='matching'),
+	url (r'^matching/(?P<petreport_id>\d+)/$','matching',name='matching'),
+
 )
 
 

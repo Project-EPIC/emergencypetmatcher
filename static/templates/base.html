@@ -128,7 +128,7 @@
 						</form>
 					</li>
 					<li><a href= "{% url 'submit_petreport' %}">Submit a Lost/Found Pet Report</a></li>
-					<li><a href= "{% url 'matching' %}">Matching</a></li>
+					<li><a href= "{% url 'matching' 1 %}">Matching</a></li> <!--Edit this url-->
 					{% else %}
 					<li><a href= "{% url 'login_user' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
 					{% endif %}
@@ -181,9 +181,9 @@
 								{% for pet_report in pet_reports_list %}
 									<li class="item" id="prdpdialog">
 										<a href= "{% url 'disp_petreport' pet_report.id %}"></a>
-										{% if pet_report.status %} Lost : {{ pet_report.pet_type }}
+										{% ifequal pet_report.status "Lost" %} Lost : {{ pet_report.pet_type }}
 										{% else %} Found : {{ pet_report.pet_type }}
-										{% endif %} <br/>
+										{% endifequal %} <br/>
 										Contact : {{  pet_report.proposed_by.user.username}}
 										{% if pet_report.img_path %}
 											<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>

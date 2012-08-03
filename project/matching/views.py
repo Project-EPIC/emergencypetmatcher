@@ -22,10 +22,11 @@ from random import choice, uniform
 import re
 
 @login_required
-def matching(request):
+def matching(request,petreport_id):
 
 	#Get Pet Report objects and organize them into a Paginator Object.
-    pet_reports = PetReport.objects.all()
+    target_pet = PetReport.objects.get(pk = petreport_id)
+    pet_reports = PetReport.objects.all().exclude(status = target_pet.status)
     paginator = Paginator(pet_reports, 100)
     page = request.GET.get('page')
   
