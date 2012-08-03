@@ -24,7 +24,7 @@ import oauth2 as oauth
 """Home view, displays login mechanism"""
 def home (request):
     #Get Pet Report objects and organize them into a Paginator Object.
-    pet_reports = PetReport.objects.all()
+    pet_reports = PetReport.objects.order_by("id").reverse()
     paginator = Paginator(pet_reports, 100)
     page = request.GET.get('page')
     
@@ -35,8 +35,9 @@ def home (request):
     except EmptyPage:
         pet_reports_list = paginator.page(paginator.num_pages)
         
-    if request.user.is_authenticated():
-        return social_login(request, pet_reports_list)
+    print len(pet_reports_list)
+    if request.user.is_authenticated() == True:
+        return render_to_response('index.html', {'version': version, 'pet_reports_list': pet_reports_list, 'last_login': request.session.get('social_auth_last_login_backend')}, RequestContext(request))
     else:
         return render_to_response('index.html', {'version': version, 'pet_reports_list': pet_reports_list}, RequestContext(request))
 
@@ -88,16 +89,6 @@ def social_auth_login(request, backend):
     except ValueError, error:
         # in case of errors, let's show a special page that will explain what happened
         return render_to_response('registration/login_errors.html', locals(), context_instance=RequestContext(request))
-
-@login_required
-def social_login(request,pet_reports_list):
-    """Login complete view, displays user data"""
-    ctx = {
-        'version': version,
-        'last_login': request.session.get('social_auth_last_login_backend'),
-        'pet_reports_list': pet_reports_list
-    }
-    return render_to_response('index.html', ctx, RequestContext(request))
 
 
 ''' Used by social auth pipeline  

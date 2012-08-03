@@ -28,67 +28,84 @@
 				handler.wookmark(options);
 			});
 
-			$(function() {
+			$.waypoints.settings.scrollThrottle = 30;
+			$('#workspace').waypoint(function(event, direction){
+				$(this).parent().toggleClass('sticky', direction === "down");
+				event.stopPropagation();
+			});
 
-				$.waypoints.settings.scrollThrottle = 30;
-				$('#workspace').waypoint(function(event, direction){
-					$(this).parent().toggleClass('sticky', direction === "down");
-					event.stopPropagation();
-				});
+			$("#tiles li.item").draggable({ 
+				revert: "invalid",
+				helper: "clone"
+			});
 
-				$("#tiles li.item").draggable({ 
-					revert: "invalid",
-					helper: "clone"
-				});
+			$(".droppable").droppable({
+				/* activeClass: "ui-state-hover", */
+				hoverClass: "ui-state-active",
+				drop: function (event, ui) {
+					moveImage(ui.draggable, $(this));
+				}
+			});
 
-				$(".droppable").droppable({
-					/* activeClass: "ui-state-hover", */
-					hoverClass: "ui-state-active",
-					drop: function (event, ui) {
-						moveImage(ui.draggable, $(this));
-					}
-				});
+			$(".droppable").click(function(){
 
-				function moveImage(item, container) {
-					var newItem = $("img", item).clone();
-					var w = container.width();
-					var h = container.height();
-					newItem.animate({height: h, width: w});
-					$(container).html(newItem);
-				}				
+				$(this).css("border-color", "yellow");
+				//Grab the Image from the PRDP Candidate and copy it in the Workspace Detail Div.
+				//Also, turn on the Workspace Detail Div.
+				var img = $("img", this).clone();
+				var detail_img = $("#workspace_match_detail").find("img");
+				$(detail_img).attr("src", $(img).attr("src"));
+				$("#workspace_match_detail").show(); 
+			});	
 
-				$(".droppable").click(function(){
 
-					var bordercolor = $(this).css("border-color");
-					if (bordercolor == "yellow"){
-						$(this).css("border-color", "black");	
-					}
-					else{
-						$(this).css("border-color", "yellow");	
-						$("#workspace_match_detail").show();
-					}					
-				});	
+			var $dialog = $("#dialog-confirm").dialog({
+				resizable: false,
+				autoOpen: false,
+				width: 815,
+				modal: true,
+				buttons: {"Propose Match" : function() {}, "Cancel" : function() {}}
+			});
 
-				var $dialog = $("#dialog-confirm").dialog({
-					resizable: false,
-					autoOpen: false,
-					width: 815,
-					modal: true,
-					buttons: {"Propose Match" : function() {}, "Cancel" : function() {}}
-				});
+			$("#propose").click(function() {
+				$dialog.dialog("open");
+			});
 
-				$("#propose").click(function() {
-					$dialog.dialog("open");
-				});
-
-				$("#chatacc").accordion({
-					collapsible: true,
-					active: false,
-					autoHeight: false
-				});
-
+			$("#chatacc").accordion({
+				collapsible: true,
+				active: false,
+				autoHeight: false
 			});
 		});
+
+		/* String formatting - retrieved from: http://stackoverflow.com/questions/1038746/equivalent-of-string-format-in-jquery */
+		String.format = function() {
+		  var s = arguments[0];
+		  for (var i = 0; i < arguments.length - 1; i++) {       
+		    var reg = new RegExp("\\{" + i + "\\}", "gm");             
+		    s = s.replace(reg, arguments[i + 1]);
+		  }
+		  return s;
+		}
+
+		function moveImage(item, container) {
+			var pet_report_img = $("img", item).clone();
+			var pet_report_id = $("input", item).clone().attr("value");
+			alert(pet_report_id);
+			var w = container.width();
+			var h = container.height();
+			pet_report_img.animate({height: h, width: w});
+			$(container).html(pet_report_img);
+		}
+
+		function propose_match(button){
+
+			alert("PROPOSE MATCH");
+		}
+
+		function bookmark_pet(button){
+			alert("BOOKMARK PET");
+		}
 
 	</script>
 {% endblock js %}
@@ -110,68 +127,61 @@
 
 <!-- Workspace for Placing Pet Report Candidate Matches-->
 <div id="workspace">
-	<div id="prtarget">
-		<img class='target' src="{{ STATIC_URL }}/images/toto.jpg">
+
+	<!-- PRDP Target and Candidates -->
+	<div id="prtarget"> 
+		<img class='target' src="{{ STATIC_URL }}{{ target_prdp.img_path }}">
 		<div class="droppable">
-			<div style="text-align:center; padding:5%; margin:20%;">Drag a Pet Report Here</div> 
-		</div>		
+			<div style="text-align:center; padding:5%; margin:20%;">Drag a Pet Report Here</div>
+		</div>
 	</div>
 
 	<div id="workspace_match_detail">
-
-		<img src="{{ STATIC_URL}}/images/defaults/dog_silhouette.jpg" style="max-width:150px; float:left">
-	    <input id="propose" type="button" value="Propose Match" />&nbsp;
-	    <input type="button" value="Bookmark Pet" /><br/><br/>
-
-		<div id="working_des" style="float:right; width: 60%;">
-	        <span><b>Breed:</b> terrier</span><br/>
-	        <span><b>Color:</b> black</span><br/>
-	        <span><b>Sex:</b> Male</span><br/>
-		</div>
-		<span><b>Description:</b> little black dog with long silky hair, small eyes</span>
+		<img src=""/>
+			<table>
+				<tr>
+			    	<td><strong> Attribute 1</strong></td>
+			    	<td> </td>
+				</tr>
+				<tr>
+			    	<td><strong> Attribute 2</strong></td>
+			    	<td> </td>
+				</tr>
+				<tr>
+			    	<td><strong> Attribute 3</strong></td>
+			    	<td> </td>
+				</tr>
+				<tr>
+			    	<td><strong> Attribute 4</strong></td>
+			    	<td> </td>
+				</tr>						
+				<tr>
+			    	<td><strong> Attribute 5</strong></td>
+			    	<td> </td>
+				</tr>										
+			</table>
+	   	<p/> <button value="Propose Match" onclick="propose_match(this);"/>Propose Match </button> 
+	   	<button value="Bookmark Pet" onclick="bookmark_pet(this);"/> Bookmark Pet </button> <br/>
 	</div>
 </div>
 
 <!-- Container for ML-Ranked Pet Reports -->
-<div id="container" style="width: 59%; float:right;">
+<div id="container" style="width: 59%; min-width: 300px; float:right;">
 	<ul id="tiles">
 		{% block pet_reports_content %}
 			{% if pet_reports_list %}
 				{% for pet_report in pet_reports_list %}
-					<li class="item"> 
-						{% if pet_report.status %} 
-							Lost : {{ pet_report.pet_type }}
-						{% else %} 
-							Found : {{ pet_report.pet_type }}
-						{% endif %} <br/>
-						Contact : {{  pet_report.proposed_by.user.username}}
-						{% if pet_report.img_path %}
+					<li class="item" id="prdpdialog">
+						<input type="hidden" value=" {{ pet_report.id }}"/>						
+						{% ifequal pet_report.status "Lost" %} Lost : {{ pet_report.pet_type }}
+						{% else %} Found : {{ pet_report.pet_type }}
+						{% endifequal %} <br/>
+						Contact : {{  pet_report.proposed_by.user.username }}
+						<a href= "{% url 'disp_petreport' pet_report.id %}">
 							<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
-						{% else %}
-							{% ifequal pet_report.pet_type "Dog" %}
-								<img src="{{ STATIC_URL }}/images/defaults/dog_silhouette.jpg"/>
-							{% endifequal %}
-							{% ifequal pet_report.pet_type "Cat" %}
-								<img src="{{ STATIC_URL }}/images/defaults/cat_silhouette.jpg"/>
-							{% endifequal %}
-							{% ifequal pet_report.pet_type "Turtle" %}
-								<img src="{{ STATIC_URL }}/images/defaults/turtle_silhouette.jpg"/>
-							{% endifequal %}
-							{% ifequal pet_report.pet_type "Rabbit" %}
-								<img src="{{ STATIC_URL }}/images/defaults/rabbit_silhouette.jpg"/>
-							{% endifequal %}
-							{% ifequal pet_report.pet_type "Snake" %}
-								<img src="{{ STATIC_URL }}/images/defaults/snake_silhouette.jpg"/>
-							{% endifequal %}
-							{% ifequal pet_report.pet_type "Horse" %}
-								<img src="{{ STATIC_URL }}/images/defaults/horse_silhouette.jpg"/>
-							{% endifequal %}
-							{% ifequal pet_report.pet_type "Other" %}
-								OTHER
-							{% endifequal %}
-						{% endif %}
-					</li>
-				{% endfor %}
+						</a>
+					</li>	
+				{% endfor %}				
 				<!-- Pagination -->
 				<div class="pagination" align="left">
 		   			<div class="step-links" id="footer" align="left">

@@ -2,17 +2,15 @@
 {% load url from future %}
 
 {% block head_title %} EPM - Login {% endblock head_title %}
-{% block headers %} <script src="https://browserid.org/include.js" type="text/javascript"></script> {% endblock headers %}
-
 {% block content_title %} Log in below {% endblock content_title %}
 {% block content_subtitle %} Please log in below, log in using Twitter or Facebook, or if you haven't signed up for an account yet, please register below.
 {% endblock content_subtitle %}
 
 {% block content %}
 
-	{% if form.errors %} <p>Your username and password didn't match. Please try again.</p> {% endif %}
+	{% if form.errors %} <strong>Your username and password didn't match. Please try again.</strong> {% endif %}
 
-	<div class="form_container">
+	<div class="form_container" style="border: 1px solid #000000; padding:5px; width: 240px; height: 120px;">
 		<form method="post" action= "{% url 'login_user' %}">
 			{% csrf_token %}
 				<table>
@@ -23,17 +21,14 @@
 					</tr>
 					{% endfor %}
 				</table>
-			<input type="hidden" name="next" value="{{ next }}" />
-			<input type="submit" value="Login"/>
+			<input type="hidden" name="next" value="{{ next }}"/><br/>
+			<input type="submit" value="Login" style="width:100px; height:25px;"/>
+			<p/><a href = "{% url 'auth_password_reset' %}"> Forgot your Password? </a>
 		</form>
-	</div>
-	<br/>
-	<p/><a href = "{% url 'auth_password_reset' %}"> Forgot your Password? </a>
+	</div> <br/>
 
 	<p/> <h3> <a href = "{% url 'registration_register' %}"> Register Here </a></h3>
-
 	<p/>Twitter: <a rel="nofollow" href="{% url 'socialauth_begin' 'twitter' %}">Enter using Twitter</a><br/>
 	<p/>Facebook: <a rel="nofollow" href="{% url 'socialauth_begin' 'facebook' %}">Enter using Facebook</a><br/>
 
 {% endblock content %}
-

@@ -65,6 +65,23 @@ def create_random_PetReport(user):
 	pr.age = random.randrange(0,15)
 	pr.save()
 	pr.workers = create_random_Userlist(-1,False,None)
+
+	#Need to handle Image defaults...
+	if pr.pet_type == "Dog":
+		pr.img_path.name = "images/defaults/dog_silhouette.jpg"
+	elif pr.pet_type == "Cat":
+		pr.img_path.name = "images/defaults/cat_silhouette.jpg"
+	elif pr.pet_type == "Horse":
+		pr.img_path.name = "images/defaults/horse_silhouette.jpg"
+	elif pr.pet_type == "Rabbit":
+		pr.img_path.name = "images/defaults/rabbit_silhouette.jpg"
+	elif pr.pet_type == "Snake":
+		pr.img_path.name = "images/defaults/snake_silhouette.jpg"
+	elif pr.pet_type == "Turtle":
+		pr.img_path.name = "images/defaults/turtle_silhouette.jpg"
+	else:
+		pr.img_path.name = "images/defaults/other_silhouette.jpg"
+
 	pr.save()
 	return pr
 
@@ -119,7 +136,7 @@ def create_random_PetMatch(lostpet=None,foundpet=None,user=None):
 		foundpet = random.choice(prfound)
 	if(user == None):
 		user = random.choice(UserProfile.objects.all())
-	pm = PetMatch(lost_pet = lostpet, found_pet = foundpet, proposed_by = user)
+	pm = PetMatch(lost_pet = lostpet, found_pet = foundpet, proposed_by = user.get_profile())
 	pm.save()	
 	pm.score = random.randrange(0, 10000)
 	pm.is_open = random.choice ([True, False])

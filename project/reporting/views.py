@@ -11,7 +11,7 @@ from social_auth import __version__ as version
 from social_auth.utils import setting
 from django.contrib.messages.api import get_messages
 from social_auth.views import auth
-from django.db import IntegrityError
+from django.db import models, IntegrityError
 from home.models import *
 from django.http import Http404
 from django.core import mail
@@ -26,18 +26,36 @@ import re
 def submit_petreport(request):
 
     if request.method == "POST":
-
         form = PetReportForm(request.POST, request.FILES)
-        
+        print request.FILES
+
         if form.is_valid() == True:
             pr = form.save(commit=False)
-            #Create (but do not save) the Pet Report Object associated wit this form data.
+            #Create (but do not save) the Pet Report Object associated with this form data.
             pr.proposed_by = request.user.get_profile()
+            #If there was no image attached, let's take care of defaults.
+            if pr.img_path == None:
+                if pr.pet_type == "Dog":
+                    pr.img_path.name = "images/defaults/dog_silhouette.jpg"
+                elif pr.pet_type == "Cat":
+                    pr.img_path.name = "images/defaults/cat_silhouette.jpg"
+                elif pr.pet_type == "Horse":
+                    pr.img_path.name = "images/defaults/horse_silhouette.jpg"
+                elif pr.pet_type == "Rabbit":
+                    pr.img_path.name = "images/defaults/rabbit_silhouette.jpg"
+                elif pr.pet_type == "Snake":
+                    pr.img_path.name = "images/defaults/snake_silhouette.jpg"                                       
+                elif pr.pet_type == "Turtle":
+                    pr.img_path.name = "images/defaults/turtle_silhouette.jpg"
+                else:
+                    pr.img_path.name = "images/defaults/other_silhouette.jpg"
+    
             pr.save() #Now save the Pet Report.
             if pr.status == 'Lost':
                 messages.success (request, 'Thank you for your submission! Your contribution will go a long way towards helping people find your lost pet.')
             else:
                 messages.success (request, 'Thank you for your submission! Your contribution will go a long way towards helping others match lost and found pets.')                
+
             print "+++++++++++++++++++++++++ [SUCCESS]: Pet Report submitted successfully +++++++++++++++++++++++++ " 
             return redirect('/')
         else:

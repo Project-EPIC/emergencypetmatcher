@@ -4,11 +4,16 @@
 {% block head_title %}EPM - Report a Lost/Found Pet{% endblock head_title %}
 {% block content_title %} Report a Lost/Found Pet {% endblock content_title %}
 
+{% block headers %}
+	<script src="{{ STATIC_URL }}js/CalendarControl.js" language="Javascript"></script>
+	<link rel="stylesheet" href="{{ STATIC_URL }}css/CalendarControl.css" type="text/css"></link>
+{% endblock headers %}
+
 {% block content %}
 
 	<p> To create a pet report, please fill in the following fields and submit a picture of the lost or found pet to the best of your ability. Once you have finished, review the pet report to determine its quality. Review with consideration to the quantity of information (are all the fields filled in?), quality of information (is the picture relevant and helpful? Is the description free of general 'fluff' and to the point?), and general correctness (is everything spelled correctly?). If the pet report meets these criteria, click the 'Submit' button at the end of the form. </p>
 
-	<div id="detail">
+	<div id="detail" style="width:400px; height:700px;">
 
 		{% if form.errors %} <strong> {{ form.errors }} </strong> {% endif %}
 
@@ -16,13 +21,19 @@
 			{% csrf_token %}
 			<table>
 				{% for field in form %}
-				<tr>
-			    	<td><strong>{{ field.label_tag }} </strong></td>
-			    	<td>{{ field }}</td>
-				</tr>
+					<tr>
+						<td><strong> {{ field.label }} </strong></td>
+						{% ifequal field.label "Date Lost/Found" %}
+							<td>
+								<input name="date_lost_or_found" id="id_date_lost_or_found" onfocus="showCalendarControl(this)" type="text"/>
+							</td>
+						{% else %}
+					    	<td>{{ field }}</td>
+					    {% endifequal %}	
+					</tr>
 				{% endfor %}
-			</table>
-			<input type="submit" value="Submit"/>
+			</table><br/>
+			<input type="submit" value="Submit" style= "width:100px; height:25px; float:right;"/>
 		</form>
 	</div>
 

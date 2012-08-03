@@ -180,36 +180,13 @@
 							{% if pet_reports_list %}
 								{% for pet_report in pet_reports_list %}
 									<li class="item" id="prdpdialog">
-										<a href= "{% url 'disp_petreport' pet_report.id %}"></a>
 										{% ifequal pet_report.status "Lost" %} Lost : {{ pet_report.pet_type }}
 										{% else %} Found : {{ pet_report.pet_type }}
 										{% endifequal %} <br/>
-										Contact : {{  pet_report.proposed_by.user.username}}
-										{% if pet_report.img_path %}
+										Contact : {{  pet_report.proposed_by.user.username }}
+										<a href= "{% url 'disp_petreport' pet_report.id %}">
 											<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
-										{% else %}
-											{% ifequal pet_report.pet_type "Dog" %}
-												<img src="{{ STATIC_URL }}images/defaults/dog_silhouette.jpg"/>
-											{% endifequal %}
-											{% ifequal pet_report.pet_type "Cat" %}
-												<img src="{{ STATIC_URL }}images/defaults/cat_silhouette.jpg"/>
-											{% endifequal %}
-											{% ifequal pet_report.pet_type "Turtle" %}
-												<img src="{{ STATIC_URL }}images/defaults/turtle_silhouette.jpg"/>
-											{% endifequal %}
-											{% ifequal pet_report.pet_type "Rabbit" %}
-												<img src="{{ STATIC_URL }}images/defaults/rabbit_silhouette.jpg"/>
-											{% endifequal %}
-											{% ifequal pet_report.pet_type "Snake" %}
-												<img src="{{ STATIC_URL }}images/defaults/snake_silhouette.jpg"/>
-											{% endifequal %}
-											{% ifequal pet_report.pet_type "Horse" %}
-												<img src="{{ STATIC_URL }}images/defaults/horse_silhouette.jpg"/>
-											{% endifequal %}
-											{% ifequal pet_report.pet_type "Other" %}
-												OTHER
-											{% endifequal %}
-										{% endif %}
+										</a>
 									</li>	
 								{% endfor %}							
 							{% else %}
