@@ -1,5 +1,8 @@
 from django.contrib import admin
 from home.models import *
+from django.contrib.sites.models import Site
+from django.contrib.auth.models import Group
+from social_auth.models import Nonce
 
 class PetReportAdmin(admin.ModelAdmin):
 
@@ -31,3 +34,5 @@ admin.site.register(UserProfile,UserProfileAdmin)
 admin.site.register(PetMatch,PetMatchAdmin)
 admin.site.unregister(User)
 admin.site.register(User,UserAdmin)
+admin.site.unregister(Site)
+admin.site.unregister(Group)
