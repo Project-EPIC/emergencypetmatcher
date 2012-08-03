@@ -54,6 +54,7 @@ elif sys.argv[1] == 'setup':
 		for user in allusers:
 			user.friends = utils.create_random_Userlist(-1,True,user)#not working without supplying -1
 		print '%d Users created.' % (NUM_USERS)
+
 	else:
 		for i in range (NUM_USERS):
 			user, pwd = utils.create_random_User(i)
@@ -61,15 +62,19 @@ elif sys.argv[1] == 'setup':
 			passwords.append(pwd)
 		allusers = UserProfile.objects.all()
 		print '%d Users created.' % (NUM_USERS)
+
 		for user in allusers:
 			user.friends = utils.create_random_Userlist(-1,True,user)#not working without supplying -1
+
 		for i in range (NUM_PETREPORTS):
 			utils.create_random_PetReport(random.choice(users))
+
 		print '%s Pet Reports created' % (NUM_PETREPORTS)	
+
 		for i in range (NUM_PETMATCHES):
 			utils.create_random_PetMatch(None,None,None)
+
 		print '%s Pet Matches created' % (NUM_PETMATCHES)	
-	
 	print 'usernames with passwords are:'
 
 	for i in range (NUM_USERS):

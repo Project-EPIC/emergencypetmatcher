@@ -113,8 +113,8 @@ def create_random_Userlist(num_users = -1,friends=False,user=None):
 	if(num_users==-1):
 		num_users = random.randint(1,allusers.count())
 	userlist = random.sample(allusers,num_users)
-	if(friends):
-		if(user!=None):
+	if (friends == True):
+		if(user != None):
 			try:
 					userlist.remove(user)
 			except ValueError:
@@ -135,7 +135,8 @@ def create_random_PetMatch(lostpet=None,foundpet=None,user=None):
 	if(foundpet == None):
 		foundpet = random.choice(prfound)
 	if(user == None):
-		user = random.choice(UserProfile.objects.all())
+		user = random.choice(User.objects.all())
+
 	pm = PetMatch(lost_pet = lostpet, found_pet = foundpet, proposed_by = user.get_profile())
 	pm.save()	
 	pm.score = random.randrange(0, 10000)
@@ -143,6 +144,7 @@ def create_random_PetMatch(lostpet=None,foundpet=None,user=None):
 	user_count = UserProfile.objects.all().count()
 	up_votes = create_random_Userlist(random.randint(1,((user_count/2)+1)),False,None)
 	down_votes = UserProfile.objects.all()	
+	
 	for up_vote in up_votes:
 			try:
 				down_votes = down_votes.exclude(id  = up_vote.id)
