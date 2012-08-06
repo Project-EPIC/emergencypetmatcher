@@ -25,75 +25,27 @@
       <div id="prdpback"> <!-- id="prdpback" --><!-- class="prdpback">-->
         {% if pet_report %}
           <div id="prdp_title"> <!-- id="prdp_title" -->
-            {% if pet_report.pet_name %}
-              {{ pet_report.pet_name }}
-            {% else %}
-              {% if pet_report.status %}
-                Lost : 
-              {% else %}
-                Found : 
-              {% endif %}
-              {{ pet_report.pet_type }}
-            {% endif %}
+            {{pet_report.status }} : {{ pet_report.pet_type }}
           </div>
   		    <div id="prdp_picwrapper"><!-- id="prdp_picwrapper">-->
-          {% if pet_report.img_path %}  
-  			       <img  src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
-          {% else %}
-                {% ifequal pet_report.pet_type "Dog" %}
-                    <img src="{{ STATIC_URL }}images/defaults/dog_silhouette.jpg"/>
-                {% endifequal %}
-                {% ifequal pet_report.pet_type "Cat" %}
-                  <img src="{{ STATIC_URL }}images/defaults/cat_silhouette.jpg"/>
-                {% endifequal %}
-                {% ifequal pet_report.pet_type "Turtle" %}
-                  <img src="{{ STATIC_URL }}images/defaults/turtle_silhouette.jpg"/>
-                {% endifequal %}
-                {% ifequal pet_report.pet_type "Rabbit" %}
-                  <img src="{{ STATIC_URL }}images/defaults/rabbit_silhouette.jpg"/>
-                {% endifequal %}
-                {% ifequal pet_report.pet_type "Snake" %}
-                  <img src="{{ STATIC_URL }}images/defaults/snake_silhouette.jpg"/>
-                {% endifequal %}
-                {% ifequal pet_report.pet_type "Horse" %}
-                  <img src="{{ STATIC_URL }}images/defaults/horse_silhouette.jpg"/>
-                {% endifequal %}
-                {% ifequal pet_report.pet_type "Other" %}
-                  OTHER
-                {% endifequal %}
-          {% endif %}
+         
+  			  <img  src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
+          
           </div><br>
 
           <div id="prdpinfo">
-              <b>Pet Name:</b> 
-              {% if pet_report.pet_name %}
-                {{ pet_report.pet_name }}
-              {% else %}
-                unknown
-              {% endif %}<br>
-              <b>Lost/Found: </b> 
-              {% ifequal pet_report.status "Lost" %}
-                Lost 
-              {% else %}
-                Found
-              {% endifequal %}
-              <br>
-              <b>Sex:</b>  {{ pet_report.sex }}<br>
-              <b>Breed:</b> 
-              {% if pet_report.breed %}
-                {{ pet_report.breed }}
-              {% else %}
-                unknown
-              {% endif %}
-              <br> 
-              <b>Color:</b> 
-              {% if pet_report.color %}
-                {{ pet_report.color }} 
-              {% else %}
-                unknown
-              {% endif %}
-              <br>
+              <b>Pet Name:</b> {{ pet_report.pet_name }}<br>
+              <b>Lost/Found: </b> {{ pet_report.status }}<br> 
               <b>Contact:</b>  {{  pet_report.proposed_by.user.username }}<br>
+              <b>Date {{ pet_report.status }} : </b>{{ pet_report.date_lost_or_found }}<br>
+              <b>Age:</b> {{ pet_report.age }}<br> 
+              <b>Sex:</b>  {% ifequal pet_report.sex "M" %} Male {% else %} Female {% endifequal %}<br>
+              <b>Breed:</b> {{ pet_report.breed }} <br> 
+              <b>Color:</b> {{ pet_report.color }} <br>
+              <b>Size:</b> {% ifequal pet_report.size "M" %} Medium (10 - 100 lbs.) {% else %}  {% ifequal pet_report.size "L" %} Large (100+ lbs.) {% else %} Small (0 - 10 lbs.) {% endifequal %} {% endifequal %}<br>
+<!--          <b>Description:</b> {{ pet_report.description }}<br>
+ -->
+
           </div>    
           <div id="prdp_ppm_wk"><!-- id="prdp_ppm_wk" -->
               <div id="prdp_subtitle"> <!-- id="prdp_subtitle" -->

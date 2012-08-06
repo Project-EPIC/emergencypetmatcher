@@ -293,8 +293,8 @@ h1.found {
 
 /*background: #ECF0EC url(../images/toto_prdp.png) no-repeat;*/
 background: #ECF0EC;
-/*width: 700px;
-height: 640px;*/
+/*width: 50%;
+height: 50%;*/
 width: auto;
 height: auto;
 /*background-size: 100%;*/
@@ -332,8 +332,10 @@ padding-bottom:20px;
 #prdpinfo {
 	
 	position:absolute;
-	top:150px;
-	right:30px;
+/*	top:150px;
+	right:30px;*/
+	top: 17%;
+	right: 10%;
 	height: 20px;
 	font-weight: normal;
 	color: #000000;
@@ -344,6 +346,7 @@ padding-bottom:20px;
 	padding-left:10px;
 	padding-right:10px;
 	padding-bottom:10px;
+	text-align:justify;
 }
 
 /*#prdp_picwrapper img{

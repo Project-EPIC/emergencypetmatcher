@@ -36,36 +36,38 @@
 		{% block js %}
 		<script type = 'text/javascript'>
 
+
+
 			//This function allows us to prepare a popup upon clicking several elements.
 			$(document).ready(function(){
-	
-				//Upon clicking on the prdpdialog div, we open up a dialog box.
-				
-				/* NOTE: 'click()' replaced 'each()'. Maybe we can still do preliminary setting up
-				of the dialog boxes WITHOUT loading the link, since loading the link means we are
-				performing the GET request....  */
-				$('#prdpdialog a').click(function(){
-				
-					var $link = $(this);
-				    var $dialog = $('<li></li>')
-						.load ($link.attr('href'))// + ' #prdpback')
-						.dialog ({
-						
-							autoOpen: true,
-							closeOnEscape: true,
-							title: $link.attr('title'),
-							height: "auto",
-							modal: true,
-							width: 700
-							
-					});
+				$('#prdpdialog a').each(function(){
 					
-					$link.click(function(){
-						//alert ("We are trying to execute this function");	
-						$dialog.dialog('open');
+					var $loading = $('<img src="{{ STATIC_URL }}images/loading.gif" alt="loading">');
+					var $dialog = $('<div></div>')
+								.append($loading.clone());
+					var $link = $(this).one('click', function() {
+				    	$dialog
+							.load ($link.attr('href'))
+							.dialog ({
+							
+								autoOpen: true,
+								closeOnEscape: true,
+								title: $link.attr('title'),
+								height: "auto",
+								modal: true,
+								width: 700,
+								resizable: false
+								
+						});
+						
+						$link.click(function(){
+							//alert ("We are trying to execute this function");	
+							$dialog.dialog('open');
+							return false;
+						});
 						return false;
-					});
 				});
+			});
 
 				$('#tiles').imagesLoaded(function() {
 				
@@ -179,14 +181,14 @@
 						{% block pet_reports_content %}
 							{% if pet_reports_list %}
 								{% for pet_report in pet_reports_list %}
-									<li class="item" id="prdpdialog">
-										{% ifequal pet_report.status "Lost" %} Lost : {{ pet_report.pet_type }}
-										{% else %} Found : {{ pet_report.pet_type }}
-										{% endifequal %} <br/>
+									<li class="item" >
+									<div  id = "prdpdialog">
+										{{ pet_report.status }}: {{ pet_report.pet_type }}<br/>
 										Contact : {{  pet_report.proposed_by.user.username }}
 										<a href= "{% url 'disp_petreport' pet_report.id %}">
 											<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
 										</a>
+									</div>
 									</li>	
 								{% endfor %}							
 							{% else %}
