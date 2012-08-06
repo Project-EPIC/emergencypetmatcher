@@ -28,10 +28,10 @@ class PetReport(models.Model):
 
     '''Non-Required Fields'''
     img_path = models.ImageField(upload_to='images/petreport_images', null=True)
-    pet_name = models.CharField(max_length=50,null=True) 
+    pet_name = models.CharField(max_length=50,null=True,default='unknown') 
     age = models.IntegerField(null=True)
-    color = models.CharField(max_length=20,null=True)
-    breed = models.CharField(max_length=30,null=True)
+    color = models.CharField(max_length=20,null=True,default='unknown')
+    breed = models.CharField(max_length=30,null=True,default='unknown')
     revision_number = models.IntegerField(null=True) #update revision using view
     description   = models.CharField(max_length=300, null=True)
     #Many-to-Many relationship with User
