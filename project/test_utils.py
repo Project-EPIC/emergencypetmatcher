@@ -54,7 +54,7 @@ def create_random_PetReport(user):
 	pet_type = random.choice(PET_TYPE_CHOICES)[0]
 	status = random.choice(STATUS_CHOICES)[0]
 	pr = PetReport (pet_type = pet_type, status = status, proposed_by = user.get_profile())
-	pr.pet_name = generate_string(30)
+	pr.pet_name = generate_string(15)
 	pr.date_lost_or_found = "2012-07-18"
 	pr.description = generate_string(300)
 	pr.sex = random.choice(SEX_CHOICES)[0]

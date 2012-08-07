@@ -276,6 +276,9 @@ h1.found {
 	height: 250px;
 }
 
+.sticky .prdpdialog {
+	position:fixed;
+}
 
 #prdp_title{
 
@@ -304,7 +307,8 @@ padding-right:20px;
 padding-bottom:20px;
 }
 
-#prdp_ppm_wk{
+
+.prdp_ppm_wk{
 
 	color: #000000;
 	border: 2px solid #ffffff;
@@ -370,6 +374,12 @@ padding-bottom:20px;
 	border: 1px solid #ffffff;
 
 }
+
+#prdp_buttons {
+
+	margin:15px;
+}
+
 
 /* Footer */
 

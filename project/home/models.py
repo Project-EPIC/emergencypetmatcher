@@ -28,7 +28,7 @@ class PetReport(models.Model):
 
     '''Non-Required Fields'''
     img_path = models.ImageField(upload_to='images/petreport_images', null=True)
-    pet_name = models.CharField(max_length=50,null=True,default='unknown') 
+    pet_name = models.CharField(max_length=15,null=True,default='unknown') 
     age = models.IntegerField(null=True)
     color = models.CharField(max_length=20,null=True,default='unknown')
     breed = models.CharField(max_length=30,null=True,default='unknown')

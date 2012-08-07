@@ -30,44 +30,42 @@
 		<!-- Include the plug-in -->
 		<script src="{{ STATIC_URL }}js/jquery.wookmark.js"></script>
 
+
 		<!-- General, inheritable JS goes here -->
 		<script type="text/javascript"> </script>
 		<!-- Page-specific JS goes in this block -->
 		{% block js %}
 		<script type = 'text/javascript'>
 
-
-
 			//This function allows us to prepare a popup upon clicking several elements.
 			$(document).ready(function(){
+
 				$('#prdpdialog a').each(function(){
 					
 					var $loading = $('<img src="{{ STATIC_URL }}images/loading.gif" alt="loading">');
-					var $dialog = $('<div></div>')
-								.append($loading.clone());
+					var $dialog = $('<div></div>').append($loading.clone());
 					var $link = $(this).one('click', function() {
-				    	$dialog
-							.load ($link.attr('href'))
-							.dialog ({
+
+				    	$dialog.load ($link.attr('href')).dialog ({
 							
-								autoOpen: true,
-								closeOnEscape: true,
-								title: $link.attr('title'),
-								height: "auto",
-								modal: true,
-								width: 700,
-								resizable: false
+							autoOpen: true,
+							closeOnEscape: true,
+							title: $link.attr('title'),
+							height: "auto",
+							modal: true,
+							width: 700,
+							resizable: false
 								
 						});
 						
 						$link.click(function(){
-							//alert ("We are trying to execute this function");	
+
 							$dialog.dialog('open');
 							return false;
 						});
 						return false;
+					});
 				});
-			});
 
 				$('#tiles').imagesLoaded(function() {
 				
@@ -84,24 +82,6 @@
 					// Call the layout function.
 					handler.wookmark(options);
 					
-				});
-
-				$(function(){
-
-					var hand = 0;
-					$("#hover1, #hover2, #toto").hoverIntent(
-						function() {
-							$(".hdetail", this).show();
-							var h = $(this).height() + 30;
-							hand.wookmark();
-						},
-						function() {
-							
-							var h = $(this).height() - 30;
-							$(".hdetail", this).hide();
-							hand.wookmark();
-						}
-					);					
 				});
 			});
 		</script>
@@ -130,7 +110,7 @@
 						</form>
 					</li>
 					<li><a href= "{% url 'submit_petreport' %}">Submit a Lost/Found Pet Report</a></li>
-					<li><a href= "{% url 'matching' 1 %}">Matching</a></li> <!--Edit this url-->
+					<!-- <li><a href= "{% url 'matching' 1 %}">Matching</a></li> Edit this url-->
 					{% else %}
 					<li><a href= "{% url 'login_user' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
 					{% endif %}
@@ -182,13 +162,16 @@
 							{% if pet_reports_list %}
 								{% for pet_report in pet_reports_list %}
 									<li class="item" >
-									<div  id = "prdpdialog">
-										{{ pet_report.status }}: {{ pet_report.pet_type }}<br/>
-										Contact : {{  pet_report.proposed_by.user.username }}
-										<a href= "{% url 'disp_petreport' pet_report.id %}">
-											<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
-										</a>
-									</div>
+										<div id = "prdpdialog">
+											<a href= "{% url 'disp_petreport' pet_report.id %}">
+												{% if pet_report.pet_name %}
+													<strong>{{ pet_report.pet_name }}</strong><br/>
+												{% endif %}
+												{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
+												Contact : {{  pet_report.proposed_by.user.username }}
+												<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
+											</a>
+										</div>
 									</li>	
 								{% endfor %}							
 							{% else %}
