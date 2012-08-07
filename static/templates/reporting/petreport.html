@@ -22,35 +22,35 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
     <!-- Include the waypoints plug-in -->
     <script type="text/javascript"> 
-    $(document).ready(function(){
+    // $(document).ready(function(){
 
-        $('#prdpdialog a').each(function(){
+    //     $('#prdpsubdialog a').each(function(){
           
-          var $loading = $('<img src="{{ STATIC_URL }}images/loading.gif" alt="loading">');
-          var $dialog = $('<div></div>').append($loading.clone());
-          var $link = $(this).one('click', function() {
+    //       var $loading = $('<img src="{{ STATIC_URL }}images/loading.gif" alt="loading">');
+    //       var $dialog = $('<div></div>').append($loading.clone());
+    //       var $link = $(this).one('click', function() {
 
-              $dialog.load ($link.attr('href')).dialog ({
+    //           $dialog.load ($link.attr('href')).dialog ({
               
-              autoOpen: true,
-              closeOnEscape: true,
-              title: $link.attr('title'),
-              height: "auto",
-              modal: true,
-              width: 700,
-              resizable: false
+    //           autoOpen: true,
+    //           closeOnEscape: true,
+    //           title: $link.attr('title'),
+    //           height: "auto",
+    //           modal: true,
+    //           width: 700,
+    //           resizable: false
                 
-            });
+    //         });
             
-            $link.click(function(){
+    //         $link.click(function(){
 
-              $dialog.dialog('open');
-              return false;
-            });
-            return false;
-          });
-        });
-      });
+    //           $dialog.dialog('open');
+    //           return false;
+    //         });
+    //         return false;
+    //       });
+    //     });
+    //   });
     </script>
   </head>
 
@@ -87,9 +87,9 @@
           {% for pet_match in matches  %}
               <div class = "prdp_user_txt" id = "prdp_petmatch_box">
                   {% ifequal pet_report.status 'Lost' %}
-                    <div id = "prdpdialog"><a href = "{% url 'disp_petreport' pet_match.found_pet.id %}"><img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ pet_match.found_pet.img_path }}" /></a></div>
+                    <img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ pet_match.found_pet.img_path }}" />
                   {% else %}
-                    <div id = "prdpdialog"><a href="{% url 'disp_petreport' pet_match.lost_pet.id %}"><img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ pet_match.lost_pet.img_path }}" /></a></div>
+                    <img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ pet_match.lost_pet.img_path }}" />
                   {% endifequal %}  
                   <div id="prdp_user_box" style="float:right;">
                       <a href= "{% url 'detail' pet_match.proposed_by.id %}">{{ pet_match.proposed_by.user.username }}
