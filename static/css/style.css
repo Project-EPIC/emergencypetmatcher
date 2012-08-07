@@ -212,8 +212,9 @@ margin: 0;
 	-webkit-border-radius: 2px;
 	border-radius: 2px;
 	display: none; /** Hide items initially to avoid a flicker effect **/
-	  cursor: pointer;
+	cursor: pointer;
 	padding: 4px;
+	word-wrap: break-word;
 }
 
 #tiles li.item:hover{
@@ -304,7 +305,7 @@ height: auto;
 padding-top:10px;
 padding-left:20px;
 padding-right:20px;
-padding-bottom:20px;
+padding-bottom:30px;
 }
 
 
@@ -378,6 +379,19 @@ padding-bottom:20px;
 #prdp_buttons {
 
 	margin:15px;
+}
+
+#prdp_eachbutton {
+	border: 1px solid #000000;
+	background: #F8F9FC;
+	height: 16px;
+	width: auto;
+	font-color: #000000;
+	padding-top:3px;
+	padding-left:3px;
+	padding-right:3px;
+	padding-bottom:3px;
+	text-decoration:none;
 }
 
 
