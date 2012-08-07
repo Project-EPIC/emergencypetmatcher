@@ -22,6 +22,35 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
     <!-- Include the waypoints plug-in -->
     <script type="text/javascript"> 
+    $(document).ready(function(){
+
+        $('#prdpdialog a').each(function(){
+          
+          var $loading = $('<img src="{{ STATIC_URL }}images/loading.gif" alt="loading">');
+          var $dialog = $('<div></div>').append($loading.clone());
+          var $link = $(this).one('click', function() {
+
+              $dialog.load ($link.attr('href')).dialog ({
+              
+              autoOpen: true,
+              closeOnEscape: true,
+              title: $link.attr('title'),
+              height: "auto",
+              modal: true,
+              width: 700,
+              resizable: false
+                
+            });
+            
+            $link.click(function(){
+
+              $dialog.dialog('open');
+              return false;
+            });
+            return false;
+          });
+        });
+      });
     </script>
   </head>
 
@@ -55,20 +84,46 @@
 
         <div class="prdp_ppm_wk">
           <div id="prdp_subtitle"> Proposed Matches </div>
+          {% for pet_match in matches  %}
+              <div class = "prdp_user_txt" id = "prdp_petmatch_box">
+                  {% ifequal pet_report.status 'Lost' %}
+                    <div id = "prdpdialog"><a href = "{% url 'disp_petreport' pet_match.found_pet.id %}"><img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ pet_match.found_pet.img_path }}" /></a></div>
+                  {% else %}
+                    <div id = "prdpdialog"><a href="{% url 'disp_petreport' pet_match.lost_pet.id %}"><img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ pet_match.lost_pet.img_path }}" /></a></div>
+                  {% endifequal %}  
+                  <div id="prdp_user_box" style="float:right;">
+                      <a href= "{% url 'detail' pet_match.proposed_by.id %}">{{ pet_match.proposed_by.user.username }}
+                      {% if pet_match.proposed_by.photo %}    
+                        <img src="{{ STATIC_URL }}{{ pet_match.proposed_by.photo }}" class = "prdp_worker_img" />   
+                      {% else %}
+                        <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" class = "prdp_worker_img" />
+                      {% endif %}
+                      </a>
+                </div>
+              </div> 
+          {% endfor %}
         </div>         
         <div class="prdp_ppm_wk">
           <div id="prdp_subtitle">
               People working on this pet
-            </div>
+          </div>
             {% for worker in pet_report.workers.all  %}
-                {{ worker.user.username }}, 
+                <div class = "prdp_user_txt" id = "prdp_user_box">
+                  <a href= "{% url 'detail' worker.id %}">{{ worker.user.username }}
+                  {% if worker.photo %}    
+                    <img src="{{ STATIC_URL }}{{ worker.photo }}" class = "prdp_worker_img" />   
+                  {% else %}
+                    <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" class = "prdp_worker_img" />
+                  {% endif %}
+                  </a>
+                </div> 
             {% endfor %}
         </div> 
 
         <!-- Buttons -->
         <div id ="prdp_buttons">
-          <a style="float:left;" href="#">Bookmark this Pet</a>
-          <a style="float:right;" href="{% url 'matching' pet_report.id %}">Work on this Pet</a>
+          <a  href="#" style="float:left;" id = "prdp_eachbutton">Bookmark this Pet</a>
+          <a  style="float:right;" id = "prdp_eachbutton" href="{% url 'matching' pet_report.id %}">Work on this Pet</a>
         </div>
 
       </div>

@@ -16,7 +16,7 @@
 		{% if userprofile.photo %}		
 			<img src="{{ STATIC_URL }}{{ userprofile.photo }}" width=95 height=95/>		
 		{% else %}
-			<img src="{{ STATIC_URL }}/images/anonymous.gif" width=95 height=95/>
+			<img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" width=95 height=95/>
 		{% endif %}
 	</td>
 	<td>
@@ -33,8 +33,8 @@
 <hr size="10" width="95%" color="yellow"/>
 <h4><u>User Data:</u></h4>
 <table>
-    <tr align="left" class="odd"><th>Id:</th> <td>{{ userprofile.user.id }}</td></tr>
-    <tr align="left" class="even"><th>Username:</th> <td>{{ userprofile.user.username }}</td></tr>
+<!--     <tr align="left" class="odd"><th>Id:</th> <td>{{ userprofile.user.id }}</td></tr>
+ --><tr align="left" class="even"><th>Username:</th> <td>{{ userprofile.user.username }}</td></tr>
     <tr align="left" class="odd"><th>Email:</th> <td>{{ userprofile.user.email|default:"Not provided" }}</td></tr>
     <tr align="left" class="even"><th>First name:</th> <td>{{ userprofile.user.first_name|default:"Not provided" }}</td></tr>
     <tr align="left" class="odd"><th>Last name:</th> <td>{{ userprofile.user.last_name|default:"Not provided" }}</td></tr>
@@ -50,22 +50,8 @@
 {% for pet_report in userprofile.petreport_set.all %}
 <tr>
 	<td>
-		{% if pet_report.img_path %}
-			<a href="#"><img src="{{ STATIC_URL }}{{ pet_report.img_path }}" width=60 height=60/></a>
-		{% else %}
-			{% ifequal pet_report.pet_type "Dog" %}
-				<a href="#"><img src="{{ STATIC_URL }}/images/dog-sil.jpg" width=60 height=60/></a>
-			{% endifequal %}
-			{% ifequal pet_report.pet_type "Cat" %}
-				<a href="#"><img src="{{ STATIC_URL }}/images/cat-sil.png" width=60 height=60/></a>
-			{% endifequal %}
-			{% ifequal pet_report.pet_type "None" %}
-				NOTHING
-			{% endifequal %}
-			{% ifequal pet_report.pet_type "Other" %}
-				OTHER
-			{% endifequal %}
-		{% endif %}
+		<a href="#"><img src="{{ STATIC_URL }}{{ pet_report.img_path }}" width=60 height=60/></a>
+	
 	</td>
 	<td>
 		<a href="#">
