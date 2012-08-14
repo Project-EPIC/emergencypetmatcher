@@ -56,64 +56,63 @@
 
   <body>
     {%  block petreportcontent %}
-      <div id="prdpback">
+      <div id="prdp_back">
 
         <!-- PRDP Title -->
-        <div id="prdp_title">
+        <div class="prdp_title">
           <div style="float:left"> 
-            {% if pet_report.pet_name %} {{ pet_report.pet_name }} {% endif %}
+            {% if pet_report.pet_name %} {{ pet_report.pet_name }} {% endif %} : {{ pet_report.status }}
           </div>
-          <div style="float:right"> {{ pet_report.status }} </div>
         </div>
 
         <!-- PRDP Image -->
-		    <div id="prdp_picwrapper"> <img  src="{{ STATIC_URL }}{{ pet_report.img_path }}"/> </div><br/>
+		   <div class="prdp_picwrapper" > <img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/><br/></div>
 
-        <div id="prdpinfo">
+        <div class="prdp_info">
             <b>Pet Name:</b> {{ pet_report.pet_name }}<br/>
             <b>Lost/Found: </b> {{ pet_report.status }}<br/> 
             <b>Contact:</b>  {{  pet_report.proposed_by.user.username }}<br/>
             <b>Date {{ pet_report.status }} : </b>{{ pet_report.date_lost_or_found }}<br/>
             <b>Age:</b> {{ pet_report.age }}<br/> 
-            <b>Sex:</b>  {% ifequal pet_report.sex "M" %} Male {% else %} Female {% endifequal %}<br/>
+            <b>Sex:</b>  {{ pet_report.get_sex_display }}<br/>
             <b>Breed:</b> {{ pet_report.breed }} <br/> 
             <b>Color:</b> {{ pet_report.color }} <br/>
-            <b>Size:</b> {% ifequal pet_report.size "M" %} Medium (10 - 100 lbs.) {% else %}  {% ifequal pet_report.size "L" %} Large (100+ lbs.) {% else %} Small (0 - 10 lbs.) {% endifequal %} {% endifequal %}<br/>
-            <!-- <b>Description:</b> {{ pet_report.description }}<br> -->
+            <b>Size:</b> {{ pet_report.get_size_display }}<br/>
+            <b>Description:</b> {{ pet_report.description }}<br>
         </div> 
 
         <div class="prdp_ppm_wk">
-          <div id="prdp_subtitle"> Proposed Matches </div>
+          <div class="prdp_subtitle"> Proposed Matches </div>
           {% for pet_match in matches  %}
-              <div class = "prdp_user_txt" id = "prdp_petmatch_box">
+              <div  id = "prdp_petmatch_box"> 
                   {% ifequal pet_report.status 'Lost' %}
                     <img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ pet_match.found_pet.img_path }}" />
                   {% else %}
                     <img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ pet_match.lost_pet.img_path }}" />
                   {% endifequal %}  
                   <div id="prdp_user_box" style="float:right;">
-                      <a href= "{% url 'detail' pet_match.proposed_by.id %}">{{ pet_match.proposed_by.user.username }}
+                      <a href= "{% url 'detail' pet_match.proposed_by.id %}">{{ pet_match.proposed_by.user.username }} 
                       {% if pet_match.proposed_by.photo %}    
                         <img src="{{ STATIC_URL }}{{ pet_match.proposed_by.photo }}" class = "prdp_worker_img" />   
                       {% else %}
                         <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" class = "prdp_worker_img" />
                       {% endif %}
-                      </a>
+                      </a> <!-- The <A> tag here should be used to link to the PMDP in the future-->
                 </div>
               </div> 
           {% endfor %}
         </div>         
         <div class="prdp_ppm_wk">
-          <div id="prdp_subtitle">
+          <div class="prdp_subtitle">
               People working on this pet
           </div>
             {% for worker in pet_report.workers.all  %}
-                <div class = "prdp_user_txt" id = "prdp_user_box">
-                  <a href= "{% url 'detail' worker.id %}">{{ worker.user.username }}
+                <div  id = "prdp_user_box"><!-- class = "prdp_user_txt"  -->
+                  <a href= "{% url 'detail' worker.id %}" title = "{{ worker.user.username }}" >{{ worker.user.username }}
                   {% if worker.photo %}    
-                    <img src="{{ STATIC_URL }}{{ worker.photo }}" class = "prdp_worker_img" />   
+                    <img src="{{ STATIC_URL }}{{ worker.photo }}" alt = "{{ worker.user.username }}" class = "prdp_worker_img" />   
                   {% else %}
-                    <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" class = "prdp_worker_img" />
+                    <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" alt = "{{ worker.user.username }}"  class = "prdp_worker_img" />
                   {% endif %}
                   </a>
                 </div> 
