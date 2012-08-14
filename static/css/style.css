@@ -191,11 +191,13 @@ margin: 0;
 	list-style-type: none;
 	position: relative; /** Needed to ensure items are laid out relative to this container **/
 	margin: 0;
+	border:5px;
 }
 
 /* container */
 
 #container {
+
 
 }
 
@@ -488,10 +490,9 @@ padding-bottom:30px;
 
 	float: left;
 	margin-bottom: 10px;
-	width: 40%;
-	height: 90%;
+	width: 41%;
+	height: 100%;
 	min-width: 460px;
-	border: 1px solid #000000;
 }
 
 .sticky #workspace {
@@ -502,9 +503,17 @@ padding-bottom:30px;
 	width: 40%;
 	min-width: 460px;
 	top:0;
-	height: 90%;
-	border: 1px solid #000000;
+	height: 100%;
+}
 
+#matching_container {
+
+	width: 50%;
+	min-width:50%;
+	max-height: 600px;
+	overflow:auto;
+	float:right;
+	border: 2px dotted;
 }
 
 .droppable:hover {
@@ -554,9 +563,9 @@ padding-bottom:30px;
 	float:left;
 }
 
-#workspace_match_detail table {
-	margin: 10px;
-	border: 3px dotted #124023;
+#workspace_match_detail ul {
+	margin: 11px;
+	list-style-type: none;
 }
 
 #workspace_match_detail button {
