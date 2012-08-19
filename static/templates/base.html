@@ -163,7 +163,7 @@
 								{% for pet_report in pet_reports_list %}
 									<li class="item" >
 										<div id = "prdpdialog">
-											<a href= "{% url 'disp_petreport' pet_report.id %}">
+											<a href= "{% url 'disp_petreport' pet_report.id %}" title="{{ pet_report.pet_name }}">
 												{% if pet_report.pet_name %}
 													<strong>{{ pet_report.pet_name }}</strong><br/>
 												{% endif %}
