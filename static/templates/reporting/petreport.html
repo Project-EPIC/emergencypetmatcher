@@ -22,35 +22,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
     <!-- Include the waypoints plug-in -->
     <script type="text/javascript"> 
-    // $(document).ready(function(){
-
-    //     $('#prdpsubdialog a').each(function(){
-          
-    //       var $loading = $('<img src="{{ STATIC_URL }}images/loading.gif" alt="loading">');
-    //       var $dialog = $('<div></div>').append($loading.clone());
-    //       var $link = $(this).one('click', function() {
-
-    //           $dialog.load ($link.attr('href')).dialog ({
-              
-    //           autoOpen: true,
-    //           closeOnEscape: true,
-    //           title: $link.attr('title'),
-    //           height: "auto",
-    //           modal: true,
-    //           width: 700,
-    //           resizable: false
-                
-    //         });
-            
-    //         $link.click(function(){
-
-    //           $dialog.dialog('open');
-    //           return false;
-    //         });
-    //         return false;
-    //       });
-    //     });
-    //   });
     </script>
   </head>
 
@@ -94,7 +65,7 @@
                     <img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ pet_match.lost_pet.img_path }}" />
                   {% endifequal %}  
                   <div id="prdp_user_box" style="float:right;">
-                      <a href= "{% url 'detail' pet_match.proposed_by.id %}">{{ pet_match.proposed_by.user.username }} 
+                      <a href= "{% url 'detail' pet_match.proposed_by.id %}"><!-- {{ pet_match.proposed_by.user.username }}  -->
                       {% if pet_match.proposed_by.photo %}    
                         <img src="{{ STATIC_URL }}{{ pet_match.proposed_by.photo }}" class = "prdp_worker_img" />   
                       {% else %}
@@ -111,7 +82,7 @@
           </div>
             {% for worker in pet_report.workers.all  %}
                 <div  id = "prdp_user_box"><!-- class = "prdp_user_txt"  -->
-                  <a href= "{% url 'detail' worker.id %}" title = "{{ worker.user.username }}" >{{ worker.user.username }}
+                  <a href= "{% url 'detail' worker.id %}" title = "{{ worker.user.username }}" ><!-- {{ worker.user.username }} -->
                   {% if worker.photo %}    
                     <img src="{{ STATIC_URL }}{{ worker.photo }}" alt = "{{ worker.user.username }}" class = "prdp_worker_img" />   
                   {% else %}
