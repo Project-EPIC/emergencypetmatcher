@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ModelForm
 from django import forms
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.core.files.storage import FileSystemStorage
 import PIL
 
@@ -20,20 +20,20 @@ class PetReport(models.Model):
     status = models.CharField(max_length = 5, choices = STATUS_CHOICES, null=False, default=None)
     date_lost_or_found = models.DateField(null=False)
     sex = models.CharField(max_length=6, choices=SEX_CHOICES, null=False)
-    size = models.CharField(max_length=50, choices = SIZE_CHOICES, null=False)
-    location = models.CharField(max_length=50, null=False, default='N/A')
+    size = models.CharField(max_length=30, choices = SIZE_CHOICES, null=False)
+    location = models.CharField(max_length=25, null=False, default='N/A')
 
     #ForeignKey: Many-to-one relationship with User
     proposed_by = models.ForeignKey('UserProfile', null=False, default=None)
 
     '''Non-Required Fields'''
     img_path = models.ImageField(upload_to='images/petreport_images', null=True)
-    pet_name = models.CharField(max_length=15,null=True,default='unknown') 
-    age = models.IntegerField(null=True)
-    color = models.CharField(max_length=20,null=True,default='unknown')
-    breed = models.CharField(max_length=30,null=True,default='unknown')
+    pet_name = models.CharField(max_length=15, null=True, default='unknown') 
+    age = models.CharField(max_length=5, null=True)
+    color = models.CharField(max_length=30, null=True,default='unknown')
+    breed = models.CharField(max_length=30, null=True,default='unknown')
     revision_number = models.IntegerField(null=True) #update revision using view
-    description   = models.CharField(max_length=300, null=True)
+    description   = models.CharField(max_length=500, null=True, default="")
     #Many-to-Many relationship with User
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
 
@@ -49,6 +49,10 @@ class PetReport(models.Model):
         str = "PetReport {\n\tpet_type: %s\n\tstatus: %s\n\tproposed_by: %s\n\t" % (self.pet_type, self.status, self.proposed_by)
         str += "date_lost_or_found: %s\n\tsex: %s\n\tsize: %s\n\tlocation: %s\n\t" % (self.date_lost_or_found, self.sex, self.size, self.location)
         str += "age: %s\n\tbreed: %s\n\tdescription: %s\n\t}" % (self.age, self.breed, self.description)
+        return str
+
+    def convert_date_to_string(self):
+        string = str(self.date_lost_or_found)
         return str
 
         
@@ -75,22 +79,23 @@ class UserProfile (models.Model):
         if created:
             UserProfile.objects.create(user=instance)
 
-    post_save.connect(create_user_profile, sender=User)
-
     def __unicode__ (self):
         return 'User {username:%s, email:%s}' % (self.user.username, self.user.email)
+
+    post_save.connect(create_user_profile, sender=User)        
 
 
 #The Pet Match Object Model
 class PetMatch(models.Model):
 
     '''Required Fields'''
-    lost_pet = models.ForeignKey('PetReport', null=False, related_name='lost_pet_related')
-    found_pet = models.ForeignKey('PetReport', null=False, related_name='found_pet_related')
+    lost_pet = models.ForeignKey('PetReport', null=False, default=None, related_name='lost_pet_related')
+    found_pet = models.ForeignKey('PetReport', null=False, default=None, related_name='found_pet_related')
     proposed_by = models.ForeignKey('UserProfile', null=False, related_name='proposed_by_related')
+    proposed_date = models.DateField(null=False, default=None, auto_now_add=True)
+    description = models.CharField(max_length=300, null=False, default=None)
     
     '''Non-Required Fields'''
-    proposed_date = models.DateField(null=True)
     is_open = models.BooleanField(default=True)
     score = models.IntegerField(default=0)
     closed_by = models.ForeignKey('UserProfile', null=True, related_name='closed_by_related')
@@ -98,6 +103,42 @@ class PetMatch(models.Model):
     up_votes = models.ManyToManyField('UserProfile', null=True, related_name='up_votes_related')
     down_votes = models.ManyToManyField('UserProfile', null=True, related_name='down_votes_related')
     # matches_proposed = models.ForeignKey('UserProfile', null=True, related_name='matches_proposed_related')
+
+
+    ''' Determine if a PetMatch exists between pr1 and pr2, and if so, return it. Otherwise, return None. '''
+    @staticmethod
+    def get_PetMatch(pr1, pr2):
+
+        assert isinstance(pr1, PetReport)
+        assert isinstance(pr2, PetReport)
+
+        try:
+            if pr1.status == "Lost":
+                existing_match = PetMatch.objects.get(lost_pet = pr1, found_pet = pr2)
+            else:
+                existing_match = PetMatch.objects.get(lost_pet = pr2, found_pet = pr1)
+
+            return existing_match
+
+        except PetMatch.DoesNotExist:
+            return None
+
+
+    ''' Determine if the input UserProfile (user) has up/down-voted on this PetMatch already '''
+    def user_has_voted(self, user_profile):
+        try:
+            upvote = self.up_votes.get(pk = user_profile.id)
+        except UserProfile.DoesNotExist:
+            upvote = None
+        try:
+            downvote = self.down_votes.get(pk = user_profile.id)
+        except UserProfile.DoesNotExist:
+            downvote = None
+
+        if (upvote != None) or (downvote != None):
+            return True
+        return False
+
 
     def __unicode__ (self):
         return 'PetMatch {lost:%s, found:%s, proposed_by:%s}' % (self.lost_pet, self.found_pet, self.proposed_by)
@@ -143,10 +184,10 @@ class PetReportForm (ModelForm):
     '''Non-Required Fields'''
     img_path = forms.ImageField(label = "Upload an Image ", required = False)
     pet_name = forms.CharField(label = "Pet Name", max_length=50, required = False) 
-    age = forms.IntegerField(label = "Age", required = False)
+    age = forms.CharField(label = "Age", max_length = 5, required = False)
     breed = forms.CharField(label = "Breed", max_length = 30, required = False)
     color = forms.CharField(label = "Coat Color(s)", max_length = 20, required = False)
-    description  = forms.CharField(label = "Description", max_length = 300, required = False, widget = forms.Textarea)
+    description  = forms.CharField(label = "Description", max_length = 500, required = False, widget = forms.Textarea)
 
     class Meta:
         model = PetReport

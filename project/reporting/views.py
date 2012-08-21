@@ -19,7 +19,12 @@ from django.core.urlresolvers import reverse
 from registration.forms import RegistrationForm
 from random import choice, uniform
 from django.contrib import messages
-import re
+from django.utils import simplejson
+from django.core import serializers
+from matching.views import *
+from django.forms.models import model_to_dict
+import test_utils as utils
+import datetime, re
 
 
 @login_required
@@ -67,13 +72,33 @@ def submit_petreport(request):
 
     return render_to_response('reporting/petreport_form.html', {'form':form}, RequestContext(request))
 
-def disp_petreport(request,petreport_id):
+def disp_petreport(request, petreport_id):
+
     pet_report = PetReport.objects.get(pk = petreport_id)
     if pet_report.status == 'Lost':
         matches = PetMatch.objects.all().filter(lost_pet = pet_report)
     else:
         matches = PetMatch.objects.all().filter(found_pet = pet_report)
     return render_to_response('reporting/petreport.html',{'pet_report': pet_report,'matches': matches}, RequestContext(request))
+
+
+'''AJAX Request to retrieve a PetReport object in JSON format'''
+def get_petreport_json(request, petreport_id):
+
+    if request.is_ajax() == True:
+        print "============== AJAX REQUEST ======================= "
+        prdp = get_object_or_404(PetReport, pk=petreport_id)
+
+        #Need this for easy displaying on the Matching Interface workspace detail table.
+        prdp_dict = utils.simplify_model_dict(prdp) 
+
+        json = simplejson.dumps(prdp_dict)
+        print "JSON: " + str(json)
+        return HttpResponse(json, mimetype="application/json")
+
+    print "Oops,something went wrong"
+    messages.failure(request, "Oops, something went wrong.")
+    return matching.match_petreport(request, petreport_id)
 
 
 '''
