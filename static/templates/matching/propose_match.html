@@ -27,51 +27,85 @@
 
   <body>
     {%  block petreportcontent %}
-      <div id="prdpback">
+      <div id="prdp_back">
 
-        <!-- PRDP Title -->
-        <div id="prdp_title">
-          <div style="float:left"> 
-            {% if pet_report.pet_name %} {{ pet_report.pet_name }} {% endif %}
-          </div>
-          <div style="float:right"> {{ pet_report.status }} </div>
+        <strong>          
+          {% if messages %} 
+            {% for message in messages %} <p>{{ message }}</p> {% endfor %}
+          {% endif %}
+        </strong>
+
+        <div id = "match_instructions" style="margin:0 auto; font-weight:bold;">
+          <p> Examine the two pet reports carefully, comparing and contrasting the characteristics that you believe make these two pet reports link to the same pet. Are you sure this is match that you want to make? If so, please fill out a brief description of your rationale and click on the "Propose Match" button at the bottom of the dialog window. Otherwise, please click the "Cancel" button.</p>
         </div>
 
-        <!-- PRDP Image -->
-		    <div id="prdp_picwrapper"> <img  src="{{ STATIC_URL }}{{ pet_report.img_path }}"/> </div><br/>
+        <!-- First PetReport Match -->
+        <div id = "match_prdpback" style = "float:left; border-color:blue;">
 
-        <div id="prdpinfo">
-            <b>Pet Name:</b> {{ pet_report.pet_name }}<br/>
-            <b>Lost/Found: </b> {{ pet_report.status }}<br/> 
-            <b>Contact:</b>  {{  pet_report.proposed_by.user.username }}<br/>
-            <b>Date {{ pet_report.status }} : </b>{{ pet_report.date_lost_or_found }}<br/>
-            <b>Age:</b> {{ pet_report.age }}<br/> 
-            <b>Sex:</b>  {% ifequal pet_report.sex "M" %} Male {% else %} Female {% endifequal %}<br/>
-            <b>Breed:</b> {{ pet_report.breed }} <br/> 
-            <b>Color:</b> {{ pet_report.color }} <br/>
-            <b>Size:</b> {% ifequal pet_report.size "M" %} Medium (10 - 100 lbs.) {% else %}  {% ifequal pet_report.size "L" %} Large (100+ lbs.) {% else %} Small (0 - 10 lbs.) {% endifequal %} {% endifequal %}<br/>
-            <!-- <b>Description:</b> {{ pet_report.description }}<br> -->
+          <!-- First PetReport Title -->
+          <div id="match_title">
+            <div style="float:left"> {% if target.pet_name %} {{ target.pet_name }} {% endif %} </div>
+            <div style="float:right"> {{ target.status }} </div>
+          </div> <br/>
+
+          <!-- First PetReport Image -->
+          <img src="{{ STATIC_URL }}{{ target.img_path }}"/>
+
+          <!-- First PetReport Info -->
+          <ul>
+            <li><b>Pet Name:</b> {{ target.pet_name }}</li>
+            <li><b>Lost/Found:</b> {{ target.status }}</li>
+            <li><b>Contact:</b>  <a href="{% url 'detail' target.proposed_by.id %}">{{ target.proposed_by.user.username }}</a></li>
+            <li><b>Date {{ target.status }} : </b>{{ target.date_lost_or_found }}</li>
+            <li><b>Location: </b>{{ target.location }}</li>
+            <li><b>Age:</b> {{ target.age }} </li>
+            <li><b>Sex:</b>  {% ifequal target.sex "M" %} Male {% else %} Female {% endifequal %}</li>
+            <li><b>Breed:</b> {{ target.breed }}</li>
+            <li><b>Color:</b> {{ target.color }}</li>
+            <li><b>Size:</b> {% ifequal target.size "M" %} Medium (10 - 100 lbs.) {% else %}  {% ifequal target.size "L" %} Large (100+ lbs.) {% else %} Small (0 - 10 lbs.) {% endifequal %} {% endifequal %}</li>
+            <li><b>Description:</b> <div class = "pr_desc" style="border:1px dotted"> {{ target.description }}</div> </li>
+          </ul>
+
         </div> 
+        <!-- End First PetReport Match -->
 
-        <div class="prdp_ppm_wk">
-          <div id="prdp_subtitle"> Proposed Matches </div>
-        </div>         
-        <div class="prdp_ppm_wk">
-          <div id="prdp_subtitle">
-              People working on this pet
-            </div>
-            {% for worker in pet_report.workers.all  %}
-                {{ worker.user.username }}, 
-            {% endfor %}
-        </div> 
+        <!-- Second PetReport Match -->
+        <div id = "match_prdpback" style = "float:right; border-color:red;">
 
-        <!-- Buttons -->
-        <div id ="prdp_buttons">
-          <a style="float:left;" href="#">Bookmark this Pet</a>
-          <a style="float:right;" href="{% url 'matching' pet_report.id %}">Work on this Pet</a>
+          <!-- Second PetReport Title -->
+          <div id="match_title">
+            <div style="float:left"> {% if candidate.pet_name %} {{ candidate.pet_name }} {% endif %} </div>
+            <div style="float:right"> {{ candidate.status }} </div>
+          </div> <br/>
+
+          <!-- Second PetReport Image -->
+          <img src="{{ STATIC_URL }}{{ candidate.img_path }}"/>
+
+          <!-- Second PetReport Info -->
+          <ul>
+            <li><b>Pet Name:</b> {{ candidate.pet_name }}</li>
+            <li><b>Lost/Found:</b> {{ candidate.status }}</li>
+            <li><b>Contact:</b> <a href="{% url 'detail' candidate.proposed_by.id %}">{{ candidate.proposed_by.user.username }}</a></li>
+            <li><b>Date {{ candidate.status }} : </b>{{ candidate.date_lost_or_found }}</li>
+            <li><b>Location: </b>{{ candidate.location }}</li>
+            <li><b>Age:</b> {{ candidate.age }} </li>
+            <li><b>Sex:</b>  {% ifequal candidate.sex "M" %} Male {% else %} Female {% endifequal %}</li>
+            <li><b>Breed:</b> {{ candidate.breed }}</li>
+            <li><b>Color:</b> {{ candidate.color }}</li>
+            <li><b>Size:</b> {% ifequal candidate.size "M" %} Medium (10 - 100 lbs.) {% else %}  {% ifequal candidate.size "L" %} Large (100+ lbs.) {% else %} Small (0 - 10 lbs.) {% endifequal %} {% endifequal %}</li>
+            <li><b>Description:</b> <div class = "pr_desc" style="border:1px dotted"> {{ candidate.description }}</div> </li>
+          </ul>
         </div>
+        <!-- End Second PetReport Match -->
+
+          <form method="post" style="margin:5px;" action="{% url 'propose_match' target.id candidate.id %}" >
+            {% csrf_token %}
+            <textarea name='description' rows='5' cols ='100' style="display:block; margin: 0 auto;"> </textarea>
+            <input type="Submit" value="Submit" style="margin-top: 10px; width:100px; height:35px; float:right;"/>
+          </form>
 
       </div>
     {%  endblock petreportcontent %}
   </body>
 </html>
+

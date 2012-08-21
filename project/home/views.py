@@ -59,7 +59,7 @@ def login_user(request):
                 
         else:
             messages.error(request, 'Invalid Login credentials. Please try again.')
-    
+
     try: 
         next = request.REQUEST ['next']
     except KeyError: #This only happens if the user tries to plug in the login URL without a 'next' parameter...

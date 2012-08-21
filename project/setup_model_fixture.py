@@ -3,16 +3,17 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'project.settings'
 
 from home.models import *
 from django.contrib.auth import authenticate
-import test_utils as utils, string, random, sys, os
+import test_utils as utils
+import string, random, sys, os
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 setup_model_fixture.py: Setup sample (random) data for your dev env.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 #Control Variables
-NUM_PETREPORTS = 100
-NUM_USERS = 5
-NUM_PETMATCHES = 25
+NUM_PETREPORTS = 20
+NUM_USERS = 10
+NUM_PETMATCHES = 100
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''
 When Executed: Setup our fixture
@@ -82,3 +83,11 @@ elif sys.argv[1] == 'setup':
 
 else:
 	print '[ERROR]: Invalid argument(s). Try again.'
+
+
+
+
+
+
+
+	

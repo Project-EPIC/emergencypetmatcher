@@ -30,8 +30,11 @@
 
         <!-- PRDP Title -->
         <div class="prdp_title">
-          <div style="float:left"> 
-            {% if pet_report.pet_name %} {{ pet_report.pet_name }} {% endif %} : {{ pet_report.status }}
+<!--           <div style="float:left"> 
+            {% if pet_report.pet_name %} {{ pet_report.pet_name }} {% endif %} 
+          </div> -->
+          <div style="float:left;">
+             {{ pet_report.status }}
           </div>
         </div>
 
@@ -62,7 +65,7 @@
                     <img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ pet_match.lost_pet.img_path }}" />
                   {% endifequal %}  
                   <div id="prdp_user_box" style="float:right;">
-                      <a href= "{% url 'detail' pet_match.proposed_by.id %}">{{ pet_match.proposed_by.user.username }} 
+                      <a href= "{% url 'detail' pet_match.proposed_by.id %}"><!-- {{ pet_match.proposed_by.user.username }}  -->
                       {% if pet_match.proposed_by.photo %}    
                         <img src="{{ STATIC_URL }}{{ pet_match.proposed_by.photo }}" class = "prdp_worker_img" />   
                       {% else %}
@@ -79,7 +82,7 @@
           </div>
             {% for worker in pet_report.workers.all  %}
                 <div  id = "prdp_user_box"><!-- class = "prdp_user_txt"  -->
-                  <a href= "{% url 'detail' worker.id %}" title = "{{ worker.user.username }}" >{{ worker.user.username }}
+                  <a href= "{% url 'detail' worker.id %}" title = "{{ worker.user.username }}" ><!-- {{ worker.user.username }} -->
                   {% if worker.photo %}    
                     <img src="{{ STATIC_URL }}{{ worker.photo }}" alt = "{{ worker.user.username }}" class = "prdp_worker_img" />   
                   {% else %}
@@ -92,8 +95,13 @@
 
         <!-- Buttons -->
         <div id ="prdp_buttons">
-          <a  href="#" style="float:left;" id = "prdp_eachbutton">Bookmark this Pet</a>
-          <a  style="float:right;" id = "prdp_eachbutton" href="{% url 'match_petreport' pet_report.id %}">Work on this Pet</a>
+          <form method="post" action="/reporting/bookmark" name="bookmarkForm">
+            {% csrf_token %}
+            <input type="hidden" name="user_id" value="{{ user.id }}" />
+            <input type="hidden" name="petreport_id" value="{{ pet_report.id }}" />
+            <a href="#" style="float:left;" id = "prdp_eachbutton" onclick="document.bookmarkForm.submit()">Bookmark this Pet</a>
+          </form>
+          <a  style="float:right;" id = "prdp_eachbutton" href="{% url 'matching' pet_report.id %}" >Work on this Pet</a>
         </div>
 
       </div>

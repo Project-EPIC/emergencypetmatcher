@@ -36,7 +36,8 @@ class PetReport(models.Model):
     description   = models.CharField(max_length=500, null=True, default="")
     #Many-to-Many relationship with User
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
-
+    bookmarked_by = models.ManyToManyField('UserProfile', null=True, related_name='bookmarks_related')
+    
     def has_image(self):
         if self.img_path == None:
             return False

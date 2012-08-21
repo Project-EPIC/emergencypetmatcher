@@ -8,5 +8,5 @@
 {% block content_subtitle %} Alright, you are all set registering! You may now login to the system. {% endblock content_subtitle %}
 
 {% block content %}
-	<h3> <a href = {% url 'auth_login' %}> Login </a> </h3>
+	<h3> <a href = "{% url 'login_user' %}?next={% firstof request.path '/' %}"> Login </a> </h3>
 {% endblock content %}
