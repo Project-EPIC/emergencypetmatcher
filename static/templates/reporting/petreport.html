@@ -23,7 +23,7 @@
     <!-- Include the waypoints plug-in -->
     <script type="text/javascript"> </script>
       
-      $().post("GetData.jsp");
+     <!--  $().post("GetData.jsp"); -->
     </head>
 
   <body>
@@ -54,7 +54,7 @@
             <b>Breed:</b> {{ pet_report.breed }} <br/> 
             <b>Color:</b> {{ pet_report.color }} <br/>
             <b>Size:</b> {{ pet_report.get_size_display }}<br/>
-            <b>Description:</b> {{ pet_report.description }}<br>
+            <span class="pr_desc"><b>Description:</b> {{ pet_report.description }}<br></span>
         </div> 
 
         <div class="prdp_ppm_wk">
@@ -97,12 +97,11 @@
 
         <!-- Buttons -->
         <div id ="prdp_buttons">
-          <form method="post" action="/reporting/bookmark" name="bookmarkForm">
+          <!-- form method="post" action="/reporting/bookmark" name="bookmarkForm">
             {% csrf_token %}
             <input type="hidden" name="user_id" value="{{ user.id }}" />
-            <input type="hidden" name="petreport_id" value="{{ pet_report.id }}" />
-            <a href="#" style="float:left;" id = "prdp_eachbutton" onclick="document.bookmarkForm.submit()">Bookmark this Pet</a>
-          </form>
+            <input type="hidden" name="petreport_id" value="{{ pet_report.id }}" /> -->
+            <a href="#" style="float:left;" id = "prdp_eachbutton" >Bookmark this Pet</a>
           <a  style="float:right;" id = "prdp_eachbutton" href="{% url 'match_petreport' pet_report.id %}" >Work on this Pet</a>
         </div>
 
