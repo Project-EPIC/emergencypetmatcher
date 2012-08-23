@@ -195,3 +195,51 @@ class ReportingTesting (unittest.TestCase):
 		self.assertTrue(len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS)
 		utils.performance_report(iteration_time)
 
+	def test_get_PetReport_detailed_page(self):
+		print '>>>> Testing test_get_PetReport_detailedpage for %d iterations' % utils.NUMBER_OF_TESTS
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords and petreports 
+		(users, passwords, clients, petreports) = utils.create_test_view_setup(create_petreports=True)
+
+		for i in range (utils.NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petreport = petreports [petreport_i]
+			prdp_url = utils.TEST_PRDP_URL+ str(petreport.id) + "/"
+
+			#Test without logging in First.
+			print "\nGetting PRDP from %s without being logged in" % (client)
+			print prdp_url
+			response = client.get(prdp_url)
+			self.assertTrue(response.status_code == 200)
+			self.assertTrue(response.request ['PATH_INFO'] == prdp_url)
+
+			#Log in
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "\n%s logs onto %s to EPM" % (user, client)
+			#Test after Logging in.
+			response = client.get(prdp_url)
+			self.assertTrue(response.status_code == 200)
+			self.assertTrue(response.request ['PATH_INFO'] == prdp_url)
+			
+			client.logout()
+
+			utils.output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		utils.performance_report(iteration_time)
+
