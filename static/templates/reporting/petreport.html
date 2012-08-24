@@ -42,7 +42,7 @@
 
         <!-- PRDP Image -->
 		   <div class="prdp_picwrapper" > <img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/><br/></div>
-
+        <!-- Information pertaining to the PRDP -->
         <div class="prdp_info">
             <b>Pet Name:</b> {{ pet_report.pet_name }}<br/>
             <b>Lost/Found: </b> {{ pet_report.status }}<br/> 
@@ -54,7 +54,7 @@
             <b>Breed:</b> {{ pet_report.breed }} <br/> 
             <b>Color:</b> {{ pet_report.color }} <br/>
             <b>Size:</b> {{ pet_report.get_size_display }}<br/>
-            <span class="pr_desc"><b>Description:</b> {{ pet_report.description }}<br></span>
+            <div class="pr_desc"><b>Description:</b> {{ pet_report.description }}<br></div>
         </div> 
 
         <div class="prdp_ppm_wk">
@@ -83,7 +83,7 @@
               People working on this pet
           </div>
             {% for worker in pet_report.workers.all  %}
-                <div  id = "prdp_user_box"><!-- class = "prdp_user_txt"  -->
+                <div  id = "prdp_user_box">
                   <a href= "{% url 'detail' worker.id %}" title = "{{ worker.user.username }}" ><!-- {{ worker.user.username }} -->
                   {% if worker.photo %}    
                     <img src="{{ STATIC_URL }}{{ worker.photo }}" alt = "{{ worker.user.username }}" class = "prdp_worker_img" />   

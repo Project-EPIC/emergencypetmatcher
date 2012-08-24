@@ -219,8 +219,7 @@ class ReportingTesting (unittest.TestCase):
 			prdp_url = utils.TEST_PRDP_URL+ str(petreport.id) + "/"
 
 			#Test without logging in First.
-			print "\nGetting PRDP from %s without being logged in" % (client)
-			print prdp_url
+			print "\n\nGetting PRDP from %s without being logged in" % (client)
 			response = client.get(prdp_url)
 			self.assertTrue(response.status_code == 200)
 			self.assertTrue(response.request ['PATH_INFO'] == prdp_url)
@@ -228,11 +227,31 @@ class ReportingTesting (unittest.TestCase):
 			#Log in
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "\n%s logs onto %s to EPM" % (user, client)
+			print "%s logs onto %s to EPM" % (user, client)
 			#Test after Logging in.
 			response = client.get(prdp_url)
 			self.assertTrue(response.status_code == 200)
 			self.assertTrue(response.request ['PATH_INFO'] == prdp_url)
+
+			#Test navigation to user profiles of all workers
+			for worker in petreport.workers.all():
+				worker_url = "/users/"+str(worker.user.id)+"/"
+				response = client.get(worker_url)
+				self.assertTrue(response.status_code == 200)
+				self.assertTrue(response.request ['PATH_INFO'] == worker_url)
+
+			print "Navigation to all workers' user profiles is successful"
+
+			#Test navigation to the matching interface
+			matching_url = "/matching/match_petreport/"+str(petreport.id)+"/"
+			response = client.get(matching_url)
+			self.assertTrue(response.status_code == 200)
+			self.assertTrue(response.request ['PATH_INFO'] == matching_url)
+
+			print "Navigation to the matching interface is successful"
+
+			#test navigation to the PMDP
+
 			
 			client.logout()
 
@@ -242,4 +261,5 @@ class ReportingTesting (unittest.TestCase):
 
 		print ''
 		utils.performance_report(iteration_time)
+
 
