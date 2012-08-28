@@ -5,11 +5,11 @@ from home.models import *
 
 urlpatterns = patterns('reporting.views',
 
-	url (r'^submit_petreport', 'submit_petreport', name='submit_petreport'),
-	url (r'^petreport/(?P<petreport_id>\d+)/$','disp_petreport',name='disp_petreport'),
-	url (r'^get_petreport_json/(?P<petreport_id>\d+)/$', 'get_petreport_json', name="get_petreport_json"),
-	url(r'^bookmark$','bookmark_petreport',name='bookmark_petreport'),
-	# url (r'^petreport/(?P<user_id>\d+)/(?P<petreport_id>\d+)/$','bookmark_petreport',name='bookmark_petreport'),
+	url (r'^submit_PetReport', 'submit_PetReport', name='submit_PetReport'),
+	url (r'^PetReport/(?P<petreport_id>\d+)/$','disp_PetReport',name='disp_PetReport'),
+	url (r'^get_PetReport_json/(?P<petreport_id>\d+)/$', 'get_PetReport_json', name="get_PetReport_json"),
+	url (r'^bookmark$','bookmark_PetReport',name='bookmark_PetReport'),
+	# url (r'^PetReport/(?P<user_id>\d+)/(?P<PetReport_id>\d+)/$','bookmark_PetReport',name='bookmark_PetReport'),
 
 )
 

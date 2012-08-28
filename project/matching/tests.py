@@ -106,11 +106,10 @@ class MatchingTesting (unittest.TestCase):
 			client = clients [client_i]
 			petreport = petreports [petreport_i]
 
-			print "\n%s logs onto %s to enter the matching interface..." % (user, client)
-
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
+			print "\n%s logs onto %s to enter the matching interface..." % (user, client)
 
 			#Go to the matching interface
 			matching_url = utils.TEST_MATCHING_URL + str(petreport.id) + "/"
@@ -167,11 +166,10 @@ class MatchingTesting (unittest.TestCase):
 			client = clients [client_i]
 			petreport = petreports [petreport_i]
 
-			print "\n%s logs onto %s to enter the matching interface..." % (user, client)
-
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
+			print "\n%s logs onto %s to enter the matching interface..." % (user, client)			
 
 			#Go to the matching interface
 			matching_url = utils.TEST_MATCHING_URL + str(petreport.id) + "/"
@@ -194,14 +192,14 @@ class MatchingTesting (unittest.TestCase):
 			print "\n%s has successfully requested page '%s'..." % (user, propose_match_url) 
 
 			#Make the POST request Call		
-			description = utils.generate_lipsum_paragraph()
+			description = utils.generate_lipsum_paragraph(500)
 			post = {'description': description}
 			response = client.post(propose_match_url, post, follow=True)
 			client.logout()						
 
 			#Grab the PetMatch that has either been posted in the past or has been posted by this User.
 			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
-			if match.user_has_voted(user.get_profile()) == True:
+			if match.UserProfile_has_voted(user.get_profile()) == True:
 				print "A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user)
 			else:
 				print "%s has successfully POSTED a new match!" % (user)				
@@ -246,11 +244,10 @@ class MatchingTesting (unittest.TestCase):
 			client = clients [client_i]
 			petreport = petreports [petreport_i]
 
-			print "\n%s logs onto %s to enter the matching interface..." % (user, client)
-
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
+			print "\n%s logs onto %s to enter the matching interface..." % (user, client)			
 
 			#Go to the matching interface
 			matching_url = utils.TEST_MATCHING_URL + str(petreport.id) + "/"
@@ -295,15 +292,177 @@ class MatchingTesting (unittest.TestCase):
 
 
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+PetMatchTesting: Testing for EPM Pet Match functionality
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+class PetMatchTesting (unittest.TestCase):
+
+	#Get rid of all objects in the QuerySet.
+	def setUp(self):
+		User.objects.all().delete()
+		UserProfile.objects.all().delete()
+		PetMatch.objects.all().delete()
+		PetReport.objects.all().delete()
+		Chat.objects.all().delete()
+		ChatLine.objects.all().delete()
+
+	#Get rid of all objects in the QuerySet.
+	def tearDown(self):
+		User.objects.all().delete()
+		UserProfile.objects.all().delete()
+		PetMatch.objects.all().delete()
+		PetReport.objects.all().delete()
+		Chat.objects.all().delete()
+		ChatLine.objects.all().delete()
 
 
+	def test_get_PetMatch_dialog_page (self):
+		print '>>>> Testing test_get_PetMatch_dialog_page for %d iterations' % utils.NUMBER_OF_TESTS
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients, petreports, petmatches) = utils.create_test_view_setup(create_petreports=True, create_petmatches=True)
+
+		for i in range (utils.NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			petmatch_i = random.randrange(0, utils.NUMBER_OF_TESTS/2)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petreport = petreports [petreport_i]
+			petmatch = petmatches [petmatch_i]
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "\n%s logs onto %s to enter the PMDP..." % (user, client)
+
+			#Go to the PRDP
+			prdp_url = utils.TEST_PRDP_URL + str(petreport.id) + "/"
+			response = client.get(prdp_url)
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], prdp_url)
+			print "\n%s enters the Pet Report Detailed Page successfully" % (user)
+
+			#Now go to the PMDP
+			pmdp_url = utils.TEST_PMDP_URL + str(petmatch.id) + "/"
+			response = client.get(pmdp_url)
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], pmdp_url)
+			print "\n%s enters the Pet Match Detailed Page successfully" % (user)
+
+			utils.output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		utils.performance_report(iteration_time)	
 
 
+	def test_post_good_PetMatch_upvote (self):
+		print '>>>> Testing test_post_PetMatch_upvote for %d iterations' % utils.NUMBER_OF_TESTS
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients, petreports, petmatches) = utils.create_test_view_setup(create_petreports=True, create_petmatches=True)
+
+		for i in range (utils.NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			petmatch_i = random.randrange(0, utils.NUMBER_OF_TESTS/2)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petmatch = petmatches [petmatch_i]
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)			
+			print "\n%s logs onto %s to enter the PMDP..." % (user, client)
+
+			pmdp_url = utils.TEST_PMDP_URL + str(petmatch.id) + "/"
+			print pmdp_url
+			response = client.get(pmdp_url)
+
+			vote_url = utils.TEST_VOTE_URL
+			post =  {"vote":"upvote", "match_id":petmatch.id, "user_id":user.id}
+			response = client.post(vote_url, post, follow=True)
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], vote_url)
+			self.assertTrue(petmatch.UserProfile_has_voted(user.get_profile()) == "upvote")
+			self.assertEquals(petmatch.up_votes.get(pk = user.id), user.get_profile())
+
+			utils.output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		utils.performance_report(iteration_time)	
 
 
+	def test_post_good_PetMatch_downvote (self):
+		print '>>>> Testing test_post_good_PetMatch_downvote for %d iterations' % utils.NUMBER_OF_TESTS
+		iteration_time = 0.00
 
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients, petreports, petmatches) = utils.create_test_view_setup(create_petreports=True, create_petmatches=True)
 
+		for i in range (utils.NUMBER_OF_TESTS):
+			start_time = time.clock()
 
+			#indexes
+			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			petmatch_i = random.randrange(0, utils.NUMBER_OF_TESTS/2)
 
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petmatch = petmatches [petmatch_i]
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)			
+			print "\n%s logs onto %s to enter the PMDP..." % (user, client)
+
+			pmdp_url = utils.TEST_PMDP_URL + str(petmatch.id) + "/"
+			print pmdp_url
+			response = client.get(pmdp_url)
+
+			vote_url = utils.TEST_VOTE_URL
+			post =  {"vote":"downvote", "match_id":petmatch.id, "user_id":user.id}
+			response = client.post(vote_url, post, follow=True)
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], vote_url)
+			self.assertTrue(petmatch.UserProfile_has_voted(user.get_profile()) == "downvote")
+			self.assertEquals(petmatch.down_votes.get(pk = user.id), user.get_profile())
+
+			utils.output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		utils.performance_report(iteration_time)
 
 

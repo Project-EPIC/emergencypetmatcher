@@ -1,4 +1,4 @@
-{% extends 'index.html' %}
+{% extends 'home/index.html' %}
 {% load url from future %}
 
 {% block headers %}
@@ -19,7 +19,7 @@
 
 		{% if form.errors %} <strong> {{ form.errors }} </strong> {% endif %}
 
-		<form enctype="multipart/form-data" method="POST" action={% url 'submit_petreport' %}>
+		<form enctype="multipart/form-data" method="POST" action="{% url 'submit_PetReport' %}">
 			{% csrf_token %}
 			<table>
 				{% for field in form %}

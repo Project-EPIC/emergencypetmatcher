@@ -12,16 +12,14 @@
 		<title>{% block head_title %} EmergencyPetMatcher (EPM) {% endblock head_title %}</title>
 		<meta name="keywords" content="pet-family reunification, emergency, research, software engineering, disaster"/>
 		<meta name="description" content="" />
-
 		<!-- CSS -->
 		<link rel="stylesheet" href="{{ STATIC_URL }}css/style.css" type="text/css">
 		<link rel="stylesheet" href="{{ STATIC_URL }}css/reset.css" type="text/css">
-		<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
-
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui-1.8.css" type="text/css">
 		<!-- Javascript & JQuery -->
-		<script src="https://browserid.org/include.js" type="text/javascript"></script> 
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
+		<script src="{{ STATIC_URL }}js/browserid-include.js" type="text/javascript"></script>
+		<script src="{{ STATIC_URL }}js/jquery-min.js" type="text/javascript"></script>
+		<script src="{{ STATIC_URL }}js/jquery-ui-min.js" type="text/javascript"></script>
 		<!-- Include the BlockUI plugin -->
 		<script src="{{ STATIC_URL }}js/BlockUI.js" type="text/javascript"></script>
 		<!-- Include the hoverIntent plug-in -->
@@ -32,7 +30,6 @@
 		<script src="{{ STATIC_URL }}js/jquery.imagesloaded.js"></script>
 		<!-- Include the plug-in -->
 		<script src="{{ STATIC_URL }}js/jquery.wookmark.js"></script>
-
 
 		<!-- General, inheritable JS goes here -->
 		<script type="text/javascript"> </script>
@@ -46,17 +43,20 @@
 				$("#prdpdialog a").click(function(){
 
 					var link = $(this);
-					var loading = $("<img src='{{ STATIC_URL }}images/loading.gif' style='margin 0 auto;' alt='loading'>");
-					var dialog = $("<div></div>").append(loading.clone());
-					dialog.load (link.attr('href')).dialog ({
+					var dialog_box = $("<div></div>").load(link.attr('href')).dialog ({
 
 						autoOpen: true,
+						position: "top",
 						closeOnEscape: true,
-						title: link.attr('title'),
+						title:link.attr('name'),
 						height: "auto",
 						modal: true,
 						width: 700,
-						resizable: false	
+						resizable: false,
+						show: {effect:"fade", duration:500},
+						close: function(event, ui){ 
+							dialog_box.dialog('destroy').remove();
+						}
 
 					});
 					return false;
@@ -102,14 +102,14 @@
 						<li><a href="{% url 'home' %}"> Home</a></li>
 
 						{% if user.is_authenticated %}
-						<li><a href= "{% url 'detail' user.id %}">{{ user.username }}</a></li>
-							<form method = "post" action= "{% url 'logout' %}">
+						<li><a href= "{% url 'get_UserProfile_page' user.id %}">{{ user.username }}</a></li>
+							<form method = "post" action= "{% url 'logout_User' %}">
 								{% csrf_token %} <input type="submit" value="Logout"/>
 							</form>
 						</li>
-						<li><a href= "{% url 'submit_petreport' %}">Submit a Lost/Found Pet Report</a></li>
+						<li><a href= "{% url 'submit_PetReport' %}">Submit a Lost/Found Pet Report</a></li>
 						{% else %}
-						<li><a href= "{% url 'login_user' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
+						<li><a href= "{% url 'login_User' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
 						{% endif %}
 
 						<li><a href="#">About</a></li>
@@ -164,7 +164,7 @@
 							{% for pet_report in pet_reports_list %}
 								<li class="item" >
 									<div id = "prdpdialog">
-										<a href= "{% url 'disp_petreport' pet_report.id %}">
+										<a href= "{% url 'disp_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}">
 											{% if pet_report.pet_name %}
 												<strong>{{ pet_report.pet_name }}</strong><br/>
 											{% endif %}

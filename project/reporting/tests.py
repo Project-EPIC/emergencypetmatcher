@@ -69,8 +69,8 @@ class ReportingTesting (unittest.TestCase):
 		utils.performance_report(iteration_time)
 
 
-	def test_submit_good_PetReport(self):
-		print '>>>> Testing test_submit_good_PetReport for %d iterations' % utils.NUMBER_OF_TESTS
+	def test_post_good_PetReport(self):
+		print '>>>> Testing test_post_good_PetReport for %d iterations' % utils.NUMBER_OF_TESTS
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
@@ -129,8 +129,8 @@ class ReportingTesting (unittest.TestCase):
 		utils.performance_report(iteration_time)
 
 
-	def test_submit_bad_PetReport(self):
-		print '>>>> Testing test_submit_bad_PetReport for %d iterations' % utils.NUMBER_OF_TESTS
+	def test_post_bad_PetReport(self):
+		print '>>>> Testing test_post_bad_PetReport for %d iterations' % utils.NUMBER_OF_TESTS
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.

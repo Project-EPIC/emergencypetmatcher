@@ -1,4 +1,4 @@
-{% extends 'index.html' %}
+{% extends 'home/index.html' %}
 {% load url from future %}
 
 {% block js %}
@@ -68,7 +68,7 @@
 					var img = $(this).find("img");
 					var petreport_id_element = $(this).find("#petreport_id");
 					var petreport_id = $(petreport_id_element).attr("value");
-					var success = get_petreport_object(petreport_id, img);
+					var success = get_PetReport_object(petreport_id, img);
 					
 				}
 			});	
@@ -79,7 +79,7 @@
 				//Grab the Image from the target petreport and copy it in the Workspace Detail Div.
 				var img = $(this);
 				var petreport_id = "{{ target_petreport.id }}";
-				var success = get_petreport_object(petreport_id, img);
+				var success = get_PetReport_object(petreport_id, img);
 
 			});	
 
@@ -90,22 +90,25 @@
 				var target_petreport = "{{ target_petreport.id }}";
 				var candidate_petreport =  candidate_petreport_id;
 
-				var loading = $("<img src='{{ STATIC_URL }}images/loading.gif' alt='loading'>");
-				var dialog = $("<div></div>").append(loading.clone());
-				dialog.load("/matching/propose_match/" + target_petreport + "/" + candidate_petreport + "/").dialog ({
+				//Load the Dialog box.
+				var dialog_box = $("<div></div>").load("/matching/propose_PetMatch/" + target_petreport + "/" + candidate_petreport + "/").dialog ({
 
 					autoOpen: true,
 					position: "top",
 					closeOnEscape: true,
+					show: {effect:"fade", duration:500},
 					title: "Propose Match",
 					modal: true,
 					width: 900,
 					height: "auto",
 					resizable: false,
-					close: function(){ $(this).remove();}
+					close: function(event, ui){ 
+						dialog_box.dialog('destroy').remove();
+					}
 				});
 				
 				return false;
+
 			});
 
 
@@ -190,7 +193,7 @@
 			var petreport_id = petreport_id_element.attr("value");
 
 			//get the PetReport object via AJAX call.
-			var success = get_petreport_object(petreport_id, petreport_img);
+			var success = get_PetReport_object(petreport_id, petreport_img);
 			
 			//Animate the drop!
 			var w = container.width();
@@ -202,12 +205,12 @@
 			$(container).prepend(petreport_id_element);
 		}
 
-		function get_petreport_object (petreport_id, img){
+		function get_PetReport_object (petreport_id, img){
 
 			$.ajax({
 
 				type:"GET",
-				url:"/reporting/get_petreport_json/" + petreport_id + "/",
+				url:"/reporting/get_PetReport_json/" + petreport_id + "/",
 				success: function(data){
 					var petreport = data;
 					move_petreport_to_workspace_match_detail(petreport, img);
@@ -221,19 +224,21 @@
 
 		function show_prdp_dialog (link){
 
-			var loading = $("<img src='{{ STATIC_URL }}images/loading.gif' alt='loading'>");
-			var dialog = $("<div></div>").append(loading.clone());
-			dialog.load (link.attr('href')).dialog ({
+
+			var dialog_box = $("<div></div>").dialog.load(link.attr('href')).dialog ({
 
 				autoOpen: true,
 				position:"top",
 				closeOnEscape: true,
+				show: {effect:"fade", duration:500},
 				title: link.attr('title'),
 				height: "auto",
 				modal: true,
 				width: 700,
 				resizable: false,
-				close: function(){ $(this).remove();}
+				close: function(event, ui){ 
+					dialog_box.dialog('destroy').remove();
+				}
 
 			});
 
@@ -305,7 +310,7 @@
 						<li class="item" >
 							<input id="petreport_id" type="hidden" value="{{ pet_report.id }}"/>
 							<div id = "prdpdialog">
-								<a href= "{% url 'disp_petreport' pet_report.id %}">
+								<a href= "{% url 'disp_PetReport' pet_report.id %}">
 									{% if pet_report.pet_name %}
 										<strong>{{ pet_report.pet_name }}</strong><br/>
 									{% endif %}

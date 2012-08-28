@@ -1,0 +1,235 @@
+{% load url from future %} <!-- Need this for forward (future) compatibility with django 1.5 and beyond. -->
+
+<!DOCTYPE html>
+<html class = 'no-js' lang = "en">
+  <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+  <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+  <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+  <!--[if gt IE 8]> <html class="no-js" lang="en"> <![endif]-->
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>{% block head_title %}Pet Match Detailed Page{% endblock head_title %}</title>
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css" type="text/css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/reset.css" type="text/css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui-1.8.css" type="text/css">
+    <!-- Javascript & JQuery -->
+    <script src="{{ STATIC_URL }}js/browserid-include.js" type="text/javascript"></script>
+    <script src="{{ STATIC_URL }}js/jquery-min.js" type="text/javascript"></script>
+    <script src="{{ STATIC_URL }}js/jquery-ui-min.js" type="text/javascript"></script>
+    <!-- Include the BlockUI plugin -->
+    <script src="{{ STATIC_URL }}js/BlockUI.js" type="text/javascript"></script>
+    <!-- Include the hoverIntent plug-in -->
+    <script src="{{ STATIC_URL }}js/jquery.hoverIntent.js" type="text/javascript"></script>
+    <!-- Include the waypoints plug-in -->
+    <script src="{{ STATIC_URL }}js/jquery.waypoints.js"></script>
+    <!-- Include the imagesLoaded plug-in -->
+    <script src="{{ STATIC_URL }}js/jquery.imagesloaded.js"></script>
+    <!-- Include the plug-in -->
+    <script src="{{ STATIC_URL }}js/jquery.wookmark.js"></script>
+
+    <script type="text/javascript"> 
+
+      $(document).ready(function(){
+
+        //Variables to control for upvoting and downvoting and for readability.
+        var downvote_button = $("#pmdp_downvote_button");
+        var upvote_button = $("#pmdp_upvote_button");
+        var voted = "{{ user_has_voted }}";
+        var UPVOTE = "upvote";
+        var DOWNVOTE = "downvote";
+        var DOWNVOTE_BUTTON_ACTIVE_LINK = "{{ STATIC_URL }}images/icons/button_downvote_active.png";
+        var DOWNVOTE_BUTTON_INACTIVE_LINK = "{{ STATIC_URL }}images/icons/button_downvote_inactive.png";
+        var UPVOTE_BUTTON_ACTIVE_LINK = "{{ STATIC_URL }}images/icons/button_upvote_active.png";
+        var UPVOTE_BUTTON_INACTIVE_LINK = "{{ STATIC_URL }}images/icons/button_upvote_inactive.png";
+
+        //User has upvoted before
+        if (voted == UPVOTE){
+          upvote_button.attr("src", UPVOTE_BUTTON_INACTIVE_LINK);
+          upvote_button.css("cursor", "default");
+        }
+
+        //User has downvoted before
+        else if (voted == DOWNVOTE){
+          downvote_button.attr("src", DOWNVOTE_BUTTON_INACTIVE_LINK);
+          downvote_button.css("cursor", "default");
+        }
+
+        //When the User clicks on the DOWNVOTE Button...
+        downvote_button.click(function(){ 
+
+          //If the button hasn't been pushed yet.
+          if ($(this).attr("src") != DOWNVOTE_BUTTON_INACTIVE_LINK){
+            //Perform the vote.
+            vote (DOWNVOTE); 
+            $(this).attr("src", DOWNVOTE_BUTTON_INACTIVE_LINK);
+            $(this).css("cursor", "default");
+
+            //Make sure the other button is all set up to change too.
+            upvote_button.attr("src", UPVOTE_BUTTON_ACTIVE_LINK);
+            upvote_button.css("cursor", "pointer");
+          }
+        });
+
+        //When the User clicks on the UPVOTE Button...
+        upvote_button.click(function(){ 
+
+          //If the button hasn't been pushed yet.
+          if ($(this).attr("src") != UPVOTE_BUTTON_INACTIVE_LINK){
+            //Perform the vote.
+            vote (UPVOTE); 
+            $(this).attr("src", UPVOTE_BUTTON_INACTIVE_LINK);
+            $(this).css("cursor", "default");
+
+            //Make sure the other button is all set up to change too.
+            downvote_button.attr("src", DOWNVOTE_BUTTON_ACTIVE_LINK);
+            downvote_button.css("cursor", "pointer");
+          }
+        });
+
+      });
+
+      //The voting AJAX POST call. Requires a string with either "up" or "down".
+      function vote (user_vote){
+
+        //Check if the user has logged in.
+        var user_id = "{{ user.id }}";
+
+        if (user_id == "None"){
+          login_link = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";
+          $(".pmdp_messages").html("<li class='error'> You cannot vote for this Pet Match because you are not logged in! "+login_link+ "</li>");
+          return false;
+        }
+
+        //This is the value for the CSRF Token that must be passed into the POST request.
+        csrf_value = $("input").attr("value");
+
+        //Perform the AJAX POST Request for Voting on a PetMatch.
+        $.ajax({
+          type:"POST",
+          url:"{% url 'vote_PetMatch' %}",
+          data: {"csrfmiddlewaretoken":csrf_value, "vote":user_vote, "match_id":"{{ petmatch.id }}", "user_id":"{{ user.id }}"},
+          success: function(data){        
+            $(".pmdp_messages").html("<li class='success'>" + data.message + "</li>");
+            return true;
+          },
+          error: function(data){
+            alert("An unexpected error occurred when trying to " + user_vote +" this PetMatch."); 
+            return false;
+          }
+        });                  
+      }
+
+    </script>
+
+  </head>
+
+  <body>
+    <div id="pmdp_back">
+
+      {% if user_has_voted %}
+      <p style = "text-align:center; color:gray; font-size:14pt;"> You have already voted for this PetMatch. </p>
+      {% endif %}
+      <!-- PMDP Match Container - contains PMDP Images and Attributes -->
+      <div id = "pmdp_match_container">
+
+        <!-- Lost PetReport -->
+        <div class = "pmdp_pet_container" style="float:left;">
+
+          <!-- Lost PetReport Title -->
+          <div id="match_title">
+            <div style="float:left"> {% if petmatch.lost_pet.pet_name %} {{ petmatch.lost_pet.pet_name }} {% endif %} </div>
+            <div style="float:right"> {{ petmatch.lost_pet.status }} </div>
+          </div> <br/>
+
+          <!-- Lost PetReport Image -->
+          <img src="{{ STATIC_URL }}{{ petmatch.lost_pet.img_path }}"/>
+
+          <!-- Lost PetReport Info -->
+          <ul>
+            <li><b>Pet Name:</b> {{ petmatch.lost_pet.pet_name }}</li>
+            <li><b>Lost/Found:</b> {{ petmatch.lost_pet.status }}</li>
+            <li><b>Contact:</b>  <a href="{% url 'get_UserProfile_page' petmatch.lost_pet.proposed_by.id %}">{{ petmatch.lost_pet.proposed_by.user.username }}</a></li>
+            <li><b>Date {{ petmatch.lost_pet.status }} : </b>{{ petmatch.lost_pet.date_lost_or_found }}</li>
+            <li><b>Location: </b>{{ petmatch.lost_pet.location }}</li>
+            <li><b>Age:</b> {{ petmatch.lost_pet.age }} </li>
+            <li><b>Sex:</b>  {{ petmatch.lost_pet.get_sex_display }}</li>
+            <li><b>Breed:</b> {{ petmatch.lost_pet.breed }}</li>
+            <li><b>Color:</b> {{ petmatch.lost_pet.color }}</li>
+            <li><b>Size:</b> {{ petmatch.lost_pet.get_size_display }} </li>
+            <li><b>Description:</b> <div class = "pr_desc" style="padding:2px; border:1px dotted black;"> {{ petmatch.lost_pet.description }}</div> </li>
+          </ul>
+
+        </div> 
+        <!-- End Lost PetReport -->
+
+        <!-- Found PetReport -->
+        <div class = "pmdp_pet_container" style ="float:right;">
+
+          <!-- Found PetReport Title -->
+          <div id="match_title">
+            <div style="float:left"> {% if petmatch.found_pet.pet_name %} {{ petmatch.found_pet.pet_name }} {% endif %} </div>
+            <div style="float:right"> {{ petmatch.found_pet.status }} </div>
+          </div> <br/>
+
+          <!-- Found PetReport Image -->
+          <img src="{{ STATIC_URL }}{{ petmatch.found_pet.img_path }}"/>
+
+          <!-- Found PetReport Info -->
+          <ul>
+            <li><b>Pet Name:</b> {{ petmatch.found_pet.pet_name }}</li>
+            <li><b>Lost/Found:</b> {{ petmatch.found_pet.status }}</li>
+            <li><b>Contact:</b> <a href="{% url 'get_UserProfile_page' petmatch.found_pet.proposed_by.id %}">{{ petmatch.found_pet.proposed_by.user.username }}</a></li>
+            <li><b>Date {{ petmatch.found_pet.status }} : </b>{{ petmatch.found_pet.date_lost_or_found }}</li>
+            <li><b>Location: </b>{{ petmatch.found_pet.location }}</li>
+            <li><b>Age:</b> {{ petmatch.found_pet.age }} </li>
+            <li><b>Sex:</b>  {{ petmatch.found_pet.get_sex_display }}</li>
+            <li><b>Breed:</b> {{ petmatch.found_pet.breed }}</li>
+            <li><b>Color:</b> {{ petmatch.found_pet.color }}</li>
+            <li><b>Size:</b> {{ petmatch.found_pet.get_size_display }}</li>
+            <li><b>Description:</b> <div class = "pr_desc" style="padding:2px; border:1px dotted black;"> {{ petmatch.found_pet.description }}</div> </li>
+          </ul>
+
+        </div>
+        <!-- End Found PetReport -->
+      </div> 
+      <!-- end PMDP Match Container -->
+
+      <div id = "pmdp_action_container">
+
+        <div class="pmdp_subtitle">People who have voted for this Match</div>
+        <!-- Need this for sending POST data -->
+        {% csrf_token %}
+
+        <img id="pmdp_downvote_button" src = "{{ STATIC_URL }}images/icons/button_downvote_active.png" alt="Down-vote this PetMatch"></img>
+        <div id = "pmdp_userbox_container">
+          {% for worker in voters %}
+            <a href= "{% url 'get_UserProfile_page' worker.id %}" title = "{{ worker.user.username }}">
+              <div id = "pmdp_user_box">
+                {% if worker.photo %}    
+                  <img src="{{ STATIC_URL }}{{ worker.photo }}" alt = "{{ worker.user.username }}"/>   
+                {% else %}
+                  <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" alt = "{{ worker.user.username }}"/>
+                {% endif %}
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+        <img id="pmdp_upvote_button" src = "{{ STATIC_URL }}images/icons/button_upvote_active.png" alt="Up-vote this PetMatch"></img>
+
+      </div>
+
+      <!-- Messages -->
+      <ul id="messages" class="pmdp_messages">
+        {% for message in messages %}
+          <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+      </ul>              
+
+    </div>
+  </body>
+</html>
+

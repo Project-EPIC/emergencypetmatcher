@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.forms import ModelForm
 from django import forms
 from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver
 from django.core.files.storage import FileSystemStorage
 import PIL
 
@@ -21,7 +22,7 @@ class PetReport(models.Model):
     date_lost_or_found = models.DateField(null=False)
     sex = models.CharField(max_length=6, choices=SEX_CHOICES, null=False)
     size = models.CharField(max_length=30, choices = SIZE_CHOICES, null=False)
-    location = models.CharField(max_length=25, null=False, default='N/A')
+    location = models.CharField(max_length=25, null=False, default='unknown')
 
     #ForeignKey: Many-to-one relationship with User
     proposed_by = models.ForeignKey('UserProfile', null=False, default=None)
@@ -29,7 +30,7 @@ class PetReport(models.Model):
     '''Non-Required Fields'''
     img_path = models.ImageField(upload_to='images/petreport_images', null=True)
     pet_name = models.CharField(max_length=15, null=True, default='unknown') 
-    age = models.CharField(max_length=5, null=True)
+    age = models.CharField(max_length=5, null=True, default= 'unknown')
     color = models.CharField(max_length=30, null=True,default='unknown')
     breed = models.CharField(max_length=30, null=True,default='unknown')
     revision_number = models.IntegerField(null=True) #update revision using view
@@ -76,14 +77,14 @@ class UserProfile (models.Model):
     #twitter_id = models.IntegerField(blank=True, null=True)
 
     ''' Create a post save signal function to save a UserProfile when a User is created'''
-    def create_user_profile(sender, instance, created, **kwargs):
+    def create_UserProfile(sender, instance, created, **kwargs):
         if created:
             UserProfile.objects.create(user=instance)
 
     def __unicode__ (self):
         return 'User {username:%s, email:%s}' % (self.user.username, self.user.email)
 
-    post_save.connect(create_user_profile, sender=User)        
+    post_save.connect(create_UserProfile, sender=User)        
 
 
 #The Pet Match Object Model
@@ -103,13 +104,17 @@ class PetMatch(models.Model):
     closed_date = models.DateField(null=True)
     up_votes = models.ManyToManyField('UserProfile', null=True, related_name='up_votes_related')
     down_votes = models.ManyToManyField('UserProfile', null=True, related_name='down_votes_related')
-    # matches_proposed = models.ForeignKey('UserProfile', null=True, related_name='matches_proposed_related')
 
+    #TODO: Need to implement pre-save signal for the PetMatch object to avoid having duplicate PetMatch objects.
+    #    @receiver(pre_save, sender=PetMatch)
+    #    def create_PetMatch(sender, **kwargs):
+    #        existing_match = PetMatch.get_PetMatch(sender.lost_pet, sender.found_pet)
+    #        if existing_match != None:
+    #            print "PetMatch %s already exists in the Database!" 
 
     ''' Determine if a PetMatch exists between pr1 and pr2, and if so, return it. Otherwise, return None. '''
     @staticmethod
     def get_PetMatch(pr1, pr2):
-
         assert isinstance(pr1, PetReport)
         assert isinstance(pr2, PetReport)
 
@@ -126,7 +131,9 @@ class PetMatch(models.Model):
 
 
     ''' Determine if the input UserProfile (user) has up/down-voted on this PetMatch already '''
-    def user_has_voted(self, user_profile):
+    def UserProfile_has_voted(self, user_profile):
+        assert isinstance(user_profile, UserProfile)
+
         try:
             upvote = self.up_votes.get(pk = user_profile.id)
         except UserProfile.DoesNotExist:
@@ -136,13 +143,16 @@ class PetMatch(models.Model):
         except UserProfile.DoesNotExist:
             downvote = None
 
-        if (upvote != None) or (downvote != None):
-            return True
-        return False
+        if (upvote != None):
+            return "upvote"
+        elif (downvote != None):
+            return "downvote"
 
+        return False
 
     def __unicode__ (self):
         return 'PetMatch {lost:%s, found:%s, proposed_by:%s}' % (self.lost_pet, self.found_pet, self.proposed_by)
+
 
 #The Chat Object Model
 class Chat (models.Model):
