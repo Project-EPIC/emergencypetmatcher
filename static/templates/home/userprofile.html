@@ -1,0 +1,141 @@
+{% extends 'home/index.html' %}
+{% load url from future %}
+
+{% block head_title %}EPM - User Profile: {{ userprofile.user.username }} {% endblock head_title %}
+{% block content_title %} User Profile {% endblock content_title %}
+
+{% block content %}
+
+	{% if messages %}
+	<ul id="messages">
+	    {% for message in messages %}
+	    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+	    {% endfor %}
+	</ul>
+	{% endif %}
+
+	<table border=0 width="100%">
+	<tr>
+	<td width="70%">
+	<table border=0 cellpadding=5>
+	<tr>
+		<td>
+			{% if userprofile.photo %}		
+				<img src="{{ STATIC_URL }}{{ userprofile.photo }}" width=95 height=95/>		
+			{% else %}
+				<img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" width=95 height=95/>
+			{% endif %}
+		</td>
+		<td>
+			{% if userprofile.user.username == user.username %}
+				<h2><i>Hi, {{ userprofile.user.username }}</i></h2>
+			{% else %}
+				<h2>{{ userprofile.user.username }}</h2>
+			{% endif %}
+		</td>
+	</tr>
+	</table>
+
+
+	<hr size="10" width="95%" color="yellow"/>
+	<h4><u>User Data:</u></h4>
+	<table>
+	<!--     <tr align="left" class="odd"><th>Id:</th> <td>{{ userprofile.user.id }}</td></tr>
+	 --><tr align="left" class="even"><th>Username:</th> <td>{{ userprofile.user.username }}</td></tr>
+	    <tr align="left" class="odd"><th>Email:</th> <td>{{ userprofile.user.email|default:"Not provided" }}</td></tr>
+	    <tr align="left" class="even"><th>First name:</th> <td>{{ userprofile.user.first_name|default:"Not provided" }}</td></tr>
+	    <tr align="left" class="odd"><th>Last name:</th> <td>{{ userprofile.user.last_name|default:"Not provided" }}</td></tr>
+	    <tr align="left" class="even"><th>Last login:</th> <td>{{ last_login }}</td></tr>
+	</table>
+
+
+
+	{% if userprofile.user.username == user.username %}
+	<hr size="10" width="95%" color="yellow"/>
+	<h4>Proposed Pet Reports:</h4>
+	<table border=0 cellpadding=5>
+	{% for pet_report in userprofile.petreport_set.all %}
+	<tr>
+		<td>
+			<a href="#"><img src="{{ STATIC_URL }}{{ pet_report.img_path }}" width=60 height=60/></a>
+		
+		</td>
+		<td>
+			<a href="#">
+			{{ pet_report.status }} {{ pet_report.pet_type }} (id: {{ pet_report.id }}) 
+			</br>
+			Reported in {{ pet_report.date_lost_or_found }} at Location: {{ pet_report.location }}
+			</br>
+			Name: {{ pet_report.pet_name }}, Sex: {{ pet_report.sex }}, Size: {{ pet_report.size }} 
+			</a>
+		</td>
+		<td>
+			<a href="#">Edit</a>
+		</td>
+		<td>
+			<a href={% url 'share' pet_report.id %}>Share</a>
+		</td>	
+	</tr>
+	{% endfor %}	
+	</table>
+	{% endif %}
+
+
+	{% if userprofile.user.username == user.username %}
+	<div>
+	<hr size="10" width="95%" color="yellow"/>
+	<h4>Proposed Pet Matches:</h4>
+	{% for pet_match in userprofile.proposed_by_related.all %}
+		<ul>
+		<li><a href="#">Lost: {{ pet_match.lost_pet.pet_type }} (id: {{ pet_match.lost_pet.id}}) --
+			Found: {{ pet_match.found_pet.pet_type }} (id: {{ pet_match.found_pet.id}})</a>
+		</li>
+		</ul>
+	{% endfor %}
+	</div>
+	{% endif %}
+
+	{% if userprofile.user.username == user.username %}
+	<div>
+	<hr size="10" width="95%" color="yellow"/>
+	<h4>Working-On Pet Reports:</h4>
+	{% for petreport in userprofile.workers_related.all %}
+		<ul>
+		<li><a href="#">{{ petreport.status }} {{ petreport.pet_type }} (id: {{ petreport.id }}), Name: {{ petreport.pet_name }}</a>
+		</li>
+		</ul>
+	{% endfor %}
+	</div>
+	{% endif %}
+
+
+	</td>
+	<td width="30%">
+
+	{% if userprofile.user.username == user.username %}
+	<h4><u>Friends:</u></h4>
+	<div style="overflow:auto; border:0px solid #0ADA0A;">
+	<table border=0 cellpadding=5>
+	{% for friend in userprofile.friends.all %}
+	<tr>
+		<td>
+			{% if friend.photo %}
+				<a href="{% url 'get_UserProfile_page' friend.user.id %}"><img src="{{ STATIC_URL }}{{ friend.photo }}" width=60 height=60/></a></br>
+			{% else %}
+				<a href="{% url 'get_UserProfile_page' friend.user.id %}"><img src="{{ STATIC_URL }}images/defaults/anonymous.gif" width=60 height=60/></a></br>
+			{% endif %}
+			
+			<a href={% url 'get_UserProfile_page' friend.user.id %}>{{ friend.user.username }}</a>
+			
+		</td>
+	</tr>	
+	{% endfor %}	
+	</table>
+	</div>
+	{% endif %}
+
+	</td>
+	</tr>
+	</table>
+
+{% endblock content%}

@@ -37,11 +37,11 @@ def home (request):
         
     print len(pet_reports_list)
     if request.user.is_authenticated() == True:
-        return render_to_response('index.html', {'version': version, 'pet_reports_list': pet_reports_list, 'last_login': request.session.get('social_auth_last_login_backend')}, RequestContext(request))
+        return render_to_response('home/index.html', {'version': version, 'pet_reports_list': pet_reports_list, 'last_login': request.session.get('social_auth_last_login_backend')}, RequestContext(request))
     else:
-        return render_to_response('index.html', {'version': version, 'pet_reports_list': pet_reports_list}, RequestContext(request))
+        return render_to_response('home/index.html', {'version': version, 'pet_reports_list': pet_reports_list}, RequestContext(request))
 
-def login_user(request):
+def login_User(request):
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
@@ -69,7 +69,7 @@ def login_user(request):
     return render_to_response('registration/login.html', {'form':form}, RequestContext(request, {'next': next}))
 
 
-def logout_user(request):
+def logout_User(request):
     logout(request)
     messages.success(request, "You have successfully logged out.")
     return redirect('/')
@@ -103,9 +103,9 @@ def form(request):
         return render_to_response('registration/social_auth_username_form.html', {}, RequestContext(request))
 
 @login_required
-def detail(request, userprofile_id):   
+def get_UserProfile_page(request, userprofile_id):   
     u = get_object_or_404(UserProfile, pk=userprofile_id) 
-    return render_to_response('detail.html', {'userprofile':u}, context_instance=RequestContext(request))
+    return render_to_response('home/userprofile.html', {'userprofile':u}, context_instance=RequestContext(request))
  
 @login_required
 def share(request, petreport_id): 
@@ -114,5 +114,5 @@ def share(request, petreport_id):
 
     # To be completed
     
-    return render_to_response('detail.html', {'userprofile':u}, context_instance=RequestContext(request))
+    return render_to_response('home/userprofile.html', {'userprofile':u}, context_instance=RequestContext(request))
 

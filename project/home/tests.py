@@ -189,13 +189,13 @@ class ModelTesting (unittest.TestCase):
 
 			#UPDATES
 			pr.pet_name = utils.generate_string (30)
-			pr.description = utils.generate_string (300)
+			pr.description = utils.generate_lipsum_paragraph(500)
 			pr.sex = random.choice(SEX_CHOICES)[0]
 			pr.location = utils.generate_string (50)
 			pr.color = utils.generate_string (20)
 			pr.breed = utils.generate_string (30)
 			pr.size = utils.generate_string (30)
-			pr.age = random.randrange(0,15)
+			pr.age = str(random.randrange(0,15))
 
 			# check we can find the PetReport in the database again
 			pr.save()

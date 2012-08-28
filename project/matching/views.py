@@ -16,12 +16,52 @@ from social_auth import __version__ as version
 from social_auth.utils import setting
 from social_auth.views import auth
 from random import choice, uniform
+from django.utils import simplejson
 from home.models import *
 import datetime, re
 import test_utils as utils
 
+''' Display the PetMatch object '''
+def display_PetMatch(request, petmatch_id):
+
+    pm = get_object_or_404(PetMatch, pk=petmatch_id)
+    voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
+
+    #Need to check if the user is authenticated (non-anonymous) to find out if he/she has voted on this PetMatch.
+    if request.user.is_authenticated() == True:
+        user_has_voted = pm.UserProfile_has_voted(request.user.get_profile())
+    else:
+        user_has_voted = False
+
+    return render_to_response('matching/petmatch.html', {'petmatch': pm, "voters": voters, "user_has_voted": user_has_voted}, RequestContext(request))  
+
 @login_required
-def match_petreport(request, petreport_id):
+def vote_PetMatch(request):
+    
+    if request.method == "POST":
+        userprofile = request.user.get_profile()
+        vote = request.POST ['vote']
+
+        #TODO: Retrieve the PetMatch, up/down-vote it. 
+        pm = get_object_or_404(PetMatch, pk=request.POST["match_id"])
+
+        if vote == "upvote":
+            pm.up_votes.add(userprofile)
+            pm.down_votes.remove(userprofile)
+        else:
+            pm.down_votes.add(userprofile)
+            pm.up_votes.remove(userprofile)
+
+        message = "You have successfully %sd this PetMatch!" % vote            
+        json = simplejson.dumps ({"vote":vote, "message":message})
+        print "JSON: " + str(json)
+        return HttpResponse(json, mimetype="application/json")
+
+    else:
+        raise Http404
+
+@login_required
+def match_PetReport(request, petreport_id):
 
 	#Get Pet Report objects and organize them into a Paginator Object.
     target_petreport = get_object_or_404(PetReport, pk=petreport_id)
@@ -29,13 +69,13 @@ def match_petreport(request, petreport_id):
     #Place more PetReport filters here
     all_pet_reports = PetReport.objects.all().exclude(pk=petreport_id)
     if len(all_pet_reports) == 0:
-        messages.error (request, "Sorry, there are no pet reports to match!")
+        messages.info (request, "Sorry, there are no pet reports to match!")
         return redirect("/")
 
     filtered_pet_reports = all_pet_reports.exclude(status = target_petreport.status).filter(pet_type = target_petreport.pet_type)
 
     if len(filtered_pet_reports) == 0:
-        messages.error (request, "Sorry, there are no pet reports for the selected pet report to match!")
+        messages.info (request, "Sorry, there are no pet reports for the selected pet report to match!")
         return redirect("/")
 
     paginator = Paginator(filtered_pet_reports, 100)
@@ -52,7 +92,10 @@ def match_petreport(request, petreport_id):
 
 
 @login_required
-def propose_match(request, target_petreport_id, candidate_petreport_id):
+def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
+
+    print "PROPOSE MATCH: target:%s candidate:%s" % (target_petreport_id, candidate_petreport_id)
+    print request.POST
 
     #Grab the Target and Candidate PetReports first.
     target = get_object_or_404(PetReport, pk=target_petreport_id)
@@ -82,7 +125,10 @@ def propose_match(request, target_petreport_id, candidate_petreport_id):
 
         #A PetMatch already exists.            
         else:
-            if existing_match.user_has_voted(proposed_by) == True:
+            #Has the user voted for this PetMatch before?
+            user_has_voted = existing_match.UserProfile_has_voted(proposed_by)
+
+            if user_has_voted == "upvote" or user_has_voted == "down-vote":
                 messages.error(request, "You have already voted for this PetMatch already!")
                 return redirect("/matching/match_petreport/%s/" % (target_petreport_id))
 

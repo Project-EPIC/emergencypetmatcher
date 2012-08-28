@@ -1,4 +1,4 @@
-{% extends "index.html" %}
+{% extends "home/index.html" %}
 {% load url from future %}
 
 {% block head_title %} EPM - Login {% endblock head_title %}
@@ -12,7 +12,7 @@
 	{% if form.errors %} <strong>Your username and password didn't match. Please try again.</strong> {% endif %}
 
 	<div class="form_container" style="border: 1px solid #000000; padding:5px; width: 240px; height: 120px;">
-		<form method="post" action= "{% url 'login_user' %}">
+		<form method="post" action= "{% url 'login_User' %}">
 			{% csrf_token %}
 				<table>
 					{% for field in form %}

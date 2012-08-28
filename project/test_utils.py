@@ -26,14 +26,15 @@ PETREPORT_NAMES = ['Sparky', 'Nugget', 'Sydney', 'Missy', 'Marley', 'Fousey', 'D
 'Dandy', 'Candy', 'Mark', 'Baby', 'Toodle', 'Princess' ,'Prince', 'Guss']
 
 #URLS
-TEST_LOGIN_URL = '/login'
 TEST_HOME_URL = '/'
-TEST_SUBMIT_PETREPORT_URL ='/reporting/submit_petreport'
-TEST_PETREPORT_URL ='/reporting/petreport/'
-TEST_USERPROFILE_URL = '/users/'
-TEST_PRDP_URL = '/reporting/petreport/'
-TEST_MATCHING_URL = "/matching/match_petreport/"
-TEST_PROPOSE_MATCH_URL = "/matching/propose_match/"
+TEST_LOGIN_URL = '/login'
+TEST_SUBMIT_PETREPORT_URL ='/reporting/submit_PetReport'
+TEST_USERPROFILE_URL = '/UserProfile/'
+TEST_PRDP_URL = '/reporting/PetReport/'
+TEST_VOTE_URL = '/matching/vote_PetMatch'
+TEST_PMDP_URL = '/matching/PetMatch/'
+TEST_MATCHING_URL = "/matching/match_PetReport/"
+TEST_PROPOSE_MATCH_URL = "/matching/propose_PetMatch/"
 
 #Setup Lorem Ipsum Generator
 LIPSUM = lipsum.Generator()
@@ -46,8 +47,14 @@ LIPSUM.paragraph_sigma = 1
 def generate_string (size, chars = string.ascii_uppercase + string.digits):
 	return ''.join(random.choice(chars) for i in range(size))
 
-def generate_lipsum_paragraph():
-	return LIPSUM.generate_paragraph()
+def generate_lipsum_paragraph(max_length):
+	result =  LIPSUM.generate_paragraph()
+	#Make sure that the length does not exceed max_length...
+	if len(result) > max_length:
+		return generate_lipsum_paragraph(max_length)
+	else:
+		return result
+
 
 #Keep the user/tester updated.
 def output_update (i):	
@@ -132,20 +139,20 @@ def create_random_PetReport(user):
 			pr.pet_name = random.choice(PETREPORT_NAMES) 	
 
 		if random.random() > 0.3:
-			pr.description = LIPSUM.generate_paragraph() 
+			pr.description = generate_lipsum_paragraph(500) 
 
 		if random.random() > 0.3:
 			pr.breed = generate_string(15) 
 
 		if random.random() > 0.3:
-			pr.age = random.randrange(0, 15) 
+			pr.age = str(random.randrange(0, 15))
 
 	#The Pet Owner knows his/her own pet.
 	else:
 		pr.pet_name = random.choice(PETREPORT_NAMES)
-		pr.description = LIPSUM.generate_paragraph()
+		pr.description = generate_lipsum_paragraph(500)
 		pr.breed = generate_string(15)
-		pr.age = random.randrange(0, 15)
+		pr.age = str(random.randrange(0, 15))
 
 	pr.save()
 	pr.workers = create_random_Userlist(-1, False, None)
@@ -214,19 +221,19 @@ def create_random_Userlist(num_users = -1, friends=False, user=None):
 
 
 #Create Random Object for: PetMatch
-def create_random_PetMatch(lostpet=None, foundpet=None, user=None):
+def create_random_PetMatch(lost_pet=None, found_pet=None, user=None):
 	#to be modified to make unique petmatches
 	allpets = PetReport.objects.all()
 	prlost = allpets.filter(status = "Lost")
 	prfound = allpets.filter(status = "Found")
-	if(lostpet == None):
-		lostpet = random.choice(prlost)
-	if(foundpet == None):
-		foundpet = random.choice(prfound)
+	if(lost_pet == None):
+		lost_pet = random.choice(prlost)
+	if(found_pet == None):
+		found_pet = random.choice(prfound)
 	if(user == None):
 		user = random.choice(User.objects.all())
 
-	pm = PetMatch(lost_pet = lostpet, found_pet = foundpet, proposed_by = user.get_profile(), description = LIPSUM.generate_paragraph())
+	pm = PetMatch(lost_pet = lost_pet, found_pet = found_pet, proposed_by = user.get_profile(), description = generate_lipsum_paragraph(500))
 	pm.save()	
 	pm.score = random.randrange(0, 10000)
 	pm.is_open = random.choice ([True, False])
@@ -246,13 +253,14 @@ def create_random_PetMatch(lostpet=None, foundpet=None, user=None):
 
 
 ''' Function for setting up Client, User (with passwords), and (optionally) PetReport objects for testing purposes.'''
-def create_test_view_setup(create_petreports=False):
+def create_test_view_setup(create_petreports=False, create_petmatches=False):
 
 	#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
 	clients = [ None for i in range (NUMBER_OF_TESTS) ]
 	users = [ None for i in range (NUMBER_OF_TESTS) ]
 	passwords = [ None for i in range (NUMBER_OF_TESTS) ]
 	petreports = [ None for i in range (NUMBER_OF_TESTS) ]
+	petmatches = [ None for i in range (NUMBER_OF_TESTS/2) ]
 
 	#Iterate w.r.t NUMBER_OF_TESTS control variable.
 	for i in range (NUMBER_OF_TESTS):
@@ -266,8 +274,22 @@ def create_test_view_setup(create_petreports=False):
 			pr = create_random_PetReport(user)
 			petreports [i] = pr
 
+		#We can only create NUMBER_OF_TESTS/2 PetMatch objects in total, so we need to be careful about indices.
+		if create_petmatches == True and (i >= 1 and i <= NUMBER_OF_TESTS/2):
+			pm = create_random_PetMatch(lost_pet=petreports[i-1], found_pet=petreports[i], user=user)
+			petmatches [i-1] = pm
+
+
+	if create_petreports == True and create_petmatches == True:
+		return (users, passwords, clients, petreports, petmatches)
+
 	if create_petreports == True:
 		return (users, passwords, clients, petreports)
+
+	if create_petmatches == True:
+		return (users, passwords, clients, petmatches)
+
+	#just return the simple ones, geez!		
 	return (users, passwords, clients)
 
 			

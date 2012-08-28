@@ -4,10 +4,11 @@ from django.views.generic import RedirectView
 from home.models import * 
 
 urlpatterns = patterns('matching.views',
-
-	# url (r'^$', 'matching', name='matching'),
-	url (r'^match_petreport/(?P<petreport_id>\d+)/$','match_petreport',name='match_petreport'),
-	url (r'^propose_match/(?P<target_petreport_id>\d+)/(?P<candidate_petreport_id>\d+)/$', 'propose_match', name='propose_match'),
+	
+	url (r'^match_PetReport/(?P<petreport_id>\d+)/$','match_PetReport', name='match_PetReport'),
+	url (r'^propose_PetMatch/(?P<target_petreport_id>\d+)/(?P<candidate_petreport_id>\d+)/$', 'propose_PetMatch', name='propose_PetMatch'),
+	url (r'^PetMatch/(?P<petmatch_id>\d+)/$','display_PetMatch', name='display_PetMatch'),
+	url (r'^vote_PetMatch', "vote_PetMatch", name="vote_PetMatch"),
 
 )
 
