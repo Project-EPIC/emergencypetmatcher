@@ -21,7 +21,25 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
     <!-- Include the waypoints plug-in -->
-    <script type="text/javascript"> </script>
+    <script type="text/javascript"> 
+      function get_petreport_object (petreport_id, img){
+
+        $.ajax({
+
+          type:"POST",
+          url:{{ bookmark_petreport }}
+          success: function(data){
+            var petreport = data;
+            move_petreport_to_workspace_match_detail(petreport, img);
+          },
+          error: function(data){
+            alert("An unexpected error occurred when trying to retrieve this Pet Report's attributes. Please try again."); 
+            return false;
+          }
+        });
+      }
+
+    </script>
       
      <!--  $().post("GetData.jsp"); -->
     </head>
