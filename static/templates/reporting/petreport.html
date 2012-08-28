@@ -87,20 +87,20 @@
         {% endif %}        
 
         <!-- PRDP Image -->
-		    <div class="prdp_picwrapper" > <img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/><br/></div>
-
+		   <div class="prdp_picwrapper" > <img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/><br/></div>
+        <!-- Information pertaining to the PRDP -->
         <div class="prdp_info">
-          <b>Pet Name:</b> {{ pet_report.pet_name }}<br/>
-          <b>Lost/Found: </b> {{ pet_report.status }}<br/> 
-          <b>Contact:</b>  {{  pet_report.proposed_by.user.username }}<br/>
-          <b>Date {{ pet_report.status }} : </b>{{ pet_report.date_lost_or_found }}<br/>
-          <b>Location:</b> {{ pet_report.location }}<br/>
-          <b>Age:</b> {{ pet_report.age }}<br/> 
-          <b>Sex:</b>  {{ pet_report.get_sex_display }}<br/>
-          <b>Breed:</b> {{ pet_report.breed }} <br/> 
-          <b>Color:</b> {{ pet_report.color }} <br/>
-          <b>Size:</b> {{ pet_report.get_size_display }}<br/>
-          <b>Description:</b> {{ pet_report.description }}<br>
+            <b>Pet Name:</b> {{ pet_report.pet_name }}<br/>
+            <b>Lost/Found: </b> {{ pet_report.status }}<br/> 
+            <b>Contact:</b>  {{  pet_report.proposed_by.user.username }}<br/>
+            <b>Date {{ pet_report.status }} : </b>{{ pet_report.date_lost_or_found }}<br/>
+            <b>Location:</b> {{ pet_report.location }}<br/>
+            <b>Age:</b> {{ pet_report.age }}<br/> 
+            <b>Sex:</b>  {{ pet_report.get_sex_display }}<br/>
+            <b>Breed:</b> {{ pet_report.breed }} <br/> 
+            <b>Color:</b> {{ pet_report.color }} <br/>
+            <b>Size:</b> {{ pet_report.get_size_display }}<br/>
+            <div class="pr_desc"><b>Description:</b> {{ pet_report.description }}<br></div>
         </div> 
 
         <!-- Proposed Pet Matches -->
@@ -137,8 +137,9 @@
         <div class="prdp_ppm_wk">
           <div class="prdp_subtitle"> People working on this pet </div>
             {% for worker in pet_report.workers.all  %}
-              <div id = "prdp_user_box"><!-- class = "prdp_user_txt"  -->
-                <a href= "{% url 'get_UserProfile_page' worker.id %}" title = "{{ worker.user.username }}" ><!-- {{ worker.user.username }} -->
+              <div id = "prdp_user_box">
+                <a href= "{% url 'get_UserProfile_page' worker.id %}" title = "{{ worker.user.username }}" >
+
                   {% if worker.photo %}    
                     <img src="{{ STATIC_URL }}{{ worker.photo }}" alt = "{{ worker.user.username }}" class = "prdp_worker_img" />   
                   {% else %}
@@ -151,13 +152,8 @@
 
         <!-- Buttons -->
         <div id ="prdp_buttons">
-          <form method="post" action="/reporting/bookmark" name="bookmarkForm">
-            {% csrf_token %}
-            <input type="hidden" name="user_id" value="{{ user.id }}" />
-            <input type="hidden" name="petreport_id" value="{{ pet_report.id }}" />
-            <a href="#" style="float:left;" id = "prdp_eachbutton" onclick="document.bookmarkForm.submit()">Bookmark this Pet</a>
-          </form>
-          <a  style="float:right;" id = "prdp_eachbutton" href="{% url 'match_PetReport' pet_report.id %}" >Work on this Pet</a>
+          <a id = "prdp_eachbutton" href="#" style="float:left;" >Bookmark this Pet</a>
+          <a id = "prdp_eachbutton" href="{% url 'match_PetReport' pet_report.id %}" style="float:right;" >Work on this Pet</a>
         </div>
 
       </div>

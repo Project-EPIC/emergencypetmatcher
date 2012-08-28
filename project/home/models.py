@@ -202,7 +202,7 @@ class PetReportForm (ModelForm):
 
     class Meta:
         model = PetReport
-        exclude = ('revision_number', 'workers', 'proposed_by')
+        exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by')
 
 
 
