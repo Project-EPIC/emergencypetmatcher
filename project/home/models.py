@@ -30,7 +30,7 @@ class PetReport(models.Model):
     '''Non-Required Fields'''
     img_path = models.ImageField(upload_to='images/petreport_images', null=True)
     pet_name = models.CharField(max_length=15, null=True, default='unknown') 
-    age = models.CharField(max_length=5, null=True, default= 'unknown')
+    age = models.CharField(max_length=10, null=True, default= 'unknown')
     color = models.CharField(max_length=30, null=True,default='unknown')
     breed = models.CharField(max_length=30, null=True,default='unknown')
     revision_number = models.IntegerField(null=True) #update revision using view
