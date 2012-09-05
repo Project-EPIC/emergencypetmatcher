@@ -31,9 +31,8 @@
 			});
 
 			//Allow for each candidate petreport to pop up its PRDP upon click.
-			$("#prdpdialog a").click(function(){
-
-				show_prdp_dialog($(this));
+			$("#prdpdialog a").click(function(){ 
+				show_prdp_dialog($(this)); 
 				return false;
 			});					
 
@@ -140,7 +139,8 @@
 			var workspace_match_detail = $("#workspace_match_detail");
 
 			//If the workspace match detail div does not yet contain an img element...
-			workspace_match_detail.find(".matching_img").html("<a href = '/reporting/petreport/" + petreport.id + "/' + ><img src= " + img_src + "/></a>");
+			workspace_match_detail.find(".matching_img").html("<a href = '/reporting/PetReport/" + 
+				petreport.id + "/' name = " + petreport.pet_name + "><img src= " + img_src + "/></a>");
 
 			//Change the border colors as necessary.
 			$(".droppable").each(function(){ $(this).css("border-color", "black"); });
@@ -222,24 +222,21 @@
 			});
 		}
 
+
 		function show_prdp_dialog (link){
 
-
-			var dialog_box = $("<div></div>").dialog.load(link.attr('href')).dialog ({
+			var dialog_box = $("<div></div>").load(link.attr('href')).dialog ({
 
 				autoOpen: true,
 				position:"top",
 				closeOnEscape: true,
-				show: {effect:"fade", duration:500},
-				title: link.attr('title'),
+				title: link.attr("name"),
 				height: "auto",
 				modal: true,
 				width: 700,
 				resizable: false,
-				close: function(event, ui){ 
-					dialog_box.dialog('destroy').remove();
-				}
-
+				show: {effect:"fade", duration:500},
+				close: function(event, ui){ dialog_box.dialog('destroy').remove();}
 			});
 
 			return false;
@@ -310,10 +307,8 @@
 						<li class="item" >
 							<input id="petreport_id" type="hidden" value="{{ pet_report.id }}"/>
 							<div id = "prdpdialog">
-								<a href= "{% url 'disp_PetReport' pet_report.id %}">
-									{% if pet_report.pet_name %}
-										<strong>{{ pet_report.pet_name }}</strong><br/>
-									{% endif %}
+								<a href= "{% url 'disp_PetReport' pet_report.id %}" name="{{ pet_report.pet_name }}">
+									<strong>{{ pet_report.pet_name }}</strong><br/>
 									{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
 									Contact : {{ pet_report.proposed_by.user.username }}
 									<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>

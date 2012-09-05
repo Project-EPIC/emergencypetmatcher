@@ -19,7 +19,7 @@ from random import choice, uniform
 from django.utils import simplejson
 from home.models import *
 import datetime, re
-import test_utils as utils
+import utils
 
 ''' Display the PetMatch object '''
 def display_PetMatch(request, petmatch_id):
@@ -48,9 +48,11 @@ def vote_PetMatch(request):
         if vote == "upvote":
             pm.up_votes.add(userprofile)
             pm.down_votes.remove(userprofile)
+            log_activity(ACTIVITY_PETMATCH_UPVOTE, userprofile, petmatch=pm)
         else:
             pm.down_votes.add(userprofile)
             pm.up_votes.remove(userprofile)
+            log_activity(ACTIVITY_PETMATCH_DOWNVOTE, userprofile, petmatch=pm)
 
         message = "You have successfully %sd this PetMatch!" % vote            
         json = simplejson.dumps ({"vote":vote, "message":message})
@@ -95,7 +97,6 @@ def match_PetReport(request, petreport_id):
 def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
 
     print "PROPOSE MATCH: target:%s candidate:%s" % (target_petreport_id, candidate_petreport_id)
-    print request.POST
 
     #Grab the Target and Candidate PetReports first.
     target = get_object_or_404(PetReport, pk=target_petreport_id)
@@ -121,7 +122,8 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                 pm = PetMatch(lost_pet=candidate, found_pet=target, description=description, proposed_by=proposed_by)
 
             pm.save()
-            messages.success(request, "Congratulations - The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile.")
+            messages.success(request, "Congratulations - The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
+            log_activity(ACTIVITY_PETMATCH_PROPOSED, proposed_by, petmatch=pm)
 
         #A PetMatch already exists.            
         else:
@@ -130,13 +132,13 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
 
             if user_has_voted == "upvote" or user_has_voted == "down-vote":
                 messages.error(request, "You have already voted for this PetMatch already!")
-                return redirect("/matching/match_petreport/%s/" % (target_petreport_id))
+                return redirect("/matching/match_PetReport/%s/" % (target_petreport_id))
 
             existing_match.up_votes.add(proposed_by)
             existing_match.save()
-            messages.success(request, "Nice job! Because there was an existing match between the two pet reports with which you proposed a match, You have successfully upvoted the existing petmatch.")
+            messages.success(request, "Nice job! Because there was an existing match between the two pet reports with which you proposed a match, You have successfully upvoted the existing petmatch.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
+            log_activity(ACTIVITY_PETMATCH_UPVOTE, proposed_by, petmatch=existing_match)
 
-        messages.success(request, "Help spread the word about your match by sharing it on Facebook and on Twitter!")
         return redirect("/")
 
     else:

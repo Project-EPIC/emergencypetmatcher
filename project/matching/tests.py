@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from django.test.client import Client
 from django.forms.models import model_to_dict
 import unittest, string, random, sys, time
-import test_utils as utils
+import utils
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 MatchingTesting: Testing for EPM Matching

@@ -23,9 +23,8 @@ from django.utils import simplejson
 from django.core import serializers
 from matching.views import *
 from django.forms.models import model_to_dict
-import test_utils as utils
+import utils
 import datetime, re
-
 
 @login_required
 def submit_PetReport(request):
@@ -61,10 +60,13 @@ def submit_PetReport(request):
             else:
                 messages.success (request, 'Thank you for your submission! Your contribution will go a long way towards helping others match lost and found pets.')                
 
-            print "+++++++++++++++++++++++++ [SUCCESS]: Pet Report submitted successfully +++++++++++++++++++++++++ " 
+            #Log the PetReport submission for this UserProfile
+            log_activity(ACTIVITY_PETREPORT_SUBMITTED, request.user.get_profile(), petreport=pr)
+            print "[SUCCESS]: Pet Report submitted successfully" 
             return redirect('/')
+
         else:
-            print "+++++++++++++++++++++++++ [ERROR]: Pet Report not submitted successfully +++++++++++++++++++++++++ " 
+            print "[ERROR]: Pet Report not submitted successfully" 
             print form.errors
             print form.non_field_errors()
     else:

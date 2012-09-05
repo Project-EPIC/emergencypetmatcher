@@ -18,8 +18,8 @@ from registration.forms import RegistrationForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
-import urllib
 import oauth2 as oauth
+import urllib
 
 """Home view, displays login mechanism"""
 def home (request):
@@ -52,6 +52,7 @@ def login_User(request):
                 login(request, user)
                 redirect_to = request.REQUEST ['next']
                 messages.success(request, 'Welcome, %s!' % (username))
+                log_activity(ACTIVITY_LOGIN, user.get_profile())
                 return redirect(redirect_to)
 
             else:
@@ -68,11 +69,24 @@ def login_User(request):
     form = AuthenticationForm()
     return render_to_response('registration/login.html', {'form':form}, RequestContext(request, {'next': next}))
 
-
+@login_required
 def logout_User(request):
-    logout(request)
     messages.success(request, "You have successfully logged out.")
+    log_activity(ACTIVITY_LOGOUT, request.user.get_profile())
+    logout(request)
     return redirect('/')
+
+def registration_activation_complete (request):
+    messages.success (request, "Alright, you are all set registering! You may now login to the system.")
+    return redirect ("/login")
+
+def registration_complete (request):
+    messages.success (request, "Thanks for registering for EPM. Look for an account verification email and click on the link to finish registering.")
+    return home(request)
+
+def registration_disallowed (request):
+    messages.error (request, "Sorry, we are not accepting registrations at this time. Please try again later.")
+    return home(request)
 
 def social_auth_login(request, backend):
     """
@@ -86,9 +100,6 @@ def social_auth_login(request, backend):
         return auth(request, backend)
     except IntegrityError, error:
         return render_to_response('registration/social_auth_username_form.html', locals(), RequestContext(request))
-    except ValueError, error:
-        # in case of errors, let's show a special page that will explain what happened
-        return render_to_response('registration/login_errors.html', locals(), context_instance=RequestContext(request))
 
 
 ''' Used by social auth pipeline  

@@ -2,10 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ModelForm
 from django import forms
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, pre_delete
 from django.dispatch import receiver
 from django.core.files.storage import FileSystemStorage
-import PIL
+import PIL, os, time
 
 '''Enums for Various Model Choice Fields'''
 PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Turtle', 'Turtle'), ('Snake', 'Snake'), ('Horse', 'Horse'),('Rabbit', 'Rabbit'), ('Other', 'Other')]
@@ -13,6 +13,17 @@ STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
 SEX_CHOICES=[('M','Male'),('F','Female')]
 SIZE_CHOICES = [('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)')]
 BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador')]
+
+#Activity Enum Values
+ACTIVITY_LOG_DIRECTORY = "../logs/activity_logs/"
+ACTIVITY_ACCOUNT_CREATED = "ACCOUNT_CREATED"
+ACTIVITY_LOGIN = "LOGIN"
+ACTIVITY_LOGOUT = "LOGOUT"
+ACTIVITY_PETREPORT_SUBMITTED = "PETREPORT_SUBMITTED"
+ACTIVITY_PETMATCH_PROPOSED = "PETMATCH_PROPOSED"
+ACTIVITY_PETMATCH_UPVOTE = "PETMATCH_UPVOTE"
+ACTIVITY_PETMATCH_DOWNVOTE= "PETMATCH_DOWNVOTE"
+
 
 class PetReport(models.Model):
 
@@ -70,9 +81,7 @@ class PetReport(models.Model):
     def convert_date_to_string(self):
         string = str(self.date_lost_or_found)
         return str
-
         
-
 #The User Profile Model containing a 1-1 association with the 
 #django.contrib.auth.models.User object, among other attributes.
 class UserProfile (models.Model):
@@ -90,16 +99,32 @@ class UserProfile (models.Model):
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
 
-    ''' Create a post save signal function to save a UserProfile when a User is created'''
-    def create_UserProfile(sender, instance, created, **kwargs):
-        if created:
+    ''' Create a post save signal function to setup a UserProfile when a User is created'''
+    def setup_UserProfile(sender, instance, created, **kwargs):
+        if created == True:
+            #Create a UserProfile object.
             UserProfile.objects.create(user=instance)
+            #Create the first activity for this user
+            log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
 
+    ''' Create a post save signal function to setup a UserProfile when a User is created'''
+    def delete_UserProfile_log(sender, instance, **kwargs):
+        
+        #Remove the Log file associated with this UserProfile.
+        log_path = ACTIVITY_LOG_DIRECTORY + str(instance.username) + ".log"
+        if os.path.isfile(log_path):
+            try:
+                print "removing %s" % (log_path)
+                os.unlink(log_path)
+            except Exception, e:
+                print e             
+
+    
     def __unicode__ (self):
         return 'User {username:%s, email:%s}' % (self.user.username, self.user.email)
 
-    post_save.connect(create_UserProfile, sender=User)        
-
+    post_save.connect(setup_UserProfile, sender=User)
+    pre_delete.connect(delete_UserProfile_log, sender=User)
 
 #The Pet Match Object Model
 class PetMatch(models.Model):
@@ -219,10 +244,103 @@ class PetReportForm (ModelForm):
         exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by')
 
 
+#Method for logging activities given an input UserProfile, Activity Enum, and (optionally) PetReport and PetMatch objects.
+def log_activity (activity, userprofile, petreport=None, petmatch=None):
+    assert isinstance(userprofile, UserProfile)
+
+    #Define the user filename and logger.
+    user = userprofile.user
+    user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+
+    try:
+        logger = open(user_log_filename, "a")
+        if activity == ACTIVITY_ACCOUNT_CREATED:
+            log = "A new UserProfile account was created for {%s} with ID{%d}\n" % (user.username, userprofile.id)
+
+        elif activity == ACTIVITY_LOGIN:
+            log = "%s with ID{%d} logged in to the system\n" % (user.username, userprofile.id)            
+
+        elif activity == ACTIVITY_LOGOUT:
+            log = "%s with ID{%d} logged out of the system\n" % (user.username, userprofile.id)            
+
+        elif activity == ACTIVITY_PETREPORT_SUBMITTED:
+            assert isinstance(petreport, PetReport)
+            log = "%s submitted the PetReport for {%s} with ID{%d}\n" % (user.username, petreport.pet_name, petreport.id)
+
+        elif activity == ACTIVITY_PETMATCH_PROPOSED:
+            assert isinstance(petmatch, PetMatch)
+            log = "%s proposed the PetMatch object with ID{%d}\n" % (user.username, petmatch.id)
+
+        elif activity == ACTIVITY_PETMATCH_UPVOTE:
+            assert isinstance(petmatch, PetMatch)
+            log = "%s upvoted the PetMatch object with ID{%d}\n" % (user.username, petmatch.id)
+
+        elif activity == ACTIVITY_PETMATCH_DOWNVOTE:
+            assert isinstance(petmatch, PetMatch)
+            log = "%s downvoted the PetMatch object with ID{%d}\n" % (user.username, petmatch.id)         
+
+        else:
+            raise IOError
+
+    except IOError, AssertionError:
+        traceback.print_exc()
+        print "[ERROR]: log_activity not used correctly."
+
+    log = (time.asctime() + " [%s]: " + log) % activity
+    print log
+    logger.write(log)    
+    logger.close()      
 
 
+#Helper function to determine if the input activity has been logged in the past
+def activity_has_been_logged (activity, userprofile, petreport=None, petmatch=None):
+    assert isinstance(userprofile, UserProfile)
 
+    #Define the user filename and logger.
+    user = userprofile.user
+    user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
 
+    #If this particular user log file exists, then continue.
+    if os.path.exists(user_log_filename) == True:
+        logger = open(user_log_filename, "r")
+
+        #iterate through all lines in the log file and find an activity match.
+        for line in iter(lambda:logger.readline(), ""):
+            if (activity in line) and (user.username in line):
+                identifier = line.split("ID")[1]
+
+                if (activity == ACTIVITY_ACCOUNT_CREATED) or (activity == ACTIVITY_LOGIN) or (activity == ACTIVITY_LOGOUT):
+                    if str(userprofile.id) in identifier:
+                        logger.close()
+                        return True
+
+                elif activity == ACTIVITY_PETREPORT_SUBMITTED:
+                    assert isinstance(petreport, PetReport)
+                    if str(petreport.id) in identifier:
+                        logger.close()
+                        return True
+
+                elif activity == ACTIVITY_PETMATCH_PROPOSED:
+                    assert isinstance(petmatch, PetMatch)
+                    if str(petmatch.id) in identifier:
+                        logger.close()
+                        return True
+
+                elif activity == ACTIVITY_PETMATCH_UPVOTE:
+                    assert isinstance(petmatch, PetMatch)
+                    if str(petmatch.id) in identifier:
+                        logger.close()
+                        return True
+
+                elif activity == ACTIVITY_PETMATCH_DOWNVOTE:
+                    assert isinstance(petmatch, PetMatch)
+                    if str(petmatch.id) in identifier:
+                        logger.close()
+                        return True
+
+        logger.close()
+        return False
+            
 
 
 

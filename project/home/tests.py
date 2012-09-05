@@ -2,7 +2,7 @@ from home.models import *
 from django.contrib.auth import authenticate
 from django.test.client import Client
 import unittest, string, random, sys, time
-import test_utils as utils
+import utils
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ModelTesting: Testing for EPM Models

@@ -6,14 +6,6 @@
 
 {% block content %}
 
-	{% if messages %}
-	<ul id="messages">
-	    {% for message in messages %}
-	    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-	    {% endfor %}
-	</ul>
-	{% endif %}
-
 	<table border=0 width="100%">
 	<tr>
 	<td width="70%">
