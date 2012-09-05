@@ -3,7 +3,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'project.settings'
 
 from home.models import *
 from django.contrib.auth import authenticate
-import test_utils as utils
+import utils
 import string, random, sys, os
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -29,6 +29,7 @@ if (len(sys.argv) < 2) == True or (len(sys.argv) > 3) == True:
 	sys.exit()
 
 if sys.argv[1] == 'wipeout':
+
 	if len(sys.argv) > 2 and sys.argv [2] == 'leaveusers':
 		utils.delete_all(leave_users=True)
 		print '[OK]: All data from model objects EXCEPT User and UserProfile have been wiped out.'

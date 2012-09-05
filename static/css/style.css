@@ -6,7 +6,7 @@ html, body {
 	margin: 0;
 	padding: 0;
 	height: 100%;
-	min-width: 950px;
+	min-width: 1000px;
 	background: #ECF0EC url(../images/background.gif) repeat;
 	font: 13px Arial, Helvetica, sans-serif;
 	color: #787878;
@@ -602,8 +602,10 @@ h1.found {
 #match_prdpback {
 
 	padding: 5px;
+	margin-bottom:5px;
 	width: 48%;
 	height: 55%;
+	border: 1px solid black;
 }
 
 #match_title {

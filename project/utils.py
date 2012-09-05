@@ -1,19 +1,19 @@
-import random, string, sys, time, datetime, lipsum
 from django.core.files.images import ImageFile
-from home.models import *
 from django.forms.models import model_to_dict
 from django.test.client import Client
+from home.models import *
+import random, string, sys, time, datetime, lipsum, traceback
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-test_utils.py: Utility Functions for EPM Testing
+epm_utils.py: Utility Functions for EPM Utility and Testing
 
 When writing your test file (tests.py), make sure to have the following import:
 
-	import test_utils as utils
+	import epm_utils as utils
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 #Control Variable
-NUMBER_OF_TESTS = 50
+NUMBER_OF_TESTS = 10
 
 #Lower and Upper bounds for Lost and Found Dates
 DATE_LOWER_BOUND = "2012-01-01"
@@ -54,7 +54,6 @@ def generate_lipsum_paragraph(max_length):
 		return generate_lipsum_paragraph(max_length)
 	else:
 		return result
-
 
 #Keep the user/tester updated.
 def output_update (i):	
@@ -195,6 +194,7 @@ def delete_all(leave_users = False):
 	PetReport.objects.all().delete()
 	Chat.objects.all().delete()
 	ChatLine.objects.all().delete()
+	#Delete Users if you want to.
 	if leave_users == False:
 		User.objects.all().delete()
 
@@ -255,6 +255,9 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None):
 ''' Function for setting up Client, User (with passwords), and (optionally) PetReport objects for testing purposes.'''
 def create_test_view_setup(create_petreports=False, create_petmatches=False):
 
+	#Firstly, delete everything existing.
+	delete_all()
+	
 	#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
 	clients = [ None for i in range (NUMBER_OF_TESTS) ]
 	users = [ None for i in range (NUMBER_OF_TESTS) ]
