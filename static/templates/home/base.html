@@ -43,7 +43,7 @@
 				$("#prdpdialog a").click(function(){
 
 					var link = $(this);
-					var dialog_box = $("<div></div>").load(link.attr('href')).dialog ({
+					var dialog_box = $("<li></li>").load(link.attr('url')).dialog ({
 
 						autoOpen: true,
 						position: "top",
@@ -162,17 +162,15 @@
 					{% block pet_reports_content %}
 						{% if pet_reports_list %}
 							{% for pet_report in pet_reports_list %}
-								<li class="item" >
-									<div id = "prdpdialog">
-										<a href= "{% url 'disp_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}">
-											{% if pet_report.pet_name %}
-												<strong>{{ pet_report.pet_name }}</strong><br/>
-											{% endif %}
-											{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
-											Contact : {{  pet_report.proposed_by.user.username }}
-											<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
-										</a>
-									</div>
+								<li class="item" id = "prdpdialog" >
+									<a url="{% url 'disp_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}">
+										{% if pet_report.pet_name %}
+											<strong>{{ pet_report.pet_name }}</strong><br/>
+										{% endif %}
+										{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
+										Contact : {{  pet_report.proposed_by.user.username }}
+										<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
+									</a>
 								</li>	
 							{% endfor %}							
 						{% else %}

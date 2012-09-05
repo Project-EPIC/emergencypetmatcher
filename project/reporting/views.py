@@ -80,23 +80,40 @@ def disp_PetReport(request, petreport_id):
         matches = PetMatch.objects.all().filter(lost_pet = pet_report)
     else:
         matches = PetMatch.objects.all().filter(found_pet = pet_report)
+    
+    if request.user.is_authenticated():
+        user = request.user.get_profile()
+        print str(user)+"is authenticated" 
+        if(pet_report.UserProfile_has_bookmarked(user)):
+            user_has_bookmarked = "true"
+            print "user has bookmarked this petreport"
+        else:
+            user_has_bookmarked = "false"    
+            print "user has not bookmarked this petreport"
+    else:
+        user_has_bookmarked = "false"
+        print "user is not authenticated" 
+    return render_to_response('reporting/petreport.html',{'pet_report': pet_report,'matches': matches,'user_has_bookmarked':"user_has_bookmarked"}, RequestContext(request))
 
-    return render_to_response('reporting/petreport.html',{'pet_report': pet_report,'matches': matches}, RequestContext(request))
-
-
+'''AJAX Request to bookmark a PetReport'''
 @login_required
 def bookmark_PetReport(request):
 
     if request.method == "POST":
-        user_id = request.POST['user_id']
+        user = request.user.get_profile()
         petreport_id = request.POST['petreport_id']
-        print 'Bookmarking petreport #'+str(petreport_id)+" for user #"+str(user_id)
-        user = UserProfile.objects.get(pk = user_id)
-        pet_report = PetReport.objects.get(pk = petreport_id)
+        petreport = PetReport.objects.get(pk = petreport_id)
+        petreport.bookmarked_by.add(user)
+        petreport.save()
+        print 'Bookmarked petreport #'+str(petreport_id)+" for user #"+str(user.id)
+        message = "You have successfully bookmarked this PetReport!" 
     else:
         print 'did not receive a post request'    
-    return HttpResponse()
-
+        message = "There was an error when attempting to bookmark this PetReport" 
+        json = simplejson.dumps ({"message":message})
+        #print "JSON: " + str(json)
+    return HttpResponse(json, mimetype="application/json")
+    
 '''AJAX Request to retrieve a PetReport object in JSON format'''
 def get_PetReport_json(request, petreport_id):
 
