@@ -55,7 +55,6 @@ class PetReport(models.Model):
         assert isinstance(user_profile, UserProfile)
         try:
             user = self.bookmarked_by.get(pk = user_profile.id)
-            print "got: "+str(user)
         except UserProfile.DoesNotExist:
             user = None        
         if (user != None):

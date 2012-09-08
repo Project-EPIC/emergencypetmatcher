@@ -1,0 +1,89 @@
+{% extends 'home/index.html' %}
+{% load url from future %}
+{% block js %}
+		<script type = 'text/javascript'>
+
+			//This function allows us to prepare a popup upon clicking several elements.
+			$(document).ready(function(){
+
+				$(".prdpdialog").click(function(){
+
+					var link = $(this);
+					var dialog_box = $("<div></div>").load(link.attr('url')).dialog ({
+
+						autoOpen: true,
+						position: "top",
+						closeOnEscape: true,
+						title:link.attr("name"),
+						height: "auto",
+						modal: true,
+						width: 700,
+						resizable: false,
+						show: {effect:"fade", duration:500},
+						close: function(event, ui){ 
+							dialog_box.dialog("destroy").remove();
+						}
+
+					});
+					return false;
+				});
+
+				$('#tiles').imagesLoaded(function() {
+				
+					// Prepare layout options.
+					var options = {
+						autoResize: true, // This will auto-update the layout when the browser window is resized.
+						container: $('#tiles'), // Optional, used for some extra CSS styling
+						offset: 2, // Optional, the distance between grid items
+						itemWidth: 210 // Optional, the width of a grid item
+					};
+					
+					// Get a reference to your grid items.
+					var handler = $('#tiles li.item');
+					// Call the layout function.
+					handler.wookmark(options);
+					
+				});
+			});
+		</script>
+{% endblock js %}	
+
+	{% block navbar %}
+		<div id="nav">
+			<ul>
+			{% if user.is_authenticated %}
+				<li><a href="#">Friends</a></li>
+				<li class="active"><a href="reporting/bookmarks">Bookmarked</a></li>
+				<li><a href="#">My Pet Matches</a></li>
+			{% endif %}
+				<li ><a href="/">Newly Added</a></li>
+				<li><a href="#">Proposed Pet Matches</a></li>
+			</ul>
+		</div>
+	{% endblock navbar %}
+
+	<ul id="tiles">
+
+		{% block friends_activity_feed %}
+		
+		{% endblock friends_activity_feed %}
+
+
+		{% block pet_reports_content %}
+			{% if pet_reports_list %}
+				{% for pet_report in pet_reports_list %}
+					<li class="item"  >
+						<a class = "prdpdialog" url="{% url 'disp_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}">
+							<strong>{{ pet_report.pet_name }}</strong><br/>
+							{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
+							Contact : {{  pet_report.proposed_by.user.username }}
+							<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
+							
+						</a>
+					</li>	
+				{% endfor %}						
+			{% else %}
+			    <li style="text-align:center;"><h3>No pet reports are available.</h3></li>
+			{% endif %}
+		{% endblock pet_reports_content %}
+	</ul>

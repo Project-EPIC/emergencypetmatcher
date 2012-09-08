@@ -95,8 +95,25 @@ def disp_PetReport(request, petreport_id):
     else:
         user_has_bookmarked = "false"
         print "user is not authenticated" 
-    return render_to_response('reporting/petreport.html',{'pet_report': pet_report,'matches': matches,'user_has_bookmarked':"user_has_bookmarked"}, RequestContext(request))
+    return render_to_response('reporting/petreport.html',{'pet_report': pet_report,'matches': matches,'user_has_bookmarked':user_has_bookmarked}, RequestContext(request))
 
+def disp_bookmarks(request):
+
+    if(request.user.is_authenticated() == False):
+        raise Http404
+    user = request.user.get_profile()
+    pet_reports = user.bookmarks_related.all()
+    paginator = Paginator(pet_reports, 100)
+    page = request.GET.get('page') 
+    try:
+        pet_reports_list = paginator.page(page)
+    except PageNotAnInteger:
+        pet_reports_list = paginator.page(1)
+    except EmptyPage:
+        pet_reports_list = paginator.page(paginator.num_pages)        
+    print len(pet_reports_list)
+    return render_to_response('reporting/bookmarks.html', {'version': version, 'pet_reports_list': pet_reports_list, 'last_login': request.session.get('social_auth_last_login_backend')}, RequestContext(request))
+    
 '''AJAX Request to bookmark a PetReport'''
 @login_required
 def bookmark_PetReport(request):
@@ -104,17 +121,23 @@ def bookmark_PetReport(request):
     if request.method == "POST":
         user = request.user.get_profile()
         petreport_id = request.POST['petreport_id']
-        petreport = PetReport.objects.get(pk = petreport_id)
-        petreport.bookmarked_by.add(user)
-        petreport.save()
-        print 'Bookmarked petreport #'+str(petreport_id)+" for user #"+str(user.id)
-        message = "You have successfully bookmarked this PetReport!" 
+        petreport = get_object_or_404(PetReport, pk = petreport_id)
+        if(petreport.UserProfile_has_bookmarked(user)):
+            petreport.bookmarked_by.remove(user)
+            petreport.save()
+            message = "You have successfully removed the bookmark for this PetReport" 
+            text = "Bookmark this Pet"
+        else:
+            petreport.bookmarked_by.add(user)
+            petreport.save()
+            print 'Bookmarked petreport #'+str(petreport_id)+" for user #"+str(user.id)
+            message = "You have successfully bookmarked this PetReport!" 
+            text = "Remove this Bookmark"
+        json = simplejson.dumps ({"message":message, "text":text})
+        print "JSON: " + str(json)
+        return HttpResponse(json, mimetype="application/json")
     else:
-        print 'did not receive a post request'    
-        message = "There was an error when attempting to bookmark this PetReport" 
-        json = simplejson.dumps ({"message":message})
-        #print "JSON: " + str(json)
-    return HttpResponse(json, mimetype="application/json")
+        raise Http404
     
 '''AJAX Request to retrieve a PetReport object in JSON format'''
 def get_PetReport_json(request, petreport_id):

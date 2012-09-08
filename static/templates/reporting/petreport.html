@@ -42,8 +42,56 @@
     {% block js %}
     <script type = "text/javascript">
 
+      function bookmark(){
+
+        var bookmark_button = $("#prdp_bookmark");
+          
+        var user_id = "{{ user.id }}";
+        if (user_id == "None"){
+          login_link = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";
+          $(".prdp_messages").html("<li class='error'> You cannot bookmark this Pet Report because you are not logged in! "+login_link+ "</li>");
+          return false;
+        }
+
+        csrf_value = $("input").attr("value");
+
+        $.ajax({
+
+          type:"POST",
+          url:"{% url 'bookmark_PetReport' %}",
+          data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":"{{ pet_report.id }}", "user_id":"{{ user.id }}"},
+            success: function(data){
+              bookmark_button.text(data.text);
+              bookmark_button.attr("title",data.text);
+              $(".prdp_messages").html("<li class='success'>" + data.message + "</li>");
+              return true;
+            },
+            error: function(data){
+              alert("An unexpected error occurred when trying to bookmark this Pet Report. Please try again."); 
+              return false;
+            }
+        });
+        return true;
+      }
+
       //This function allows us to prepare a popup upon clicking several elements.
       $(document).ready(function(){
+
+        var bookmarked = "{{ user_has_bookmarked }}";
+        var bookmark_button = $("#prdp_bookmark");
+
+        //user is authenticated and has bookmarked this pet 
+        if (bookmarked == "true"){
+          bookmark_button.text("Remove Bookmark");
+          bookmark_button.attr("title","Remove Bookmark");
+        }
+
+        //user has not bookmarked this pet (or) user is not authenticated
+        else {
+          bookmark_button.text("Bookmark this Pet");
+          bookmark_button.attr("title","Bookmark this Pet");
+        }
+
 
         $("#prdp_petmatch_box a").click(function(){
 
@@ -69,25 +117,6 @@
         });
 
       });
-
-      function get_petreport_object (petreport_id, img){
-
-        $.ajax({
-
-          type:"POST",
-          url: "{{ bookmark_petreport }}",
-          success: function(data){
-            var petreport = data;
-            // This function does not exist
-            //move_petreport_to_workspace_match_detail(petreport, img);
-          },
-          error: function(data){
-            alert("An unexpected error occurred when trying to retrieve this Pet Report's attributes. Please try again."); 
-            return false;
-          }
-        });
-      }
-
     </script>
     {% endblock js %} 
   </head>
@@ -177,10 +206,18 @@
 
         <!-- Buttons -->
         <div id ="prdp_buttons">
-          <a id = "prdp_eachbutton" href="#" style="float:left;" >Bookmark this Pet</a>
-          <a id = "prdp_eachbutton" href="{% url 'match_PetReport' pet_report.id %}" style="float:right;" >Work on this Pet</a>
+          <a class = "prdp_eachbutton" id="prdp_bookmark"  title="bookmark this pet" style="float:left;cursor:pointer;" onclick="bookmark();" innerText="blah">
+            {% csrf_token %}
+            <!-- Bookmark this Pet -->
+          </a>
+          <a class = "prdp_eachbutton" href="{% url 'match_PetReport' pet_report.id %}" style="float:right;" >Work on this Pet</a>
         </div>
-
+              <!-- Messages -->
+        <ul id="messages" class="prdp_messages" style = "margin-top:40px;">
+          {% for message in messages %}
+            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+          {% endfor %}
+        </ul>              
       </div>
     {%  endblock petreportcontent %}
   </body>
