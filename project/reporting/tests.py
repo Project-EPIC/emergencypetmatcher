@@ -260,4 +260,11 @@ class ReportingTesting (unittest.TestCase):
 		print ''
 		utils.performance_report(iteration_time)
 
+	def test_add_PetReport_bookmark(self):
+
+	def test_remove_petreport_bookmark(self):
+
+	def test_get_bookmarks_page(self):
+		
+
 

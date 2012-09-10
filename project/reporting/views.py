@@ -85,18 +85,18 @@ def disp_PetReport(request, petreport_id):
     
     if request.user.is_authenticated():
         user = request.user.get_profile()
-        print str(user)+"is authenticated" 
         if(pet_report.UserProfile_has_bookmarked(user)):
             user_has_bookmarked = "true"
-            print "user has bookmarked this petreport"
+            #print "user has bookmarked this petreport"
         else:
             user_has_bookmarked = "false"    
-            print "user has not bookmarked this petreport"
+            #print "user has not bookmarked this petreport"
     else:
         user_has_bookmarked = "false"
         print "user is not authenticated" 
     return render_to_response('reporting/petreport.html',{'pet_report': pet_report,'matches': matches,'user_has_bookmarked':user_has_bookmarked}, RequestContext(request))
 
+@login_required
 def disp_bookmarks(request):
 
     if(request.user.is_authenticated() == False):
@@ -122,16 +122,17 @@ def bookmark_PetReport(request):
         user = request.user.get_profile()
         petreport_id = request.POST['petreport_id']
         petreport = get_object_or_404(PetReport, pk = petreport_id)
+        print "host: "+str(request.get_host())
         if(petreport.UserProfile_has_bookmarked(user)):
             petreport.bookmarked_by.remove(user)
             petreport.save()
-            message = "You have successfully removed the bookmark for this PetReport" 
-            text = "Bookmark this Pet"
+            message = "You have successfully removed the bookmark for this Pet Report" 
+            text = "Bookmark this  Pet"
         else:
             petreport.bookmarked_by.add(user)
             petreport.save()
-            print 'Bookmarked petreport #'+str(petreport_id)+" for user #"+str(user.id)
-            message = "You have successfully bookmarked this PetReport!" 
+            print 'Bookmarked pet report #'+str(petreport_id)+" for user #"+str(user.id)
+            message = "You have successfully bookmarked this Pet Report!" 
             text = "Remove this Bookmark"
         json = simplejson.dumps ({"message":message, "text":text})
         print "JSON: " + str(json)

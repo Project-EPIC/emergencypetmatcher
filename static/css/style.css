@@ -524,6 +524,16 @@ h1.found {
 	text-decoration:none;
 }
 
+/*the X button to remove a bookmark*/
+img.bookmark_x{
+
+	position: absolute;
+	left: 190px;
+	width: 15px;
+	height: 15px;
+
+}
+
 
 /* The Matching Interface Workspace div */
 #workspace {

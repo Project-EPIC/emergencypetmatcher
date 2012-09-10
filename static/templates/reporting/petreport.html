@@ -129,16 +129,8 @@
           <!--  <div style="float:left"> 
             {% if pet_report.pet_name %} {{ pet_report.pet_name }} {% endif %} 
           </div> -->
-          <div style="float:left;"> {{ pet_report.status }}</div>
+          <div style="float:left;"> {{ pet_report.status }} : {{ pet_report.pet_name }} </div>
         </div>
-
-        {% if messages %}
-        <ul id="messages">
-            {% for message in messages %}
-            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}        
 
         <!-- PRDP Image -->
 		   <div class="prdp_picwrapper" > <img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/><br/></div>
@@ -213,7 +205,7 @@
           <a class = "prdp_eachbutton" href="{% url 'match_PetReport' pet_report.id %}" style="float:right;" >Work on this Pet</a>
         </div>
               <!-- Messages -->
-        <ul id="messages" class="prdp_messages" style = "margin-top:40px;">
+        <ul id="messages" class="prdp_messages" style = "margin-top:70px;">
           {% for message in messages %}
             <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
           {% endfor %}
