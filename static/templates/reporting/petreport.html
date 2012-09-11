@@ -59,7 +59,7 @@
 
           type:"POST",
           url:"{% url 'bookmark_PetReport' %}",
-          data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":"{{ pet_report.id }}", "user_id":"{{ user.id }}"},
+          data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":"{{ pet_report.id }}", "user_id":"{{ user.id }}", "action":bookmark_button.text()},
             success: function(data){
               bookmark_button.text(data.text);
               bookmark_button.attr("title",data.text);
@@ -165,15 +165,15 @@
                 {% endifequal %}  
 
               </a>
-              <div id="prdp_user_box" style="float:right;">
+              <!-- <div id="prdp_user_box" style="float:right;">
                 <a href= "{% url 'get_UserProfile_page' petmatch.proposed_by.id %}"><!-- {{ petmatch.proposed_by.user.username }}  -->
-                  {% if petmatch.proposed_by.photo %}    
+                <!--  {% if petmatch.proposed_by.photo %}    
                     <img src="{{ STATIC_URL }}{{ petmatch.proposed_by.photo }}" class = "prdp_worker_img" />   
                   {% else %}
                     <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" class = "prdp_worker_img" />
                   {% endif %}
                 </a>
-              </div>
+              </div> -->
             </div> 
           {% endfor %}
 
@@ -196,7 +196,14 @@
             {% endfor %}
         </div> 
 
-        <!-- Buttons -->
+        <!-- Messages -->
+        <ul id="messages" class="prdp_messages" >
+          {% for message in messages %}
+            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+          {% endfor %}
+        </ul>   
+
+         <!-- Buttons -->
         <div id ="prdp_buttons">
           <a class = "prdp_eachbutton" id="prdp_bookmark"  title="bookmark this pet" style="float:left;cursor:pointer;" onclick="bookmark();" innerText="blah">
             {% csrf_token %}
@@ -204,12 +211,7 @@
           </a>
           <a class = "prdp_eachbutton" href="{% url 'match_PetReport' pet_report.id %}" style="float:right;" >Work on this Pet</a>
         </div>
-              <!-- Messages -->
-        <ul id="messages" class="prdp_messages" style = "margin-top:70px;">
-          {% for message in messages %}
-            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-          {% endfor %}
-        </ul>              
+
       </div>
     {%  endblock petreportcontent %}
   </body>

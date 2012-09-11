@@ -23,7 +23,7 @@ DATE_UPPER_BOUND = "2012-08-16"
 USERNAMES = ['Jacob', 'Emily', 'Joshua', 'Madison', 'Kenneth', 'Mark', 'Dave', 'Angela', '' 'Matthew', 'Olivia', 'Daniel', 'Hannah', 
 'Chris', 'Abby', 'Andrew', 'Isabella', 'Mario', 'Sahar', 'Amrutha', 'Leysia', 'Ken', 'Abe']
 PETREPORT_NAMES = ['Sparky', 'Nugget', 'Sydney', 'Missy', 'Marley', 'Fousey', 'Daisy', 'Libby', 'Apollo', 'Bentley', 'Scruffy',
-'Dandy', 'Candy', 'Mark', 'Baby', 'Toodle', 'Princess' ,'Prince', 'Guss']
+'Dandy', 'Candy', 'Mark', 'Baby', 'Toodle', 'Princess' ,'Prince', 'Guss','Bingo']
 
 #URLS
 TEST_HOME_URL = '/'
@@ -31,10 +31,13 @@ TEST_LOGIN_URL = '/login'
 TEST_SUBMIT_PETREPORT_URL ='/reporting/submit_PetReport'
 TEST_USERPROFILE_URL = '/UserProfile/'
 TEST_PRDP_URL = '/reporting/PetReport/'
+TEST_BOOKMARK_PETREPORT_URL = '/reporting/bookmark_PetReport'
+TEST_BOOKMARKED_PETREPORTS_URL = '/reporting/bookmarks'
 TEST_VOTE_URL = '/matching/vote_PetMatch'
 TEST_PMDP_URL = '/matching/PetMatch/'
 TEST_MATCHING_URL = "/matching/match_PetReport/"
 TEST_PROPOSE_MATCH_URL = "/matching/propose_PetMatch/"
+
 
 #Setup Lorem Ipsum Generator
 LIPSUM = lipsum.Generator()

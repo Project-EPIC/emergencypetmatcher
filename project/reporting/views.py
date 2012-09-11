@@ -122,18 +122,22 @@ def bookmark_PetReport(request):
         user = request.user.get_profile()
         petreport_id = request.POST['petreport_id']
         petreport = get_object_or_404(PetReport, pk = petreport_id)
-        print "host: "+str(request.get_host())
-        if(petreport.UserProfile_has_bookmarked(user)):
+        action = request.POST['action']
+        #print "path: "+str(request.META.get('HTTP_REFERER','/'))
+        if ((petreport.UserProfile_has_bookmarked(user)) and (action == "Remove Bookmark")) :
             petreport.bookmarked_by.remove(user)
             petreport.save()
             message = "You have successfully removed the bookmark for this Pet Report" 
             text = "Bookmark this  Pet"
-        else:
+        elif ((not petreport.UserProfile_has_bookmarked(user)) and (action == "Bookmark this Pet")):
             petreport.bookmarked_by.add(user)
             petreport.save()
             print 'Bookmarked pet report #'+str(petreport_id)+" for user #"+str(user.id)
             message = "You have successfully bookmarked this Pet Report!" 
             text = "Remove this Bookmark"
+        else:
+            message = "unable to "+action
+            text = action
         json = simplejson.dumps ({"message":message, "text":text})
         print "JSON: " + str(json)
         return HttpResponse(json, mimetype="application/json")

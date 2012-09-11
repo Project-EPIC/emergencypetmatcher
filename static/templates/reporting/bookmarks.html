@@ -28,7 +28,7 @@
 
 								          type:"POST",
 								          url:"{% url 'bookmark_PetReport' %}",
-								          data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":petreport_id, "user_id":"{{ user.id }}"},
+								          data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":petreport_id, "user_id":"{{ user.id }}", "action":"Remove Bookmark"},
 								            success: function(data){
 								            	$(".bookmarks_messages").html("<li class='success'>" + data.message + "</li>");
 								            	parent.remove();
