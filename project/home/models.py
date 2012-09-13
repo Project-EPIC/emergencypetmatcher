@@ -233,7 +233,7 @@ class PetReportForm (ModelForm):
     '''Non-Required Fields'''
     img_path = forms.ImageField(label = "Upload an Image ", required = False)
     pet_name = forms.CharField(label = "Pet Name", max_length=50, required = False) 
-    age = forms.CharField(label = "Age", max_length = 5, required = False)
+    age = forms.CharField(label = "Age", max_length = 10, required = False)
     breed = forms.CharField(label = "Breed", max_length = 30, required = False)
     color = forms.CharField(label = "Coat Color(s)", max_length = 20, required = False)
     description  = forms.CharField(label = "Description", max_length = 500, required = False, widget = forms.Textarea)

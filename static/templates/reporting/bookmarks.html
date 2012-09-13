@@ -93,8 +93,11 @@
 			});
 
 			function loadImages(){
-				$('#tiles').imagesLoaded(function() {
+
+				// $('#tiles').imagesLoaded(function() {
 				
+				
+				// });
 				// Prepare layout options.
 				var options = {
 					autoResize: true, // This will auto-update the layout when the browser window is resized.
@@ -108,7 +111,6 @@
 				// Call the layout function.
 				handler.wookmark(options);
 					
-				});
 			}
 		</script>
 {% endblock js %}	

@@ -159,7 +159,7 @@
               <a href = "#" class = "prdp_petmatch_link" value = "{% url 'display_PetMatch' petmatch.id %}">
 
                 {% ifequal pet_report.status 'Lost' %}
-                  <img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ petmatch.found_pet.img_path }}" />
+                  <img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ petmatch.found_pet.img_path }}" />  
                 {% else %}
                   <img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ petmatch.lost_pet.img_path }}" />
                 {% endifequal %}  
@@ -205,7 +205,7 @@
 
          <!-- Buttons -->
         <div id ="prdp_buttons">
-          <a class = "prdp_eachbutton" id="prdp_bookmark"  title="bookmark this pet" style="float:left;cursor:pointer;" onclick="bookmark();" innerText="blah">
+          <a class = "prdp_eachbutton" id="prdp_bookmark"  title="bookmark this pet" style="float:left;cursor:pointer;" onclick="bookmark();">
             {% csrf_token %}
             <!-- Bookmark this Pet -->
           </a>
