@@ -127,16 +127,17 @@ def bookmark_PetReport(request):
         if ((petreport.UserProfile_has_bookmarked(user)) and (action == "Remove Bookmark")) :
             petreport.bookmarked_by.remove(user)
             petreport.save()
-            message = "You have successfully removed the bookmark for this Pet Report" 
-            text = "Bookmark this  Pet"
+            message = "You have successfully removed the bookmark for this Pet Report." 
+            text = "Bookmark this Pet"
         elif ((not petreport.UserProfile_has_bookmarked(user)) and (action == "Bookmark this Pet")):
             petreport.bookmarked_by.add(user)
             petreport.save()
             print 'Bookmarked pet report #'+str(petreport_id)+" for user #"+str(user.id)
             message = "You have successfully bookmarked this Pet Report!" 
-            text = "Remove this Bookmark"
+            text = "Remove Bookmark"
         else:
-            message = "unable to "+action
+            print "User has bookmarked the pet: "+str(petreport.UserProfile_has_bookmarked(user))
+            message = "Unable to "+action
             text = action
         json = simplejson.dumps ({"message":message, "text":text})
         print "JSON: " + str(json)
