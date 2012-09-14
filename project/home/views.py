@@ -10,7 +10,6 @@ from social_auth import __version__ as version
 from social_auth.utils import setting
 from social_auth.views import auth
 from django.db import IntegrityError
-from home.models import *
 from django.http import Http404
 from django.core import mail
 from django.core.urlresolvers import reverse
@@ -18,14 +17,17 @@ from registration.forms import RegistrationForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
-import oauth2 as oauth
-import urllib
+from django.utils import simplejson
+from home.models import *
+from constants import *
+from logging import *
+import oauth2 as oauth, random, urllib
 
 """Home view, displays login mechanism"""
 def home (request):
     #Get Pet Report objects and organize them into a Paginator Object.
     pet_reports = PetReport.objects.order_by("id").reverse()
-    paginator = Paginator(pet_reports, 100)
+    paginator = Paginator(pet_reports, 50)
     page = request.GET.get('page')
     
     try:
@@ -34,12 +36,37 @@ def home (request):
         pet_reports_list = paginator.page(1)
     except EmptyPage:
         pet_reports_list = paginator.page(paginator.num_pages)
-        
-    print len(pet_reports_list)
+
     if request.user.is_authenticated() == True:
-        return render_to_response('home/index.html', {'version': version, 'pet_reports_list': pet_reports_list, 'last_login': request.session.get('social_auth_last_login_backend')}, RequestContext(request))
+        return render_to_response(HTML_HOME, {'pet_reports_list': pet_reports_list, 'last_login': request.session.get('social_auth_last_login_backend'), 'version':version}, RequestContext(request))
+
     else:
-        return render_to_response('home/index.html', {'version': version, 'pet_reports_list': pet_reports_list}, RequestContext(request))
+        return render_to_response(HTML_HOME, {'pet_reports_list': pet_reports_list, 'version': version}, RequestContext(request))
+
+def get_activities_json(request):
+
+    print "======= AJAX: get_activities_json ========="
+    if request.is_ajax() == True:
+        #Let's populate the activity feed based upon whether the user is logged in.
+        activities = []
+
+        if request.user.is_authenticated() == True:
+            userprofile = request.user.get_profile()
+
+            for friend in userprofile.friends.all().order_by("?")[:10]:
+                activities.append(get_recent_log(friend))
+
+        else:
+            for userprof in UserProfile.objects.order_by("?")[:10]:
+                activities.append(get_recent_log(userprof))
+
+        if len(activities) == 0:
+            activities.append("<h3 style='text-align:center; color:gray;'> No Activities Yet.</h3>")
+
+        json = simplejson.dumps ({"activities":activities})
+        print "JSON: " + str(json)
+        return HttpResponse(json, mimetype="application/json")                
+
 
 def login_User(request):
     if request.method == "POST":
@@ -50,10 +77,9 @@ def login_User(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                redirect_to = request.REQUEST ['next']
                 messages.success(request, 'Welcome, %s!' % (username))
                 log_activity(ACTIVITY_LOGIN, user.get_profile())
-                return redirect(redirect_to)
+                return redirect(request.REQUEST ['next'])
 
             else:
                 messages.error(request, 'There seems to be a problem with the account. Please try re-registering.')
@@ -67,18 +93,18 @@ def login_User(request):
         next = '/'
 
     form = AuthenticationForm()
-    return render_to_response('registration/login.html', {'form':form}, RequestContext(request, {'next': next}))
+    return render_to_response(HTML_LOGIN, {'form':form}, RequestContext(request, {'next': next}))
 
 @login_required
 def logout_User(request):
     messages.success(request, "You have successfully logged out.")
     log_activity(ACTIVITY_LOGOUT, request.user.get_profile())
     logout(request)
-    return redirect('/')
+    return redirect(URL_HOME)
 
 def registration_activation_complete (request):
     messages.success (request, "Alright, you are all set registering! You may now login to the system.")
-    return redirect ("/login")
+    return redirect (URL_LOGIN)
 
 def registration_complete (request):
     messages.success (request, "Thanks for registering for EPM. Look for an account verification email and click on the link to finish registering.")
@@ -99,7 +125,7 @@ def social_auth_login(request, backend):
         # if everything is ok, then original view gets returned, no problem
         return auth(request, backend)
     except IntegrityError, error:
-        return render_to_response('registration/social_auth_username_form.html', locals(), RequestContext(request))
+        return render_to_response(HTML_SOCIAL_AUTH_FORM, locals(), RequestContext(request))
 
 
 ''' Used by social auth pipeline  
@@ -111,12 +137,12 @@ def form(request):
         backend = request.session[name]['backend']
         return redirect('socialauth_complete', backend=backend)
     else:
-        return render_to_response('registration/social_auth_username_form.html', {}, RequestContext(request))
+        return render_to_response(HTML_SOCIAL_AUTH_FORM, {}, RequestContext(request))
 
 @login_required
 def get_UserProfile_page(request, userprofile_id):   
-    u = get_object_or_404(UserProfile, pk=userprofile_id) 
-    return render_to_response('home/userprofile.html', {'userprofile':u}, context_instance=RequestContext(request))
+    u = get_object_or_404(UserProfile, pk=userprofile_id)
+    return render_to_response(HTML_USERPROFILE, {'userprofile':u}, RequestContext(request))
  
 @login_required
 def share(request, petreport_id): 
@@ -125,5 +151,5 @@ def share(request, petreport_id):
 
     # To be completed
     
-    return render_to_response('home/userprofile.html', {'userprofile':u}, context_instance=RequestContext(request))
+    return render_to_response(HTML_USERPROFILE, {'userprofile':u}, RequestContext(request))
 

@@ -6,7 +6,8 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = patterns('home.views',
 
-	url(r'^$', 'home', name='home'),	
+	url(r'^$', 'home', name='home'),
+	url(r'^get_activities_json$', 'get_activities_json', name="get_activities_json"),	
 	url(r'^login$', 'login_User', name='login_User'),
 	url(r'^logout$', 'logout_User', name='logout_User'),
 	url(r'^UserProfile/(?P<userprofile_id>\d+)/$', 'get_UserProfile_page', name='get_UserProfile_page'),

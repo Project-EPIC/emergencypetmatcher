@@ -2,6 +2,7 @@ from django.core.files.images import ImageFile
 from django.forms.models import model_to_dict
 from django.test.client import Client
 from home.models import *
+from constants import *
 import random, string, sys, time, datetime, lipsum, traceback
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -14,27 +15,6 @@ When writing your test file (tests.py), make sure to have the following import:
 
 #Control Variable
 NUMBER_OF_TESTS = 10
-
-#Lower and Upper bounds for Lost and Found Dates
-DATE_LOWER_BOUND = "2012-01-01"
-DATE_UPPER_BOUND = "2012-08-16"
-
-#Small List of Names
-USERNAMES = ['Jacob', 'Emily', 'Joshua', 'Madison', 'Kenneth', 'Mark', 'Dave', 'Angela', '' 'Matthew', 'Olivia', 'Daniel', 'Hannah', 
-'Chris', 'Abby', 'Andrew', 'Isabella', 'Mario', 'Sahar', 'Amrutha', 'Leysia', 'Ken', 'Abe']
-PETREPORT_NAMES = ['Sparky', 'Nugget', 'Sydney', 'Missy', 'Marley', 'Fousey', 'Daisy', 'Libby', 'Apollo', 'Bentley', 'Scruffy',
-'Dandy', 'Candy', 'Mark', 'Baby', 'Toodle', 'Princess' ,'Prince', 'Guss']
-
-#URLS
-TEST_HOME_URL = '/'
-TEST_LOGIN_URL = '/login'
-TEST_SUBMIT_PETREPORT_URL ='/reporting/submit_PetReport'
-TEST_USERPROFILE_URL = '/UserProfile/'
-TEST_PRDP_URL = '/reporting/PetReport/'
-TEST_VOTE_URL = '/matching/vote_PetMatch'
-TEST_PMDP_URL = '/matching/PetMatch/'
-TEST_MATCHING_URL = "/matching/match_PetReport/"
-TEST_PROPOSE_MATCH_URL = "/matching/propose_PetMatch/"
 
 #Setup Lorem Ipsum Generator
 LIPSUM = lipsum.Generator()
@@ -223,9 +203,15 @@ def create_random_Userlist(num_users = -1, friends=False, user=None):
 #Create Random Object for: PetMatch
 def create_random_PetMatch(lost_pet=None, found_pet=None, user=None):
 	#to be modified to make unique petmatches
-	allpets = PetReport.objects.all()
+	pet_type = random.choice(PET_TYPE_CHOICES)[0]
+	allpets = PetReport.objects.filter(pet_type=pet_type)
 	prlost = allpets.filter(status = "Lost")
 	prfound = allpets.filter(status = "Found")
+
+	if len(prlost.all()) == 0 or len(prfound.all()) == 0:
+		print "Can't create random PetMatch: There isn't at least one lost and found %s." % pet_type
+		return None
+
 	if(lost_pet == None):
 		lost_pet = random.choice(prlost)
 	if(found_pet == None):
@@ -233,23 +219,55 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None):
 	if(user == None):
 		user = random.choice(User.objects.all())
 
+    #Try saving the PetMatch object.
+    # We will expect the following output:
+    # None --> PetMatch was not inserted properly OR Duplicate PetMatch
+    # PetMatch Object --> Existing PetMatch (UPDATE) OR Brand new PetMatch.
+    # "Existing" means the PetMatch to be saved is the same PetMatch found, "Duplicate" means
+    # another PetMatch with the same Lost+Found Pets were found.
+
 	pm = PetMatch(lost_pet = lost_pet, found_pet = found_pet, proposed_by = user.get_profile(), description = generate_lipsum_paragraph(500))
-	pm.save()	
-	pm.score = random.randrange(0, 10000)
-	pm.is_open = random.choice ([True, False])
-	user_count = UserProfile.objects.all().count()
-	up_votes = create_random_Userlist(random.randint(1,((user_count/2)+1)),False,None)
-	down_votes = UserProfile.objects.all()	
-	
-	for up_vote in up_votes:
-			try:
-				down_votes = down_votes.exclude(id  = up_vote.id)
-			except ValueError:
-				continue
-	pm.up_votes = up_votes
-	pm.down_votes = down_votes
-	pm.save()
-	return pm
+	(petmatch, outcome) = pm.save()
+
+	#If the PetMatch save was successful...
+	if (petmatch != None):
+		if outcome == "NEW PETMATCH":
+			petmatch.score = random.randrange(0, 10000)
+			petmatch.is_open = random.choice ([True, False])
+			user_count = UserProfile.objects.all().count()
+			up_votes = create_random_Userlist(random.randint(1,((user_count/2)+1)),False,None)
+			down_votes = UserProfile.objects.all()	
+			
+			for up_vote in up_votes:
+				try:
+					down_votes = down_votes.exclude(id =up_vote.id)
+				except ValueError:
+					continue
+
+			petmatch.up_votes = up_votes
+			petmatch.down_votes = down_votes
+			petmatch.save()
+			log_activity(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=petmatch)
+		
+		elif outcome == "SQL UPDATE":
+			petmatch.up_votes.add(user.get_profile())
+			log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=petmatch)			
+
+	else:
+		if outcome =="DUPLICATE PETMATCH":
+			petmatch = PetMatch.get_PetMatch(lost_pet, found_pet)
+
+			if random.random() >= 0.5:
+				petmatch.up_votes.add(user.get_profile())
+				petmatch.down_votes.remove(user.get_profile())
+				log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=petmatch)				
+			else:
+				petmatch.down_votes.add(user.get_profile())
+				petmatch.up_votes.remove(user.get_profile())
+				log_activity(ACTIVITY_PETMATCH_DOWNVOTE, user.get_profile(), petmatch=petmatch)				
+			
+	#Return the (possibly None) PetMatch
+	return petmatch
 
 
 ''' Function for setting up Client, User (with passwords), and (optionally) PetReport objects for testing purposes.'''
@@ -277,7 +295,7 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 			pr = create_random_PetReport(user)
 			petreports [i] = pr
 
-		#We can only create NUMBER_OF_TESTS/2 PetMatch objects in total, so we need to be careful about indices.
+		#We can only create AT MOST NUMBER_OF_TESTS/2 PetMatch objects in total, so we need to be careful about indices.
 		if create_petmatches == True and (i >= 1 and i <= NUMBER_OF_TESTS/2):
 			pm = create_random_PetMatch(lost_pet=petreports[i-1], found_pet=petreports[i], user=user)
 			petmatches [i-1] = pm

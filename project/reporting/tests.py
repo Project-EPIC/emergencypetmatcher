@@ -1,9 +1,11 @@
-from home.models import *
 from django.contrib.auth import authenticate
 from django.test.client import Client
 from django.forms.models import model_to_dict
 import unittest, string, random, sys, time
-import utils
+from constants import *
+from utils import *
+from home.models import *
+
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ReportingTesting: Testing for EPM Pet Reporting
@@ -29,18 +31,18 @@ class ReportingTesting (unittest.TestCase):
 		ChatLine.objects.all().delete()
 
 	def test_get_petreport_form(self):
-		print '>>>> Testing test_get_petreport_form for %d iterations' % utils.NUMBER_OF_TESTS
+		print '>>>> Testing test_get_petreport_form for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = utils.create_test_view_setup(create_petreports=False)
+		(users, passwords, clients) = create_test_view_setup(create_petreports=False)
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#indexes
-			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
 
 			#objects
 			user = users [user_i]
@@ -53,35 +55,35 @@ class ReportingTesting (unittest.TestCase):
 			print "\n%s logs onto %s to enter the pet report form..." % (user, client)
 
 			#Go to the Pet Report Form Page
-			response = client.get(utils.TEST_SUBMIT_PETREPORT_URL)
+			response = client.get(URL_SUBMIT_PETREPORT)
 			self.assertTrue(response.status_code == 200)
-			self.assertTrue(response.request ['PATH_INFO'] == utils.TEST_SUBMIT_PETREPORT_URL)
+			self.assertTrue(response.request ['PATH_INFO'] == URL_SUBMIT_PETREPORT)
 			#We should have the base.html -> index.html -> petreport_form.html
 			self.assertTrue(len(response.templates) == 3)
 
 			client.logout()
 
-			utils.output_update(i + 1)
+			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
 		print ''
-		utils.performance_report(iteration_time)
+		performance_report(iteration_time)
 
 
 	def test_post_good_PetReport(self):
-		print '>>>> Testing test_post_good_PetReport for %d iterations' % utils.NUMBER_OF_TESTS
+		print '>>>> Testing test_post_good_PetReport for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = utils.create_test_view_setup(create_petreports=False)
+		(users, passwords, clients) = create_test_view_setup(create_petreports=False)
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#indexes
-			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
 
 			#objects
 			user = users [user_i]
@@ -94,10 +96,10 @@ class ReportingTesting (unittest.TestCase):
 			print "\n%s logs onto %s to enter the pet report form..." % (user, client)
 
 			#Go to the Pet Report Form Page
-			response = client.get(utils.TEST_SUBMIT_PETREPORT_URL)
+			response = client.get(TEST_SUBMIT_PETREPORT_URL)
 
 			#Create and submit a Pet Report object as form content
-			pr = utils.create_random_PetReport(users [user_i])
+			pr = create_random_PetReport(users [user_i])
 
 			#Note here that we convert the PetReport attributes into a dictionary in order to pass it into the POST request object.
 			pr_dict = model_to_dict(pr) 
@@ -107,41 +109,41 @@ class ReportingTesting (unittest.TestCase):
 			post.update(pr_dict)
 
 			#Make the POST request Call
-			response = client.post(utils.TEST_SUBMIT_PETREPORT_URL, post, follow=True)
+			response = client.post(TEST_SUBMIT_PETREPORT_URL, post, follow=True)
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertTrue(len(response.redirect_chain) == 1)
 			self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/')
 			self.assertEquals(response.redirect_chain[0][1], 302)
-			self.assertTrue(response.request ['PATH_INFO'] == utils.TEST_HOME_URL)
+			self.assertTrue(response.request ['PATH_INFO'] == TEST_HOME_URL)
 			self.assertTrue(len(PetReport.objects.all()) == 2*i + 2)
 			client.logout()
 
-			utils.output_update(i + 1)
+			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
 		print ''
-		self.assertTrue(len(UserProfile.objects.all()) <= utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(User.objects.all()) <= utils.NUMBER_OF_TESTS)	
-		self.assertTrue(len(PetReport.objects.all()) == 2*utils.NUMBER_OF_TESTS)
-		utils.performance_report(iteration_time)
+		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
+		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+		self.assertTrue(len(PetReport.objects.all()) == 2*NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
 
 	def test_post_bad_PetReport(self):
-		print '>>>> Testing test_post_bad_PetReport for %d iterations' % utils.NUMBER_OF_TESTS
+		print '>>>> Testing test_post_bad_PetReport for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = utils.create_test_view_setup(create_petreports=False)
+		(users, passwords, clients) = create_test_view_setup(create_petreports=False)
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#indexes
-			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
 
 			#objects
 			user = users [user_i]
@@ -154,20 +156,20 @@ class ReportingTesting (unittest.TestCase):
 			print "\n%s logs onto %s to enter the pet report form..." % (user, client)
 
 			#Go to the Pet Report Form Page
-			response = client.get(utils.TEST_SUBMIT_PETREPORT_URL)
+			response = client.get(TEST_SUBMIT_PETREPORT_URL)
 
 			#Create and submit a Pet Report object as form content
-			pr = utils.create_random_PetReport(users [user_i])
+			pr = create_random_PetReport(users [user_i])
 			#Note here that we convert the PetReport attributes into a dictionary in order to pass it into the POST request object.
 			pr_dict = model_to_dict(pr)
 
 			#Generate bad input
 			if i %2 == 0:
-				pr_dict ['sex'] = utils.generate_string(5)
+				pr_dict ['sex'] = generate_string(5)
 			elif i%3 == 0:
-				pr_dict ['size'] = utils.generate_string(10)
+				pr_dict ['size'] = generate_string(10)
 			elif i%5 == 0:
-				pr_dict ['status'] = utils.generate_string(5)
+				pr_dict ['status'] = generate_string(5)
 			else:
 				pr_dict ['date_lost_or_found'] = 100
 
@@ -177,45 +179,45 @@ class ReportingTesting (unittest.TestCase):
 			post.update(pr_dict)
 
 			#Make the POST request Call
-			response = client.post(utils.TEST_SUBMIT_PETREPORT_URL, post, follow=True)
+			response = client.post(TEST_SUBMIT_PETREPORT_URL, post, follow=True)
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
-			self.assertTrue(response.request ['PATH_INFO'] == utils.TEST_SUBMIT_PETREPORT_URL)
+			self.assertTrue(response.request ['PATH_INFO'] == TEST_SUBMIT_PETREPORT_URL)
 			self.assertTrue(len(PetReport.objects.all()) == i + 1)
 			client.logout()
 
-			utils.output_update(i + 1)
+			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
 		print ''
-		self.assertTrue(len(UserProfile.objects.all()) <= utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(User.objects.all()) <= utils.NUMBER_OF_TESTS)	
-		self.assertTrue(len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS)
-		utils.performance_report(iteration_time)
+		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
+		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
 	def test_get_PetReport_detailed_page(self):
-		print '>>>> Testing test_get_PetReport_detailedpage for %d iterations' % utils.NUMBER_OF_TESTS
+		print '>>>> Testing test_get_PetReport_detailedpage for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords and petreports 
-		(users, passwords, clients, petreports) = utils.create_test_view_setup(create_petreports=True)
+		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#indexes
-			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
 
 			#objects
 			user = users [user_i]
 			password = passwords [user_i]
 			client = clients [client_i]
 			petreport = petreports [petreport_i]
-			prdp_url = utils.TEST_PRDP_URL + str(petreport.id) + "/"
+			prdp_url = TEST_PRDP_URL + str(petreport.id) + "/"
 
 			#Test without logging in First.
 			print "\n\nGetting PRDP from %s without being logged in" % (client)
@@ -235,7 +237,7 @@ class ReportingTesting (unittest.TestCase):
 
 			#Test navigation to user profiles of all workers
 			for worker in petreport.workers.all():
-				worker_url = utils.TEST_USERPROFILE_URL +str(worker.user.id)+ "/"
+				worker_url = TEST_USERPROFILE_URL +str(worker.user.id)+ "/"
 				response = client.get(worker_url)
 				self.assertEquals(response.status_code, 200)
 				self.assertTrue(response.request ['PATH_INFO'] == worker_url)
@@ -243,7 +245,7 @@ class ReportingTesting (unittest.TestCase):
 			print "Navigation to all workers' user profiles is successful"
 
 			#Test navigation to the matching interface
-			matching_url = utils.TEST_MATCHING_URL + str(petreport.id)+ "/"
+			matching_url = TEST_MATCHING_URL + str(petreport.id)+ "/"
 			response = client.get(matching_url)
 			self.assertEquals(response.status_code, 200)
 			self.assertTrue(response.request ['PATH_INFO'] == matching_url)
@@ -253,11 +255,11 @@ class ReportingTesting (unittest.TestCase):
 			#test navigation to the PMDP
 			client.logout()
 
-			utils.output_update(i + 1)
+			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
 		print ''
-		utils.performance_report(iteration_time)
+		performance_report(iteration_time)
 
 

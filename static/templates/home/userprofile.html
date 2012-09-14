@@ -1,6 +1,10 @@
 {% extends 'home/index.html' %}
 {% load url from future %}
 
+{% block js %}
+<script src = "{{ STATIC_URL }}/js/local/epm.js" type = 'text/javascript'></script>
+{% endblock js %}
+
 {% block head_title %}EPM - User Profile: {{ userprofile.user.username }} {% endblock head_title %}
 {% block content_title %} User Profile {% endblock content_title %}
 

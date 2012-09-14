@@ -2,10 +2,15 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ModelForm
 from django import forms
-from django.db.models.signals import post_save, pre_save, pre_delete
+from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
 from django.dispatch import receiver
 from django.core.files.storage import FileSystemStorage
 import PIL, os, time
+from constants import *
+
+'''===================================================================================
+[models.py]: Models for the EPM system
+==================================================================================='''
 
 '''Enums for Various Model Choice Fields'''
 PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Turtle', 'Turtle'), ('Snake', 'Snake'), ('Horse', 'Horse'),('Rabbit', 'Rabbit'), ('Other', 'Other')]
@@ -13,17 +18,6 @@ STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
 SEX_CHOICES=[('M','Male'),('F','Female')]
 SIZE_CHOICES = [('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)')]
 BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador')]
-
-#Activity Enum Values
-ACTIVITY_LOG_DIRECTORY = "../logs/activity_logs/"
-ACTIVITY_ACCOUNT_CREATED = "ACCOUNT_CREATED"
-ACTIVITY_LOGIN = "LOGIN"
-ACTIVITY_LOGOUT = "LOGOUT"
-ACTIVITY_PETREPORT_SUBMITTED = "PETREPORT_SUBMITTED"
-ACTIVITY_PETMATCH_PROPOSED = "PETMATCH_PROPOSED"
-ACTIVITY_PETMATCH_UPVOTE = "PETMATCH_UPVOTE"
-ACTIVITY_PETMATCH_DOWNVOTE= "PETMATCH_DOWNVOTE"
-
 
 class PetReport(models.Model):
 
@@ -56,7 +50,7 @@ class PetReport(models.Model):
         return True
 
     def __unicode__(self):
-        return 'PetReport {pet_type: %s, status: %s, proposed_by: %s}' % (self.pet_type, self.status, self.proposed_by)
+        return '{ID{%s} %s %s name:%s}' % (self.id, self.status, self.pet_type, self.pet_name)
 
     def long_unicode (self):
         str = "PetReport {\n\tpet_type: %s\n\tstatus: %s\n\tproposed_by: %s\n\t" % (self.pet_type, self.status, self.proposed_by)
@@ -84,33 +78,9 @@ class UserProfile (models.Model):
     reputation = models.IntegerField(default=0, null=True)
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
-
-    ''' Create a post save signal function to setup a UserProfile when a User is created'''
-    def setup_UserProfile(sender, instance, created, **kwargs):
-        if created == True:
-            #Create a UserProfile object.
-            UserProfile.objects.create(user=instance)
-            #Create the first activity for this user
-            log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
-
-    ''' Create a post save signal function to setup a UserProfile when a User is created'''
-    def delete_UserProfile_log(sender, instance, **kwargs):
-        
-        #Remove the Log file associated with this UserProfile.
-        log_path = ACTIVITY_LOG_DIRECTORY + str(instance.username) + ".log"
-        if os.path.isfile(log_path):
-            try:
-                print "removing %s" % (log_path)
-                os.unlink(log_path)
-            except Exception, e:
-                print e             
-
     
     def __unicode__ (self):
-        return 'User {username:%s, email:%s}' % (self.user.username, self.user.email)
-
-    post_save.connect(setup_UserProfile, sender=User)
-    pre_delete.connect(delete_UserProfile_log, sender=User)
+        return '{ID{%s} %s}' % (self.id, self.user.username)
 
 #The Pet Match Object Model
 class PetMatch(models.Model):
@@ -130,12 +100,34 @@ class PetMatch(models.Model):
     up_votes = models.ManyToManyField('UserProfile', null=True, related_name='up_votes_related')
     down_votes = models.ManyToManyField('UserProfile', null=True, related_name='down_votes_related')
 
-    #TODO: Need to implement pre-save signal for the PetMatch object to avoid having duplicate PetMatch objects.
-    #    @receiver(pre_save, sender=PetMatch)
-    #    def create_PetMatch(sender, **kwargs):
-    #        existing_match = PetMatch.get_PetMatch(sender.lost_pet, sender.found_pet)
-    #        if existing_match != None:
-    #            print "PetMatch %s already exists in the Database!" 
+    '''Because of the Uniqueness constraint that the PetMatch must uphold, we override the save method'''
+    def save(self, *args, **kwargs):
+        #First, try to find an existing PetMatch
+        lost_pet = self.lost_pet
+        found_pet = self.found_pet
+        
+        #PetMatch inserted improperly
+        if (lost_pet.status != "Lost") or (found_pet.status != "Found"):
+            #print "INSERTED IMPROPERLY"
+            return (None, "INSERTED IMPROPERLY")
+
+        existing_match = PetMatch.get_PetMatch(self.lost_pet, self.found_pet)            
+
+        #A PetMatch with the same lost and found pets (and same user who proposed it) already exists - SQL Update
+        if existing_match != None:
+            if existing_match.id == self.id:
+                super(PetMatch, self).save(args, kwargs)
+                print "[SQL UPDATE]: %s" % self
+                return (self, "SQL UPDATE")
+            else:
+                print "[DUPLICATE PETMATCH]: %s VS. %s" % (self, existing_match)
+                return (None, "DUPLICATE PETMATCH") #Duplicate PetMatch!
+
+        #Good to go: Save the PetMatch Object.
+        super(PetMatch, self).save(args, kwargs)
+        print "[OK]: PetMatch %s was saved!" % self
+        return (self, "NEW PETMATCH")
+
 
     ''' Determine if a PetMatch exists between pr1 and pr2, and if so, return it. Otherwise, return None. '''
     @staticmethod
@@ -154,7 +146,6 @@ class PetMatch(models.Model):
         except PetMatch.DoesNotExist:
             return None
 
-
     ''' Determine if the input UserProfile (user) has up/down-voted on this PetMatch already '''
     def UserProfile_has_voted(self, user_profile):
         assert isinstance(user_profile, UserProfile)
@@ -169,15 +160,14 @@ class PetMatch(models.Model):
             downvote = None
 
         if (upvote != None):
-            return "upvote"
+            return UPVOTE
         elif (downvote != None):
-            return "downvote"
+            return DOWNVOTE
 
-        return False
+        return False       
 
     def __unicode__ (self):
-        return 'PetMatch {lost:%s, found:%s, proposed_by:%s}' % (self.lost_pet, self.found_pet, self.proposed_by)
-
+        return '{ID{%s} lost:%s, found:%s, proposed_by:%s}' % (self.id, self.lost_pet, self.found_pet, self.proposed_by)
 
 #The Chat Object Model
 class Chat (models.Model):
@@ -203,8 +193,12 @@ class ChatLine (models.Model):
         return 'ChatLine {text:%s}' % (self.text)
 
 
-''' Form Models - These Models nicely organize the model-related data into Django Form objects that have built-in validation
-functionality and can be passed around via POST requests. Order of Fields matter.'''
+
+''' ============================ [FORM MODELS] ==================================== '''
+''' These Models nicely organize the model-related data into Django Form objects that 
+    have built-in validation functionality and can be passed around via POST requests. 
+    Order of Fields matter.                                                         '''
+
 
 #The PetReport ModelForm
 class PetReportForm (ModelForm):
@@ -230,104 +224,35 @@ class PetReportForm (ModelForm):
         exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by')
 
 
-#Method for logging activities given an input UserProfile, Activity Enum, and (optionally) PetReport and PetMatch objects.
-def log_activity (activity, userprofile, petreport=None, petmatch=None):
-    assert isinstance(userprofile, UserProfile)
 
-    #Define the user filename and logger.
-    user = userprofile.user
-    user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+''' ============================ [SIGNALS] ==================================== '''
 
-    try:
-        logger = open(user_log_filename, "a")
-        if activity == ACTIVITY_ACCOUNT_CREATED:
-            log = "A new UserProfile account was created for {%s} with ID{%d}\n" % (user.username, userprofile.id)
+''' Create a post delete signal function to delete a UserProfile when a User/UserProfile is deleted'''
+@receiver (pre_delete, sender=UserProfile)
+def delete_UserProfile(sender, instance=None, **kwargs):
+    #Remove the Log file associated with this UserProfile.
+    log_path = ACTIVITY_LOG_DIRECTORY + str(instance.user.username) + ".log"
+    if os.path.isfile(log_path):
+        try:
+            print "removing %s" % (log_path)
+            os.unlink(log_path)
+        except Exception, e:
+            print e
 
-        elif activity == ACTIVITY_LOGIN:
-            log = "%s with ID{%d} logged in to the system\n" % (user.username, userprofile.id)            
+    #Instead of deleting the User (which might break foreign-key relationships), let's set the active flag to False (INACTIVE)
+    instance.user.is_active = False
 
-        elif activity == ACTIVITY_LOGOUT:
-            log = "%s with ID{%d} logged out of the system\n" % (user.username, userprofile.id)            
-
-        elif activity == ACTIVITY_PETREPORT_SUBMITTED:
-            assert isinstance(petreport, PetReport)
-            log = "%s submitted the PetReport for {%s} with ID{%d}\n" % (user.username, petreport.pet_name, petreport.id)
-
-        elif activity == ACTIVITY_PETMATCH_PROPOSED:
-            assert isinstance(petmatch, PetMatch)
-            log = "%s proposed the PetMatch object with ID{%d}\n" % (user.username, petmatch.id)
-
-        elif activity == ACTIVITY_PETMATCH_UPVOTE:
-            assert isinstance(petmatch, PetMatch)
-            log = "%s upvoted the PetMatch object with ID{%d}\n" % (user.username, petmatch.id)
-
-        elif activity == ACTIVITY_PETMATCH_DOWNVOTE:
-            assert isinstance(petmatch, PetMatch)
-            log = "%s downvoted the PetMatch object with ID{%d}\n" % (user.username, petmatch.id)         
-
-        else:
-            raise IOError
-
-    except IOError, AssertionError:
-        traceback.print_exc()
-        print "[ERROR]: log_activity not used correctly."
-
-    log = (time.asctime() + " [%s]: " + log) % activity
-    print log
-    logger.write(log)    
-    logger.close()      
-
-
-#Helper function to determine if the input activity has been logged in the past
-def activity_has_been_logged (activity, userprofile, petreport=None, petmatch=None):
-    assert isinstance(userprofile, UserProfile)
-
-    #Define the user filename and logger.
-    user = userprofile.user
-    user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
-
-    #If this particular user log file exists, then continue.
-    if os.path.exists(user_log_filename) == True:
-        logger = open(user_log_filename, "r")
-
-        #iterate through all lines in the log file and find an activity match.
-        for line in iter(lambda:logger.readline(), ""):
-            if (activity in line) and (user.username in line):
-                identifier = line.split("ID")[1]
-
-                if (activity == ACTIVITY_ACCOUNT_CREATED) or (activity == ACTIVITY_LOGIN) or (activity == ACTIVITY_LOGOUT):
-                    if str(userprofile.id) in identifier:
-                        logger.close()
-                        return True
-
-                elif activity == ACTIVITY_PETREPORT_SUBMITTED:
-                    assert isinstance(petreport, PetReport)
-                    if str(petreport.id) in identifier:
-                        logger.close()
-                        return True
-
-                elif activity == ACTIVITY_PETMATCH_PROPOSED:
-                    assert isinstance(petmatch, PetMatch)
-                    if str(petmatch.id) in identifier:
-                        logger.close()
-                        return True
-
-                elif activity == ACTIVITY_PETMATCH_UPVOTE:
-                    assert isinstance(petmatch, PetMatch)
-                    if str(petmatch.id) in identifier:
-                        logger.close()
-                        return True
-
-                elif activity == ACTIVITY_PETMATCH_DOWNVOTE:
-                    assert isinstance(petmatch, PetMatch)
-                    if str(petmatch.id) in identifier:
-                        logger.close()
-                        return True
-
-        logger.close()
-        return False
-            
+''' Create a post save signal function to setup a UserProfile when a User is created'''
+@receiver (post_save, sender=User)
+def setup_UserProfile(sender, instance, created, **kwargs):
+    if created == True:
+        #Create a UserProfile object.
+        UserProfile.objects.create(user=instance)
+        #Create the first activity for this user
+        log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
 
 
 
 
+''' Import statements placed at the bottom of the page to prevent circular import dependence '''
+from logging import log_activity

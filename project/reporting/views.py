@@ -12,7 +12,6 @@ from social_auth.utils import setting
 from django.contrib.messages.api import get_messages
 from social_auth.views import auth
 from django.db import models, IntegrityError
-from home.models import *
 from django.http import Http404
 from django.core import mail
 from django.core.urlresolvers import reverse
@@ -23,7 +22,10 @@ from django.utils import simplejson
 from django.core import serializers
 from matching.views import *
 from django.forms.models import model_to_dict
-import utils
+from home.models import *
+from utils import *
+from constants import *
+from logging import *
 import datetime, re
 
 @login_required
@@ -63,7 +65,7 @@ def submit_PetReport(request):
             #Log the PetReport submission for this UserProfile
             log_activity(ACTIVITY_PETREPORT_SUBMITTED, request.user.get_profile(), petreport=pr)
             print "[SUCCESS]: Pet Report submitted successfully" 
-            return redirect('/')
+            return redirect(URL_HOME)
 
         else:
             print "[ERROR]: Pet Report not submitted successfully" 
@@ -72,7 +74,7 @@ def submit_PetReport(request):
     else:
         form = PetReportForm() #Unbound Form
 
-    return render_to_response('reporting/petreport_form.html', {'form':form}, RequestContext(request))
+    return render_to_response(HTML_SUBMIT_PETREPORT, {'form':form}, RequestContext(request))
 
 def disp_PetReport(request, petreport_id):
 
@@ -83,7 +85,7 @@ def disp_PetReport(request, petreport_id):
     else:
         matches = PetMatch.objects.all().filter(found_pet = pet_report)
 
-    return render_to_response('reporting/petreport.html',{'pet_report': pet_report,'matches': matches}, RequestContext(request))
+    return render_to_response(HTML_PRDP, {'pet_report': pet_report,'matches': matches}, RequestContext(request))
 
 
 @login_required
@@ -92,7 +94,7 @@ def bookmark_PetReport(request):
     if request.method == "POST":
         user_id = request.POST['user_id']
         petreport_id = request.POST['petreport_id']
-        print 'Bookmarking petreport #'+str(petreport_id)+" for user #"+str(user_id)
+        print 'Bookmarking petreport #' + str(petreport_id) + " for user #" + str(user_id)
         user = UserProfile.objects.get(pk = user_id)
         pet_report = PetReport.objects.get(pk = petreport_id)
     else:
@@ -105,9 +107,11 @@ def get_PetReport_json(request, petreport_id):
     if request.is_ajax() == True:
         print "============== AJAX REQUEST ======================= "
         prdp = get_object_or_404(PetReport, pk=petreport_id)
+        print "Retrieved the PetReport: %s" % prdp
 
         #Need this for easy displaying on the Matching Interface workspace detail table.
-        prdp_dict = utils.simplify_model_dict(prdp) 
+        prdp_dict = simplify_model_dict(prdp) 
+        print prdp_dict
 
         json = simplejson.dumps(prdp_dict)
         print "JSON: " + str(json)

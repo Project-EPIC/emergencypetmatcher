@@ -155,6 +155,7 @@ header p {
 	width: 90%;
 	margin-left: auto;
 	margin-right: auto;
+	margin-top: 10px;
 	text-align: center;
 	padding-bottom: 2px;
 }
@@ -282,20 +283,28 @@ h1.found {
 
 #feedlist {
 	list-style-type: none;
+	padding: 0 0 2px 2px;
+	overflow:auto;
 }
 
 #feedlist li {
 	background-color: #ffffff;
 	color: #000000;
+	margin: 0 0 5px 0;
 }
 
-#feedlist li.alternate {
+#feedlist li:nth-child(odd) {
 	background-color: #e9e9e9;
 }
 
 /**
  * Some extra styles to randomize heights of grid items.
  */
+
+#tiles ali:nth-child(2){
+
+	width:300px;
+}
 #tiles ali:nth-child(3n) {
 	height: 175px;
 }
@@ -347,7 +356,6 @@ h1.found {
 	text-decoration: none;
 	color: #939393;
 }
-
 
 
 .sticky .prdpdialog {
@@ -422,7 +430,7 @@ h1.found {
 }
 
 
-#prdp_petmatch_box{
+.prdp_pmdp_dialog {
 	background: #FFFFFF;
 	border: 1px solid #000000;
 	width: auto;
@@ -435,7 +443,7 @@ h1.found {
 
 }
 
-.prdp_petmatch_img{
+.prdp_pmdp_dialog img { 
 
 	float:left;
 	margin-top: 20px;
@@ -471,9 +479,9 @@ h1.found {
 	height:auto;*/
 	padding-top:10px;
 	padding-left:10px;
+	padding-right:10px;
 	margin-bottom:10px;
 	margin-right: 15px;
-	padding-right:10px;
 	text-align:justify;
 	max-width:330px;
 	max-height:275px;
@@ -671,22 +679,56 @@ h1.found {
 	list-style-type: none;
 }
 
-.pmdp_subtitle {
+#pmdp_subtitle {
 
+	display:block;
 	text-align: center;
-	height: 40px;
 	letter-spacing: -1px;
 	font-size: 16pt;
+}
+
+#pmdp_votes_subtitle {
+
 	padding-top: 2px;
+	margin:2px;
+	height:100px;
+
+}
+
+.pmdp_vote_box {
+
+	text-align: center;
+	margin-left: 5px;
+	margin-top: 0px;
+	margin-bottom: 5px;
+	width: 120px;
+
+}
+
+#pmdp_downvote_number {
+
+	font-size:30pt;
+	color: gray;
+	margin: 0px 5px 0px 5px;
+
+}
+
+#pmdp_upvote_number {
+
+	font-size:30pt;
+	color: gray;
+	margin: 0px 5px 0px 5px;
+
 }
 
 #pmdp_action_container {
 
-	height:150px;
+	height:230px;
 	border-style: outset;
 	border-width: 2px;
 	border-color: black;
 }
+
 
 #pmdp_userbox_container {
 
@@ -694,8 +736,9 @@ h1.found {
 	padding-right: 2px;
 	margin-top: 2px;
 	margin-bottom: 2px;
+	margin-left:5px;
 	display:inline-block;
-	border: 1px solid dotted;
+	border: 1px dotted black;
 	height: 100px;
 	width: 630px;
 	overflow: auto;
@@ -705,7 +748,6 @@ h1.found {
 #pmdp_downvote_button {
 	height:90px;
 	width: 85px;
-	float:left;
 	cursor: pointer;
 }
 
