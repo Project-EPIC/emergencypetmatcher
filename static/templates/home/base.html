@@ -48,10 +48,10 @@
 			//This function allows us to prepare a popup upon clicking several elements.
 			$(document).ready(function(){
 
-				$("#prdpdialog a").click(function(){
+				$(".prdpdialog").click(function(){
 
 					var link = $(this);
-					var dialog_box = $("<div></div>").load(link.attr("href")).dialog ({
+					var dialog_box = $("<div></div>").load(link.attr('url')).dialog ({
 
 						autoOpen: true,
 						position: "top",
@@ -132,30 +132,31 @@
 
 				<h2>{% block content_title %}{% endblock content_title %}</h2>
 				<h3>{% block content_subtitle %}{% endblock content_subtitle %}</h3>
-
-				{% if messages %}
-				<ul id="messages">
-				    {% for message in messages %}
-				    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-				    {% endfor %}
-				</ul>
-				{% endif %}
-				
+				{% block messages %}
+					{% if messages %}
+					<ul id="messages">
+					    {% for message in messages %}
+					    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+					    {% endfor %}
+					</ul>
+					{% endif %}
+				{% endblock messages %}
 
 				<!-- start content -->
 				{% block content %}				
-
-				<div id="nav">
-					<ul>
-					{% if user.is_authenticated %}
-						<li><a href="#">Friends</a></li>
-						<li><a href="#">Bookmarked</a></li>
-						<li><a href="#">My Pet Matches</a></li>
-					{% endif %}
-						<li class="active"><a href="#">Newly Added</a></li>
-						<li><a href="#">Proposed Pet Matches</a></li>
-					</ul>
-				</div>
+					{% block navbar %}
+						<div id="nav">
+							<ul>
+							{% if user.is_authenticated %}
+								<li><a href="#">Friends</a></li>
+								<li><a href="{% url 'bookmarks' %}">Bookmarked</a></li>
+								<li><a href="#">My Pet Matches</a></li>
+							{% endif %}
+								<li class="active"><a href="#">Newly Added</a></li>
+								<li><a href="#">Proposed Pet Matches</a></li>
+							</ul>
+						</div>
+					{% endblock navbar %}
 
 				<ul id="tiles">
 
@@ -169,15 +170,15 @@
 					{% block pet_reports_content %}
 						{% if pet_reports_list %}
 							{% for pet_report in pet_reports_list %}
-								<li class="item" >
-									<div id = "prdpdialog">
-										<a href= "{% url 'disp_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}">
-											<strong>{{ pet_report.pet_name }}</strong><br/>
-											{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
-											Contact : {{  pet_report.proposed_by.user.username }}
-											<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
-										</a>
-									</div>
+								<li class="item"  >
+									
+									<a class = "prdpdialog" url="{% url 'disp_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}">
+										<strong>{{ pet_report.pet_name }}</strong><br/>
+										{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
+										Contact : {{  pet_report.proposed_by.user.username }}
+										<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
+									</a>
+									
 								</li>	
 							{% endfor %}							
 						{% else %}

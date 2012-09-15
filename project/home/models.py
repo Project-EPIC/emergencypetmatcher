@@ -50,6 +50,19 @@ class PetReport(models.Model):
     #Many-to-Many relationship with User
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
     bookmarked_by = models.ManyToManyField('UserProfile', null=True, related_name='bookmarks_related')
+
+    ''' Determine if the input UserProfile (user) has bookmarked this PetReport already '''
+    def UserProfile_has_bookmarked(self, user_profile):
+        assert isinstance(user_profile, UserProfile)
+        try:
+            user = self.bookmarked_by.get(pk = user_profile.id)
+        except UserProfile.DoesNotExist:
+            user = None        
+        if (user != None):
+            return True
+        else:
+            return False
+        return False
     
     def has_image(self):
         if self.img_path == None:
@@ -221,7 +234,7 @@ class PetReportForm (ModelForm):
     '''Non-Required Fields'''
     img_path = forms.ImageField(label = "Upload an Image ", required = False)
     pet_name = forms.CharField(label = "Pet Name", max_length=50, required = False) 
-    age = forms.CharField(label = "Age", max_length = 5, required = False)
+    age = forms.CharField(label = "Age", max_length = 10, required = False)
     breed = forms.CharField(label = "Breed", max_length = 30, required = False)
     color = forms.CharField(label = "Coat Color(s)", max_length = 20, required = False)
     description  = forms.CharField(label = "Description", max_length = 500, required = False, widget = forms.Textarea)
