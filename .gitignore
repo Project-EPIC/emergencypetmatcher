@@ -1,2 +1,4 @@
 #ignore log files
 ./logs/*
+#ignore below file
+./project/home/__init__.pyc
