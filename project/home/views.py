@@ -20,6 +20,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages
 import oauth2 as oauth
 import urllib
+from django.forms.models import model_to_dict
 
 """Home view, displays login mechanism"""
 def home (request):
@@ -126,4 +127,9 @@ def share(request, petreport_id):
     # To be completed
     
     return render_to_response('home/userprofile.html', {'userprofile':u}, context_instance=RequestContext(request))
+
+@login_required
+def display_editUserProfile_page(request):
+    form = UserProfileForm()
+    return render_to_response('home/EditUserProfile_form.html', {'form':form}, RequestContext(request))
 

@@ -6,6 +6,7 @@ from django.db.models.signals import post_save, pre_save, pre_delete
 from django.dispatch import receiver
 from django.core.files.storage import FileSystemStorage
 import PIL, os, time
+from django import forms
 
 '''Enums for Various Model Choice Fields'''
 PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Turtle', 'Turtle'), ('Snake', 'Snake'), ('Horse', 'Horse'),('Rabbit', 'Rabbit'), ('Other', 'Other')]
@@ -229,6 +230,20 @@ class PetReportForm (ModelForm):
         model = PetReport
         exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by')
 
+#The UserProfile ModelForm - used for editing the user profile
+#edit initial value of each field either in the view or in the template
+class UserProfileForm (forms.Form):
+    '''Required Fields'''
+    username = forms.CharField(label="Username",max_length=30) 
+
+    '''Non-Required Fields'''
+    first_name = forms.CharField(label="First Name",max_length=30,required=False)
+    last_name = forms.CharField(label="Last Name",max_length=30,required=False)
+    email = forms.EmailField(label="Email",required=False)
+    old_password = forms.CharField(label="Old Password",max_length=30,widget = forms.PasswordInput) 
+    new_password = forms.CharField(label="New Password",max_length=30,widget = forms.PasswordInput) 
+    confirm_password = forms.CharField(label="Confirm Password",max_length=30,widget = forms.PasswordInput) 
+    #photo = forms.ImageField(upload_to='images/profile_images', required=False)
 
 #Method for logging activities given an input UserProfile, Activity Enum, and (optionally) PetReport and PetMatch objects.
 def log_activity (activity, userprofile, petreport=None, petmatch=None):

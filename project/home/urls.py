@@ -14,7 +14,7 @@ urlpatterns = patterns('home.views',
 	url(r'^form/$', 'form', name='form'),
 	url(r'^share_(?P<petreport_id>\d+)/$', 'share', name='share'),
 	url(r'^', include('social_auth.urls')),
-
+	url(r'^edituserprofile/$', 'display_editUserProfile_page', name='display_editUserProfile_page'),
 	url (r'^accounts/', include('registration.backends.default.urls')),
 	#registration-related URLs that have been customized.
 	url(r'^activate/complete/$', "registration_activation_complete", name='registration_activation_complete'),

@@ -1,0 +1,17 @@
+{% extends 'home/index.html' %}
+{% load url from future %}
+{% block content %}
+	
+		<form enctype="multipart/form-data" method="POST" action="#">
+			{% csrf_token %}
+			<table>
+				{% for field in form %}
+					<tr>
+						<td><strong> {{ field.label }} </strong></td>
+					</tr>
+				{% endfor %}
+			</table><br/>
+			<input type="submit" value="Submit" style= "width:100px; height:25px; float:right;"/>
+		</form>
+{% endblock content %}
+
