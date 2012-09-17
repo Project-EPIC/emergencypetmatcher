@@ -14,7 +14,7 @@ When writing your test file (tests.py), make sure to have the following import:
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 #Control Variable
-NUMBER_OF_TESTS = 10
+NUMBER_OF_TESTS = 50
 
 #Setup Lorem Ipsum Generator
 LIPSUM = lipsum.Generator()
@@ -100,9 +100,15 @@ def create_random_User(i, pretty_name=True):
 	return (user, password)
 
 #Create Random Object for: PetReport
-def create_random_PetReport(user):
-	pet_type = random.choice(PET_TYPE_CHOICES)[0]
-	status = random.choice(STATUS_CHOICES)[0]
+def create_random_PetReport(user=None, status=None, pet_type=None):
+	
+	if pet_type == None:
+		pet_type = random.choice(PET_TYPE_CHOICES)[0]
+	if status == None:
+		status = random.choice(STATUS_CHOICES)[0]
+	if user == None:
+		user = random.choice(User.objects.all())
+
 	pr = PetReport (pet_type = pet_type, status = status, proposed_by = user.get_profile())
 
 	pr.date_lost_or_found = generate_random_date(DATE_LOWER_BOUND, DATE_UPPER_BOUND, "%Y-%m-%d", random.random())
@@ -201,31 +207,32 @@ def create_random_Userlist(num_users = -1, friends=False, user=None):
 
 
 #Create Random Object for: PetMatch
-def create_random_PetMatch(lost_pet=None, found_pet=None, user=None):
-	#to be modified to make unique petmatches
-	pet_type = random.choice(PET_TYPE_CHOICES)[0]
-	allpets = PetReport.objects.filter(pet_type=pet_type)
-	prlost = allpets.filter(status = "Lost")
-	prfound = allpets.filter(status = "Found")
+def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None):
+	
+	#If the lost or found pet (or both) wasn't supplied, then get random Pet Reports.
+	if lost_pet == None or found_pet == None:
 
-	if len(prlost.all()) == 0 or len(prfound.all()) == 0:
-		print "Can't create random PetMatch: There isn't at least one lost and found %s." % pet_type
-		return None
+		if pet_type == None:
+			pet_type = random.choice(PET_TYPE_CHOICES)[0]
 
-	if(lost_pet == None):
-		lost_pet = random.choice(prlost)
-	if(found_pet == None):
-		found_pet = random.choice(prfound)
+		allpets = PetReport.objects.filter(pet_type=pet_type)
+		prlost = allpets.filter(status = "Lost")
+		prfound = allpets.filter(status = "Found")
+
+		if len(prlost.all()) == 0 or len(prfound.all()) == 0:
+			print "[ERROR]: Can't create random PetMatch: There isn't at least one lost and found %s." % pet_type
+			return None
+
+		if(lost_pet == None):
+			lost_pet = random.choice(prlost)
+		if(found_pet == None):
+			found_pet = random.choice(prfound)
+
+	#If no user supplied, then get a random one.
 	if(user == None):
 		user = random.choice(User.objects.all())
 
-    #Try saving the PetMatch object.
-    # We will expect the following output:
-    # None --> PetMatch was not inserted properly OR Duplicate PetMatch
-    # PetMatch Object --> Existing PetMatch (UPDATE) OR Brand new PetMatch.
-    # "Existing" means the PetMatch to be saved is the same PetMatch found, "Duplicate" means
-    # another PetMatch with the same Lost+Found Pets were found.
-
+	#Make your PetMatch.
 	pm = PetMatch(lost_pet = lost_pet, found_pet = found_pet, proposed_by = user.get_profile(), description = generate_lipsum_paragraph(500))
 	(petmatch, outcome) = pm.save()
 
@@ -255,16 +262,16 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None):
 
 	else:
 		if outcome =="DUPLICATE PETMATCH":
-			petmatch = PetMatch.get_PetMatch(lost_pet, found_pet)
+			existing_petmatch = PetMatch.get_PetMatch(lost_pet, found_pet)
 
 			if random.random() >= 0.5:
-				petmatch.up_votes.add(user.get_profile())
-				petmatch.down_votes.remove(user.get_profile())
-				log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=petmatch)				
+				existing_petmatch.up_votes.add(user.get_profile())
+				existing_petmatch.down_votes.remove(user.get_profile())
+				log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=existing_petmatch)				
 			else:
-				petmatch.down_votes.add(user.get_profile())
-				petmatch.up_votes.remove(user.get_profile())
-				log_activity(ACTIVITY_PETMATCH_DOWNVOTE, user.get_profile(), petmatch=petmatch)				
+				existing_petmatch.down_votes.add(user.get_profile())
+				existing_petmatch.up_votes.remove(user.get_profile())
+				log_activity(ACTIVITY_PETMATCH_DOWNVOTE, user.get_profile(), petmatch=existing_petmatch)				
 			
 	#Return the (possibly None) PetMatch
 	return petmatch
@@ -282,6 +289,8 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 	passwords = [ None for i in range (NUMBER_OF_TESTS) ]
 	petreports = [ None for i in range (NUMBER_OF_TESTS) ]
 	petmatches = [ None for i in range (NUMBER_OF_TESTS/2) ]
+	pet_type = random.choice(PET_TYPE_CHOICES)[0]
+	status = None
 
 	#Iterate w.r.t NUMBER_OF_TESTS control variable.
 	for i in range (NUMBER_OF_TESTS):
@@ -292,12 +301,21 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 		clients [i] = client
 
 		if create_petreports == True:
-			pr = create_random_PetReport(user)
+
+			#reset the pet_type: This is done so that the pet reports are generated with one pet type per two Pet Reports.
+			if i % 2 == 0:
+				status = "Lost"
+				pet_type = random.choice(PET_TYPE_CHOICES)[0]				
+			else:
+				status = "Found"
+
+			pr = create_random_PetReport(user, status=status, pet_type=pet_type)
 			petreports [i] = pr
 
 		#We can only create AT MOST NUMBER_OF_TESTS/2 PetMatch objects in total, so we need to be careful about indices.
-		if create_petmatches == True and (i >= 1 and i <= NUMBER_OF_TESTS/2):
-			pm = create_random_PetMatch(lost_pet=petreports[i-1], found_pet=petreports[i], user=user)
+		#(i >= 1 and i <= NUMBER_OF_TESTS/2)
+		if (create_petmatches == True) and (i % 2 == 1) and (i <= NUMBER_OF_TESTS/2):
+			pm = create_random_PetMatch(lost_pet=petreports[i-1], found_pet=petreports[i], pet_type=pet_type, user=user)
 			petmatches [i-1] = pm
 
 

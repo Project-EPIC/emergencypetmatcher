@@ -70,10 +70,15 @@ def get_activity_HTML(log, userprofile, petreport=None, petmatch=None):
 
     elif ACTIVITY_PETMATCH_PROPOSED in log:
         assert isinstance(petmatch, PetMatch)
-        #TODO: Combine Javascript functionality in order to use PMDP
-        html += "proposed a Pet Match examining two Pet Reports!"
-    else:
-        return ""
+        html += "proposed a <a class='pmdp_dialog' href = '" + URL_PMDP + str(petmatch.id) + "/'>" + "Pet Match </a> examining two " + petmatch.lost_pet.pet_type + "s!"
+
+    elif ACTIVITY_PETMATCH_UPVOTE in log:
+        assert isinstance(petmatch, PetMatch)
+        html += "upvoted a <a class='pmdp_dialog' href='" + URL_PMDP + str(petmatch.id) + "/'>" + "Pet Match </a> examining two " + petmatch.lost_pet.pet_type + "s!"
+
+    elif ACTIVITY_PETMATCH_DOWNVOTE in log:
+        assert isinstance(petmatch, PetMatch)
+        html += "downvoted a <a class='pmdp_dialog' href='" + URL_PMDP + str(petmatch.id) + "/'>" + "Pet Match </a> examining two " + petmatch.lost_pet.pet_type + "s!"
 
     return html
 
@@ -102,10 +107,6 @@ def get_recent_log(userprofile, activity=None):
 
             if ACTIVITY_ACCOUNT_CREATED in line: 
                 recent_log = line
-            elif ACTIVITY_LOGIN in line: 
-                recent_log = line                    
-            elif ACTIVITY_LOGOUT in line: 
-                recent_log = line                    
             elif ACTIVITY_PETREPORT_SUBMITTED in line:
                 petreport = PetReport.objects.get(pk=int(identifier))
                 recent_log = line                    
@@ -118,6 +119,8 @@ def get_recent_log(userprofile, activity=None):
             elif ACTIVITY_PETMATCH_DOWNVOTE in line:
                 petmatch = PetMatch.objects.get(pk=int(identifier))
                 recent_log = line  
+            else:
+                continue
 
             if activity != None:
                 if activity in recent_log:

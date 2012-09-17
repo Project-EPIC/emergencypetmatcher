@@ -1,8 +1,8 @@
-from home.models import *
 from django.contrib.auth import authenticate
 from django.test.client import Client
+from utils import *
+from home.models import *
 import unittest, string, random, sys, time
-import utils
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ModelTesting: Testing for EPM Models
@@ -30,16 +30,16 @@ class ModelTesting (unittest.TestCase):
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
 	CRUD Tests for: UserProfile + User
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
- 	def test_saveUser(self):
- 		print '>>> Testing test_saveUser for %d iterations' % utils.NUMBER_OF_TESTS
+ 	def test_save_User(self):
+ 		print '>>> Testing test_saveUser for %d iterations' % NUMBER_OF_TESTS
  		iteration_time = 0.00
 
- 		for i in range (utils.NUMBER_OF_TESTS):
+ 		for i in range (NUMBER_OF_TESTS):
  			start_time = time.clock()
 
 			#Create the essential ingredients for the User object.
 			#Creating a User creates a User Profile!
-			user, password = utils.create_random_User(i)
+			user, password = create_random_User(i)
 			username = user.username
 
 			user_profile = user.get_profile()
@@ -56,25 +56,25 @@ class ModelTesting (unittest.TestCase):
 			userObject = authenticate (username = username, password = password)
 			self.assertTrue(userObject is not None)
 
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue (len(UserProfile.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue (len(User.objects.all()) == utils.NUMBER_OF_TESTS)
-		utils.performance_report(iteration_time)
+		self.assertTrue (len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue (len(User.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
 
-	def test_updateUser (self):
-		print '>>> Testing test_updateUser for %d iterations' % utils.NUMBER_OF_TESTS
+	def test_update_User (self):
+		print '>>> Testing test_updateUser for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User object.
-			user, password = utils.create_random_User(i)
+			user, password = create_random_User(i)
 			username = user.username
 
 			user_profile = user.get_profile()
@@ -82,7 +82,7 @@ class ModelTesting (unittest.TestCase):
 			user_profile.save()
 
 			# check that we can update the user's username
-			changed_username = utils.generate_string (10) + str(i)
+			changed_username = generate_string (10) + str(i)
 			user.username = changed_username
 			user.save()
 
@@ -96,24 +96,24 @@ class ModelTesting (unittest.TestCase):
 			userObject = authenticate (username = changed_username, password = password)
 			self.assertTrue(userObject is not None)
 
-			utils.output_update (i + 1)		
+			output_update (i + 1)		
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue (len(UserProfile.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue (len(User.objects.all()) == utils.NUMBER_OF_TESTS)
-		utils.performance_report(iteration_time)
+		self.assertTrue (len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue (len(User.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
-	def test_deleteUser(self):
-		print '>>> Testing test_deleteUser for %d iterations' % utils.NUMBER_OF_TESTS
+	def test_delete_User(self):
+		print '>>> Testing test_deleteUser for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User object.
-			user, password = utils.create_random_User(i)
+			user, password = create_random_User(i)
 			username = user.username
 
 			user_profile = user.get_profile()
@@ -127,30 +127,30 @@ class ModelTesting (unittest.TestCase):
 			#Now, use the authenticate function
 			userObject = authenticate (username = username, password = password)
 			self.assertTrue(userObject is None)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
 		self.assertTrue(len(UserProfile.objects.all()) == 0)
 		self.assertTrue(len(User.objects.all()) == 0)
-		utils.performance_report(iteration_time)
+		performance_report(iteration_time)
 
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
 	CRUD Tests for: PetReport
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	def test_savePetReport(self):
-		print '>>>> Testing test_savePetReport for %d iterations' % utils.NUMBER_OF_TESTS
+	def test_save_PetReport(self):
+		print '>>>> Testing test_savePetReport for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User object.
-			user, password = utils.create_random_User(i)
+			user, password = create_random_User(i)
 
 			#Create the essential ingredients for the PetReport object.
-			pr = utils.create_random_PetReport(user)
+			pr = create_random_PetReport(user)
 			
 			# check we can find the PetReport in the database again
 			pet_report = PetReport.objects.get(proposed_by = user)
@@ -164,37 +164,37 @@ class ModelTesting (unittest.TestCase):
 			self.assertEquals(pr.breed, pet_report.breed)
 			self.assertEquals(pr.size, pet_report.size)
 			self.assertEquals(pr.age, pet_report.age)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue (len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue (len(UserProfile.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue (len(User.objects.all()) == utils.NUMBER_OF_TESTS)
-		utils.performance_report(iteration_time)
+		self.assertTrue (len(PetReport.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue (len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue (len(User.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
 	def test_updatePetReport(self):
-		print '>>>> Testing test_updatePetReport for %d iterations' % utils.NUMBER_OF_TESTS
+		print '>>>> Testing test_updatePetReport for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User object.
-			user, password = utils.create_random_User(i)
+			user, password = create_random_User(i)
 
 			#Create the essential ingredients for the PetReport object.
-			pr = utils.create_random_PetReport(user)
+			pr = create_random_PetReport(user)
 
 			#UPDATES
-			pr.pet_name = utils.generate_string (30)
-			pr.description = utils.generate_lipsum_paragraph(500)
+			pr.pet_name = generate_string (30)
+			pr.description = generate_lipsum_paragraph(500)
 			pr.sex = random.choice(SEX_CHOICES)[0]
-			pr.location = utils.generate_string (50)
-			pr.color = utils.generate_string (20)
-			pr.breed = utils.generate_string (30)
-			pr.size = utils.generate_string (30)
+			pr.location = generate_string (50)
+			pr.color = generate_string (20)
+			pr.breed = generate_string (30)
+			pr.size = generate_string (30)
 			pr.age = str(random.randrange(0,15))
 
 			# check we can find the PetReport in the database again
@@ -211,63 +211,64 @@ class ModelTesting (unittest.TestCase):
 			self.assertEquals(pr.breed, pet_report.breed)
 			self.assertEquals(pr.size, pet_report.size)
 			self.assertEquals(pr.age, pet_report.age)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue (len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue (len(UserProfile.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue (len(User.objects.all()) == utils.NUMBER_OF_TESTS)
-		utils.performance_report(iteration_time)
+		self.assertTrue (len(PetReport.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue (len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue (len(User.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
-	def test_deletePetReport(self):
-		print '>>>> Testing test_deletePetReport for %d iterations' % utils.NUMBER_OF_TESTS
+	def test_delete_PetReport(self):
+		print '>>>> Testing test_deletePetReport for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User object.
-			user, password = utils.create_random_User(i)
+			user, password = create_random_User(i)
 
 			#Create the essential ingredients for the PetReport object.
-			pr = utils.create_random_PetReport(user)
+			pr = create_random_PetReport(user)
 
 			PetReport.objects.get(proposed_by = user).delete()
 			self.assertTrue(len(PetReport.objects.all()) == 0)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue (len(UserProfile.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue (len(User.objects.all()) == utils.NUMBER_OF_TESTS)
+		self.assertTrue (len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue (len(User.objects.all()) == NUMBER_OF_TESTS)
 		self.assertTrue (len(PetReport.objects.all()) == 0)
-		utils.performance_report(iteration_time)
+		performance_report(iteration_time)
 
 
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
 	CRUD Tests for: PetMatch 
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	def test_savePetMatch(self):
-		print '>>>> Testing test_savePetMatch for %d iterations' % utils.NUMBER_OF_TESTS
+	def test_save_PetMatch(self):
+		print '>>>> Testing test_savePetMatch for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User objects.
-			user, password = utils.create_random_User(str(i) + 'a')
-			user2, password2 = utils.create_random_User(str(i) + 'b')
-			user3, password3 = utils.create_random_User(str(i) + 'c')
+			user, password = create_random_User(str(i) + 'a')
+			user2, password2 = create_random_User(str(i) + 'b')
+			user3, password3 = create_random_User(str(i) + 'c')
 
 			#Create the essential ingredients for the PetReport objects.
-			pr1 = utils.create_random_PetReport(user2)
-			pr2 = utils.create_random_PetReport(user3)
+			pet_type = random.choice(PET_TYPE_CHOICES)[0]
+			pr1 = create_random_PetReport(user2, status = "Lost", pet_type = pet_type)
+			pr2 = create_random_PetReport(user3, status = "Found", pet_type = pet_type)
 
 			#Now, create the PetMatch
-			pm = utils.create_random_PetMatch(pr1, pr2, user)
+			pm = create_random_PetMatch(pr1, pr2, user, pet_type=pet_type)
 
 			#Now, retrieve it and assert that they are the same.
 			pm_same = PetMatch.objects.get(proposed_by = user.get_profile())
@@ -275,36 +276,99 @@ class ModelTesting (unittest.TestCase):
 			self.assertEqual(pm.found_pet, pm_same.found_pet)
 			self.assertEqual(pm.proposed_by, pm_same.proposed_by)
 			self.assertEqual(pm, pm_same)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue(len(User.objects.all()) == utils.NUMBER_OF_TESTS * 3)
-		self.assertTrue(len(UserProfile.objects.all()) == utils.NUMBER_OF_TESTS * 3)
-		self.assertTrue(len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS * 2)
-		self.assertTrue(len(PetMatch.objects.all()) == utils.NUMBER_OF_TESTS)
-		utils.performance_report(iteration_time)
+		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS * 3)
+		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS * 3)
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS * 2)
+		self.assertTrue(len(PetMatch.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
 
-	def test_updatePetMatch(self):
-		print '>>>> Testing test_updatePetMatch for %d iterations' % utils.NUMBER_OF_TESTS
+	def test_save_improperly_saved_PetMatch(self):
+		print '>>>> Testing test_save_improperly_saved_PetMatch for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		start_time = time.clock()
+		for i in range (NUMBER_OF_TESTS):
+
+			create_random_User(str(i) + 'a')
+			create_random_User(str(i) + 'b')
+			pet_type = random.choice(PET_TYPE_CHOICES)[0]
+			pr_lost = create_random_PetReport(status="Lost")
+			pr_found = create_random_PetReport(status="Found")
+
+			#Now, create an improperly-placed PetMatch (i.e. Lost on Found attribute, Found on Lost attribute).
+			pm = create_random_PetMatch(lost_pet=pr_found, found_pet=pr_lost)
+
+			self.assertEquals(pm, None)
+			self.assertEquals(PetMatch.objects.filter(lost_pet=pr_found, found_pet=pr_lost).exists(), False)
+
+			output_update (i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)			
+
+		print ''
+		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS * 2)
+		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS * 2)
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS * 2)
+		self.assertTrue(len(PetMatch.objects.all()) == 0)
+		performance_report(iteration_time)
+
+	def test_save_duplicate_PetMatch(self):
+		print '>>>> Testing test_save_duplicate_PetMatch for %d iterations' % NUMBER_OF_TESTS
+		iteration_time = 0.00
+
+		start_time = time.clock()
+		for i in range (NUMBER_OF_TESTS):
+
+			u1 = create_random_User(str(i) + 'a')
+			u2 = create_random_User(str(i) + 'b')
+			pet_type = random.choice(PET_TYPE_CHOICES)[0]
+			pr_lost = create_random_PetReport(status="Lost")
+			pr_found = create_random_PetReport(status="Found")
+			pm = create_random_PetMatch(lost_pet=pr_lost, found_pet=pr_found, user = u1[0])
+			pm_duplicate = create_random_PetMatch(lost_pet=pr_lost, found_pet=pr_found, user = u2[0])
+
+			self.assertFalse(pm == None)
+			self.assertEquals(pm_duplicate, None)
+			self.assertEquals(PetMatch.objects.filter(lost_pet=pr_lost, found_pet=pr_found, proposed_by = u1[0]).exists(), True)			
+			self.assertEquals(PetMatch.objects.filter(lost_pet=pr_lost, found_pet=pr_found, proposed_by = u2[0]).exists(), False)
+
+			output_update (i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)			
+
+		print ''
+		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS * 2)
+		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS * 2)
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS * 2)
+		self.assertTrue(len(PetMatch.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)		
+
+
+	def test_update_PetMatch(self):
+		print '>>>> Testing test_updatePetMatch for %d iterations' % NUMBER_OF_TESTS
+		iteration_time = 0.00
+
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User objects.
-			user, password = utils.create_random_User(str(i) + 'a')
-			user2, password2 = utils.create_random_User(str(i) + 'b')
-			user3, password3 = utils.create_random_User(str(i) + 'c')
+			user, password = create_random_User(str(i) + 'a')
+			user2, password2 = create_random_User(str(i) + 'b')
+			user3, password3 = create_random_User(str(i) + 'c')
 
 			#Create the essential ingredients for the PetReport objects.
-			pr1 = utils.create_random_PetReport(user2)
-			pr2 = utils.create_random_PetReport(user3)
+			pet_type = random.choice(PET_TYPE_CHOICES)[0]
+			pr1 = create_random_PetReport(user2, status = "Lost", pet_type = pet_type)
+			pr2 = create_random_PetReport(user3, status = "Found", pet_type = pet_type)
 
 			#Now, create the PetMatch
-			pm = utils.create_random_PetMatch(pr1, pr2, user)
+			pm = create_random_PetMatch(pr1, pr2, user, pet_type=pet_type)
 
 			#UPDATES
 			pm.score = random.randrange(0, 10000)
@@ -318,99 +382,100 @@ class ModelTesting (unittest.TestCase):
 			self.assertEqual(pm, pm_updated)
 			self.assertEqual(pm.score, pm_updated.score)
 			self.assertEqual(pm.is_open, pm_updated.is_open)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue(len(User.objects.all()) == utils.NUMBER_OF_TESTS * 3)
-		self.assertTrue(len(UserProfile.objects.all()) == utils.NUMBER_OF_TESTS * 3)
-		self.assertTrue(len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS * 2)
-		self.assertTrue(len(PetMatch.objects.all()) == utils.NUMBER_OF_TESTS)
-		utils.performance_report(iteration_time)
+		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS * 3)
+		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS * 3)
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS * 2)
+		self.assertTrue(len(PetMatch.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
 
-	def test_deletePetMatch(self):
-		print '>>>> Testing test_deletePetMatch for %d iterations' % utils.NUMBER_OF_TESTS
+	def test_delete_PetMatch(self):
+		print '>>>> Testing test_deletePetMatch for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User objects.
-			user, password = utils.create_random_User(str(i) + 'a')
-			user2, password2 = utils.create_random_User(str(i) + 'b')
-			user3, password3 = utils.create_random_User(str(i) + 'c')
+			user, password = create_random_User(str(i) + 'a')
+			user2, password2 = create_random_User(str(i) + 'b')
+			user3, password3 = create_random_User(str(i) + 'c')
 
 			#Create the essential ingredients for the PetReport objects.
-			pr1 = utils.create_random_PetReport(user2)
-			pr2 = utils.create_random_PetReport(user3)
+			pet_type = random.choice(PET_TYPE_CHOICES)[0]
+			pr1 = create_random_PetReport(user2, status = "Lost", pet_type = pet_type)
+			pr2 = create_random_PetReport(user3, status = "Found", pet_type = pet_type)
 
 			#Now, create the PetMatch
-			pm = utils.create_random_PetMatch(pr1, pr2, user)
+			pm = create_random_PetMatch(pr1, pr2, user, pet_type=pet_type)
 
 			#And now delete the PetMatch Object.
 			PetMatch.objects.all().get(proposed_by = user.get_profile(), lost_pet = pr1, found_pet = pr2).delete()
 			#Assert that there is nothing in the database!
 			self.assertTrue(len(PetMatch.objects.all()) == 0)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue(len(User.objects.all()) == utils.NUMBER_OF_TESTS * 3)
-		self.assertTrue(len(UserProfile.objects.all()) == utils.NUMBER_OF_TESTS * 3)
-		self.assertTrue(len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS * 2)
+		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS * 3)
+		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS * 3)
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS * 2)
 		self.assertTrue(len(PetMatch.objects.all()) == 0)
-		utils.performance_report(iteration_time)
+		performance_report(iteration_time)
 
 
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
 	CRUD Tests for: Chat
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	def test_saveChat(self):
-		print '>>>> Testing test_saveChat for %d iterations' % utils.NUMBER_OF_TESTS
+	def dont_test_saveChat(self):
+		print '>>>> Testing test_saveChat for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 			#Create the essential ingredients for the User object(s).
-			user, password = utils.create_random_User(i)
+			user, password = create_random_User(i)
 
 			#Create the essential ingredients for the PetReport object(s).
-			pr = utils.create_random_PetReport(user)
+			pr = create_random_PetReport(user)
 
 			#Now, create the Chat Object.
-			chat = utils.create_random_Chat(pr)
+			chat = create_random_Chat(pr)
 
 			# check we can find the Chat in the database again
 			chat_same = Chat.objects.get(pet_report = pr)
 			self.assertEqual(chat.pet_report, chat_same.pet_report)
 			self.assertEqual(chat, chat_same)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue(len(User.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(Chat.objects.all()) == utils.NUMBER_OF_TESTS)
-		utils.performance_report(iteration_time)
+		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue(len(Chat.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
-	def test_updateChat(self):
-		print '>>>> Testing test_updateChat for %d iterations' % utils.NUMBER_OF_TESTS
+	def dont_test_updateChat(self):
+		print '>>>> Testing test_updateChat for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 			#Create the essential ingredients for the User object(s).
-			user, password = utils.create_random_User(i)
+			user, password = create_random_User(i)
 
 			#Create the essential ingredients for the PetReport object(s).
-			pr = utils.create_random_PetReport(user)
+			pr = create_random_PetReport(user)
 
 			#Now, create the Chat Object.
-			chat = utils.create_random_Chat(pr)
+			chat = create_random_Chat(pr)
 
 			#UPDATES
 			user_profile = user.get_profile()
@@ -422,104 +487,104 @@ class ModelTesting (unittest.TestCase):
 			self.assertEqual(chat.pet_report, chat_same.pet_report)
 			self.assertEqual(chat.userprofile_set.get(), chat_same.userprofile_set.get())
 			self.assertEqual(chat, chat_same)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue(len(User.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(Chat.objects.all()) == utils.NUMBER_OF_TESTS)
-		utils.performance_report(iteration_time)
+		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue(len(Chat.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
 
-	def test_deleteChat(self):
-		print '>>>> Testing test_deleteChat for %d iterations' % utils.NUMBER_OF_TESTS
+	def dont_test_deleteChat(self):
+		print '>>>> Testing test_deleteChat for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#Create the essential ingredients for the User object(s).
-			user, password = utils.create_random_User(i)
+			user, password = create_random_User(i)
 
 			#Create the essential ingredients for the PetReport object(s).
-			pr = utils.create_random_PetReport(user)
+			pr = create_random_PetReport(user)
 
 			#Now, create the Chat Object.
-			chat = utils.create_random_Chat(pr)
+			chat = create_random_Chat(pr)
 
 			#Delete the Chat object.
 			Chat.objects.get(pet_report = pr).delete()
 			self.assertTrue(len(Chat.objects.all()) == 0)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue(len(User.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS)
+		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
 		self.assertTrue(len(Chat.objects.all()) == 0)
-		utils.performance_report(iteration_time)
+		performance_report(iteration_time)
 
 
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
 	CRUD Tests for: ChatLine
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	def test_saveChatLine(self):
-		print '>>>> Testing test_saveChatLine for %d iterations' % utils.NUMBER_OF_TESTS
+	def dont_test_saveChatLine(self):
+		print '>>>> Testing test_saveChatLine for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 			#Create the essential ingredients for the User object(s).
-			user, password = utils.create_random_User(i)
+			user, password = create_random_User(i)
 
 			#Create the essential ingredients for the PetReport object(s).
-			pr = utils.create_random_PetReport(user)
+			pr = create_random_PetReport(user)
 
 			#Create the essential ingredients for the Chat object(s).
-			chat = utils.create_random_Chat(pr)
+			chat = create_random_Chat(pr)
 
 			#Now, create the ChatLine Object.
-			chatline = utils.create_random_ChatLine(user, chat)
+			chatline = create_random_ChatLine(user, chat)
 
 			#Now, retrieve the chatline object.
 			chatline_same = ChatLine.objects.get(chat = chat)
 			self.assertEqual(chatline.chat, chatline_same.chat)
 			self.assertEqual(chatline.userprofile, chatline_same.userprofile)
 			self.assertEqual(chatline.text, chatline_same.text)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue(len(User.objects.all()) == utils.NUMBER_OF_TESTS)	
-		self.assertTrue(len(UserProfile.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(ChatLine.objects.all()) == utils.NUMBER_OF_TESTS)
-		utils.performance_report(iteration_time)
+		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS)	
+		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue(len(ChatLine.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
-	def test_updateChatLine(self):
-		print '>>>> Testing test_updateChatLine for %d iterations' % utils.NUMBER_OF_TESTS
+	def dont_test_updateChatLine(self):
+		print '>>>> Testing test_updateChatLine for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 			#Create the essential ingredients for the User object(s).
-			user, password = utils.create_random_User(i)
+			user, password = create_random_User(i)
 
 			#Create the essential ingredients for the PetReport object(s).
-			pr = utils.create_random_PetReport(user)
+			pr = create_random_PetReport(user)
 
 			#Create the essential ingredients for the Chat object(s).
-			chat = utils.create_random_Chat(pr)
+			chat = create_random_Chat(pr)
 
 			#Now, create the ChatLine Object.
-			chatline = utils.create_random_ChatLine(user, chat)
+			chatline = create_random_ChatLine(user, chat)
 
 			#UPDATE
-			chatline.text = utils.generate_string (10000)
+			chatline.text = generate_string (10000)
 			chatline.save()
 
 			#Now, retrieve the chatline object.
@@ -527,48 +592,48 @@ class ModelTesting (unittest.TestCase):
 			self.assertEqual(chatline.chat, chatline_same.chat)
 			self.assertEqual(chatline.userprofile, chatline_same.userprofile)
 			self.assertEqual(chatline.text, chatline_same.text)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue(len(User.objects.all()) == utils.NUMBER_OF_TESTS)	
-		self.assertTrue(len(UserProfile.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(ChatLine.objects.all()) == utils.NUMBER_OF_TESTS)
-		utils.performance_report(iteration_time)
+		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS)	
+		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue(len(ChatLine.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
-	def test_deleteChatLine(self):
-		print '>>>> Testing test_deleteChatLine for %d iterations' % utils.NUMBER_OF_TESTS
+	def dont_test_deleteChatLine(self):
+		print '>>>> Testing test_deleteChatLine for %d iterations' % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 			#Create the essential ingredients for the User object(s).
-			user, password = utils.create_random_User(i)
+			user, password = create_random_User(i)
 
 			#Create the essential ingredients for the PetReport object(s).
-			pr = utils.create_random_PetReport(user)
+			pr = create_random_PetReport(user)
 
 			#Create the essential ingredients for the Chat object(s).
-			chat = utils.create_random_Chat(pr)
+			chat = create_random_Chat(pr)
 
 			#Now, create the ChatLine Object.
-			chatline = utils.create_random_ChatLine(user, chat)
+			chatline = create_random_ChatLine(user, chat)
 
 			#Now, delete the ChatLine object
 			ChatLine.objects.get(chat = chat).delete()
 			self.assertTrue(len(ChatLine.objects.all()) == 0)
-			utils.output_update (i + 1)
+			output_update (i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
 		print ''
-		self.assertTrue(len(User.objects.all()) == utils.NUMBER_OF_TESTS)	
-		self.assertTrue(len(UserProfile.objects.all()) == utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(PetReport.objects.all()) == utils.NUMBER_OF_TESTS)
+		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS)	
+		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
 		self.assertTrue(len(ChatLine.objects.all()) == 0)
-		utils.performance_report(iteration_time)
+		performance_report(iteration_time)
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -595,25 +660,25 @@ class LoginTesting (unittest.TestCase):
 		ChatLine.objects.all().delete()
 
 	def test_login_Users_successfully(self):
-		print ">>>> Testing 'test_login_Users' for %d iterations" % utils.NUMBER_OF_TESTS
+		print ">>>> Testing 'test_login_Users' for %d iterations" % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		clients = [ None for i in range (utils.NUMBER_OF_TESTS) ]
-		users = [ None for i in range (utils.NUMBER_OF_TESTS) ]
-		passwords = [ None for i in range (utils.NUMBER_OF_TESTS) ]
+		clients = [ None for i in range (NUMBER_OF_TESTS) ]
+		users = [ None for i in range (NUMBER_OF_TESTS) ]
+		passwords = [ None for i in range (NUMBER_OF_TESTS) ]
 		user_count = 0
 		client_count = 0
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
 			user = users [user_i]
 			client = clients [client_i]
 
 			if user is None:
-				user, password = utils.create_random_User(i, pretty_name=True)
+				user, password = create_random_User(i, pretty_name=True)
 				users [user_i] = user
 				passwords [user_i] = password
 				user_count += 1
@@ -626,14 +691,14 @@ class LoginTesting (unittest.TestCase):
 			print "\n%s logs onto %s and attempts to login..." % (user, client)
 
 			#Go to the Login Page
-			response = client.get(utils.TEST_LOGIN_URL)
+			response = client.get(URL_LOGIN)
 			next = response.context ['next']
 			self.assertTrue(response.status_code == 200)
-			self.assertTrue(response.request ['PATH_INFO'] == utils.TEST_LOGIN_URL)
-			self.assertTrue(next == utils.TEST_HOME_URL)
+			self.assertTrue(response.request ['PATH_INFO'] == URL_LOGIN)
+			self.assertTrue(next == URL_HOME)
 
 			#Submit Login information
-			response = client.post (utils.TEST_LOGIN_URL, 
+			response = client.post (URL_LOGIN, 
 				{'username':users [user_i].username, 'password': passwords [user_i], 'next': next}, follow=True)
 
 			#Get Redirected back to the home page.
@@ -641,17 +706,17 @@ class LoginTesting (unittest.TestCase):
 			self.assertTrue(len(response.redirect_chain) == 1)
 			self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/')
 			self.assertTrue(response.redirect_chain[0][1] == 302)
-			self.assertTrue(response.request ['PATH_INFO'] == utils.TEST_HOME_URL)
+			self.assertTrue(response.request ['PATH_INFO'] == URL_HOME)
 			client.logout()
 
-			utils.output_update(i + 1)
+			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
 		print ''
-		self.assertTrue(len(UserProfile.objects.all()) <= utils.NUMBER_OF_TESTS and user_count <= utils.NUMBER_OF_TESTS)	
-		self.assertTrue(len(User.objects.all()) <= utils.NUMBER_OF_TESTS)	
-		utils.performance_report(iteration_time)
+		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS and user_count <= NUMBER_OF_TESTS)	
+		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+		performance_report(iteration_time)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 UserProfileTesting: Testing for EPM User Profile Page
@@ -677,25 +742,25 @@ class UserProfileTesting (unittest.TestCase):
 		ChatLine.objects.all().delete()
 
 	def test_render_UserProfile_page(self):
-		print ">>>> Testing 'test_render_UserProfile_page' for %d iterations" % utils.NUMBER_OF_TESTS
+		print ">>>> Testing 'test_render_UserProfile_page' for %d iterations" % NUMBER_OF_TESTS
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate accessing UserProfile pages.
-		clients = [ None for i in range (utils.NUMBER_OF_TESTS) ]
-		users = [ None for i in range (utils.NUMBER_OF_TESTS) ]
-		passwords = [ None for i in range (utils.NUMBER_OF_TESTS) ]
+		clients = [ None for i in range (NUMBER_OF_TESTS) ]
+		users = [ None for i in range (NUMBER_OF_TESTS) ]
+		passwords = [ None for i in range (NUMBER_OF_TESTS) ]
 		user_count = 0
 		client_count = 0
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
 			user = users [user_i]
 			client = clients [client_i]
 
 			if user is None:
-				user, password = utils.create_random_User(i, pretty_name=True)
+				user, password = create_random_User(i, pretty_name=True)
 				users [user_i] = user
 				passwords [user_i] = password
 				user_count += 1
@@ -709,7 +774,7 @@ class UserProfileTesting (unittest.TestCase):
 
 			loggedin = client.login(username = users [user_i].username, password = passwords[user_i])
 			self.assertTrue(loggedin == True)
-			response = client.get(utils.TEST_USERPROFILE_URL + str(user.id) + '/')
+			response = client.get(URL_USERPROFILE + str(user.id) + '/')
 			self.assertTrue(response.status_code == 200)
 			#We should have the base.html -> index.html -> detail.html
 			self.assertTrue(len(response.templates) == 3)
@@ -717,12 +782,12 @@ class UserProfileTesting (unittest.TestCase):
 			self.assertTrue(len(UserProfile.objects.all()) == user_count)
 
 			client.logout()
-			utils.output_update(i + 1)
+			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
 		print ''
-		self.assertTrue(len(UserProfile.objects.all()) <= utils.NUMBER_OF_TESTS and user_count <= utils.NUMBER_OF_TESTS)	
-		self.assertTrue(len(User.objects.all()) <= utils.NUMBER_OF_TESTS)	
-		utils.performance_report(iteration_time)
+		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS and user_count <= NUMBER_OF_TESTS)	
+		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+		performance_report(iteration_time)
 

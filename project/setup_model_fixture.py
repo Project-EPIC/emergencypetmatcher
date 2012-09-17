@@ -11,9 +11,10 @@ setup_model_fixture.py: Setup sample (random) data for your dev env.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 #Control Variables
-NUM_PETREPORTS = 20
-NUM_USERS = 5
-NUM_PETMATCHES = 20
+NUM_PETREPORTS = 100
+NUM_USERS = 50
+NUM_PETMATCHES = 150
+
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''
 When Executed: Setup our fixture

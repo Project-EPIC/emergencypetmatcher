@@ -1,10 +1,10 @@
 from django.contrib.auth import authenticate
 from django.test.client import Client
 from django.forms.models import model_to_dict
-import unittest, string, random, sys, time
 from constants import *
 from utils import *
 from home.models import *
+import unittest, string, random, sys, time
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -96,7 +96,7 @@ class ReportingTesting (unittest.TestCase):
 			print "\n%s logs onto %s to enter the pet report form..." % (user, client)
 
 			#Go to the Pet Report Form Page
-			response = client.get(TEST_SUBMIT_PETREPORT_URL)
+			response = client.get(URL_SUBMIT_PETREPORT)
 
 			#Create and submit a Pet Report object as form content
 			pr = create_random_PetReport(users [user_i])
@@ -109,14 +109,14 @@ class ReportingTesting (unittest.TestCase):
 			post.update(pr_dict)
 
 			#Make the POST request Call
-			response = client.post(TEST_SUBMIT_PETREPORT_URL, post, follow=True)
+			response = client.post(URL_SUBMIT_PETREPORT, post, follow=True)
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertTrue(len(response.redirect_chain) == 1)
 			self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/')
 			self.assertEquals(response.redirect_chain[0][1], 302)
-			self.assertTrue(response.request ['PATH_INFO'] == TEST_HOME_URL)
+			self.assertTrue(response.request ['PATH_INFO'] == URL_HOME)
 			self.assertTrue(len(PetReport.objects.all()) == 2*i + 2)
 			client.logout()
 
@@ -156,7 +156,7 @@ class ReportingTesting (unittest.TestCase):
 			print "\n%s logs onto %s to enter the pet report form..." % (user, client)
 
 			#Go to the Pet Report Form Page
-			response = client.get(TEST_SUBMIT_PETREPORT_URL)
+			response = client.get(URL_SUBMIT_PETREPORT)
 
 			#Create and submit a Pet Report object as form content
 			pr = create_random_PetReport(users [user_i])
@@ -179,11 +179,11 @@ class ReportingTesting (unittest.TestCase):
 			post.update(pr_dict)
 
 			#Make the POST request Call
-			response = client.post(TEST_SUBMIT_PETREPORT_URL, post, follow=True)
+			response = client.post(URL_SUBMIT_PETREPORT, post, follow=True)
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
-			self.assertTrue(response.request ['PATH_INFO'] == TEST_SUBMIT_PETREPORT_URL)
+			self.assertTrue(response.request ['PATH_INFO'] == URL_SUBMIT_PETREPORT)
 			self.assertTrue(len(PetReport.objects.all()) == i + 1)
 			client.logout()
 
@@ -217,7 +217,7 @@ class ReportingTesting (unittest.TestCase):
 			password = passwords [user_i]
 			client = clients [client_i]
 			petreport = petreports [petreport_i]
-			prdp_url = TEST_PRDP_URL + str(petreport.id) + "/"
+			prdp_url = URL_PRDP + str(petreport.id) + "/"
 
 			#Test without logging in First.
 			print "\n\nGetting PRDP from %s without being logged in" % (client)
@@ -237,7 +237,7 @@ class ReportingTesting (unittest.TestCase):
 
 			#Test navigation to user profiles of all workers
 			for worker in petreport.workers.all():
-				worker_url = TEST_USERPROFILE_URL +str(worker.user.id)+ "/"
+				worker_url = URL_USERPROFILE +str(worker.user.id)+ "/"
 				response = client.get(worker_url)
 				self.assertEquals(response.status_code, 200)
 				self.assertTrue(response.request ['PATH_INFO'] == worker_url)
@@ -245,7 +245,7 @@ class ReportingTesting (unittest.TestCase):
 			print "Navigation to all workers' user profiles is successful"
 
 			#Test navigation to the matching interface
-			matching_url = TEST_MATCHING_URL + str(petreport.id)+ "/"
+			matching_url = URL_MATCHING + str(petreport.id)+ "/"
 			response = client.get(matching_url)
 			self.assertEquals(response.status_code, 200)
 			self.assertTrue(response.request ['PATH_INFO'] == matching_url)

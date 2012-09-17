@@ -53,11 +53,11 @@ def get_activities_json(request):
         if request.user.is_authenticated() == True:
             userprofile = request.user.get_profile()
 
-            for friend in userprofile.friends.all().order_by("?")[:10]:
+            for friend in userprofile.friends.all().order_by("?")[:ACTIVITY_FEED_LENGTH]:
                 activities.append(get_recent_log(friend))
 
         else:
-            for userprof in UserProfile.objects.order_by("?")[:10]:
+            for userprof in UserProfile.objects.order_by("?")[:ACTIVITY_FEED_LENGTH]:
                 activities.append(get_recent_log(userprof))
 
         if len(activities) == 0:

@@ -44,6 +44,34 @@ class PetReport(models.Model):
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
     bookmarked_by = models.ManyToManyField('UserProfile', null=True, related_name='bookmarks_related')
     
+    def save(self, *args, **kwargs):
+
+        if self.id == None:
+            print "%s has been saved!" % self
+        else:
+            print "%s has been updated!" % self
+
+        super(PetReport, self).save(args, kwargs)            
+        return self
+
+    @staticmethod
+    def get_PetReport(status, pet_type, pet_name=None, petreport_id=None):
+
+        try:
+            if petreport_id != None:
+                existing_pet = PetReport.objects.get(pk=petreport_id)
+            elif pet_name != None:
+                existing_pet = PetReport.objects.get(status=status, pet_type=pet_type, pet_name=pet_name)
+            else:
+                existing_pet = PetReport.objects.get(status=status, pet_type=pet_type)
+
+            return existing_pet
+
+        except PetReport.DoesNotExist:
+            return None
+
+
+
     def has_image(self):
         if self.img_path == None:
             return False
@@ -108,7 +136,7 @@ class PetMatch(models.Model):
         
         #PetMatch inserted improperly
         if (lost_pet.status != "Lost") or (found_pet.status != "Found"):
-            #print "INSERTED IMPROPERLY"
+            print "INSERTED IMPROPERLY"
             return (None, "INSERTED IMPROPERLY")
 
         existing_match = PetMatch.get_PetMatch(self.lost_pet, self.found_pet)            

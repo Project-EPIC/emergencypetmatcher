@@ -27,7 +27,7 @@ ACTIVITY_PETMATCH_UPVOTE = "PETMATCH_UPVOTE"
 ACTIVITY_PETMATCH_DOWNVOTE= "PETMATCH_DOWNVOTE"
 
 #Represents how many activities to fetch per request.
-ACTIVITY_FEED_LENGTH = 10
+ACTIVITY_FEED_LENGTH = 25
 
 #URLS - use for redirect calls
 URL_HOME = '/'
