@@ -398,8 +398,13 @@ h1.found {
 	padding-left:10px;
 	padding-right:10px;
 	padding-bottom:30px;
+}
+
+.prdp_overflow{
 	overflow-y:visible;
 	overflow-x:hidden;
+	margin:10px;
+	height:90px;
 }
 
 .prdp_worker_img{
@@ -435,20 +440,25 @@ h1.found {
 	border: 1px solid #000000;
 	width: auto;
 	height: auto;
-	padding-right:5px;
+	/*padding-right:5px;*/
 	/*padding-bottom:7px;*/
 	float: left;
-	margin-left: 5px;
-	margin-top: 10px;
+	margin-left: 15px;
+	margin-top: 20px;
+	cursor:pointer;
 
 }
 
 .prdp_pmdp_dialog img { 
 
-	float:left;
+/*	float:left;
 	margin-top: 20px;
+	margin-left: 15px;
 	max-width: 30px;
-	max-height: 30px;
+	max-height: 30px;*/
+	padding:10px;
+	width: 40px;
+	height: 40px;
 
 }
 
@@ -513,7 +523,7 @@ h1.found {
 	margin:15px;
 }
 
-#prdp_eachbutton {
+.prdp_eachbutton {
 	border: 1px solid #000000;
 	background: #F8F9FC;
 	height: 16px;
@@ -524,6 +534,16 @@ h1.found {
 	padding-right:3px;
 	padding-bottom:3px;
 	text-decoration:none;
+}
+
+/*the X button to remove a bookmark*/
+img.bookmark_x{
+
+	position: absolute;
+	left: 190px;
+	width: 15px;
+	height: 15px;
+
 }
 
 

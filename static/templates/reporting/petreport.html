@@ -55,16 +55,8 @@
           <!--  <div style="float:left"> 
             {% if pet_report.pet_name %} {{ pet_report.pet_name }} {% endif %} 
           </div> -->
-          <div style="float:left;"> {{ pet_report.status }}</div>
+          <div style="float:left;"> {{ pet_report.status }} : {{ pet_report.pet_name }} </div>
         </div>
-
-        {% if messages %}
-        <ul id="messages">
-            {% for message in messages %}
-            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}        
 
         <!-- PRDP Image -->
 		   <div class="prdp_picwrapper" > <img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/><br/></div>
@@ -93,21 +85,21 @@
               <a href="{% url 'display_PetMatch' petmatch.id %}">
 
                 {% ifequal pet_report.status 'Lost' %}
-                  <img src="{{ STATIC_URL}}{{ petmatch.found_pet.img_path }}" />
+                  <img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ petmatch.found_pet.img_path }}" />  
                 {% else %}
                   <img src="{{ STATIC_URL}}{{ petmatch.lost_pet.img_path }}" />
                 {% endifequal %}  
 
               </a>
-              <div id="prdp_user_box" style="float:right;">
+              <!-- <div id="prdp_user_box" style="float:right;">
                 <a href= "{% url 'get_UserProfile_page' petmatch.proposed_by.id %}"><!-- {{ petmatch.proposed_by.user.username }}  -->
-                  {% if petmatch.proposed_by.photo %}    
+                <!--  {% if petmatch.proposed_by.photo %}    
                     <img src="{{ STATIC_URL }}{{ petmatch.proposed_by.photo }}" class = "prdp_worker_img" />   
                   {% else %}
                     <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" class = "prdp_worker_img" />
                   {% endif %}
                 </a>
-              </div>
+              </div> -->
             </div> 
           {% endfor %}
 
@@ -130,10 +122,20 @@
             {% endfor %}
         </div> 
 
-        <!-- Buttons -->
+        <!-- Messages -->
+        <ul id="messages" class="prdp_messages" >
+          {% for message in messages %}
+            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+          {% endfor %}
+        </ul>   
+
+         <!-- Buttons -->
         <div id ="prdp_buttons">
-          <a id = "prdp_eachbutton" href="#" style="float:left;" >Bookmark this Pet</a>
-          <a id = "prdp_eachbutton" href="{% url 'match_PetReport' pet_report.id %}" style="float:right;" >Work on this Pet</a>
+          <a class = "prdp_eachbutton" id="prdp_bookmark"  title="bookmark this pet" style="float:left;cursor:pointer;" onclick="bookmark();">
+            {% csrf_token %}
+            <!-- Bookmark this Pet -->
+          </a>
+          <a class = "prdp_eachbutton" href="{% url 'match_PetReport' pet_report.id %}" style="float:right;" >Work on this Pet</a>
         </div>
 
       </div>

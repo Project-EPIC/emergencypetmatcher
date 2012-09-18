@@ -113,7 +113,7 @@ class ReportingTesting (unittest.TestCase):
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
-			self.assertTrue(len(response.redirect_chain) == 1)
+			self.assertTrue(len(response.redirect_chain) == 1) 
 			self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/')
 			self.assertEquals(response.redirect_chain[0][1], 302)
 			self.assertTrue(response.request ['PATH_INFO'] == URL_HOME)
@@ -125,10 +125,10 @@ class ReportingTesting (unittest.TestCase):
 			iteration_time += (end_time - start_time)
 
 		print ''
-		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
-		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
-		self.assertTrue(len(PetReport.objects.all()) == 2*NUMBER_OF_TESTS)
-		performance_report(iteration_time)
+		self.assertTrue(len(UserProfile.objects.all()) <= utils.NUMBER_OF_TESTS)
+		self.assertTrue(len(User.objects.all()) <= utils.NUMBER_OF_TESTS)	
+		self.assertTrue(len(PetReport.objects.all()) == 2*utils.NUMBER_OF_TESTS) 
+		utils.performance_report(iteration_time)
 
 
 	def test_post_bad_PetReport(self):
@@ -244,12 +244,17 @@ class ReportingTesting (unittest.TestCase):
 
 			print "Navigation to all workers' user profiles is successful"
 
+			expected_status_code = 200
+			all_pet_reports = PetReport.objects.all().exclude(pk=petreport_i)
+    		filtered_pet_reports = all_pet_reports.exclude(status = petreport.status).filter(pet_type = petreport.pet_type)
+	        if len(filtered_pet_reports) == 0:
+	        	expected_status_code = 302	
+
 			#Test navigation to the matching interface
 			matching_url = URL_MATCHING + str(petreport.id)+ "/"
 			response = client.get(matching_url)
-			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.status_code, expected_status_code) 
 			self.assertTrue(response.request ['PATH_INFO'] == matching_url)
-
 			print "Navigation to the matching interface is successful"
 
 			#test navigation to the PMDP
@@ -262,4 +267,174 @@ class ReportingTesting (unittest.TestCase):
 		print ''
 		performance_report(iteration_time)
 
+	def test_add_PetReport_bookmark(self):
+		print '>>>> Testing test_add_PetReport_bookmark for %d iterations' % utils.NUMBER_OF_TESTS
+		iteration_time = 0.00
 
+		#Need to setup clients, users, and their passwords in order to simulate bookmarking of PetReport objects.
+		(users, passwords, clients, petreports) = utils.create_test_view_setup(create_petreports=True)
+
+		for i in range (utils.NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petreport = petreports [petreport_i]
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)			
+			print "\n%s logs onto %s to enter the PRDP..." % (user, client)
+
+			prdp_url = utils.TEST_PRDP_URL + str(petreport.id) + "/"
+			print prdp_url
+			response = client.get(prdp_url)
+			old_bookmarks_count = user.get_profile().bookmarks_related.count()
+
+			#if user has bookmarked this petreport previously,
+			if(petreport.UserProfile_has_bookmarked(user.get_profile())):
+				previously_bookmarked = True
+			else:
+				previously_bookmarked = False
+
+			add_bookmark_url = utils.TEST_BOOKMARK_PETREPORT_URL
+			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
+			response = client.post(add_bookmark_url, post, follow=True)
+			new_bookmarks_count = user.get_profile().bookmarks_related.count()
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], add_bookmark_url)
+			self.assertTrue(petreport.UserProfile_has_bookmarked(user.get_profile()))
+			self.assertEquals(petreport.bookmarked_by.get(pk = user.id), user.get_profile())
+			if(not previously_bookmarked):
+				self.assertEquals(old_bookmarks_count, (new_bookmarks_count-1))
+
+			utils.output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		utils.performance_report(iteration_time)	
+
+	def test_remove_petreport_bookmark(self):
+		print '>>>> Testing test_add_PetReport_bookmark for %d iterations' % utils.NUMBER_OF_TESTS
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate bookmarking of PetReport objects.
+		(users, passwords, clients, petreports) = utils.create_test_view_setup(create_petreports=True)
+
+		for i in range (utils.NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petreport = petreports [petreport_i]
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)			
+			print "\n%s logs onto %s to enter the PRDP..." % (user, client)
+
+			#navigate to the prdp
+			prdp_url = utils.TEST_PRDP_URL + str(petreport.id) + "/"
+			print prdp_url
+			response = client.get(prdp_url)
+
+
+			#add a bookmark
+			add_bookmark_url = utils.TEST_BOOKMARK_PETREPORT_URL
+			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
+			response = client.post(add_bookmark_url, post, follow=True)
+			old_bookmarks_count = user.get_profile().bookmarks_related.count()
+
+			#remove the bookmark
+			remove_bookmark_url = utils.TEST_BOOKMARK_PETREPORT_URL
+			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Remove Bookmark"}
+			response = client.post(remove_bookmark_url, post, follow=True)
+			new_bookmarks_count = user.get_profile().bookmarks_related.count()
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], remove_bookmark_url)
+			#self.assertTrue(petreport.UserProfile_has_bookmarked(user.get_profile()),False)
+			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
+
+			#add back the bookmark
+			add_bookmark_url = utils.TEST_BOOKMARK_PETREPORT_URL
+			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
+			response = client.post(add_bookmark_url, post, follow=True)
+			old_bookmarks_count = user.get_profile().bookmarks_related.count()
+
+
+			#navigate to the bookmarks page
+			bookmarks_page_url = utils.TEST_BOOKMARKED_PETREPORTS_URL
+			print bookmarks_page_url
+			response = client.get(bookmarks_page_url)
+
+			#remove the bookmark 
+			remove_bookmark_url = utils.TEST_BOOKMARK_PETREPORT_URL
+			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Remove Bookmark"}
+			response = client.post(add_bookmark_url, post, follow=True)
+			new_bookmarks_count = user.get_profile().bookmarks_related.count()
+
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], remove_bookmark_url)
+			#self.assertTrue(petreport.UserProfile_has_bookmarked(user.get_profile()),False)
+			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
+
+
+			utils.output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+
+		utils.performance_report(iteration_time)	
+
+	def test_get_bookmarks_page(self):
+		print '>>>> Testing test_get_bookmarks_page for %d iterations' % utils.NUMBER_OF_TESTS
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate retrieving the bookmarks page for a user.
+		(users, passwords, clients, petreports) = utils.create_test_view_setup(create_petreports=True)
+
+		for i in range (utils.NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petreport = petreports [petreport_i]
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)			
+			print "\n%s logs onto %s to enter the bookmarks page..." % (user, client)
+
+			#navigate to the bookmarks page
+			bookmarks_page_url = utils.TEST_BOOKMARKED_PETREPORTS_URL
+			print bookmarks_page_url
+			response = client.get(bookmarks_page_url)
