@@ -1,17 +1,86 @@
 {% extends 'home/index.html' %}
 {% load url from future %}
+{% block head_title %} Edit your Profile Information  {% endblock head_title %}
+{% block js %}
+	<script type = 'text/javascript'>
+		function saveProfile(){
+
+			// alert("we shall now save your changes!");
+			var user_id = "{{ user.id }}";
+	        /*an anonymous user shouldn't be able to acess the bookmarks page*/
+	        if (user_id == "None"){
+	            return false;
+	        }
+
+	        csrf_value = $(".edit_profile_input_box input").attr("value");
+	        email = $("#id_email").attr("value");
+	        first_name = $("#id_first_name").attr("value");
+	        last_name = $("#id_last_name").attr("value");
+	        username = $("#id_username").attr("value");
+	        /*ajax request to remove the bookmark*/
+	        $.ajax({
+
+	          type:"POST",
+	          url:"{% url 'editUserProfile_page' %}",
+	          data: {"csrfmiddlewaretoken":csrf_value, "action":"saveProfile","username":username,"first_name":first_name,"last_name":last_name,"email":email},
+	            success: function(data){
+	            	// $("#messages").html("<li class='success'>" + data.message + "</li>");
+	            	alert("ajax success!");
+	              return true;
+	            },
+	            error: function(data){
+	              alert("An unexpected error occurred when trying to bookmark this Pet Report. Please try again."); 
+	              return false;
+	            }
+	        });
+	        return true;
+		}
+	</script>
+{% endblock js %}
+{% block content_title %} Edit your Profile {% endblock content_title %}
+
 {% block content %}
-	
-		<form enctype="multipart/form-data" method="POST" action="#">
-			{% csrf_token %}
-			<table>
-				{% for field in form %}
-					<tr>
-						<td><strong> {{ field.label }} </strong></td>
-					</tr>
-				{% endfor %}
-			</table><br/>
-			<input type="submit" value="Submit" style= "width:100px; height:25px; float:right;"/>
-		</form>
-{% endblock content %}
+		<!-- <form enctype="multipart/form-data" method="POST" action="#"> -->
+
+			
+			<div class = "edit_profile_subtitle">
+				Edit your Personal Information
+			</div>
+			<div class = "edit_profile_input_box">
+				{% csrf_token %}
+				<table>
+					{% for field in form1 %}
+						<tr>
+							<td><strong> {{ field.label }} </strong></td>
+							<td ><div style="margin-left:40px;">{{ field }}</div></td>
+						</tr>
+					{% endfor %}
+				</table>
+			</div>	
+			<input type="button" value="Save" style= "width:100px; height:25px; float:left;" onclick = "saveProfile()"/>
+			<!-- </form> -->
+ 
+		<!-- 	<br /><br /><div class = "edit_profile_info">
+				*Your Email will 
+			</div> -->
+<!-- 		<form enctype="multipart/form-data" method="POST" action="#"> -->	
+			<div id = "edit_profile_password">	
+				{% csrf_token %}
+	 			<div class = "edit_profile_subtitle">
+					Change your Password
+				</div>
+				<div class = "edit_profile_input_box" >
+					<table>
+						{% for field in form2 %}
+							<tr>
+								<td><strong> {{ field.label }} </strong></td>
+								<td ><div style="margin-left:40px;">{{ field }}</div></td>
+							</tr>
+						{% endfor %}
+					</table><br/>
+				</div>
+				<input type="button" value="Submit" style= "width:100px; height:25px; float:left;"/>
+			</div>	
+	<!-- 	</form>
+ -->{% endblock content %}
 

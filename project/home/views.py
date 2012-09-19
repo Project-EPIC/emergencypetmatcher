@@ -129,7 +129,37 @@ def share(request, petreport_id):
     return render_to_response('home/userprofile.html', {'userprofile':u}, context_instance=RequestContext(request))
 
 @login_required
-def display_editUserProfile_page(request):
-    form = UserProfileForm()
-    return render_to_response('home/EditUserProfile_form.html', {'form':form}, RequestContext(request))
+def editUserProfile_page(request):
+    if request.method == 'POST':
+        if request.POST["action"] == 'saveProfile':
+            
+            user = UserProfile.objects.get(pk = request.user.id).user
+            
+            user.username = request.POST["username"]
+            user.save()
+            print "username saved!"
+            user.first_name = request.POST["first_name"]
+            user.save()
+            print "first_name saved!"    
+            user.last_name = request.POST["last_name"]
+            user.save()
+            print "last_name saved!"
+            #user.email = request.POST["email"]
+            user.save()
+            # message = "successfully saved your changes!"
+            # json = simplejson.dumps ({"message":message})
+            # print "JSON: " + str(json)
+            return HttpResponse()
+            # json, mimetype="application/json"
+    else:
+        user = request.user
+        form = UserProfileForm(initial={'first_name': user.first_name,'last_name': user.last_name,'username':user.username,'email':user.email})
+        form1 = []
+        form2 = []
+        for field in form:
+            if 'password' in field.name:
+                form2.append(field)
+            else:
+                form1.append(field)
+        return render_to_response('home/EditUserProfile_form.html', {'form1':form1,'form2':form2}, RequestContext(request))
 

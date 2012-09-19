@@ -252,7 +252,7 @@ class UserProfileForm (forms.Form):
     '''Non-Required Fields'''
     first_name = forms.CharField(label="First Name",max_length=30,required=False)
     last_name = forms.CharField(label="Last Name",max_length=30,required=False)
-    email = forms.EmailField(label="Email",required=False)
+    email = forms.EmailField(label="Email*",required=False)
     old_password = forms.CharField(label="Old Password",max_length=30,widget = forms.PasswordInput) 
     new_password = forms.CharField(label="New Password",max_length=30,widget = forms.PasswordInput) 
     confirm_password = forms.CharField(label="Confirm Password",max_length=30,widget = forms.PasswordInput) 
