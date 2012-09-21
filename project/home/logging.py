@@ -1,6 +1,6 @@
 from constants import *
 from home.models import UserProfile, PetReport, PetMatch
-import time
+import os, time
 
 '''===================================================================================
 [logging.py]: Logging Functionality for the EPM system
@@ -70,7 +70,7 @@ def get_activity_HTML(log, userprofile, petreport=None, petmatch=None):
 
     elif ACTIVITY_PETMATCH_PROPOSED in log:
         assert isinstance(petmatch, PetMatch)
-        html += "proposed a <a class='pmdp_dialog' href = '" + URL_PMDP + str(petmatch.id) + "/'>" + "Pet Match </a> examining two " + petmatch.lost_pet.pet_type + "s!"
+        html += "proposed a <a class='prdp_dialog' href='" + URL_PMDP + str(petmatch.id) + "/'>" + "Pet Match </a> examining two " + petmatch.lost_pet.pet_type + "s!"
 
     elif ACTIVITY_PETMATCH_UPVOTE in log:
         assert isinstance(petmatch, PetMatch)
@@ -103,6 +103,12 @@ def get_recent_log(userprofile, activity=None):
 
         #Iterate only once UNLESS an activity has been specified and found.
         for line in reversed_activities:
+
+            #Before we do any work, check if the activity does not exist in this line.
+            if (activity != None) and (activity not in line):
+                continue
+
+            #Every line has an ID to denote what is being identified (PetMatchc, UserProfile, etc).
             identifier = line.split("ID")[1].replace('}','').replace('{','')   
 
             if ACTIVITY_ACCOUNT_CREATED in line: 

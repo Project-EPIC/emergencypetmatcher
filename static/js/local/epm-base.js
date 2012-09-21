@@ -13,12 +13,13 @@ $(document).ready(function(){
 	});
 
 	//Link to click to open to the PMDP
-    $(".pmdp_dialog").click(function(){
+	$("#pmdp_dialog").click(function(){
 
-      var link = $(this);
-      //load_dialog(link, title, width, height)      
-      return load_dialog(link.attr("href"), "Pet Match Detailed Page", 850, "auto");
-    });	
+		alert("HEY");
+		var link = $(this);
+		//load_dialog(link, title, width, height)      
+		return load_dialog(link.attr("href"), "Pet Match Detailed Page", 850, "auto");
+	});	
 
 	$('#tiles').imagesLoaded(function() {
 

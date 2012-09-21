@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate
 from django.test.client import Client
 from utils import *
 from home.models import *
+from home import logging
 import unittest, string, random, sys, time
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -11,27 +12,16 @@ class ModelTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		User.objects.all().delete()
-		UserProfile.objects.all().delete()
-		PetMatch.objects.all().delete()
-		PetReport.objects.all().delete()
-		Chat.objects.all().delete()
-		ChatLine.objects.all().delete()
-
+		delete_all()
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		User.objects.all().delete()
-		UserProfile.objects.all().delete()
-		PetMatch.objects.all().delete()
-		PetReport.objects.all().delete()
-		Chat.objects.all().delete()
-		ChatLine.objects.all().delete()
+		delete_all()
 
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
 	CRUD Tests for: UserProfile + User
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
  	def test_save_User(self):
- 		print '>>> Testing test_saveUser for %d iterations' % NUMBER_OF_TESTS
+ 		print_testing_name("test_save_User")
  		iteration_time = 0.00
 
  		for i in range (NUMBER_OF_TESTS):
@@ -67,7 +57,7 @@ class ModelTesting (unittest.TestCase):
 
 
 	def test_update_User (self):
-		print '>>> Testing test_updateUser for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_update_User")
 		iteration_time = 0.00
 
 		for i in range (NUMBER_OF_TESTS):
@@ -106,7 +96,7 @@ class ModelTesting (unittest.TestCase):
 		performance_report(iteration_time)
 
 	def test_delete_User(self):
-		print '>>> Testing test_deleteUser for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_delete_User")
 		iteration_time = 0.00
 
 		for i in range (NUMBER_OF_TESTS):
@@ -140,7 +130,7 @@ class ModelTesting (unittest.TestCase):
 	CRUD Tests for: PetReport
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
 	def test_save_PetReport(self):
-		print '>>>> Testing test_savePetReport for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_save_PetReport")
 		iteration_time = 0.00
 
 		for i in range (NUMBER_OF_TESTS):
@@ -175,7 +165,7 @@ class ModelTesting (unittest.TestCase):
 		performance_report(iteration_time)
 
 	def test_updatePetReport(self):
-		print '>>>> Testing test_updatePetReport for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_updatePetReport")
 		iteration_time = 0.00
 
 		for i in range (NUMBER_OF_TESTS):
@@ -222,7 +212,7 @@ class ModelTesting (unittest.TestCase):
 		performance_report(iteration_time)
 
 	def test_delete_PetReport(self):
-		print '>>>> Testing test_deletePetReport for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_delete_PetReport")
 		iteration_time = 0.00
 
 		for i in range (NUMBER_OF_TESTS):
@@ -251,7 +241,7 @@ class ModelTesting (unittest.TestCase):
 	CRUD Tests for: PetMatch 
 	'''''''''''''''''''''''''''''''''''''''''''''''''''
 	def test_save_PetMatch(self):
-		print '>>>> Testing test_savePetMatch for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_save_PetMatch")
 		iteration_time = 0.00
 
 		for i in range (NUMBER_OF_TESTS):
@@ -289,7 +279,7 @@ class ModelTesting (unittest.TestCase):
 
 
 	def test_save_improperly_saved_PetMatch(self):
-		print '>>>> Testing test_save_improperly_saved_PetMatch for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_save_improperly_saved_PetMatch")
 		iteration_time = 0.00
 
 		start_time = time.clock()
@@ -319,7 +309,7 @@ class ModelTesting (unittest.TestCase):
 		performance_report(iteration_time)
 
 	def test_save_duplicate_PetMatch(self):
-		print '>>>> Testing test_save_duplicate_PetMatch for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_save_duplicate_PetMatch")
 		iteration_time = 0.00
 
 		start_time = time.clock()
@@ -351,7 +341,7 @@ class ModelTesting (unittest.TestCase):
 
 
 	def test_update_PetMatch(self):
-		print '>>>> Testing test_updatePetMatch for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_update_PetMatch")
 		iteration_time = 0.00
 
 		for i in range (NUMBER_OF_TESTS):
@@ -395,7 +385,7 @@ class ModelTesting (unittest.TestCase):
 
 
 	def test_delete_PetMatch(self):
-		print '>>>> Testing test_deletePetMatch for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_delete_PetMatch")
 		iteration_time = 0.00
 
 		for i in range (NUMBER_OF_TESTS):
@@ -430,211 +420,6 @@ class ModelTesting (unittest.TestCase):
 		performance_report(iteration_time)
 
 
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	CRUD Tests for: Chat
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	def dont_test_saveChat(self):
-		print '>>>> Testing test_saveChat for %d iterations' % NUMBER_OF_TESTS
-		iteration_time = 0.00
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-			#Create the essential ingredients for the User object(s).
-			user, password = create_random_User(i)
-
-			#Create the essential ingredients for the PetReport object(s).
-			pr = create_random_PetReport(user)
-
-			#Now, create the Chat Object.
-			chat = create_random_Chat(pr)
-
-			# check we can find the Chat in the database again
-			chat_same = Chat.objects.get(pet_report = pr)
-			self.assertEqual(chat.pet_report, chat_same.pet_report)
-			self.assertEqual(chat, chat_same)
-			output_update (i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)			
-
-		print ''
-		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS)
-		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
-		self.assertTrue(len(Chat.objects.all()) == NUMBER_OF_TESTS)
-		performance_report(iteration_time)
-
-	def dont_test_updateChat(self):
-		print '>>>> Testing test_updateChat for %d iterations' % NUMBER_OF_TESTS
-		iteration_time = 0.00
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-			#Create the essential ingredients for the User object(s).
-			user, password = create_random_User(i)
-
-			#Create the essential ingredients for the PetReport object(s).
-			pr = create_random_PetReport(user)
-
-			#Now, create the Chat Object.
-			chat = create_random_Chat(pr)
-
-			#UPDATES
-			user_profile = user.get_profile()
-			user_profile.chats.add(chat)
-			user_profile.save()
-
-			# check we can find the Chat in the database again
-			chat_same = Chat.objects.get(pet_report = pr)
-			self.assertEqual(chat.pet_report, chat_same.pet_report)
-			self.assertEqual(chat.userprofile_set.get(), chat_same.userprofile_set.get())
-			self.assertEqual(chat, chat_same)
-			output_update (i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)			
-
-		print ''
-		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS)
-		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
-		self.assertTrue(len(Chat.objects.all()) == NUMBER_OF_TESTS)
-		performance_report(iteration_time)
-
-
-	def dont_test_deleteChat(self):
-		print '>>>> Testing test_deleteChat for %d iterations' % NUMBER_OF_TESTS
-		iteration_time = 0.00
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-
-			#Create the essential ingredients for the User object(s).
-			user, password = create_random_User(i)
-
-			#Create the essential ingredients for the PetReport object(s).
-			pr = create_random_PetReport(user)
-
-			#Now, create the Chat Object.
-			chat = create_random_Chat(pr)
-
-			#Delete the Chat object.
-			Chat.objects.get(pet_report = pr).delete()
-			self.assertTrue(len(Chat.objects.all()) == 0)
-			output_update (i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)			
-
-		print ''
-		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS)
-		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
-		self.assertTrue(len(Chat.objects.all()) == 0)
-		performance_report(iteration_time)
-
-
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	CRUD Tests for: ChatLine
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	def dont_test_saveChatLine(self):
-		print '>>>> Testing test_saveChatLine for %d iterations' % NUMBER_OF_TESTS
-		iteration_time = 0.00
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-			#Create the essential ingredients for the User object(s).
-			user, password = create_random_User(i)
-
-			#Create the essential ingredients for the PetReport object(s).
-			pr = create_random_PetReport(user)
-
-			#Create the essential ingredients for the Chat object(s).
-			chat = create_random_Chat(pr)
-
-			#Now, create the ChatLine Object.
-			chatline = create_random_ChatLine(user, chat)
-
-			#Now, retrieve the chatline object.
-			chatline_same = ChatLine.objects.get(chat = chat)
-			self.assertEqual(chatline.chat, chatline_same.chat)
-			self.assertEqual(chatline.userprofile, chatline_same.userprofile)
-			self.assertEqual(chatline.text, chatline_same.text)
-			output_update (i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)			
-
-		print ''
-		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS)	
-		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
-		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
-		self.assertTrue(len(ChatLine.objects.all()) == NUMBER_OF_TESTS)
-		performance_report(iteration_time)
-
-	def dont_test_updateChatLine(self):
-		print '>>>> Testing test_updateChatLine for %d iterations' % NUMBER_OF_TESTS
-		iteration_time = 0.00
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-			#Create the essential ingredients for the User object(s).
-			user, password = create_random_User(i)
-
-			#Create the essential ingredients for the PetReport object(s).
-			pr = create_random_PetReport(user)
-
-			#Create the essential ingredients for the Chat object(s).
-			chat = create_random_Chat(pr)
-
-			#Now, create the ChatLine Object.
-			chatline = create_random_ChatLine(user, chat)
-
-			#UPDATE
-			chatline.text = generate_string (10000)
-			chatline.save()
-
-			#Now, retrieve the chatline object.
-			chatline_same = ChatLine.objects.get(chat = chat)
-			self.assertEqual(chatline.chat, chatline_same.chat)
-			self.assertEqual(chatline.userprofile, chatline_same.userprofile)
-			self.assertEqual(chatline.text, chatline_same.text)
-			output_update (i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)			
-
-		print ''
-		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS)	
-		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
-		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
-		self.assertTrue(len(ChatLine.objects.all()) == NUMBER_OF_TESTS)
-		performance_report(iteration_time)
-
-	def dont_test_deleteChatLine(self):
-		print '>>>> Testing test_deleteChatLine for %d iterations' % NUMBER_OF_TESTS
-		iteration_time = 0.00
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-			#Create the essential ingredients for the User object(s).
-			user, password = create_random_User(i)
-
-			#Create the essential ingredients for the PetReport object(s).
-			pr = create_random_PetReport(user)
-
-			#Create the essential ingredients for the Chat object(s).
-			chat = create_random_Chat(pr)
-
-			#Now, create the ChatLine Object.
-			chatline = create_random_ChatLine(user, chat)
-
-			#Now, delete the ChatLine object
-			ChatLine.objects.get(chat = chat).delete()
-			self.assertTrue(len(ChatLine.objects.all()) == 0)
-			output_update (i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)			
-
-		print ''
-		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS)	
-		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
-		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
-		self.assertTrue(len(ChatLine.objects.all()) == 0)
-		performance_report(iteration_time)
-
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 LoginTesting: Testing for EPM Logging In/Out
@@ -643,32 +428,18 @@ class LoginTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		User.objects.all().delete()
-		UserProfile.objects.all().delete()
-		PetMatch.objects.all().delete()
-		PetReport.objects.all().delete()
-		Chat.objects.all().delete()
-		ChatLine.objects.all().delete()
+		delete_all()
 
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		User.objects.all().delete()
-		UserProfile.objects.all().delete()
-		PetMatch.objects.all().delete()
-		PetReport.objects.all().delete()
-		Chat.objects.all().delete()
-		ChatLine.objects.all().delete()
+		delete_all()
 
 	def test_login_Users_successfully(self):
-		print ">>>> Testing 'test_login_Users' for %d iterations" % NUMBER_OF_TESTS
+		print_testing_name("test_login_Users_successfully")
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		clients = [ None for i in range (NUMBER_OF_TESTS) ]
-		users = [ None for i in range (NUMBER_OF_TESTS) ]
-		passwords = [ None for i in range (NUMBER_OF_TESTS) ]
-		user_count = 0
-		client_count = 0
+		(users, passwords, clients) = create_test_view_setup(create_petreports=False)	
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -677,18 +448,7 @@ class LoginTesting (unittest.TestCase):
 			user = users [user_i]
 			client = clients [client_i]
 
-			if user is None:
-				user, password = create_random_User(i, pretty_name=True)
-				users [user_i] = user
-				passwords [user_i] = password
-				user_count += 1
-
-			if client is None:
-				client = Client (enforce_csrf_checks=False)
-				clients [client_i] = client
-				client_count += 1
-
-			print "\n%s logs onto %s and attempts to login..." % (user, client)
+			print "[INFO]:%s logs onto %s and attempts to login..." % (user, client)
 
 			#Go to the Login Page
 			response = client.get(URL_LOGIN)
@@ -710,11 +470,12 @@ class LoginTesting (unittest.TestCase):
 			client.logout()
 
 			output_update(i + 1)
+			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
 		print ''
-		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS and user_count <= NUMBER_OF_TESTS)	
+		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)
 
@@ -725,32 +486,18 @@ class UserProfileTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		User.objects.all().delete()
-		UserProfile.objects.all().delete()
-		PetMatch.objects.all().delete()
-		PetReport.objects.all().delete()
-		Chat.objects.all().delete()
-		ChatLine.objects.all().delete()
+		delete_all()
 
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		User.objects.all().delete()
-		UserProfile.objects.all().delete()
-		PetMatch.objects.all().delete()
-		PetReport.objects.all().delete()
-		Chat.objects.all().delete()
-		ChatLine.objects.all().delete()
+		delete_all()
 
 	def test_render_UserProfile_page(self):
-		print ">>>> Testing 'test_render_UserProfile_page' for %d iterations" % NUMBER_OF_TESTS
+		print_testing_name("test_render_UserProfile_page")
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate accessing UserProfile pages.
-		clients = [ None for i in range (NUMBER_OF_TESTS) ]
-		users = [ None for i in range (NUMBER_OF_TESTS) ]
-		passwords = [ None for i in range (NUMBER_OF_TESTS) ]
-		user_count = 0
-		client_count = 0
+		(users, passwords, clients) = create_test_view_setup(create_petreports=False)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -759,35 +506,236 @@ class UserProfileTesting (unittest.TestCase):
 			user = users [user_i]
 			client = clients [client_i]
 
-			if user is None:
-				user, password = create_random_User(i, pretty_name=True)
-				users [user_i] = user
-				passwords [user_i] = password
-				user_count += 1
-
-			if client is None:
-				client = Client (enforce_csrf_checks=False)
-				clients [client_i] = client
-				client_count += 1
-
-			print "\n%s logs onto %s to render the profile page..." % (user, client)
+			print "[INFO]:%s logs onto %s to render the profile page..." % (user, client)
 
 			loggedin = client.login(username = users [user_i].username, password = passwords[user_i])
 			self.assertTrue(loggedin == True)
 			response = client.get(URL_USERPROFILE + str(user.id) + '/')
+
 			self.assertTrue(response.status_code == 200)
-			#We should have the base.html -> index.html -> detail.html
+			#We should have the base.html -> index.html -> userprofile.html
 			self.assertTrue(len(response.templates) == 3)
-			self.assertTrue(len(User.objects.all()) == user_count)
-			self.assertTrue(len(UserProfile.objects.all()) == user_count)
 
 			client.logout()
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
+		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+		performance_report(iteration_time)
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+LoggingTesting: Testing for EPM Logging Activities
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+class LoggingTesting (unittest.TestCase):
+
+	#Get rid of all objects in the QuerySet.
+	def setUp(self):
+		delete_all()
+
+	#Get rid of all objects in the QuerySet.
+	def tearDown(self):
+		delete_all()
+
+	def test_log_account_creations(self):
+		print_testing_name("test_log_account_creations")
+		iteration_time = 0.00
+
+		for i in range(NUMBER_OF_TESTS):
+			start_time = time.clock()
+			(user, password) = create_random_User(i, pretty_name=True)
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+
+			with open(user_log_filename, 'r') as logger:
+
+				lines = list(iter(logger.readlines()))
+				print lines
+				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_ACCOUNT_CREATED, user.get_profile()) == True)
+				self.assertEquals(len(lines), 1)
+
+			logger.close()
 			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
 		print ''
-		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS and user_count <= NUMBER_OF_TESTS)	
+		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)	
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+		performance_report(iteration_time)		
+
+
+	def test_log_submit_PetReport(self):
+		print_testing_name("test_log_submit_PetReport")
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients) = create_test_view_setup(create_petreports=False)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "[INFO]:%s logs onto %s to enter the pet report form..." % (user, client)
+
+			#Go to the Pet Report Form Page
+			response = client.get(URL_SUBMIT_PETREPORT)
+
+			#Create and submit a Pet Report object as form content
+			pr = create_random_PetReport(users [user_i])
+
+			#Note here that we convert the PetReport attributes into a dictionary in order to pass it into the POST request object.
+			pr_dict = model_to_dict(pr) 
+			pr_dict ['img_path'] = None #Nullify the img_path attribute
+			pr_dict ['pet_name'] = user.username + str(i)
+			form  = PetReportForm() #Create an unbound form
+			post = {'form': form}
+			post.update(pr_dict)
+
+			#Make the POST request Call
+			response = client.post(URL_SUBMIT_PETREPORT, post, follow=True)
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertTrue(len(response.redirect_chain) == 1) 
+			self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/')
+			self.assertEquals(response.redirect_chain[0][1], 302)
+			self.assertTrue(response.request ['PATH_INFO'] == URL_HOME)
+			self.assertTrue(len(PetReport.objects.all()) == 2*i + 2)
+			client.logout()
+
+			#Now, check if the activity for submitting a PetReport appears in this user's log.
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+			petreport = PetReport.objects.get(proposed_by = user, pet_name = user.username + str(i))
+
+			with open(user_log_filename, 'r') as logger:
+
+				lines = list(iter(logger.readlines()))
+				print lines
+				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=petreport) == True)
+
+			logger.close()			
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
+		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+		self.assertTrue(len(PetReport.objects.all()) == 2*NUMBER_OF_TESTS) 
 		performance_report(iteration_time)
+
+
+	def test_log_propose_PetMatch (self):
+		print_testing_name("test_log_propose_PetMatch")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petreport = petreports [petreport_i]
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "[INFO]:%s logs onto %s to enter the matching interface..." % (user, client)			
+
+			#Go to the matching interface
+			matching_url = URL_MATCHING + str(petreport.id) + "/"
+			response = client.get(matching_url)
+			#Generate the PetReport filters for this target PetReport so we take care of the case where there are NO PetReports to match! (causes a 302)
+			filtered_pet_reports = PetReport.objects.all().exclude(pk=petreport.id).exclude(status = petreport.status).filter(pet_type = petreport.pet_type)
+			if len(filtered_pet_reports) == 0:
+				self.assertEquals(response.status_code, 302)
+				print "[INFO]: Oh! There are no PetReports to match this PetReport with - Back to the Home Page!"
+				continue
+
+			self.assertEquals(response.status_code, 200)
+			print "[INFO]:%s has successfully requested page '%s'..." % (user, matching_url) 
+			candidate_petreport = random.choice(filtered_pet_reports) 
+
+			#Go to the propose match dialog
+			propose_match_url = URL_PROPOSE_MATCH + str(petreport.id) + "/" + str(candidate_petreport.id) + "/"
+			response = client.get(propose_match_url)
+			print "[INFO]:%s has successfully requested page '%s'..." % (user, propose_match_url) 
+
+			#Make the POST request Call		
+			description = generate_lipsum_paragraph(500)
+			post = {'description': description}
+			response = client.post(propose_match_url, post, follow=True)
+			client.logout()						
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(len(response.redirect_chain), 1)
+			self.assertEquals(response.redirect_chain[0][0], 'http://testserver/')
+			self.assertEquals(response.redirect_chain[0][1], 302)
+			self.assertEquals(response.request ['PATH_INFO'], URL_HOME)		
+
+			#Now, check if the activity for proposing a PetMatch appears in this user's log.
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+
+			with open(user_log_filename, 'r') as logger:
+				#Grab the PetMatch that has either been posted in the past or has been posted by this User.
+				match = PetMatch.get_PetMatch(petreport, candidate_petreport)
+				print match
+
+				if match.UserProfile_has_voted(user.get_profile()) == UPVOTE:
+					print "[INFO]:A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user)
+					self.assertTrue(logging.activity_has_been_logged(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=match) == True)
+
+				else:
+					print "[INFO]:%s has successfully POSTED a new match!" % (user)
+					self.assertTrue(logging.activity_has_been_logged(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=match) == True)					
+
+			logger.close()			
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)		
+
+		print ''
+		performance_report(iteration_time)		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

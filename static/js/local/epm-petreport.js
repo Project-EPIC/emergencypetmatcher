@@ -1,6 +1,21 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
 
+  var bookmarked = "{{ user_has_bookmarked }}";
+  var bookmark_button = $("#prdp_bookmark");
+
+  //user is authenticated and has bookmarked this pet 
+  if (bookmarked == "true"){
+    bookmark_button.text("Remove Bookmark");
+    bookmark_button.attr("title","Remove Bookmark");
+  }
+
+  //user has not bookmarked this pet (or) user is not authenticated
+  else {
+    bookmark_button.text("Bookmark this Pet");
+    bookmark_button.attr("title","Bookmark this Pet");
+  }
+
   $(".prdp_pmdp_dialog a").click(function(){
 
     var link = $(this);
@@ -10,20 +25,34 @@ $(document).ready(function(){
 
 });
 
-function get_petreport_object (petreport_id, img){
+function bookmark(){
+
+  var bookmark_button = $("#prdp_bookmark");
+    
+  var user_id = "{{ user.id }}";
+  if (user_id == "None"){
+    login_link = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";
+    $(".prdp_messages").html("<li class='error'> You cannot bookmark this Pet Report because you are not logged in! "+login_link+ "</li>");
+    return false;
+  }
+
+  csrf_value = $("input").attr("value");
 
   $.ajax({
 
     type:"POST",
-    url: "{{ bookmark_petreport }}",
-    success: function(data){
-      var petreport = data;
-      // This function does not exist
-      //move_petreport_to_workspace_match_detail(petreport, img);
-    },
-    error: function(data){
-      alert("An unexpected error occurred when trying to retrieve this Pet Report's attributes. Please try again."); 
-      return false;
-    }
+    url:"{% url 'bookmark_PetReport' %}",
+    data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":"{{ pet_report.id }}", "user_id":"{{ user.id }}", "action":bookmark_button.text()},
+      success: function(data){
+        bookmark_button.text(data.text);
+        bookmark_button.attr("title",data.text);
+        $(".prdp_messages").html("<li class='success'>" + data.message + "</li>");
+        return true;
+      },
+      error: function(data){
+        alert("An unexpected error occurred when trying to bookmark this Pet Report. Please try again."); 
+        return false;
+      }
   });
+  return true;
 }

@@ -14,24 +14,14 @@ class ReportingTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		User.objects.all().delete()
-		UserProfile.objects.all().delete()
-		PetMatch.objects.all().delete()
-		PetReport.objects.all().delete()
-		Chat.objects.all().delete()
-		ChatLine.objects.all().delete()
+		delete_all()
 
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		User.objects.all().delete()
-		UserProfile.objects.all().delete()
-		PetMatch.objects.all().delete()
-		PetReport.objects.all().delete()
-		Chat.objects.all().delete()
-		ChatLine.objects.all().delete()
+		delete_all()
 
-	def test_get_petreport_form(self):
-		print '>>>> Testing test_get_petreport_form for %d iterations' % NUMBER_OF_TESTS
+	def test_get_PetReport_form(self):
+		print_testing_name("test_get_PetReport_form")
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
@@ -52,7 +42,7 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "\n%s logs onto %s to enter the pet report form..." % (user, client)
+			print "[INFO]:%s logs onto %s to enter the pet report form..." % (user, client)
 
 			#Go to the Pet Report Form Page
 			response = client.get(URL_SUBMIT_PETREPORT)
@@ -64,6 +54,7 @@ class ReportingTesting (unittest.TestCase):
 			client.logout()
 
 			output_update(i + 1)
+			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
@@ -72,7 +63,7 @@ class ReportingTesting (unittest.TestCase):
 
 
 	def test_post_good_PetReport(self):
-		print '>>>> Testing test_post_good_PetReport for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_post_good_PetReport")
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
@@ -93,7 +84,7 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "\n%s logs onto %s to enter the pet report form..." % (user, client)
+			print "[INFO]:%s logs onto %s to enter the pet report form..." % (user, client)
 
 			#Go to the Pet Report Form Page
 			response = client.get(URL_SUBMIT_PETREPORT)
@@ -121,18 +112,19 @@ class ReportingTesting (unittest.TestCase):
 			client.logout()
 
 			output_update(i + 1)
+			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
 		print ''
-		self.assertTrue(len(UserProfile.objects.all()) <= utils.NUMBER_OF_TESTS)
-		self.assertTrue(len(User.objects.all()) <= utils.NUMBER_OF_TESTS)	
-		self.assertTrue(len(PetReport.objects.all()) == 2*utils.NUMBER_OF_TESTS) 
-		utils.performance_report(iteration_time)
+		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
+		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+		self.assertTrue(len(PetReport.objects.all()) == 2*NUMBER_OF_TESTS) 
+		performance_report(iteration_time)
 
 
 	def test_post_bad_PetReport(self):
-		print '>>>> Testing test_post_bad_PetReport for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_post_bad_PetReport")
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
@@ -153,7 +145,7 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "\n%s logs onto %s to enter the pet report form..." % (user, client)
+			print "[INFO]:%s logs onto %s to enter the pet report form..." % (user, client)
 
 			#Go to the Pet Report Form Page
 			response = client.get(URL_SUBMIT_PETREPORT)
@@ -188,6 +180,7 @@ class ReportingTesting (unittest.TestCase):
 			client.logout()
 
 			output_update(i + 1)
+			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
@@ -198,7 +191,7 @@ class ReportingTesting (unittest.TestCase):
 		performance_report(iteration_time)
 
 	def test_get_PetReport_detailed_page(self):
-		print '>>>> Testing test_get_PetReport_detailedpage for %d iterations' % NUMBER_OF_TESTS
+		print_testing_name("test_get_PetReport_detailed_page")
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords and petreports 
@@ -220,7 +213,7 @@ class ReportingTesting (unittest.TestCase):
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
 
 			#Test without logging in First.
-			print "\n\nGetting PRDP from %s without being logged in" % (client)
+			print "[INFO]:Getting PRDP from %s without being logged in" % (client)
 			response = client.get(prdp_url)
 			self.assertEquals(response.status_code, 200)
 			self.assertTrue(response.request ['PATH_INFO'] == prdp_url)
@@ -228,7 +221,7 @@ class ReportingTesting (unittest.TestCase):
 			#Log in
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "%s logs onto %s to EPM" % (user, client)
+			print "[INFO]:%s logs onto %s to EPM" % (user, client)
 
 			#Test after Logging in.
 			response = client.get(prdp_url)
@@ -242,7 +235,7 @@ class ReportingTesting (unittest.TestCase):
 				self.assertEquals(response.status_code, 200)
 				self.assertTrue(response.request ['PATH_INFO'] == worker_url)
 
-			print "Navigation to all workers' user profiles is successful"
+			print "[OK]:Navigation to all workers' user profiles is successful"
 
 			expected_status_code = 200
 			all_pet_reports = PetReport.objects.all().exclude(pk=petreport_i)
@@ -255,12 +248,13 @@ class ReportingTesting (unittest.TestCase):
 			response = client.get(matching_url)
 			self.assertEquals(response.status_code, expected_status_code) 
 			self.assertTrue(response.request ['PATH_INFO'] == matching_url)
-			print "Navigation to the matching interface is successful"
+			print "[OK]:Navigation to the matching interface is successful"
 
 			#test navigation to the PMDP
 			client.logout()
 
 			output_update(i + 1)
+			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
@@ -268,19 +262,19 @@ class ReportingTesting (unittest.TestCase):
 		performance_report(iteration_time)
 
 	def test_add_PetReport_bookmark(self):
-		print '>>>> Testing test_add_PetReport_bookmark for %d iterations' % utils.NUMBER_OF_TESTS
+		print_testing_name("test_add_PetReport_bookmark")
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate bookmarking of PetReport objects.
-		(users, passwords, clients, petreports) = utils.create_test_view_setup(create_petreports=True)
+		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#indexes
-			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
 
 			#objects
 			user = users [user_i]
@@ -291,9 +285,9 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "\n%s logs onto %s to enter the PRDP..." % (user, client)
+			print "[INFO]:%s logs onto %s to enter the PRDP..." % (user, client)
 
-			prdp_url = utils.TEST_PRDP_URL + str(petreport.id) + "/"
+			prdp_url = TEST_PRDP_URL + str(petreport.id) + "/"
 			print prdp_url
 			response = client.get(prdp_url)
 			old_bookmarks_count = user.get_profile().bookmarks_related.count()
@@ -304,7 +298,7 @@ class ReportingTesting (unittest.TestCase):
 			else:
 				previously_bookmarked = False
 
-			add_bookmark_url = utils.TEST_BOOKMARK_PETREPORT_URL
+			add_bookmark_url = TEST_BOOKMARK_PETREPORT_URL
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
 			response = client.post(add_bookmark_url, post, follow=True)
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
@@ -317,27 +311,28 @@ class ReportingTesting (unittest.TestCase):
 			if(not previously_bookmarked):
 				self.assertEquals(old_bookmarks_count, (new_bookmarks_count-1))
 
-			utils.output_update(i + 1)
+			output_update(i + 1)
+			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
 		print ''
-		utils.performance_report(iteration_time)	
+		performance_report(iteration_time)	
 
-	def test_remove_petreport_bookmark(self):
-		print '>>>> Testing test_add_PetReport_bookmark for %d iterations' % utils.NUMBER_OF_TESTS
+	def test_remove_PetReport_bookmark(self):
+		print_testing_name("test_remove_PetReport_bookmark")
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate bookmarking of PetReport objects.
-		(users, passwords, clients, petreports) = utils.create_test_view_setup(create_petreports=True)
+		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#indexes
-			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
 
 			#objects
 			user = users [user_i]
@@ -348,22 +343,22 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "\n%s logs onto %s to enter the PRDP..." % (user, client)
+			print "[INFO]:%s logs onto %s to enter the PRDP..." % (user, client)
 
 			#navigate to the prdp
-			prdp_url = utils.TEST_PRDP_URL + str(petreport.id) + "/"
+			prdp_url = TEST_PRDP_URL + str(petreport.id) + "/"
 			print prdp_url
 			response = client.get(prdp_url)
 
 
 			#add a bookmark
-			add_bookmark_url = utils.TEST_BOOKMARK_PETREPORT_URL
+			add_bookmark_url = TEST_BOOKMARK_PETREPORT_URL
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
 			response = client.post(add_bookmark_url, post, follow=True)
 			old_bookmarks_count = user.get_profile().bookmarks_related.count()
 
 			#remove the bookmark
-			remove_bookmark_url = utils.TEST_BOOKMARK_PETREPORT_URL
+			remove_bookmark_url = TEST_BOOKMARK_PETREPORT_URL
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Remove Bookmark"}
 			response = client.post(remove_bookmark_url, post, follow=True)
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
@@ -375,19 +370,19 @@ class ReportingTesting (unittest.TestCase):
 			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
 
 			#add back the bookmark
-			add_bookmark_url = utils.TEST_BOOKMARK_PETREPORT_URL
+			add_bookmark_url = TEST_BOOKMARK_PETREPORT_URL
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
 			response = client.post(add_bookmark_url, post, follow=True)
 			old_bookmarks_count = user.get_profile().bookmarks_related.count()
 
 
 			#navigate to the bookmarks page
-			bookmarks_page_url = utils.TEST_BOOKMARKED_PETREPORTS_URL
+			bookmarks_page_url = TEST_BOOKMARKED_PETREPORTS_URL
 			print bookmarks_page_url
 			response = client.get(bookmarks_page_url)
 
 			#remove the bookmark 
-			remove_bookmark_url = utils.TEST_BOOKMARK_PETREPORT_URL
+			remove_bookmark_url = TEST_BOOKMARK_PETREPORT_URL
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Remove Bookmark"}
 			response = client.post(add_bookmark_url, post, follow=True)
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
@@ -400,28 +395,29 @@ class ReportingTesting (unittest.TestCase):
 			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
 
 
-			utils.output_update(i + 1)
+			output_update(i + 1)
+			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
 		print ''
 
-		utils.performance_report(iteration_time)	
+		performance_report(iteration_time)	
 
 	def test_get_bookmarks_page(self):
-		print '>>>> Testing test_get_bookmarks_page for %d iterations' % utils.NUMBER_OF_TESTS
+		print_testing_name("test_get_bookmarks_page")
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate retrieving the bookmarks page for a user.
-		(users, passwords, clients, petreports) = utils.create_test_view_setup(create_petreports=True)
+		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
 
-		for i in range (utils.NUMBER_OF_TESTS):
+		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
 			#indexes
-			user_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			client_i = random.randrange(0, utils.NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, utils.NUMBER_OF_TESTS)
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
 
 			#objects
 			user = users [user_i]
@@ -432,9 +428,13 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "\n%s logs onto %s to enter the bookmarks page..." % (user, client)
+			print "[INFO]:%s logs onto %s to enter the bookmarks page..." % (user, client)
 
 			#navigate to the bookmarks page
-			bookmarks_page_url = utils.TEST_BOOKMARKED_PETREPORTS_URL
+			bookmarks_page_url = TEST_BOOKMARKED_PETREPORTS_URL
 			print bookmarks_page_url
 			response = client.get(bookmarks_page_url)
+
+
+
+			

@@ -51,13 +51,17 @@ def get_activities_json(request):
         activities = []
 
         if request.user.is_authenticated() == True:
+
+            print "Authenticated User -- friend sample of activities..."
             userprofile = request.user.get_profile()
 
             for friend in userprofile.friends.all().order_by("?")[:ACTIVITY_FEED_LENGTH]:
                 activities.append(get_recent_log(friend))
 
         else:
+            print "Anonymous User -- random sample of activities..."
             for userprof in UserProfile.objects.order_by("?")[:ACTIVITY_FEED_LENGTH]:
+                print userprof
                 activities.append(get_recent_log(userprof))
 
         if len(activities) == 0:
@@ -82,7 +86,7 @@ def login_User(request):
                 return redirect(request.REQUEST ['next'])
 
             else:
-                messages.error(request, 'There seems to be a problem with the account. Please try re-registering.')
+                messages.error(request, "You haven't activated your account yet. Please check your email.")
                 
         else:
             messages.error(request, 'Invalid Login credentials. Please try again.')
@@ -90,7 +94,7 @@ def login_User(request):
     try: 
         next = request.REQUEST ['next']
     except KeyError: #This only happens if the user tries to plug in the login URL without a 'next' parameter...
-        next = '/'
+        next = URL_HOME
 
     form = AuthenticationForm()
     return render_to_response(HTML_LOGIN, {'form':form}, RequestContext(request, {'next': next}))

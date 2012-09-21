@@ -14,7 +14,7 @@ When writing your test file (tests.py), make sure to have the following import:
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 #Control Variable
-NUMBER_OF_TESTS = 50
+NUMBER_OF_TESTS = 20
 
 #Setup Lorem Ipsum Generator
 LIPSUM = lipsum.Generator()
@@ -22,6 +22,9 @@ LIPSUM.sentence_mean = 4
 LIPSUM.sentence_sigma = 1
 LIPSUM.paragraph_mean = 3
 LIPSUM.paragraph_sigma = 1
+
+def print_testing_name(test_name):
+	print "\n[TEST]: Testing {%s} for %s iterations\n" % (test_name, NUMBER_OF_TESTS)
 
 #Generate a random alpha-numeric string.
 def generate_string (size, chars = string.ascii_uppercase + string.digits):
