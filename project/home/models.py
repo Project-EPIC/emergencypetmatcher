@@ -7,6 +7,7 @@ from django.dispatch import receiver
 from django.core.files.storage import FileSystemStorage
 import PIL, os, time
 from constants import *
+from django.template.loader import render_to_string
 
 '''===================================================================================
 [models.py]: Models for the EPM system
@@ -134,6 +135,7 @@ class PetMatch(models.Model):
     description = models.CharField(max_length=300, null=False, default=None)
     
     '''Non-Required Fields'''
+    #add a field to keep track of a successful  pet match
     is_open = models.BooleanField(default=True)
     score = models.IntegerField(default=0)
     closed_by = models.ForeignKey('UserProfile', null=True, related_name='closed_by_related')
@@ -205,7 +207,56 @@ class PetMatch(models.Model):
         elif (downvote != None):
             return DOWNVOTE
 
-        return False       
+        return False      
+    def PetMatch_has_reached_threshold(self):
+        '''Difference[D] is calculated as the difference between number of upvotes and number of downvotes. 
+        For a PetMatch to be successful, it should satisfy certain constraints. D should exceed a threshold value,
+        which is half the number of active users on the system. '''
+        active_users = 10 
+        '''10 will be replaced by a function that returns the number of active users in the system'''
+        threshold = active_users/2 
+        difference = self.up_votes.count() - self.down_votes.count()
+        if difference >= threshold:
+            return True
+        else:
+            return False
+
+    def verify_petmatch(self):
+
+        pet_match = self
+        petmatch_owner = self.proposed_by.user
+        lost_pet_contact = self.lost_pet.proposed_by.user
+        found_pet_contact = self.found_pet.proposed_by.user
+        if petmatch_owner.username == lost_pet_contact.username:
+            Optionally_discuss_with_digital_volunteer = ""
+            email_petmatch_owner = False
+        else:
+            Optionally_discuss_with_digital_volunteer = "You may also discuss this pet match with %s, the digital volunteer who proposed this pet match. You can reach %s at %s" % (pet_match.proposed_by.user.username,pet_match.proposed_by.user.username,pet_match.proposed_by.user.email)
+            email_petmatch_owner = True
+
+        #An email is sent to the lost pet owner
+        ctx = {'pet_type':'your lost pet','opposite_pet_type_contact':found_pet_contact,'pet_status':"found",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer}
+        email_body = render_to_string('/srv/epm/static/templates/matching/verification_email_to_pet_owner.txt',ctx)
+        email_subject = "We have a found a potential match for your pet!"
+        #lost_pet_contact.email_user(email_subject,email_body,from_email=None)
+        print 'email to lost pet owner: '+email_body
+        
+        ''' An email is sent to the lost pet owner '''
+        ctx = {'pet_type':'the pet you found','opposite_pet_type_contact':lost_pet_contact,'pet_status':"lost",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer}
+        email_body = render_to_string('/srv/epm/static/templates/matching/verification_email_to_pet_owner.txt',ctx)
+        email_subject = "We have a found a potential match for your pet!"
+        #found_pet_contact.email_user(email_subject,email_body,from_email=None)
+        print 'email to found pet owner: '+email_body
+       
+        '''If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact,
+        an email will be sent to this person '''
+        ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
+        email_body = render_to_string('/srv/epm/static/templates/matching/verification_email_to_digital_volunteer.txt',ctx)
+        email_subject = 'Your pet match is close to being successful!'    
+        #petmatch_owner.email_user(email_subject,email_body,from_email=None)
+        print 'email to pet match owner: '+email_body
+
+
 
     def __unicode__ (self):
         return '{ID{%s} lost:%s, found:%s, proposed_by:%s}' % (self.id, self.lost_pet, self.found_pet, self.proposed_by)

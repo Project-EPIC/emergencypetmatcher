@@ -58,6 +58,12 @@ def vote_PetMatch(request):
             pm.down_votes.remove(userprofile)
             log_activity(ACTIVITY_PETMATCH_UPVOTE, userprofile, petmatch=pm)
             message = "You have successfully upvoted this PetMatch!"
+
+            '''Checking condition that will return true once PetMatch reaches a threshold value,
+            if it returns true, pet match verification work flow is triggered'''
+            '''convert this to a signal '''
+            if pm.PetMatch_has_reached_threshold():
+                pm.verify_petmatch()   
         elif vote == "downvote":
             pm.down_votes.add(userprofile)
             pm.up_votes.remove(userprofile)
@@ -179,6 +185,23 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
     
     else:
         return render_to_response(HTML_PROPOSE_MATCH, {'target':target, 'candidate':candidate}, RequestContext(request))
+
+@login_required
+def verify_PetMatch(request, petmatch_id):
+    if request.method == "GET":
+        pm = get_object_or_404(PetMatch, pk=petmatch_id)
+        voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
+
+        #Need to check if the user is authenticated (non-anonymous) to find out if he/she has voted on this PetMatch.
+        if request.user.is_authenticated() == True:
+            user_has_voted = pm.UserProfile_has_voted(request.user.get_profile())
+        else:
+            user_has_voted = False
+
+        num_upvotes = len(pm.up_votes.all())
+        num_downvotes = len(pm.down_votes.all())
+        render_to_response(HTML_VERIFY_PETMATCH,{'petmatch': pm, "voters": voters, "user_has_voted": user_has_voted, "num_upvotes":num_upvotes, "num_downvotes":num_downvotes},
+         RequestContext(request))
 
 
 

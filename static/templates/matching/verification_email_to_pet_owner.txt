@@ -1,0 +1,16 @@
+Hi there, 
+
+Congratulations! The digital volunteers on EmergencyPetMatcher have found a pet match for {{ pet_type }}. We encourage you to discuss this with {{ opposite_pet_type_contact.username }}, the person who possibly {{ pet_status }} this pet. You can reach {{ opposite_pet_type_contact.username }} at {{ opposite_pet_type_contact.email }}. {{ Optionally_discuss_with_digital_volunteer }}
+
+After your discussion, please let us know if this pet match was successful by visiting the following URL:
+
+http://localhost:8000/verify_PetMatch/{{petmatch_id}}
+
+Good Luck!
+
+Thank you,
+
+---------------------
+The EPM Team
+Project EPIC
+(http://epic.cs.colorado.edu)
