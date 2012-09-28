@@ -35,6 +35,8 @@ TEST_VOTE_URL = '/matching/vote_PetMatch'
 TEST_PMDP_URL = '/matching/PetMatch/'
 TEST_MATCHING_URL = "/matching/match_PetReport/"
 TEST_PROPOSE_MATCH_URL = "/matching/propose_PetMatch/"
+TEST_FOLLOW_URL = "/follow/"
+TEST_UNFOLLOW_URL = "/unfollow/"
 
 #Setup Lorem Ipsum Generator
 LIPSUM = lipsum.Generator()

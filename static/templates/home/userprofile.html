@@ -1,141 +1,171 @@
 {% extends 'home/index.html' %}
 {% load url from future %}
 
-{% block head_title %}EPM - User Profile: {{ userprofile.user.username }} {% endblock head_title %}
+{% block head_title %}EPM - User Profile: {{ show_profile.user.username }} {% endblock head_title %}
 {% block content_title %} User Profile {% endblock content_title %}
 
 {% block content %}
 
-	{% if messages %}
-	<ul id="messages">
-	    {% for message in messages %}
-	    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-	    {% endfor %}
-	</ul>
-	{% endif %}
 
-	<table border=0 width="100%">
+	<table border=0 cellpadding=10 width="100%">
 	<tr>
 	<td width="70%">
-	<table border=0 cellpadding=5>
-	<tr>
-		<td>
-			{% if userprofile.photo %}		
-				<img src="{{ STATIC_URL }}{{ userprofile.photo }}" width=95 height=95/>		
-			{% else %}
-				<img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" width=95 height=95/>
+			<table>
+			<tr>
+				<td>
+					{% if show_profile.photo %}		
+						<img src="{{ STATIC_URL }}{{ show_profile.photo }}" width=95 height=95/>	
+					{% else %}
+						<img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" width=95 height=95/>
+					{% endif %}
+				</td>
+				<td>
+					{% if show_profile.user.username == user.username %}
+						<h2>&nbsp;<i>Hi, {{ show_profile.user.username }}</i></h2>
+					{% else %}
+						<h2>&nbsp;{{ show_profile.user.username }}</h2>
+					{% endif %}
+				</td>
+			</tr>
+			</table>
+
+			<!-- Follow link -->
+			{% if show_profile.user.username != user.username %}
+				{% if not show_profile in user.userprofile.following.all %}
+					<a href="{% url 'follow' user.id show_profile.user.id %}">Follow</a>
+				{% else %}
+					<a href="{% url 'unfollow' user.id show_profile.user.id %}">Unfollow</a>
+
+				{% endif %}
 			{% endif %}
-		</td>
-		<td>
-			{% if userprofile.user.username == user.username %}
-				<h2><i>Hi, {{ userprofile.user.username }}</i></h2>
-			{% else %}
-				<h2>{{ userprofile.user.username }}</h2>
+			
+			<hr size="10" width="100%" color="white"/>
+			<h3>User Data:</h3>
+			<table>
+			    <tr align="left" class="even"><th>Username:</th> <td>{{ show_profile.user.username }}</td></tr>
+			    <tr align="left" class="odd"><th>Email:</th> <td>{{ show_profile.user.email|default:"Not provided" }}</td></tr>
+			    <tr align="left" class="even"><th>First name:</th> <td>{{ show_profile.user.first_name|default:"Not provided" }}</td></tr>
+			    <tr align="left" class="odd"><th>Last name:</th> <td>{{ show_profile.user.last_name|default:"Not provided" }}</td></tr>
+			    <tr align="left" class="even"><th>Last login:</th> <td>{{ last_login }}</td></tr>
+			</table>
+			</br>
+
+			<!-- Proposed Pet Reports -->
+			{% if show_profile.user.username == user.username %}
+		     	<h3>Proposed Pet Reports:</h3>
+		        <div class="prdp_ppm_wk">		
+		            {% for pet_report in show_profile.petreport_set.all %}
+		                <div id = "prdpdialog">
+							<a href= "{% url 'disp_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}">
+								{% if pet_report.pet_name %}
+									<strong>{{ pet_report.pet_name }}</strong><br/>
+								{% endif %}
+								{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
+								<img src="{{ STATIC_URL }}{{ pet_report.img_path }}" border=1 width=60 height=60/>
+							</a>
+						</div>
+		            {% endfor %}
+		        </div> 
 			{% endif %}
-		</td>
-	</tr>
-	</table>
 
+			<!-- Proposed Pet Matches -->
+			{% if show_profile.user.username == user.username %}
+				<h3> Proposed Pet Matches </h3>
+		 		<div class="prdp_ppm_wk">         
+		 			{% for pet_match in show_profile.proposed_by_related.all %}
+				        <div id = "prdp_petmatch_box"> 
+				            <a href = "{% url 'display_PetMatch' pet_match.id %}" name = ""
+				           		title="Lost: {{ pet_match.lost_pet.pet_type }}/Found: {{ pet_match.found_pet.pet_type }}">
+								Lost: {{ pet_match.lost_pet.pet_name }}</br>Found:{{ pet_match.found_pet.pet_name }}</br>
+								<img src="{{ STATIC_URL}}{{ pet_match.lost_pet.img_path }}" width="60" height="60"/><img src="{{ STATIC_URL}}{{ pet_match.found_pet.img_path }}" width="60" height="60"/>
+		             	    </a>
+		            	</div> 
+		          {% endfor %}
+		        </div>
+			{% endif %}
 
-	<hr size="10" width="95%" color="yellow"/>
-	<h4><u>User Data:</u></h4>
-	<table>
-	<!--     <tr align="left" class="odd"><th>Id:</th> <td>{{ userprofile.user.id }}</td></tr>
-	 --><tr align="left" class="even"><th>Username:</th> <td>{{ userprofile.user.username }}</td></tr>
-	    <tr align="left" class="odd"><th>Email:</th> <td>{{ userprofile.user.email|default:"Not provided" }}</td></tr>
-	    <tr align="left" class="even"><th>First name:</th> <td>{{ userprofile.user.first_name|default:"Not provided" }}</td></tr>
-	    <tr align="left" class="odd"><th>Last name:</th> <td>{{ userprofile.user.last_name|default:"Not provided" }}</td></tr>
-	    <tr align="left" class="even"><th>Last login:</th> <td>{{ last_login }}</td></tr>
-	</table>
-
-
-
-	{% if userprofile.user.username == user.username %}
-	<hr size="10" width="95%" color="yellow"/>
-	<h4>Proposed Pet Reports:</h4>
-	<table border=0 cellpadding=5>
-	{% for pet_report in userprofile.petreport_set.all %}
-	<tr>
-		<td>
-			<a href="#"><img src="{{ STATIC_URL }}{{ pet_report.img_path }}" width=60 height=60/></a>
-		
-		</td>
-		<td>
-			<a href="#">
-			{{ pet_report.status }} {{ pet_report.pet_type }} (id: {{ pet_report.id }}) 
+			<!-- Working on Pet Report -->
+			{% if show_profile.user.username == user.username %}
+		     	<h3>Working-On Pet Reports:</h3>
+		        <div class="prdp_ppm_wk">		
+		            {% for pet_report in show_profile.workers_related.all %}
+		                <div id = "prdpdialog">
+							<a href= "{% url 'disp_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}">
+								{% if pet_report.pet_name %}
+									<strong>{{ pet_report.pet_name }}</strong><br/>
+								{% endif %}
+								{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
+								<img src="{{ STATIC_URL }}{{ pet_report.img_path }}" border=1 width=60 height=60/>
+							</a>
+						</div>
+		            {% endfor %}
+		        </div> 
+			{% endif %}
 			</br>
-			Reported in {{ pet_report.date_lost_or_found }} at Location: {{ pet_report.location }}
 			</br>
-			Name: {{ pet_report.pet_name }}, Sex: {{ pet_report.sex }}, Size: {{ pet_report.size }} 
-			</a>
-		</td>
-		<td>
-			<a href="#">Edit</a>
-		</td>
-		<td>
-			<a href={% url 'share' pet_report.id %}>Share</a>
-		</td>	
-	</tr>
-	{% endfor %}	
-	</table>
-	{% endif %}
-
-
-	{% if userprofile.user.username == user.username %}
-	<div>
-	<hr size="10" width="95%" color="yellow"/>
-	<h4>Proposed Pet Matches:</h4>
-	{% for pet_match in userprofile.proposed_by_related.all %}
-		<ul>
-		<li><a href="#">Lost: {{ pet_match.lost_pet.pet_type }} (id: {{ pet_match.lost_pet.id}}) --
-			Found: {{ pet_match.found_pet.pet_type }} (id: {{ pet_match.found_pet.id}})</a>
-		</li>
-		</ul>
-	{% endfor %}
-	</div>
-	{% endif %}
-
-	{% if userprofile.user.username == user.username %}
-	<div>
-	<hr size="10" width="95%" color="yellow"/>
-	<h4>Working-On Pet Reports:</h4>
-	{% for petreport in userprofile.workers_related.all %}
-		<ul>
-		<li><a href="#">{{ petreport.status }} {{ petreport.pet_type }} (id: {{ petreport.id }}), Name: {{ petreport.pet_name }}</a>
-		</li>
-		</ul>
-	{% endfor %}
-	</div>
-	{% endif %}
-
-
 	</td>
+
 	<td width="30%">
 
-	{% if userprofile.user.username == user.username %}
-	<h4><u>Friends:</u></h4>
-	<div style="overflow:auto; border:0px solid #0ADA0A;">
-	<table border=0 cellpadding=5>
-	{% for friend in userprofile.friends.all %}
-	<tr>
-		<td>
-			{% if friend.photo %}
-				<a href="{% url 'get_UserProfile_page' friend.user.id %}"><img src="{{ STATIC_URL }}{{ friend.photo }}" width=60 height=60/></a></br>
-			{% else %}
-				<a href="{% url 'get_UserProfile_page' friend.user.id %}"><img src="{{ STATIC_URL }}images/defaults/anonymous.gif" width=60 height=60/></a></br>
-			{% endif %}
-			
-			<a href={% url 'get_UserProfile_page' friend.user.id %}>{{ friend.user.username }}</a>
-			
-		</td>
-	</tr>	
-	{% endfor %}	
-	</table>
-	</div>
-	{% endif %}
+			<table border=0 cellpadding=5>
+			<tr>
+				<td>
+				<!-- Following list -->
+				{% if show_profile.user.username == user.username %}
+					<h3>Following:</h3>
+					<div style="float:center; overflow:auto; border:0px solid #0ADA0A; margin-top:8px;">	
+						{% for following in show_profile.following.all %}
+							<div style="float:center; margin-top:2px;">		
+							<a href="{% url 'get_UserProfile_page' following.user.id %}"
+							   style="text-decoration:none; color:green; font-size:12px;}"
+							   title="{% if following.user.first_name %} {{ following.user.first_name }} {% endif %}@{{ following.user.username }}">
+								{% if following.photo %}
+									<img src="{{ STATIC_URL }}{{ following.photo }}" width=60 height=60/>
+								{% else %}
+									<img src="{{ STATIC_URL }}images/defaults/anonymous.gif" width=60 height=60/>
+								{% endif %}	
+							</a>
+							</br>
+							<a href="{% url 'unfollow' user.id following.user.id %}" 
+							   title="Unfolllow {{ following.user.username }}"
+							   onMouseOver="this.style.color='#0099FF'" onMouseOut="this.style.color='#CCCC88'"
+							   style="text-decoration:none; color:#CCCC88; font-size:10px;">Unfollow</a>
+							</div>					
+						{% endfor %}
+					</div>							
+				{% endif %}
+				</td>
+			</tr>
+
+			<tr>
+				<td></br>
+				<!-- Follower list -->
+				{% if show_profile.user.username == user.username %}
+					<h3>Followers:</h3>
+					<div style="float:center; overflow:auto; border:0px solid #0ADA0A; margin-top:8px;">	
+						{% for follower in show_profile.followers.all %}
+							<div style="float:center; margin-top:8px;">		
+							<a href="{% url 'get_UserProfile_page' follower.user.id %}"
+							   style="text-decoration:none; color:green; font-size:12px;}"
+							   title="{% if follower.user.first_name %} {{ follower.user.first_name }} {% endif %}@{{ follower.user.username }}">
+								{% if follower.photo %}
+									<img src="{{ STATIC_URL }}{{ follower.photo }}" width=60 height=60/>
+								{% else %}
+									<img src="{{ STATIC_URL }}images/defaults/anonymous.gif" width=60 height=60/>
+								{% endif %}	
+							</a>
+							</div>					
+						{% endfor %}
+					</div>															
+				{% endif %}
+				</td>
+			</tr>
+
+			</table>
 
 	</td>
 	</tr>
+
 	</table>
 
 {% endblock content%}

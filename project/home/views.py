@@ -105,14 +105,29 @@ def form(request):
 @login_required
 def get_UserProfile_page(request, userprofile_id):   
     u = get_object_or_404(UserProfile, pk=userprofile_id) 
-    return render_to_response('home/userprofile.html', {'userprofile':u}, context_instance=RequestContext(request))
+    return render_to_response('home/userprofile.html', {'show_profile':u}, context_instance=RequestContext(request))
  
 @login_required
-def share(request, petreport_id): 
-    p = get_object_or_404(PetReport, pk=petreport_id) 
-    u = p.proposed_by
+def follow(request, userprofile_id1, userprofile_id2): 
+    me = get_object_or_404(UserProfile, pk=userprofile_id1) 
+    follow = get_object_or_404(UserProfile, pk=userprofile_id2) 
+    if not userprofile_id1 == userprofile_id2:
+        if follow in me.following.all():
+            messages.success(request, "You are already following '" + str(follow.user.username) + "'")        
+        else:
+            me.following.add(follow)
+            messages.success(request, "You have successfully followed '" + str(follow.user.username) + "'") 
+    return redirect('/UserProfile/' + userprofile_id1)
 
-    # To be completed
-    
-    return render_to_response('home/userprofile.html', {'userprofile':u}, context_instance=RequestContext(request))
+@login_required
+def unfollow(request, userprofile_id1, userprofile_id2): 
+    me = get_object_or_404(UserProfile, pk=userprofile_id1) 
+    unfollow = get_object_or_404(UserProfile, pk=userprofile_id2) 
+    if not userprofile_id1 == userprofile_id2:
+        if unfollow in me.following.all():
+            me.following.remove(unfollow)
+            messages.success(request, "You have successfully unfollowed '" + str(unfollow.user.username) + "'") 
+    return redirect('/UserProfile/' + userprofile_id1)
+
+
 

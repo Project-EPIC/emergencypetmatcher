@@ -40,6 +40,9 @@
 			//This function allows us to prepare a popup upon clicking several elements.
 			$(document).ready(function(){
 
+
+
+
 				$("#prdpdialog a").click(function(){
 
 					var link = $(this);
@@ -89,12 +92,39 @@
 		<!-- container for main divs: 1) header, 2) body, 3) footer-->
 		<div id = "container">
 
-			<!-- start header with TITLE and MENU -->
+			<!-- start header with TITLE and MENU -->			
 			<div id="header">
+
 				<div id="logo">
 					<h1><a href="{% url 'home' %}">EmergencyPetMatcher</a></h1>
 						<p> <a href = "http://epic.cs.colorado.edu"> Project EPIC </a></p>
 				</div>
+
+				<!-- Share Buttons -->
+			 	<div id="sharebuttons" style="float:right">
+		            <div style="float:left; margin-top:9px; margin-bottom:7px;">
+		              <font size=-1> Share on: </font>
+		            </div>
+		            <div style="float:left; margin:3px 0 0 7px;">
+
+		                <a title="Share on Facebook"
+		                   target='_blank' 
+		                   name="fb_share" 
+		                   type="button_count"
+		                   expr:share_url='data:post.url'  
+		                   href="http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/&p[images][0]={{ STATIC_URL }}/images/epm.jpg&p[title]=EmergencyPetMatcher Website&p[summary]=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder."
+		                   onclick="window.open('http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/&p[images][0]={{ STATIC_URL }}/images/epm.jpg&p[title]=EmergencyPetMatcher Website&p[summary]=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.', 
+		                   'newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a>
+
+		                <a title="Share on Twitter" 
+		                    target="_blank" 
+		                    expr:share_url='data:post.url'
+		                    href="http://twitter.com/share?text=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.&url=http://emergencypetmatcher.herokuapp.com:8000/" 
+		                    onclick="window.open('http://twitter.com/share?text=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.&url=http://emergencypetmatcher.herokuapp.com:8000/', 'newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22"></a> 
+		              </div>
+			     </div>
+
+		
 
 				<div id="menu">
 					<ul>
@@ -102,9 +132,13 @@
 						<li><a href="{% url 'home' %}"> Home</a></li>
 
 						{% if user.is_authenticated %}
-						<li><a href= "{% url 'get_UserProfile_page' user.id %}">{{ user.username }}</a></li>
+						
+						<li>
+							<a href= "{% url 'get_UserProfile_page' user.id %}">{{ user.username }}</a>
+	
+						</li>
 							<form method = "post" action= "{% url 'logout_User' %}">
-								{% csrf_token %} <input type="submit" value="Logout"/>
+								{% csrf_token %} <input id="logout" type="submit" value="Logout"/>
 							</form>
 						</li>
 						<li><a href= "{% url 'submit_PetReport' %}">Submit a Lost/Found Pet Report</a></li>
@@ -118,18 +152,20 @@
 					</ul>
 				</div>
 			</div>
-			<br/><br/><br/><br/>
-			<!-- end header -->
 
+			<br/><br/><br/><br/>
+          	<!-- end header -->
+			
 			<div id="body">
 
 				<h2>{% block content_title %}{% endblock content_title %}</h2>
 				<h3>{% block content_subtitle %}{% endblock content_subtitle %}</h3>
 
+
 				{% if messages %}
 				<ul id="messages">
 				    {% for message in messages %}
-				    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+				    <li id="message"{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
 				    {% endfor %}
 				</ul>
 				{% endif %}

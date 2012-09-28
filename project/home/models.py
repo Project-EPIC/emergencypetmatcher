@@ -68,7 +68,7 @@ class UserProfile (models.Model):
     photo = models.ImageField(upload_to='images/profile_images', null=True)
 
     '''Non-Required Fields'''
-    friends = models.ManyToManyField('self', null=True)
+    following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
     chats = models.ManyToManyField('Chat', null=True)
     # facebook_cred = models.CharField(max_length=100, null=True)
     # twitter_cred = models.CharField(max_length=100, null=True)
@@ -84,6 +84,7 @@ class UserProfile (models.Model):
     def __unicode__ (self):
         return 'User {username:%s, email:%s}' % (self.user.username, self.user.email)
 
+ 
     post_save.connect(create_UserProfile, sender=User)        
 
 

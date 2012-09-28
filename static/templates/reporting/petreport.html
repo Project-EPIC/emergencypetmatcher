@@ -80,20 +80,48 @@
           }
         });
       }
-
     </script>
+
+
     {% endblock js %} 
   </head>
   <body>
-    {%  block petreportcontent %}
-      <div id="prdp_back">        
 
+    {%  block petreportcontent %}
+
+      
+      <div id="prdp_back"> 
+           
+          <!-- Share Buttons -->
+          <div id="sharebuttons" style="float:right">
+            <div style="float:left; margin-top:9px; margin-bottom:7px;">
+              <font size=-1> Share on: </font>
+            </div>
+            <div style="float:left; margin:3px 0 0 7px;"> 
+
+                <a title="Share on Facebook"
+                   target='_blank' 
+                   name="fb_share" 
+                   type="button_count"
+                   expr:share_url='data:post.url'  
+                   href="http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/reporting/PetReport/{{ pet_report.id }}/&p[images][0]={{ STATIC_URL }}{{ pet_report.img_path }}&p[title]=A Pet Report at EPM&p[summary]=A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder."
+                   onclick="window.open('http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/reporting/PetReport/{{ pet_report.id }}/&p[images][0]={{ STATIC_URL }}{{ pet_report.img_path }}&p[title]=A Pet Report at EPM&p[summary]=A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.', 
+                   'newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a>
+
+                  <a title="Share on Twitter" 
+                    target="_blank" 
+                    expr:share_url='data:post.url'
+                    href="http://twitter.com/share?url=http://emergencypetmatcher.herokuapp.com:8000/reporting/PetReport/{{ pet_report.id }}/&text=A Pet Report at EPM. A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder." 
+                    onclick="window.open('http://twitter.com/share?url=http://emergencypetmatcher.herokuapp.com:8000/reporting/PetReport/{{ pet_report.id }}/&text=A Pet Report at EPM. A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.', 'newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22"></a> 
+              </div>
+          </div>
+    
         <!-- PRDP Title -->
         <div class="prdp_title">
           <!--  <div style="float:left"> 
             {% if pet_report.pet_name %} {{ pet_report.pet_name }} {% endif %} 
           </div> -->
-          <div style="float:left;"> {{ pet_report.status }}</div>
+          <div style="float:left;"> {{ pet_report.status }}</div>         
         </div>
 
         {% if messages %}
