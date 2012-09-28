@@ -1,0 +1,21 @@
+upstream backend {
+	 server emergencypetmatcher.com:8080;
+}
+
+
+server { 
+       
+       listen emergencypetmatcher.com:80; 
+       server_name www.emergencypetmatcher.com;
+       access_log /srv/epm/logs/nginx_access.log; 
+       error_log /srv/epm/logs/nginx_error.log;
+ 
+       location / {
+       		proxy_pass http://emergencypetmatcher.com:8080; 
+	  	include /etc/nginx/proxy.conf; 
+       }
+ 
+       location /srv/epm/static/ { 
+       		alias /srv/epm/static/;
+       } 
+}
