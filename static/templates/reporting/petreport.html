@@ -108,6 +108,7 @@
         <!-- People Working on this Pet -->
         <div class="prdp_ppm_wk">
           <div class="prdp_subtitle"> People working on this pet </div>
+          <div class = "prdp_overflow">  
             {% for worker in pet_report.workers.all  %}
               <div id = "prdp_user_box">
                 <a href= "{% url 'get_UserProfile_page' worker.id %}" title = "{{ worker.user.username }}" >
@@ -120,6 +121,7 @@
                 </a>
               </div> 
             {% endfor %}
+          </div>
         </div> 
 
         <!-- Messages -->

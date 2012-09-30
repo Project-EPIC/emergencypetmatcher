@@ -22,24 +22,24 @@ BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Go
 class PetReport(models.Model):
 
     '''Required Fields'''
-    pet_type = models.CharField(max_length=10, choices = PET_TYPE_CHOICES, null=False, default=None)
-    status = models.CharField(max_length = 5, choices = STATUS_CHOICES, null=False, default=None)
+    pet_type = models.CharField(max_length=PETREPORT_PET_TYPE_LENGTH, choices = PET_TYPE_CHOICES, null=False, default=None)
+    status = models.CharField(max_length = PETREPORT_STATUS_LENGTH, choices = STATUS_CHOICES, null=False, default=None)
     date_lost_or_found = models.DateField(null=False)
-    sex = models.CharField(max_length=6, choices=SEX_CHOICES, null=False)
-    size = models.CharField(max_length=30, choices = SIZE_CHOICES, null=False)
-    location = models.CharField(max_length=25, null=False, default='unknown')
+    sex = models.CharField(max_length=PETREPORT_SEX_LENGTH, choices=SEX_CHOICES, null=False)
+    size = models.CharField(max_length=PETREPORT_SIZE_LENGTH, choices = SIZE_CHOICES, null=False)
+    location = models.CharField(max_length=PETREPORT_LOCATION_LENGTH, null=False, default='unknown')
 
     #ForeignKey: Many-to-one relationship with User
     proposed_by = models.ForeignKey('UserProfile', null=False, default=None)
 
     '''Non-Required Fields'''
     img_path = models.ImageField(upload_to='images/petreport_images', null=True)
-    pet_name = models.CharField(max_length=15, null=True, default='unknown') 
-    age = models.CharField(max_length=10, null=True, default= 'unknown')
-    color = models.CharField(max_length=30, null=True,default='unknown')
-    breed = models.CharField(max_length=30, null=True,default='unknown')
+    pet_name = models.CharField(max_length=PETREPORT_PET_NAME_LENGTH, null=True, default='unknown') 
+    age = models.CharField(max_length=PETREPORT_AGE_LENGTH, null=True, default= 'unknown')
+    color = models.CharField(max_length=PETREPORT_COLOR_LENGTH, null=True,default='unknown')
+    breed = models.CharField(max_length=PETREPORT_BREED_LENGTH, null=True,default='unknown')
     revision_number = models.IntegerField(null=True) #update revision using view
-    description   = models.CharField(max_length=500, null=True, default="")
+    description   = models.CharField(max_length=PETREPORT_DESCRIPTION_LENGTH, null=True, default="")
     #Many-to-Many relationship with User
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
     bookmarked_by = models.ManyToManyField('UserProfile', null=True, related_name='bookmarks_related')
@@ -131,7 +131,7 @@ class PetMatch(models.Model):
     found_pet = models.ForeignKey('PetReport', null=False, default=None, related_name='found_pet_related')
     proposed_by = models.ForeignKey('UserProfile', null=False, related_name='proposed_by_related')
     proposed_date = models.DateField(null=False, default=None, auto_now_add=True)
-    description = models.CharField(max_length=300, null=False, default=None)
+    description = models.CharField(max_length=PETMATCH_DESCRIPTION_LENGTH, null=False, default=None)
     
     '''Non-Required Fields'''
     is_open = models.BooleanField(default=True)
@@ -227,7 +227,7 @@ class ChatLine (models.Model):
     '''Required Fields'''
     chat = models.ForeignKey('Chat', null=False, default=None)
     userprofile = models.ForeignKey('UserProfile', null=False, default=None)
-    text = models.CharField (max_length=10000, blank=True, null=False, default=None)
+    text = models.CharField (max_length=CHATLINE_TEXT_LENGTH, blank=True, null=False, default=None)
     date = models.DateTimeField(auto_now_add=True)
 
     def __unicode__ (self):
@@ -243,22 +243,22 @@ class ChatLine (models.Model):
 
 #The PetReport ModelForm
 class PetReportForm (ModelForm):
-
+    '''TODO: Use max_length values from constants.py'''
     '''Required Fields'''
     pet_type = forms.ChoiceField(label = 'Pet Type', choices = PET_TYPE_CHOICES, required = True)
     status = forms.ChoiceField(label = "Status (Lost/Found)", choices = STATUS_CHOICES, required = True)
     date_lost_or_found = forms.DateField(label = "Date Lost/Found", required = True)
     sex = forms.ChoiceField(label = "Sex", choices = SEX_CHOICES, required = True)
     size = forms.ChoiceField(label = "Size of Pet", choices = SIZE_CHOICES, required = True)
-    location = forms.CharField(label = "Location", max_length = 50, required = True)
+    location = forms.CharField(label = "Location", max_length = PETREPORT_LOCATION_LENGTH , required = True)
 
     '''Non-Required Fields'''
     img_path = forms.ImageField(label = "Upload an Image ", required = False)
-    pet_name = forms.CharField(label = "Pet Name", max_length=50, required = False) 
-    age = forms.CharField(label = "Age", max_length = 10, required = False)
-    breed = forms.CharField(label = "Breed", max_length = 30, required = False)
-    color = forms.CharField(label = "Coat Color(s)", max_length = 20, required = False)
-    description  = forms.CharField(label = "Description", max_length = 500, required = False, widget = forms.Textarea)
+    pet_name = forms.CharField(label = "Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False) 
+    age = forms.CharField(label = "Age", max_length = PETREPORT_AGE_LENGTH, required = False)
+    breed = forms.CharField(label = "Breed", max_length = PETREPORT_BREED_LENGTH, required = False)
+    color = forms.CharField(label = "Coat Color(s)", max_length = PETREPORT_COLOR_LENGTH, required = False)
+    description  = forms.CharField(label = "Description", max_length = PETREPORT_DESCRIPTION_LENGTH, required = False, widget = forms.Textarea)
 
     class Meta:
         model = PetReport

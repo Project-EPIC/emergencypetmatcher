@@ -6,6 +6,23 @@
 DATE_LOWER_BOUND = "2012-01-01"
 DATE_UPPER_BOUND = "2012-08-16"
 
+#max_length for Model Fields
+
+PETREPORT_PET_TYPE_LENGTH = 10
+PETREPORT_STATUS_LENGTH = 5
+PETREPORT_SEX_LENGTH = 6
+PETREPORT_SIZE_LENGTH = 30
+PETREPORT_LOCATION_LENGTH = 25
+PETREPORT_PET_NAME_LENGTH = 15 
+PETREPORT_AGE_LENGTH = 10
+PETREPORT_COLOR_LENGTH =30
+PETREPORT_BREED_LENGTH = 30
+PETREPORT_DESCRIPTION_LENGTH = 500
+
+PETMATCH_DESCRIPTION_LENGTH = 300
+
+CHATLINE_TEXT_LENGTH = 10000
+
 #Small List of Names
 USERNAMES = ['Jacob', 'Emily', 'Joshua', 'Madison', 'Kenneth', 'Mark', 'Dave', 'Angela', '' 'Matthew', 'Olivia', 'Daniel', 'Hannah', 
 'Chris', 'Abby', 'Andrew', 'Isabella', 'Mario', 'Sahar', 'Amrutha', 'Leysia', 'Ken', 'Abe']
@@ -39,6 +56,8 @@ URL_PMDP = '/matching/PetMatch/'
 URL_VOTE_MATCH = '/matching/vote_PetMatch'
 URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
+URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport/"
+URL_BOOKMARKED = "/reporting/bookmarks/"
  
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"

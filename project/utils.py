@@ -117,8 +117,8 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 	pr.date_lost_or_found = generate_random_date(DATE_LOWER_BOUND, DATE_UPPER_BOUND, "%Y-%m-%d", random.random())
 	pr.sex = random.choice(SEX_CHOICES)[0]
 	pr.size = random.choice(SIZE_CHOICES)[0] 
-	pr.location = generate_string(20) 
-	pr.color = generate_string(20)
+	pr.location = generate_string(PETREPORT_LOCATION_LENGTH) 
+	pr.color = generate_string(PETREPORT_COLOR_LENGTH)
 
 	#Randomly generate attributes, or not.
 	if status == "Found":
@@ -127,10 +127,10 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 			pr.pet_name = random.choice(PETREPORT_NAMES) 	
 
 		if random.random() > 0.3:
-			pr.description = generate_lipsum_paragraph(500) 
+			pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH) 
 
 		if random.random() > 0.3:
-			pr.breed = generate_string(15) 
+			pr.breed = generate_string(PETREPORT_BREED_LENGTH) 
 
 		if random.random() > 0.3:
 			pr.age = str(random.randrange(0, 15))
@@ -138,8 +138,8 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 	#The Pet Owner knows his/her own pet.
 	else:
 		pr.pet_name = random.choice(PETREPORT_NAMES)
-		pr.description = generate_lipsum_paragraph(500)
-		pr.breed = generate_string(15)
+		pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH)
+		pr.breed = generate_string(PETREPORT_BREED_LENGTH)
 		pr.age = str(random.randrange(0, 15))
 
 	pr.save()
@@ -173,7 +173,7 @@ def create_random_Chat (pr):
 #Create Random Object for: ChatLine
 def create_random_ChatLine(user, chat):
 	chatline = ChatLine(userprofile = user.get_profile(), chat = chat)
-	chatline.text = generate_string(100)
+	chatline.text = generate_string(CHATLINE_TEXT_LENGTH)
 	chatline.save()
 	return chatline
 

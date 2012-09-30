@@ -178,13 +178,13 @@ class ModelTesting (unittest.TestCase):
 			pr = create_random_PetReport(user)
 
 			#UPDATES
-			pr.pet_name = generate_string (30)
-			pr.description = generate_lipsum_paragraph(500)
+			pr.pet_name = generate_string (PETREPORT_PET_NAME_LENGTH)
+			pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH)
 			pr.sex = random.choice(SEX_CHOICES)[0]
-			pr.location = generate_string (50)
-			pr.color = generate_string (20)
-			pr.breed = generate_string (30)
-			pr.size = generate_string (30)
+			pr.location = generate_string (PETREPORT_LOCATION_LENGTH)
+			pr.color = generate_string (PETREPORT_COLOR_LENGTH)
+			pr.breed = generate_string (PETREPORT_BREED_LENGTH)
+			pr.size = generate_string (PETREPORT_SIZE_LENGTH)
 			pr.age = str(random.randrange(0,15))
 
 			# check we can find the PetReport in the database again

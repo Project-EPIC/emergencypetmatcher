@@ -287,7 +287,7 @@ class ReportingTesting (unittest.TestCase):
 			self.assertTrue(loggedin == True)			
 			print "[INFO]:%s logs onto %s to enter the PRDP..." % (user, client)
 
-			prdp_url = TEST_PRDP_URL + str(petreport.id) + "/"
+			prdp_url = URL_PRDP + str(petreport.id) + "/"
 			print prdp_url
 			response = client.get(prdp_url)
 			old_bookmarks_count = user.get_profile().bookmarks_related.count()
@@ -298,7 +298,7 @@ class ReportingTesting (unittest.TestCase):
 			else:
 				previously_bookmarked = False
 
-			add_bookmark_url = TEST_BOOKMARK_PETREPORT_URL
+			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
 			response = client.post(add_bookmark_url, post, follow=True)
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
@@ -346,19 +346,19 @@ class ReportingTesting (unittest.TestCase):
 			print "[INFO]:%s logs onto %s to enter the PRDP..." % (user, client)
 
 			#navigate to the prdp
-			prdp_url = TEST_PRDP_URL + str(petreport.id) + "/"
+			prdp_url = URL_PRDP + str(petreport.id) + "/"
 			print prdp_url
 			response = client.get(prdp_url)
 
 
 			#add a bookmark
-			add_bookmark_url = TEST_BOOKMARK_PETREPORT_URL
+			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
 			response = client.post(add_bookmark_url, post, follow=True)
 			old_bookmarks_count = user.get_profile().bookmarks_related.count()
 
 			#remove the bookmark
-			remove_bookmark_url = TEST_BOOKMARK_PETREPORT_URL
+			remove_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Remove Bookmark"}
 			response = client.post(remove_bookmark_url, post, follow=True)
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
@@ -370,19 +370,19 @@ class ReportingTesting (unittest.TestCase):
 			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
 
 			#add back the bookmark
-			add_bookmark_url = TEST_BOOKMARK_PETREPORT_URL
+			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
 			response = client.post(add_bookmark_url, post, follow=True)
 			old_bookmarks_count = user.get_profile().bookmarks_related.count()
 
 
 			#navigate to the bookmarks page
-			bookmarks_page_url = TEST_BOOKMARKED_PETREPORTS_URL
+			bookmarks_page_url = URL_BOOKMARKED
 			print bookmarks_page_url
 			response = client.get(bookmarks_page_url)
 
 			#remove the bookmark 
-			remove_bookmark_url = TEST_BOOKMARK_PETREPORT_URL
+			remove_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Remove Bookmark"}
 			response = client.post(add_bookmark_url, post, follow=True)
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
@@ -431,7 +431,7 @@ class ReportingTesting (unittest.TestCase):
 			print "[INFO]:%s logs onto %s to enter the bookmarks page..." % (user, client)
 
 			#navigate to the bookmarks page
-			bookmarks_page_url = TEST_BOOKMARKED_PETREPORTS_URL
+			bookmarks_page_url = URL_BOOKMARKED
 			print bookmarks_page_url
 			response = client.get(bookmarks_page_url)
 
