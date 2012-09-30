@@ -1,0 +1,21 @@
+<VirtualHost emergencypetmatcher.com:8080>
+
+	      ServerAdmin emergencypetmatcher@gmail.com
+	      ServerName www.emergencypetmatcher.com
+	      ServerAlias emergencypetmatcher.com
+	      WSGIScriptAlias / /srv/epm/project/project/wsgi.py
+
+	      <Directory /srv/epm/project/project>
+	       <Files wsgi.py>
+	        Order deny,allow
+	        Allow from all
+	       </Files>
+	      </Directory>
+
+	      LogLevel warn
+	      ErrorLog /srv/epm/logs/apache_error.log
+	      CustomLog /srv/epm/logs/apache_access.log combined
+	      WSGIDaemonProcess emergencypetmatcher.com user=www-data group=www-data threads=25
+	      WSGIProcessGroup emergencypetmatcher.com
+
+</VirtualHost>

@@ -1,3 +1,5 @@
+import os
+
 '''===================================================================================
 [constants.py]: Constants for the EPM system
 ==================================================================================='''
@@ -34,7 +36,7 @@ UPVOTE = "upvote"
 DOWNVOTE = "downvote"
 
 #Activity Enum Values
-ACTIVITY_LOG_DIRECTORY = "../logs/activity_logs/"
+ACTIVITY_LOG_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/logs/activity_logs/"
 ACTIVITY_ACCOUNT_CREATED = "ACCOUNT_CREATED"
 ACTIVITY_LOGIN = "LOGIN"
 ACTIVITY_LOGOUT = "LOGOUT"

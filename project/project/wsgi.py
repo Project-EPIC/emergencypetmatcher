@@ -18,7 +18,7 @@ import os, sys, django
 import site
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "project.settings")
+os.environ ["DJANGO_SETTINGS_MODULE"] = "project.settings"
 
 #Path Constants (relative to project directory) - edit this to reflect changes in project WSGI script.
 PROJECT_NAME = '/project'

@@ -1,6 +1,6 @@
 from constants import *
 from home.models import UserProfile, PetReport, PetMatch
-import os, time
+import os, sys, time
 
 '''===================================================================================
 [logging.py]: Logging Functionality for the EPM system
@@ -45,14 +45,14 @@ def log_activity (activity, userprofile, petreport=None, petmatch=None):
         else:
             raise IOError
 
-    except IOError, AssertionError:
-        traceback.print_exc()
-        print "[ERROR]: log_activity not used correctly."
+        log = (time.asctime() + " [%s]: " + log) % activity
+        print log
+        logger.write(log)
+        logger.close()
 
-    log = (time.asctime() + " [%s]: " + log) % activity
-    print log
-    logger.write(log)    
-    logger.close() 
+    except IOError, AssertionError:
+        print "[ERROR]: problem in log_activity()."
+        
 
 ''' Helper function for returning an HTML representation for an input activity '''
 def get_activity_HTML(log, userprofile, petreport=None, petmatch=None):
@@ -86,10 +86,10 @@ def get_activity_HTML(log, userprofile, petreport=None, petmatch=None):
 '''Helper function to get the most recent activity from an input UserProfile and (optionally) activity type.'''
 def get_recent_log(userprofile, activity=None):
     assert isinstance(userprofile, UserProfile)
-
     #Define the user filename and logger.
     user = userprofile.user
     user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+    print user_log_filename
     recent_log = None
 
     with open(user_log_filename, 'r') as logger:
