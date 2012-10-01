@@ -112,7 +112,7 @@ class UserProfile (models.Model):
     photo = models.ImageField(upload_to='images/profile_images', null=True)
 
     '''Non-Required Fields'''
-    friends = models.ManyToManyField('self', null=True)
+    following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
     chats = models.ManyToManyField('Chat', null=True)
     # facebook_cred = models.CharField(max_length=100, null=True)
     # twitter_cred = models.CharField(max_length=100, null=True)
@@ -121,7 +121,10 @@ class UserProfile (models.Model):
     #twitter_id = models.IntegerField(blank=True, null=True)
     
     def __unicode__ (self):
-        return '{ID{%s} %s}' % (self.id, self.user.username)
+         return '{ID{%s} %s}' % (self.id, self.user.username)
+
+    # post_save.connect(create_UserProfile, sender=User)   
+
 
 #The Pet Match Object Model
 class PetMatch(models.Model):

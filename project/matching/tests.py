@@ -6,9 +6,9 @@ from utils import *
 from constants import *
 import unittest, string, random, sys, time
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 MatchingTesting: Testing for EPM Matching
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 class MatchingTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
@@ -319,6 +319,8 @@ class PetMatchTesting (unittest.TestCase):
 			client = clients [client_i]
 			petreport = petreports [petreport_i]
 			petmatch = petmatches [petmatch_i]
+			print "PETMATCH: %s %d " % (petmatch, petmatch_i)
+
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)

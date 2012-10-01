@@ -1,13 +1,14 @@
 from django.contrib.auth import authenticate
 from django.test.client import Client
 from utils import *
+from constants import *
 from home.models import *
 from home import logging
 import unittest, string, random, sys, time
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 ModelTesting: Testing for EPM Models
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 class ModelTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
@@ -17,9 +18,7 @@ class ModelTesting (unittest.TestCase):
 	def tearDown(self):
 		delete_all()
 
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	CRUD Tests for: UserProfile + User
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
+	#CRUD Tests for: UserProfile + User		
  	def test_save_User(self):
  		print_testing_name("test_save_User")
  		iteration_time = 0.00
@@ -126,9 +125,8 @@ class ModelTesting (unittest.TestCase):
 		self.assertTrue(len(User.objects.all()) == 0)
 		performance_report(iteration_time)
 
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	CRUD Tests for: PetReport
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
+	
+	#CRUD Tests for: UserProfile + User
 	def test_save_PetReport(self):
 		print_testing_name("test_save_PetReport")
 		iteration_time = 0.00
@@ -237,9 +235,7 @@ class ModelTesting (unittest.TestCase):
 		performance_report(iteration_time)
 
 
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	CRUD Tests for: PetMatch 
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
+	#CRUD Tests for: PetMatch 	
 	def test_save_PetMatch(self):
 		print_testing_name("test_save_PetMatch")
 		iteration_time = 0.00
@@ -421,9 +417,9 @@ class ModelTesting (unittest.TestCase):
 
 
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 LoginTesting: Testing for EPM Logging In/Out
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 class LoginTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
@@ -479,9 +475,9 @@ class LoginTesting (unittest.TestCase):
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 UserProfileTesting: Testing for EPM User Profile Page
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 class UserProfileTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
@@ -527,10 +523,9 @@ class UserProfileTesting (unittest.TestCase):
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)
 
-
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 LoggingTesting: Testing for EPM Logging Activities
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 class LoggingTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
@@ -722,20 +717,236 @@ class LoggingTesting (unittest.TestCase):
 
 		print ''
 		performance_report(iteration_time)		
+		
 
 
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+SocialAuthTesting: Testing for Social Authentication
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+import urlparse
+from selenium import webdriver
+from django.test import TestCase
+from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD
+from project.settings import TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD
+from project.settings import TEST_DOMAIN
+from time import sleep
+
+class SocialAuthTesting(TestCase):
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+
+    def tearDown(self):
+        self.driver.quit()
+        # pass
+
+    def url(self, path):
+        return urlparse.urljoin(TEST_DOMAIN, path)
+
+    def test_twitter_authentication(self):
+    	print "\n>>>> Testing 'test_twitter_authentication'"
+
+        start_time = time.clock()
+
+        # Assert the username and passward for the testing Twitter account are not none
+        self.assertTrue(TEST_TWITTER_USER)
+        self.assertTrue(TEST_TWITTER_PASSWORD)
+
+        # Go to Twitter App Authorization page
+        self.driver.get(self.url('/login/twitter/'))
+        self.assertEqual("Twitter / Authorize an application", self.driver.title)
+        print "  Redirecting to log in Twitter App Authorization page."
+
+        # Log in Twitter using the testing user credential
+        username_field = self.driver.find_element_by_id('username_or_email')
+        username_field.send_keys(TEST_TWITTER_USER)
+        password_field = self.driver.find_element_by_id('password')
+        password_field.send_keys(TEST_TWITTER_PASSWORD)
+ 
+        try:
+        	# Try to log in
+            password_field.submit()           
+            sleep(5)
+        
+	        # If the testing user is not found in the user profile table,
+	        # the user will be prompted to submit a username 
+            try:
+	        	assert "Username" in self.driver.title
+	        	username_field = self.driver.find_element_by_id('id_username')
+	        	username = "twitter_testing_user" + str(random.randrange(100, 999))
+	        	username_field.send_keys(username)
+	         	username_field.submit()
+	         	print "  Submitting a username '%s' for a created user profile account." % username
+            except:
+                pass
+	        
+	        # Assert the user logged in and has been redirected to the app home page 
+	        # after successful authentication by Twitter 
+            assert "EPM" in self.driver.title
+            self.assertTrue(self.driver.find_element_by_id('logout'))
+            print "  Successfully logging in EPM home page with Twitter authentication."
+        except:
+        	print "  Unable to authenticate the testing user with Twitter."
+
+        end_time = time.clock()
+        print '\n\tTotal Time: %s sec' % (end_time - start_time)
+       
+
+    def test_facebook_authentication(self):
+    	print "\n>>>> Testing 'test_facebook_authentication'"
+
+        start_time = time.clock()
+
+        # Assert the username and passward for the testing Facebook account are not none
+        self.assertTrue(TEST_FACEBOOK_USER)
+        self.assertTrue(TEST_FACEBOOK_PASSWORD)
+
+        # Go to Facebook App Authorization page
+        self.driver.get(self.url('/login/facebook/'))
+        self.assertEqual("Log In | Facebook", self.driver.title)
+        print "  Redirecting to log in Facebook App Authorization page."
+
+        # Log in Facebook using the testing user credential
+        username_field = self.driver.find_element_by_id('email')
+        username_field.send_keys(TEST_FACEBOOK_USER)
+        password_field = self.driver.find_element_by_id('pass')
+        password_field.send_keys(TEST_FACEBOOK_PASSWORD)
+
+        try:
+        	# Try to log in
+            password_field.submit()           
+            sleep(5)
+             
+            # If the testing user is not found in the user profile table,
+            # the user will be prompted to submit a username
+            try:
+	        	assert "Username" in self.driver.title
+	        	username_field = self.driver.find_element_by_id('id_username')
+	        	username = "facebook_testing_user" + str(random.randrange(100, 999))
+	        	username_field.send_keys(username)
+	         	username_field.submit()
+	         	print "  Submitting a username '%s' for a created user profile account." % username
+            except:
+                pass
+  
+            # Assert the user logged in and has been redirected to the app home page
+            # after successful authentication by Facebook
+            assert "EPM" in self.driver.title
+            self.assertTrue(self.driver.find_element_by_id('logout'))
+            print "  Successfully logging in EPM home page with Facebook authentication."
+
+        except:
+        	print "  Unable to authenticate the testing user with Facebook."
+        	
+        end_time = time.clock()
+        print '\n\tTotal Time: %s sec' % (end_time - start_time)
+ 
 
 
+# '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+# FollowTesting: Testing for EPM Following and Unfollowing functionality
+# '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+class FollowingTesting (unittest.TestCase):
+
+    # Get rid of all objects in the QuerySet.
+    def setUp(self):
+        User.objects.all().delete()
+        UserProfile.objects.all().delete()
+
+    # Get rid of all objects in the QuerySet.
+    def tearDown(self):
+        User.objects.all().delete()
+        UserProfile.objects.all().delete()
+
+    def test_following_and_unfollowing_a_user(self):
+        print "\n>>>> Testing 'test_following_and_unfollowing_a_user' for %d iterations " % NUMBER_OF_TESTS
+
+        iteration_time = 0.00
+
+        # Need to setup clients, users, and their passwords in order to simula the following function.
+        (users, passwords, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
+
+        for i in range (NUMBER_OF_TESTS):
+            start_time = time.clock()
+
+			# indexes
+            user_one_i = random.randrange(0, NUMBER_OF_TESTS)
+            user_two_i = random.randrange(0, NUMBER_OF_TESTS)
+            if user_one_i == user_two_i: 
+            	continue
+            client_i = random.randrange(0, NUMBER_OF_TESTS)
+
+            # objects
+            user_one = users [user_one_i]
+            password_one = passwords [user_one_i]
+            client = clients [client_i]
+            user_two = users [user_two_i]
+            password_two = passwords [user_two_i]
+            print "%s" % i
+            print "  %s (id:%s) and %s (id:%s) have been created." % (user_one, user_one.id, user_two, user_two.id)
+
+			#Log onto the first user.
+            client = clients [client_i]
+            loggedin = client.login(username = user_one.username, password = password_one)
+            self.assertTrue(loggedin == True)			
+            print "  %s logs onto %s to follow %s." % (user_one, client, user_two)
+
+            # Go to the second user's profile page
+            response = client.get(URL_USERPROFILE + str(user_two.id) + "/")
+            self.assertEquals(response.status_code, 200)
+
+            # ...................Testing Following Function.........................
+
+            # Make the POST request Call for following the second user
+            follow_url = URL_FOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
+            post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
+            response = client.post(follow_url, post, follow=True)
+
+			# Make assertions
+            self.assertEquals(response.status_code, 200)
+            self.assertTrue(len(response.redirect_chain) == 2)
+            self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/UserProfile/'+ str(user_one.id) )
+            self.assertEquals(response.redirect_chain[0][1], 302)
+            self.assertTrue(response.request ['PATH_INFO'] == URL_USERPROFILE + str(user_one.id) + "/")
+
+            # Assert that 
+            # the second user is in the first user's following list, and 
+            # the first user is in the second user's followers list
+            self.assertTrue(user_two.userprofile in user_one.userprofile.following.all())
+            self.assertTrue(user_one.userprofile in user_two.userprofile.followers.all())
+            print "  %s first followed %s." % (user_one, user_two)
+ 
+            # ...................Testing Unfollowing Function.........................
+
+            # Make the POST request Call for unfollowing the second user
+            unfollow_url = URL_UNFOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
+            post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
+            response = client.post(unfollow_url, post, follow=True)
+
+			# Make assertions
+            self.assertEquals(response.status_code, 200)
+            self.assertTrue(len(response.redirect_chain) == 2)
+            self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/UserProfile/'+ str(user_one.id) )
+            self.assertEquals(response.redirect_chain[0][1], 302)
+            self.assertTrue(response.request ['PATH_INFO'] == URL_USERPROFILE + str(user_one.id) + "/")
+ 
+            # Assert that 
+            # the second user is not in the first user's following list, and 
+            # the first user is not in the second user's followers list
+            self.assertTrue(not user_two.userprofile in user_one.userprofile.following.all())
+            self.assertTrue(not user_one.userprofile in user_two.userprofile.followers.all())
+            print "  %s then unfollowed %s." % (user_one, user_two)
+
+            # Logout the first user
+            client.logout()
+
+            end_time = time.clock()
+            iteration_time += (end_time - start_time)
 
 
-
-
-
-
-
-
-
-
-
+        print ''
+        self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
+        self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+        performance_report(iteration_time)
 

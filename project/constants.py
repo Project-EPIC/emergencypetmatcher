@@ -60,6 +60,8 @@ URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
 URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
 URL_BOOKMARKED = "/reporting/bookmarks/"
+URL_FOLLOW = "/follow/"
+URL_UNFOLLOW = "/unfollow/"
  
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"

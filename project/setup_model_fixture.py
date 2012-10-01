@@ -6,19 +6,17 @@ from django.contrib.auth import authenticate
 import utils
 import string, random, sys, os
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 setup_model_fixture.py: Setup sample (random) data for your dev env.
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 
 #Control Variables
 NUM_PETREPORTS = 100
 NUM_USERS = 50
-NUM_PETMATCHES = 150
+NUM_PETMATCHES = 50
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''
-When Executed: Setup our fixture
-'''''''''''''''''''''''''''''''''''''''''''''''''''
 
+#When Executed: Setup our fixture
 if (len(sys.argv) < 2) == True or (len(sys.argv) > 3) == True:
 	print "[ERROR]: You must specify at least one argument or at most 2 arguments (not including the python script name):\n"
 	print "\t'setup' for setting up all data"
