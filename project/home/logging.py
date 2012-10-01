@@ -13,7 +13,7 @@ def log_activity (activity, userprofile, petreport=None, petmatch=None):
     #Define the user filename and logger.
     user = userprofile.user
     user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
-
+    print user_log_filename
     try:
         logger = open(user_log_filename, "a")
         if activity == ACTIVITY_ACCOUNT_CREATED:

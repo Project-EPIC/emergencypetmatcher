@@ -41,6 +41,9 @@ URL_PMDP = '/matching/PetMatch/'
 URL_VOTE_MATCH = '/matching/vote_PetMatch'
 URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
+URL_FOLLOW = "/follow/"
+URL_UNFOLLOW = "/unfollow/"
+
  
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"

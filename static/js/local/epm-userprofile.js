@@ -2,43 +2,21 @@
 $(document).ready(function(){
 
 	//Link to click to open to the PRDP
-	$(".prdp_dialog").click(function(){
+	$(".prdp_dialog a").click(function(){
 
 		var link = $(this);
-		var options = {
+		//load_dialog(link, title, width, height)
+		return load_dialog(link.attr("href"), link.attr("name"), 700, "auto");
 
-			autoOpen: true,
-			position: "top",
-			closeOnEscape: true,
-			title:link.attr("name"),
-			height: "auto",
-			modal: true,
-			width: 700,
-			resizable: false,
-			show: {effect:"fade", duration:500}
-		};
-
-		return load_dialog(link, options);
 	});
 
 	//Link to click to open to the PMDP
     $(".pmdp_dialog a").click(function(){
 
-      var link = $(this).attr("value");
-      var options = {
+  		var link = $(this);
+		//load_dialog(link, title, width, height)
+		return load_dialog(link.attr("href"), link.attr("name"), 850, "auto");
 
-		autoOpen: true,
-        position: "top",
-        closeOnEscape: true,
-        title: "Pet Match Detailed Page",
-        width: 850,
-        height: "auto",
-        modal: true,
-        resizable: false,
-        show: {effect:"fade", duration:500}
-
-      };
-      return load_dialog(link, options);
     });	
 
 });

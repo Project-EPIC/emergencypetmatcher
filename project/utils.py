@@ -13,7 +13,6 @@ When writing your test file (tests.py), make sure to have the following import:
 	from utils import *
 ==================================================================================='''
 
-#Control Variable
 NUMBER_OF_TESTS = 20
 
 #Setup Lorem Ipsum Generator
@@ -296,6 +295,7 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 	petmatches = [ None for i in range (NUMBER_OF_TESTS/2) ]
 	pet_type = random.choice(PET_TYPE_CHOICES)[0]
 	status = None
+	petmatch_i=0
 
 	#Iterate w.r.t NUMBER_OF_TESTS control variable.
 	for i in range (NUMBER_OF_TESTS):
@@ -321,7 +321,8 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 		#(i >= 1 and i <= NUMBER_OF_TESTS/2)
 		if (create_petmatches == True) and (i % 2 == 1) and (i <= NUMBER_OF_TESTS/2):
 			pm = create_random_PetMatch(lost_pet=petreports[i-1], found_pet=petreports[i], pet_type=pet_type, user=user)
-			petmatches [i-1] = pm
+			petmatches [petmatch_i] = pm
+			petmatch_i += 1
 
 
 	if create_petreports == True and create_petmatches == True:

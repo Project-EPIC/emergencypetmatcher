@@ -1,8 +1,7 @@
 
 TWITTER_CONSUMER_KEY        = 'ssl0g9FopCG1zsItjarBJg'
 TWITTER_CONSUMER_SECRET     = 'eDRctXylxlXxHuFQqrLSXcRtTkY1CVMpZtdaM46Wg'
-# FACEBOOK_APP_ID             = '294682853930535'
-# FACEBOOK_API_SECRET         = '0106dd00c7a51e98fccbbd99e6b89db3'
+
 FACEBOOK_APP_ID             = '315409715220911'
 FACEBOOK_API_SECRET         = '0d6dccfbd7f042c31a29904222df78a2'
 
@@ -34,4 +33,14 @@ SOCIAL_AUTH_PIPELINE = (
     'home.pipeline.get_user_avatar',
 )
 
+# Twitter testing
+TEST_TWITTER_USER = 'epicdatascouts'
+TEST_TWITTER_PASSWORD = 'crowdsourcing'
+
+# Facebook testing
+# TEST_FACEBOOK_USER = 'epicdatascouts'
+TEST_FACEBOOK_USER = '100004419938460@facebook.com'
+TEST_FACEBOOK_PASSWORD = 'crowdsourcing'
+
+TEST_DOMAIN = 'http://localhost:8000/'
 
