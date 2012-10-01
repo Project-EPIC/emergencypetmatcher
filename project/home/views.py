@@ -64,7 +64,7 @@ def get_activities_json(request):
 
         else:
             print "Anonymous User -- random sample of activities..."
-            for userprof in UserProfile.objects.order_by("?")[:ACTIVITY_FEED_LENGTH]:
+            for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:ACTIVITY_FEED_LENGTH]:
                 print userprof
                 activities.append(get_recent_log(userprof))
 

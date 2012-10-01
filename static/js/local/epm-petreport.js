@@ -1,7 +1,7 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
 
-  var bookmarked = "{{ user_has_bookmarked }}";
+  
   var bookmark_button = $("#prdp_bookmark");
 
   //user is authenticated and has bookmarked this pet 
@@ -29,9 +29,9 @@ function bookmark(){
 
   var bookmark_button = $("#prdp_bookmark");
     
-  var user_id = "{{ user.id }}";
+  
   if (user_id == "None"){
-    login_link = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";
+    login_link = "Log in <a href="+URL_LOGIN+"?next={% firstof request.path '/' %} > here.</a>";
     $(".prdp_messages").html("<li class='error'> You cannot bookmark this Pet Report because you are not logged in! "+login_link+ "</li>");
     return false;
   }
@@ -41,8 +41,8 @@ function bookmark(){
   $.ajax({
 
     type:"POST",
-    url:"{% url 'bookmark_PetReport' %}",
-    data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":"{{ pet_report.id }}", "user_id":"{{ user.id }}", "action":bookmark_button.text()},
+    url:URL_BOOKMARK_PETREPORT,
+    data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":petreport_id, "action":bookmark_button.text()},
       success: function(data){
         bookmark_button.text(data.text);
         bookmark_button.attr("title",data.text);

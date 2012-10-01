@@ -6,9 +6,9 @@ from home.models import *
 from home import logging
 import unittest, string, random, sys, time
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 ModelTesting: Testing for EPM Models
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 class ModelTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
@@ -18,9 +18,7 @@ class ModelTesting (unittest.TestCase):
 	def tearDown(self):
 		delete_all()
 
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	CRUD Tests for: UserProfile + User
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
+	#CRUD Tests for: UserProfile + User		
  	def test_save_User(self):
  		print_testing_name("test_save_User")
  		iteration_time = 0.00
@@ -127,9 +125,8 @@ class ModelTesting (unittest.TestCase):
 		self.assertTrue(len(User.objects.all()) == 0)
 		performance_report(iteration_time)
 
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	CRUD Tests for: PetReport
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
+	
+	#CRUD Tests for: UserProfile + User
 	def test_save_PetReport(self):
 		print_testing_name("test_save_PetReport")
 		iteration_time = 0.00
@@ -179,13 +176,13 @@ class ModelTesting (unittest.TestCase):
 			pr = create_random_PetReport(user)
 
 			#UPDATES
-			pr.pet_name = generate_string (30)
-			pr.description = generate_lipsum_paragraph(500)
+			pr.pet_name = generate_string (PETREPORT_PET_NAME_LENGTH)
+			pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH)
 			pr.sex = random.choice(SEX_CHOICES)[0]
-			pr.location = generate_string (50)
-			pr.color = generate_string (20)
-			pr.breed = generate_string (30)
-			pr.size = generate_string (30)
+			pr.location = generate_string (PETREPORT_LOCATION_LENGTH)
+			pr.color = generate_string (PETREPORT_COLOR_LENGTH)
+			pr.breed = generate_string (PETREPORT_BREED_LENGTH)
+			pr.size = generate_string (PETREPORT_SIZE_LENGTH)
 			pr.age = str(random.randrange(0,15))
 
 			# check we can find the PetReport in the database again
@@ -238,9 +235,7 @@ class ModelTesting (unittest.TestCase):
 		performance_report(iteration_time)
 
 
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
-	CRUD Tests for: PetMatch 
-	'''''''''''''''''''''''''''''''''''''''''''''''''''
+	#CRUD Tests for: PetMatch 	
 	def test_save_PetMatch(self):
 		print_testing_name("test_save_PetMatch")
 		iteration_time = 0.00
@@ -422,9 +417,9 @@ class ModelTesting (unittest.TestCase):
 
 
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 LoginTesting: Testing for EPM Logging In/Out
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 class LoginTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
@@ -480,9 +475,9 @@ class LoginTesting (unittest.TestCase):
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 UserProfileTesting: Testing for EPM User Profile Page
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 class UserProfileTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
@@ -528,10 +523,9 @@ class UserProfileTesting (unittest.TestCase):
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)
 
-
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 LoggingTesting: Testing for EPM Logging Activities
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 class LoggingTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
@@ -723,6 +717,7 @@ class LoggingTesting (unittest.TestCase):
 
 		print ''
 		performance_report(iteration_time)		
+		
 
 
 

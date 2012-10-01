@@ -82,7 +82,10 @@ def get_activity_HTML(log, userprofile, userprofile2=None, petreport=None, petma
 
     elif ACTIVITY_PETREPORT_SUBMITTED in log:
         assert isinstance(petreport, PetReport)
-        html = "submitted a Pet Report named <a class='prdp_dialog' href= '" + URL_PRDP + str(petreport.id) + "/'>" + petreport.pet_name + "</a>!"
+        if petreport.pet_name.strip() == "unknown" or petreport.pet_name.strip() == "":
+            html += "submitted a " + "<a class='prdp_dialog' href= '" + URL_PRDP + str(petreport.id) + "/'>" + "Pet Report </a> with no name."
+        else:
+            html += "submitted a Pet Report named <a class='prdp_dialog' href= '" + URL_PRDP + str(petreport.id) + "/'>" + petreport.pet_name + "</a>!"
 
     elif ACTIVITY_PETMATCH_PROPOSED in log:
         assert isinstance(petmatch, PetMatch)
@@ -172,7 +175,12 @@ def get_recent_log(userprofile, activity=None):
             else:
                 break
 
-    return get_activity_HTML(recent_log, userprofile, userprofile2=userprofile2, petreport=petreport, petmatch=petmatch, current_userprofile=None)
+
+    if recent_log == None:
+        return "" #No log to return.
+    else:    
+        return get_activity_HTML(recent_log, userprofile, petreport=petreport, petmatch=petmatch)
+
 
 
 def get_recent_log_by(userprofile, activity=None):
@@ -229,6 +237,7 @@ def get_recent_log_by(userprofile, activity=None):
     print activities
     logger.close()
     return activities
+
 
 
 '''Helper function to determine if the input activity has been logged in the past'''

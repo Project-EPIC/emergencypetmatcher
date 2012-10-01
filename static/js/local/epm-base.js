@@ -49,6 +49,9 @@ function index_fetch_activities (feedlist_item){
 			 //Iterate through the activities and append them to the list.
 			 for (var i = 0; i < activities.length; i++){
 
+			 	var activity = activities [i];
+			 	if (activity == "")
+			 		continue;
 			 	//Now add it to the list.
 			 	feedlist.append("<li style=margin-left:2px; padding-left:0px;>" + activities[i] + "</li>");
 			 }
