@@ -400,11 +400,39 @@ h1.found {
 	padding-bottom:30px;
 }
 
+.prdp_ppm_wk2{
+
+	color: #000000;
+	border: 2px solid #ffffff;
+	width:430px;
+	height:340px; 
+	margin-top:0px;
+	padding-top:0px;
+	padding-left:0px;
+	padding-right:0px;
+	padding-bottom:0px;
+}
+
 .prdp_overflow{
 	overflow-y:visible;
 	overflow-x:hidden;
 	margin:10px;
 	height:90px;
+}
+
+.prdp_overflow1{
+	overflow-y:visible;
+	overflow-x:hidden;
+	margin:10px;
+	height:100px;
+}
+
+.prdp_overflow2{
+	overflow-y:visible;
+	overflow-x:hidden;
+	margin:0px;
+	width:430px;
+	height:340px;
 }
 
 .prdp_worker_img{
@@ -429,7 +457,7 @@ h1.found {
 	padding-bottom:5px;
 	margin-top: 15px;
 	margin-left: 10px; 
-	margin-bottom: 10px;
+	margin-bottom: 5px;
 	float: left;
 	
 }
@@ -460,6 +488,46 @@ h1.found {
 	width: 40px;
 	height: 40px;
 
+}
+
+
+.prdp_pmdp_dialog_pr{
+	background: #FFFFEC;
+	border: 1px solid #000000;
+	width: auto;
+	height: auto;
+	float: left;
+	margin-left: 15px;
+	margin-top: 10px;
+	cursor:pointer;
+
+}
+
+.prdp_pmdp_dialog_pr img { 
+	padding:2px;
+	width: 60px;
+	height: 60px;
+}
+
+
+.prdp_pmdp_dialog_pr2{
+	background: #FFFFFF;
+	border: 0px solid #000000;
+	width: auto;
+	height: auto;
+	float: left;
+	margin-left: 3px;
+	margin-top: 3px;
+	margin-right: 3px;
+	margin-bottom: 3px;
+	cursor:pointer;
+
+}
+
+.prdp_pmdp_dialog_pr2 img { 
+	padding:0px;
+	width: 60px;
+	height: 60px;
 }
 
 .prdp_subtitle{
@@ -673,6 +741,7 @@ img.bookmark_x{
 
 #pmdp_match_container{
 	height: 622px;
+	margin-bottom: 30px;
 }
 
 .pmdp_pet_container {
