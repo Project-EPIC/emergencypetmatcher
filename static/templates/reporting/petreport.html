@@ -42,6 +42,13 @@
     <script src = "{{ STATIC_URL }}/js/epm.js" type = 'text/javascript'></script>    
     <!-- Page-specific JS goes in this block -->
     {% block js %}
+    <script type = 'text/javascript'> 
+      var bookmarked = "{{ user_has_bookmarked }}";
+      var user_id = "{{ user.id }}";
+      var petreport_id = "{{ pet_report.id }}"
+      var URL_LOGIN  = "{% url 'login_User' %}"
+      var URL_BOOKMARK_PETREPORT = "{% url 'bookmark_PetReport' %}"
+    </script>
     <script src = "{{ STATIC_URL }}/js/local/epm-petreport.js" type = 'text/javascript'></script>
     {% endblock js %} 
 
