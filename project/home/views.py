@@ -53,10 +53,14 @@ def get_activities_json(request):
         if request.user.is_authenticated() == True:
 
             print "Authenticated User -- following sample of activities..."
-            userprofile = request.user.get_profile()
+            userprofile = request.user.get_profile()           
+
+            # Get the log info of all followers
+            activities = get_recent_log_by(userprofile, ACTIVITY_FOLLOWER)
 
             for following in userprofile.following.all().order_by("?")[:ACTIVITY_FEED_LENGTH]:
                 activities.append(get_recent_log(following))
+            
 
         else:
             print "Anonymous User -- random sample of activities..."
@@ -158,6 +162,7 @@ def follow(request, userprofile_id1, userprofile_id2):
         else:
             me.following.add(follow)
             messages.success(request, "You have successfully followed '" + str(follow.user.username) + "'") 
+            log_activity(ACTIVITY_FOLLOWING, me.user.get_profile(), follow.user.get_profile())
     return redirect('/UserProfile/' + userprofile_id1)
 
 @login_required
