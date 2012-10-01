@@ -1,13 +1,16 @@
 {% extends 'home/index.html' %}
 {% load url from future %}
 
-{% block head_title %}EPM - User Profile: {{ show_profile.user.username }} {% endblock head_title %}
+{% block js %}
+<script src = "{{ STATIC_URL }}/js/local/epm-userprofile.js" type = 'text/javascript'></script>
+{% endblock js %}
+
+{% block head_title %}EPM - User Profile: {{ userprofile.user.username }} {% endblock head_title %}
 {% block content_title %} User Profile {% endblock content_title %}
 
 {% block content %}
 
-
-	<table border=0 cellpadding=10 width="100%">
+	<table border=0 width="100%">
 	<tr>
 	<td width="70%">
 			<table>
@@ -51,89 +54,96 @@
 			</br>
 
 			<!-- Proposed Pet Reports -->
-			{% if show_profile.user.username == user.username %}
-		     	<h3>Proposed Pet Reports:</h3>
-		        <div class="prdp_ppm_wk">		
-		            {% for pet_report in show_profile.petreport_set.all %}
-		                <div id = "prdpdialog">
-							<a href= "{% url 'disp_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}">
-								{% if pet_report.pet_name %}
-									<strong>{{ pet_report.pet_name }}</strong><br/>
-								{% endif %}
-								{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
-								<img src="{{ STATIC_URL }}{{ pet_report.img_path }}" border=1 width=60 height=60/>
+			
+				<h3>Proposed Pet Reports:</h3>
+			    <div class="prdp_ppm_wk">	
+			    	<div class = "prdp_overflow1"> 
+						{% for pet_report in show_profile.petreport_set.all %}
+						<div class="prdp_dialog">
+							<a class="prdp_pmdp_dialog_pr" href= "{% url 'disp_PetReport' pet_report.id %}" 
+							name = "{{ pet_report.pet_name }}"
+							style="text-decoration:none; color:#663399; font-size:12px;}"
+							title="{% if pet_report.pet_name %}{{ pet_report.pet_name }}: {% endif %}{{ pet_report.status }} {{ pet_report.pet_type }}">
+							<strong>&nbsp;&nbsp;{{ pet_report.pet_name }}</strong><br/>
+							<img src="{{ STATIC_URL }}{{ pet_report.img_path }}" border=1 width=60 height=60/>
 							</a>
 						</div>
-		            {% endfor %}
-		        </div> 
-			{% endif %}
+						{% endfor %}
+				    </div>
+				</div>	
+			
 
 			<!-- Proposed Pet Matches -->
-			{% if show_profile.user.username == user.username %}
+			
 				<h3> Proposed Pet Matches </h3>
-		 		<div class="prdp_ppm_wk">         
-		 			{% for pet_match in show_profile.proposed_by_related.all %}
-				        <div id = "prdp_petmatch_box"> 
-				            <a href = "{% url 'display_PetMatch' pet_match.id %}" name = ""
-				           		title="Lost: {{ pet_match.lost_pet.pet_type }}/Found: {{ pet_match.found_pet.pet_type }}">
-								Lost: {{ pet_match.lost_pet.pet_name }}</br>Found:{{ pet_match.found_pet.pet_name }}</br>
-								<img src="{{ STATIC_URL}}{{ pet_match.lost_pet.img_path }}" width="60" height="60"/><img src="{{ STATIC_URL}}{{ pet_match.found_pet.img_path }}" width="60" height="60"/>
+		 		<div class="prdp_ppm_wk">   
+		 			<div class = "prdp_overflow1">      
+		 			{% for pet_match in show_profile.proposed_by_related.all %}	
+		 				<div class="pmdp_dialog">
+				            <a class="prdp_pmdp_dialog_pr" 
+				            	href = "{% url 'display_PetMatch' pet_match.id %}" name = ""
+				            	style="text-decoration:none; color:#663399; font-size:12px;}"
+				           		title="{{ pet_match.lost_pet.pet_name }}: Lost {{ pet_match.lost_pet.pet_type }} / {{ pet_match.found_pet.pet_name }}: Found {{ pet_match.found_pet.pet_type }}">
+								&nbsp;&nbsp;{{ pet_match.lost_pet.pet_name }} / {{ pet_match.found_pet.pet_name }}</br>
+								<img src="{{ STATIC_URL}}{{ pet_match.lost_pet.img_path }}" width="60" height="60"/>
+								<img src="{{ STATIC_URL}}{{ pet_match.found_pet.img_path }}" width="60" height="60"/>
 		             	    </a>
-		            	</div> 
-		          {% endfor %}
+		             	</div>
+		            {% endfor %}
+		            </div>
 		        </div>
-			{% endif %}
-
+			
+ 
 			<!-- Working on Pet Report -->
-			{% if show_profile.user.username == user.username %}
+			
 		     	<h3>Working-On Pet Reports:</h3>
-		        <div class="prdp_ppm_wk">		
-		            {% for pet_report in show_profile.workers_related.all %}
-		                <div id = "prdpdialog">
-							<a href= "{% url 'disp_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}">
-								{% if pet_report.pet_name %}
-									<strong>{{ pet_report.pet_name }}</strong><br/>
-								{% endif %}
-								{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
-								<img src="{{ STATIC_URL }}{{ pet_report.img_path }}" border=1 width=60 height=60/>
+		     	<div class="prdp_ppm_wk">   
+		 			<div class = "prdp_overflow1">      				
+					{% for pet_report in show_profile.workers_related.all %}
+					    <div class="prdp_dialog">
+							<a class="prdp_pmdp_dialog_pr" href= "{% url 'disp_PetReport' pet_report.id %}" 
+								name = "{{ pet_report.pet_name }}"
+								style="text-decoration:none; color:#663399; font-size:12px;}"
+								title="{% if pet_report.pet_name %}{{ pet_report.pet_name }}: {% endif %}{{ pet_report.status }} {{ pet_report.pet_type }}">
+								<strong>&nbsp;&nbsp;{{ pet_report.pet_name }}</strong><br/>
+								<img src="{{ STATIC_URL }}{{ pet_report.img_path }}" border=1 width=60 	height=60/>
 							</a>
 						</div>
-		            {% endfor %}
-		        </div> 
-			{% endif %}
+					{% endfor %}
+					</div>
+				</div>
+					
 			</br>
 			</br>
+  
 	</td>
 
 	<td width="30%">
 
-			<table border=0 cellpadding=5>
+			<table border=0 cellpadding=15>
 			<tr>
 				<td>
 				<!-- Following list -->
 				{% if show_profile.user.username == user.username %}
 					<h3>Following:</h3>
-					<div style="float:center; overflow:auto; border:0px solid #0ADA0A; margin-top:8px;">	
+					<div class="prdp_ppm_wk2">  
+						<div class = "prdp_overflow2">  
 						{% for following in show_profile.following.all %}
-							<div style="float:center; margin-top:2px;">		
-							<a href="{% url 'get_UserProfile_page' following.user.id %}"
-							   style="text-decoration:none; color:green; font-size:12px;}"
-							   title="{% if following.user.first_name %} {{ following.user.first_name }} {% endif %}@{{ following.user.username }}">
+							<a  class="prdp_pmdp_dialog_pr2"
+								href="{% url 'get_UserProfile_page' following.user.id %}"
+								style="text-decoration:none; color:green; font-size:12px;}"
+								title="{% if following.user.first_name %} {{ following.user.first_name }} {% endif %}@{{ following.user.username }}">
 								{% if following.photo %}
 									<img src="{{ STATIC_URL }}{{ following.photo }}" width=60 height=60/>
 								{% else %}
 									<img src="{{ STATIC_URL }}images/defaults/anonymous.gif" width=60 height=60/>
 								{% endif %}	
 							</a>
-							</br>
-							<a href="{% url 'unfollow' user.id following.user.id %}" 
-							   title="Unfolllow {{ following.user.username }}"
-							   onMouseOver="this.style.color='#0099FF'" onMouseOut="this.style.color='#CCCC88'"
-							   style="text-decoration:none; color:#CCCC88; font-size:10px;">Unfollow</a>
-							</div>					
+		
 						{% endfor %}
+						</div>	
 					</div>							
-				{% endif %}
+				{% endif %}	
 				</td>
 			</tr>
 
@@ -142,22 +152,23 @@
 				<!-- Follower list -->
 				{% if show_profile.user.username == user.username %}
 					<h3>Followers:</h3>
-					<div style="float:center; overflow:auto; border:0px solid #0ADA0A; margin-top:8px;">	
-						{% for follower in show_profile.followers.all %}
-							<div style="float:center; margin-top:8px;">		
-							<a href="{% url 'get_UserProfile_page' follower.user.id %}"
-							   style="text-decoration:none; color:green; font-size:12px;}"
-							   title="{% if follower.user.first_name %} {{ follower.user.first_name }} {% endif %}@{{ follower.user.username }}">
+					<div class="prdp_ppm_wk2">  
+						<div class = "prdp_overflow2">  	
+						{% for follower in show_profile.followers.all %}	
+							<a  class="prdp_pmdp_dialog_pr2"
+								href="{% url 'get_UserProfile_page' follower.user.id %}"
+							   	style="text-decoration:none; color:green; font-size:12px;}"
+							   	title="{% if follower.user.first_name %} {{ follower.user.first_name }} {% endif %}@{{ follower.user.username }}">
 								{% if follower.photo %}
 									<img src="{{ STATIC_URL }}{{ follower.photo }}" width=60 height=60/>
 								{% else %}
 									<img src="{{ STATIC_URL }}images/defaults/anonymous.gif" width=60 height=60/>
 								{% endif %}	
-							</a>
-							</div>					
+							</a>			
 						{% endfor %}
+						</div>
 					</div>															
-				{% endif %}
+				{% endif %}	
 				</td>
 			</tr>
 

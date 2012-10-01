@@ -42,4 +42,5 @@ TEST_TWITTER_PASSWORD = 'crowdsourcing'
 TEST_FACEBOOK_USER = '100004419938460@facebook.com'
 TEST_FACEBOOK_PASSWORD = 'crowdsourcing'
 
-TEST_DOMAIN = 'http://localhost:8000'
+TEST_DOMAIN = 'http://localhost:8000/'
+

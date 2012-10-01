@@ -2,10 +2,15 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ModelForm
 from django import forms
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
 from django.dispatch import receiver
 from django.core.files.storage import FileSystemStorage
-import PIL
+import PIL, os, time
+from constants import *
+
+'''===================================================================================
+[models.py]: Models for the EPM system
+==================================================================================='''
 
 '''Enums for Various Model Choice Fields'''
 PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Turtle', 'Turtle'), ('Snake', 'Snake'), ('Horse', 'Horse'),('Rabbit', 'Rabbit'), ('Other', 'Other')]
@@ -38,14 +43,55 @@ class PetReport(models.Model):
     #Many-to-Many relationship with User
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
     bookmarked_by = models.ManyToManyField('UserProfile', null=True, related_name='bookmarks_related')
+
+    ''' Determine if the input UserProfile (user) has bookmarked this PetReport already '''
+    def UserProfile_has_bookmarked(self, user_profile):
+        assert isinstance(user_profile, UserProfile)
+        try:
+            user = self.bookmarked_by.get(pk = user_profile.id)
+        except UserProfile.DoesNotExist:
+            user = None        
+        if (user != None):
+            return True
+        else:
+            return False
+        return False
     
+    def save(self, *args, **kwargs):
+
+        if self.id == None:
+            print "%s has been saved!" % self
+        else:
+            print "%s has been updated!" % self
+
+        super(PetReport, self).save(args, kwargs)            
+        return self
+
+    @staticmethod
+    def get_PetReport(status, pet_type, pet_name=None, petreport_id=None):
+
+        try:
+            if petreport_id != None:
+                existing_pet = PetReport.objects.get(pk=petreport_id)
+            elif pet_name != None:
+                existing_pet = PetReport.objects.get(status=status, pet_type=pet_type, pet_name=pet_name)
+            else:
+                existing_pet = PetReport.objects.get(status=status, pet_type=pet_type)
+
+            return existing_pet
+
+        except PetReport.DoesNotExist:
+            return None
+
+
+
     def has_image(self):
         if self.img_path == None:
             return False
         return True
 
     def __unicode__(self):
-        return 'PetReport {pet_type: %s, status: %s, proposed_by: %s}' % (self.pet_type, self.status, self.proposed_by)
+        return '{ID{%s} %s %s name:%s}' % (self.id, self.status, self.pet_type, self.pet_name)
 
     def long_unicode (self):
         str = "PetReport {\n\tpet_type: %s\n\tstatus: %s\n\tproposed_by: %s\n\t" % (self.pet_type, self.status, self.proposed_by)
@@ -56,9 +102,7 @@ class PetReport(models.Model):
     def convert_date_to_string(self):
         string = str(self.date_lost_or_found)
         return str
-
         
-
 #The User Profile Model containing a 1-1 association with the 
 #django.contrib.auth.models.User object, among other attributes.
 class UserProfile (models.Model):
@@ -75,17 +119,11 @@ class UserProfile (models.Model):
     reputation = models.IntegerField(default=0, null=True)
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
-
-    ''' Create a post save signal function to save a UserProfile when a User is created'''
-    def create_UserProfile(sender, instance, created, **kwargs):
-        if created:
-            UserProfile.objects.create(user=instance)
-
+    
     def __unicode__ (self):
-        return 'User {username:%s, email:%s}' % (self.user.username, self.user.email)
+         return '{ID{%s} %s}' % (self.id, self.user.username)
 
- 
-    post_save.connect(create_UserProfile, sender=User)        
+    # post_save.connect(create_UserProfile, sender=User)   
 
 
 #The Pet Match Object Model
@@ -106,12 +144,34 @@ class PetMatch(models.Model):
     up_votes = models.ManyToManyField('UserProfile', null=True, related_name='up_votes_related')
     down_votes = models.ManyToManyField('UserProfile', null=True, related_name='down_votes_related')
 
-    #TODO: Need to implement pre-save signal for the PetMatch object to avoid having duplicate PetMatch objects.
-    #    @receiver(pre_save, sender=PetMatch)
-    #    def create_PetMatch(sender, **kwargs):
-    #        existing_match = PetMatch.get_PetMatch(sender.lost_pet, sender.found_pet)
-    #        if existing_match != None:
-    #            print "PetMatch %s already exists in the Database!" 
+    '''Because of the Uniqueness constraint that the PetMatch must uphold, we override the save method'''
+    def save(self, *args, **kwargs):
+        #First, try to find an existing PetMatch
+        lost_pet = self.lost_pet
+        found_pet = self.found_pet
+        
+        #PetMatch inserted improperly
+        if (lost_pet.status != "Lost") or (found_pet.status != "Found"):
+            print "INSERTED IMPROPERLY"
+            return (None, "INSERTED IMPROPERLY")
+
+        existing_match = PetMatch.get_PetMatch(self.lost_pet, self.found_pet)            
+
+        #A PetMatch with the same lost and found pets (and same user who proposed it) already exists - SQL Update
+        if existing_match != None:
+            if existing_match.id == self.id:
+                super(PetMatch, self).save(args, kwargs)
+                print "[SQL UPDATE]: %s" % self
+                return (self, "SQL UPDATE")
+            else:
+                print "[DUPLICATE PETMATCH]: %s VS. %s" % (self, existing_match)
+                return (None, "DUPLICATE PETMATCH") #Duplicate PetMatch!
+
+        #Good to go: Save the PetMatch Object.
+        super(PetMatch, self).save(args, kwargs)
+        print "[OK]: PetMatch %s was saved!" % self
+        return (self, "NEW PETMATCH")
+
 
     ''' Determine if a PetMatch exists between pr1 and pr2, and if so, return it. Otherwise, return None. '''
     @staticmethod
@@ -130,7 +190,6 @@ class PetMatch(models.Model):
         except PetMatch.DoesNotExist:
             return None
 
-
     ''' Determine if the input UserProfile (user) has up/down-voted on this PetMatch already '''
     def UserProfile_has_voted(self, user_profile):
         assert isinstance(user_profile, UserProfile)
@@ -145,15 +204,14 @@ class PetMatch(models.Model):
             downvote = None
 
         if (upvote != None):
-            return "upvote"
+            return UPVOTE
         elif (downvote != None):
-            return "downvote"
+            return DOWNVOTE
 
-        return False
+        return False       
 
     def __unicode__ (self):
-        return 'PetMatch {lost:%s, found:%s, proposed_by:%s}' % (self.lost_pet, self.found_pet, self.proposed_by)
-
+        return '{ID{%s} lost:%s, found:%s, proposed_by:%s}' % (self.id, self.lost_pet, self.found_pet, self.proposed_by)
 
 #The Chat Object Model
 class Chat (models.Model):
@@ -179,8 +237,12 @@ class ChatLine (models.Model):
         return 'ChatLine {text:%s}' % (self.text)
 
 
-''' Form Models - These Models nicely organize the model-related data into Django Form objects that have built-in validation
-functionality and can be passed around via POST requests. Order of Fields matter.'''
+
+''' ============================ [FORM MODELS] ==================================== '''
+''' These Models nicely organize the model-related data into Django Form objects that 
+    have built-in validation functionality and can be passed around via POST requests. 
+    Order of Fields matter.                                                         '''
+
 
 #The PetReport ModelForm
 class PetReportForm (ModelForm):
@@ -196,7 +258,7 @@ class PetReportForm (ModelForm):
     '''Non-Required Fields'''
     img_path = forms.ImageField(label = "Upload an Image ", required = False)
     pet_name = forms.CharField(label = "Pet Name", max_length=50, required = False) 
-    age = forms.CharField(label = "Age", max_length = 5, required = False)
+    age = forms.CharField(label = "Age", max_length = 10, required = False)
     breed = forms.CharField(label = "Breed", max_length = 30, required = False)
     color = forms.CharField(label = "Coat Color(s)", max_length = 20, required = False)
     description  = forms.CharField(label = "Description", max_length = 500, required = False, widget = forms.Textarea)
@@ -207,10 +269,34 @@ class PetReportForm (ModelForm):
 
 
 
+''' ============================ [SIGNALS] ==================================== '''
+
+''' Create a post delete signal function to delete a UserProfile when a User/UserProfile is deleted'''
+@receiver (pre_delete, sender=UserProfile)
+def delete_UserProfile(sender, instance=None, **kwargs):
+    #Remove the Log file associated with this UserProfile.
+    log_path = ACTIVITY_LOG_DIRECTORY + str(instance.user.username) + ".log"
+    if os.path.isfile(log_path):
+        try:
+            print "removing %s" % (log_path)
+            os.unlink(log_path)
+        except Exception, e:
+            print e
+
+    #Instead of deleting the User (which might break foreign-key relationships), let's set the active flag to False (INACTIVE)
+    instance.user.is_active = False
+
+''' Create a post save signal function to setup a UserProfile when a User is created'''
+@receiver (post_save, sender=User)
+def setup_UserProfile(sender, instance, created, **kwargs):
+    if created == True:
+        #Create a UserProfile object.
+        UserProfile.objects.create(user=instance)
+        #Create the first activity for this user
+        log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
 
 
 
 
-
-
-
+''' Import statements placed at the bottom of the page to prevent circular import dependence '''
+from logging import log_activity
