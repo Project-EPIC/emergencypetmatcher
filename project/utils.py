@@ -5,13 +5,13 @@ from home.models import *
 from constants import *
 import random, string, sys, time, datetime, lipsum, traceback
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 epm_utils.py: Utility Functions for EPM Utility and Testing
 
 When writing your test file (tests.py), make sure to have the following import:
 
-	import epm_utils as utils
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+	from utils import *
+==================================================================================='''
 
 #Control Variable
 NUMBER_OF_TESTS = 20
@@ -66,7 +66,7 @@ def simplify_model_dict(model_object):
 	return modeldict
 
 
-''' 
+'''===================================================================================
 generate_random_date():
 
 Referenced from: http://stackoverflow.com/questions/553303/generate-a-random-date-between-two-other-dates
@@ -76,7 +76,8 @@ start and end should be strings specifying times formated in the
 given format (strftime-style), giving an interval [start, end].
 prop specifies how a proportion of the interval to be taken after
 start.  The returned time will be in the specified format.
-'''
+
+==================================================================================='''
 def generate_random_date(start, end, format, prop):
 
     stime = time.mktime(time.strptime(start, format))
@@ -162,6 +163,7 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 		pr.img_path.name = "images/defaults/other_silhouette.jpg"
 
 	pr.save()
+	log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr)
 	return pr
 
 #Create Random Object for: Chat

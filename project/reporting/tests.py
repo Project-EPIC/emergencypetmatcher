@@ -6,10 +6,9 @@ from utils import *
 from home.models import *
 import unittest, string, random, sys, time
 
-
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 ReportingTesting: Testing for EPM Pet Reporting
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 class ReportingTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.

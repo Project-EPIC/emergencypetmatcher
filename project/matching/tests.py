@@ -6,9 +6,9 @@ from utils import *
 from constants import *
 import unittest, string, random, sys, time
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 MatchingTesting: Testing for EPM Matching
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 class MatchingTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
