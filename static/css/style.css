@@ -802,6 +802,9 @@ img.bookmark_x{
 
 }
 
-
+p.verification_message {
+	font-size: 20px;
+	margin-left: 27%;
+}
 
 

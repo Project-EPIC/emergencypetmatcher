@@ -160,6 +160,12 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                 log_activity(ACTIVITY_PETMATCH_UPVOTE, proposed_by, petmatch=result)
 
             elif outcome == "NEW PETMATCH":
+                #Verification votes is initialized to 00 if the user who proposed the pet match is the same user who proposed the target or candidate pet report
+                if (target.proposed_by == proposed_by) or (candidate.proposed_by == proposed_by):
+                    pm.verification_votes='00'
+                else: 
+                    pm.verification_votes='000'
+                (result,outcome) = pm.save()
                 messages.success(request, "Congratulations - The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
                 log_activity(ACTIVITY_PETMATCH_PROPOSED, proposed_by, petmatch=pm)
 
@@ -200,16 +206,24 @@ def verify_PetMatch(request, petmatch_id):
 
         num_upvotes = len(pm.up_votes.all())
         num_downvotes = len(pm.down_votes.all())
-        render_to_response(HTML_VERIFY_PETMATCH,{'petmatch': pm, "voters": voters, "user_has_voted": user_has_voted, "num_upvotes":num_upvotes, "num_downvotes":num_downvotes},
-         RequestContext(request))
-
-
-
-
-
-
-
-
-
-
-
+        return render_to_response(HTML_VERIFY_PETMATCH,{'petmatch': pm, "voters": voters, "user_has_voted": user_has_voted, "num_upvotes":num_upvotes, "num_downvotes":num_downvotes}, RequestContext(request))
+    elif request.method == "POST":
+        pm = get_object_or_404(PetMatch, pk=petmatch_id)
+        action = request.POST['message']
+        if action[0] == 'y':
+            bit = '1'
+        else:
+            bit = '2'     
+        pm.verification_votes = '00'
+        if pm.verification_votes[0] == '0':
+            pm.verification_votes = bit+pm.verification_votes[1]
+        elif pm.verification_votes[1] == '0':
+            pm.verification_votes = pm.verification_votes[0]+bit
+        print 'votes bits: '+str(pm.verification_votes)
+        pm.save() 
+        if '0' not in pm.verification_votes:
+            pm.close_PetMatch()
+            message = "Thank you, your input has been recorded. This pet match is now closed."
+        else:
+            message = "Thank you, your input has been recorded. Once your peers verify this petmatch, it will be closed."
+        return render_to_response(HTML_HOME, {'message':message}, RequestContext(request))

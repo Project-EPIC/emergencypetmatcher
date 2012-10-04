@@ -8,7 +8,7 @@
   <!--[if gt IE 8]> <html class="no-js" lang="en"> <![endif]-->
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>{% block head_title %}Pet Match Detailed Page{% endblock head_title %}</title>
+    <title>{% block head_title %}Pet Match Verification Page{% endblock head_title %}</title>
     <meta name="keywords" content="" />
     <meta name="description" content="" />
 
@@ -49,26 +49,54 @@
       var STATIC_URL = "{{ STATIC_URL }}";
       var VOTED = "{{ user_has_voted }}";
       var USER_ID = "{{ user.id }}";
+      var URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
       var PETMATCH_ID = "{{ petmatch.id }}";
       var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
       var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";      
 
+
     </script>
+    <script type="text/javascript">
+        function post_user_response(response){
+            var url = URL_VERIFY_PETMATCH+PETMATCH_ID+"/";
+            var message =response;
+            var csrf_value = $("input").attr("value");
+            $.post(url, {"csrfmiddlewaretoken":csrf_value,"message":message},function(data){
+               alert("post success!");
+             });
+              
+        }
+     </script>
     {% endblock js %}
 
   </head>
 
   <body>
-    <div id="pmdp_back">
+    <div id="pmdp_back" style="width:auto;">
 
-      {% if user_has_voted %}
+ <!--      {% if user_has_voted %}
       <p style = "text-align:center; color:gray; font-size:14pt;"> You have already voted for this PetMatch. </p>
-      {% endif %}
+      {% endif %} -->
+      <p class = "verification_message">
+        This match could potentially be a success! Let us know what you think.
+      </p>
+          <!-- Buttons -->
+        <div id ="prdp_buttons">
+
+          {% csrf_token %}
+          <a class = "prdp_eachbutton"  title="Yes, this is a perfect match" style="float:left;cursor:pointer;margin-left:25%" onclick="post_user_response('yes')">
+            
+            Yes, this is a perfect match
+          </a>
+          <a class = "prdp_eachbutton" style="float:right;margin-right:25%" onclick="post_user_response('no')" >No, I do not agree with this match</a></br>
+        </div>
+      
+
       <!-- PMDP Match Container - contains PMDP Images and Attributes -->
-      <div id = "pmdp_match_container">
+      <div id = "pmdp_match_container" style="width:auto;">
 
         <!-- Lost PetReport -->
-        <div class = "pmdp_pet_container" style="float:left;">
+        <div class = "pmdp_pet_container" style="margin-left:5px;float:left;width:48%;">
 
           <!-- Lost PetReport Title -->
           <div id="match_title">
@@ -99,7 +127,7 @@
         <!-- End Lost PetReport -->
 
         <!-- Found PetReport -->
-        <div class = "pmdp_pet_container" style ="float:right;">
+        <div class = "pmdp_pet_container" style ="margin-right:5px;float:right;width:48%;">
 
           <!-- Found PetReport Title -->
           <div id="match_title">
@@ -159,7 +187,7 @@
           </div>
 
           <!-- UserBox Div -->
-          <div id = "pmdp_userbox_container">
+          <div id = "pmdp_userbox_container" style="width:85%">
             {% for worker in voters %}
               <div id = "pmdp_user_box">
                 <a href= "{% url 'get_UserProfile_page' worker.id %}" title = "{{ worker.user.username }}">

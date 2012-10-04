@@ -133,7 +133,7 @@ class PetMatch(models.Model):
     proposed_by = models.ForeignKey('UserProfile', null=False, related_name='proposed_by_related')
     proposed_date = models.DateField(null=False, default=None, auto_now_add=True)
     description = models.CharField(max_length=300, null=False, default=None)
-    
+
     '''Non-Required Fields'''
     #add a field to keep track of a successful  pet match
     is_open = models.BooleanField(default=True)
@@ -142,6 +142,7 @@ class PetMatch(models.Model):
     closed_date = models.DateField(null=True)
     up_votes = models.ManyToManyField('UserProfile', null=True, related_name='up_votes_related')
     down_votes = models.ManyToManyField('UserProfile', null=True, related_name='down_votes_related')
+    verification_votes = models.CharField(max_length=3,null=True)
 
     '''Because of the Uniqueness constraint that the PetMatch must uphold, we override the save method'''
     def save(self, *args, **kwargs):
@@ -256,7 +257,11 @@ class PetMatch(models.Model):
         #petmatch_owner.email_user(email_subject,email_body,from_email=None)
         print 'email to pet match owner: '+email_body
 
+    def close_PetMatch(self):
+        if '0' not in self.verification_votes:
+            self.is_open = False
 
+            print 'PetMatch %s has been closed' % (self)
 
     def __unicode__ (self):
         return '{ID{%s} lost:%s, found:%s, proposed_by:%s}' % (self.id, self.lost_pet, self.found_pet, self.proposed_by)
