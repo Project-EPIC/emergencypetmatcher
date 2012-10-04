@@ -45,6 +45,7 @@
 		{% block js %}
 		<script src = "{{ STATIC_URL }}js/local/epm-base.js" type = 'text/javascript'></script>
 		{% endblock js %}
+
 		{% block headers %} {% endblock headers %}
 	</head>	
 	<body>
@@ -52,12 +53,39 @@
 		<!-- container for main divs: 1) header, 2) body, 3) footer-->
 		<div id = "container">
 
-			<!-- start header with TITLE and MENU -->
+			<!-- start header with TITLE and MENU -->			
 			<div id="header">
+
 				<div id="logo">
 					<h1><a href="{% url 'home' %}">EmergencyPetMatcher</a></h1>
 						<p> <a href = "http://epic.cs.colorado.edu"> Project EPIC </a></p>
 				</div>
+
+				<!-- Share Buttons -->
+			 	<div id="sharebuttons" style="float:right">
+		            <div style="float:left; margin-top:9px; margin-bottom:7px;">
+		              <font size=-1> Share on: </font>
+		            </div>
+		            <div style="float:left; margin:3px 0 0 7px;">
+
+		                <a title="Share on Facebook"
+		                   target='_blank' 
+		                   name="fb_share" 
+		                   type="button_count"
+		                   expr:share_url='data:post.url'  
+		                   href="http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/&p[images][0]={{ STATIC_URL }}/images/epm.jpg&p[title]=EmergencyPetMatcher Website&p[summary]=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder."
+		                   onclick="window.open('http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/&p[images][0]={{ STATIC_URL }}/images/epm.jpg&p[title]=EmergencyPetMatcher Website&p[summary]=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.', 
+		                   'newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a>
+
+		                <a title="Share on Twitter" 
+		                    target="_blank" 
+		                    expr:share_url='data:post.url'
+		                    href="http://twitter.com/share?text=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.&url=http://emergencypetmatcher.herokuapp.com:8000/" 
+		                    onclick="window.open('http://twitter.com/share?text=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.&url=http://emergencypetmatcher.herokuapp.com:8000/', 'newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22"></a> 
+		              </div>
+			     </div>
+
+		
 
 				<div id="menu">
 					<ul>
@@ -65,9 +93,13 @@
 						<li><a href="{% url 'home' %}"> Home</a></li>
 
 						{% if user.is_authenticated %}
-						<li><a href= "{% url 'get_UserProfile_page' user.id %}">{{ user.username }}</a></li>
+						
+						<li>
+							<a href= "{% url 'get_UserProfile_page' user.id %}">{{ user.username }}</a>
+	
+						</li>
 							<form method = "post" action= "{% url 'logout_User' %}">
-								{% csrf_token %} <input type="submit" value="Logout"/>
+								{% csrf_token %} <input id="logout" type="submit" value="Logout"/>
 							</form>
 						</li>
 						<li><a href= "{% url 'submit_PetReport' %}">Submit a Lost/Found Pet Report</a></li>
@@ -81,13 +113,15 @@
 					</ul>
 				</div>
 			</div>
-			<br/><br/><br/><br/>
-			<!-- end header -->
 
+			<br/><br/><br/><br/>
+          	<!-- end header -->
+			
 			<div id="body">
 
 				<h2>{% block content_title %}{% endblock content_title %}</h2>
 				<h3>{% block content_subtitle %}{% endblock content_subtitle %}</h3>
+
 				{% block messages %}
 					{% if messages %}
 					<ul id="messages">
@@ -104,12 +138,15 @@
 						<div id="nav">
 							<ul>
 							{% if user.is_authenticated %}
-								<li><a href="#">Friends</a></li>
+								<li class="active"><a href="#">Newly Added</a></li>
+								<li><a href="#">Following</a></li>
 								<li><a href="{% url 'bookmarks' %}">Bookmarked</a></li>
-								<li><a href="#">My Pet Matches</a></li>
-							{% endif %}
+								<li><a href="#">Pet Reports</a></li>
+								<li><a href="#">Pet Matches</a></li>
+							{% else %}
 								<li class="active"><a href="#">Newly Added</a></li>
 								<li><a href="#">Proposed Pet Matches</a></li>
+							{% endif %}
 							</ul>
 						</div>
 					{% endblock navbar %}
@@ -140,7 +177,7 @@
 						{% endif %}
 					{% endblock pet_reports_content %}
 				</ul>	
-				
+			
 
 				<div class="pagination" align="center">
 					Page {{ pet_reports_list.number }} of {{ pet_reports_list.paginator.num_pages }}.

@@ -52,15 +52,15 @@ def get_activities_json(request):
 
         if request.user.is_authenticated() == True:
 
-            print "Authenticated User -- friend sample of activities..."
+            print "Authenticated User -- following sample of activities..."
             userprofile = request.user.get_profile()
 
-            for friend in userprofile.friends.all().order_by("?")[:ACTIVITY_FEED_LENGTH]:
-                activities.append(get_recent_log(friend))
+            for following in userprofile.following.all().order_by("?")[:ACTIVITY_FEED_LENGTH]:
+                activities.append(get_recent_log(following))
 
         else:
             print "Anonymous User -- random sample of activities..."
-            for userprof in UserProfile.objects.order_by("?")[:ACTIVITY_FEED_LENGTH]:
+            for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:ACTIVITY_FEED_LENGTH]:
                 print userprof
                 activities.append(get_recent_log(userprof))
 
@@ -146,14 +146,27 @@ def form(request):
 @login_required
 def get_UserProfile_page(request, userprofile_id):   
     u = get_object_or_404(UserProfile, pk=userprofile_id)
-    return render_to_response(HTML_USERPROFILE, {'userprofile':u}, RequestContext(request))
+    return render_to_response(HTML_USERPROFILE, {'show_profile':u}, RequestContext(request))
  
 @login_required
-def share(request, petreport_id): 
-    p = get_object_or_404(PetReport, pk=petreport_id) 
-    u = p.proposed_by
+def follow(request, userprofile_id1, userprofile_id2): 
+    me = get_object_or_404(UserProfile, pk=userprofile_id1) 
+    follow = get_object_or_404(UserProfile, pk=userprofile_id2) 
+    if not userprofile_id1 == userprofile_id2:
+        if follow in me.following.all():
+            messages.success(request, "You are already following '" + str(follow.user.username) + "'")        
+        else:
+            me.following.add(follow)
+            messages.success(request, "You have successfully followed '" + str(follow.user.username) + "'") 
+    return redirect('/UserProfile/' + userprofile_id1)
 
-    # To be completed
-    
-    return render_to_response(HTML_USERPROFILE, {'userprofile':u}, RequestContext(request))
+@login_required
+def unfollow(request, userprofile_id1, userprofile_id2): 
+    me = get_object_or_404(UserProfile, pk=userprofile_id1) 
+    unfollow = get_object_or_404(UserProfile, pk=userprofile_id2) 
+    if not userprofile_id1 == userprofile_id2:
+        if unfollow in me.following.all():
+            me.following.remove(unfollow)
+            messages.success(request, "You have successfully unfollowed '" + str(unfollow.user.username) + "'") 
+    return redirect('/UserProfile/' + userprofile_id1)
 

@@ -42,19 +42,51 @@
     <script src = "{{ STATIC_URL }}/js/epm.js" type = 'text/javascript'></script>    
     <!-- Page-specific JS goes in this block -->
     {% block js %}
+    <script type = 'text/javascript'> 
+      var bookmarked = "{{ user_has_bookmarked }}";
+      var user_id = "{{ user.id }}";
+      var petreport_id = "{{ pet_report.id }}"
+      var URL_LOGIN  = "{% url 'login_User' %}"
+      var URL_BOOKMARK_PETREPORT = "{% url 'bookmark_PetReport' %}"
+    </script>
     <script src = "{{ STATIC_URL }}/js/local/epm-petreport.js" type = 'text/javascript'></script>
     {% endblock js %} 
 
   </head>
   <body>
-    {%  block petreportcontent %}
-      <div id="prdp_back">        
 
+    {%  block petreportcontent %}
+
+      
+      <div id="prdp_back"> 
+           
+          <!-- Share Buttons -->
+          <div id="sharebuttons" style="float:right; margin-bottom:10px; width:100%;">    
+              <div style="float:right; margin:3px 0 0 7px;">
+                  <font size=-1> Share on: </font>
+                  <a title="Share on Facebook"
+                   target='_blank' 
+                   name="fb_share" 
+                   type="button_count"
+                   expr:share_url='data:post.url'  
+                   href="http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/reporting/PetReport/{{ pet_report.id }}/&p[images][0]={{ STATIC_URL }}{{ pet_report.img_path }}&p[title]=A Pet Report at EPM&p[summary]=A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder."
+                   onclick="window.open('http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/reporting/PetReport/{{ pet_report.id }}/&p[images][0]={{ STATIC_URL }}{{ pet_report.img_path }}&p[title]=A Pet Report at EPM&p[summary]=A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.', 
+                   'newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a>
+
+                  <a title="Share on Twitter" 
+                    target="_blank" 
+                    expr:share_url='data:post.url'
+                    href="http://twitter.com/share?url=http://emergencypetmatcher.herokuapp.com:8000/reporting/PetReport/{{ pet_report.id }}/&text=A Pet Report at EPM. A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder." 
+                    onclick="window.open('http://twitter.com/share?url=http://emergencypetmatcher.herokuapp.com:8000/reporting/PetReport/{{ pet_report.id }}/&text=A Pet Report at EPM. A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.', 'newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22"></a> 
+              </div>
+          </div>
+    
         <!-- PRDP Title -->
         <div class="prdp_title">
           <!--  <div style="float:left"> 
             {% if pet_report.pet_name %} {{ pet_report.pet_name }} {% endif %} 
           </div> -->
+
           <div style="float:left;"> {{ pet_report.status }} : {{ pet_report.pet_name }} </div>
         </div>
 
@@ -79,7 +111,7 @@
         <!-- Proposed Pet Matches -->
         <div class="prdp_ppm_wk">
           <div class="prdp_subtitle"> Proposed Matches </div>
-
+          <div class = "prdp_overflow"> 
           {% for petmatch in matches %}
             <div class = "prdp_pmdp_dialog"> 
               <a href="{% url 'display_PetMatch' petmatch.id %}">
@@ -91,23 +123,16 @@
                 {% endifequal %}  
 
               </a>
-              <!-- <div id="prdp_user_box" style="float:right;">
-                <a href= "{% url 'get_UserProfile_page' petmatch.proposed_by.id %}"><!-- {{ petmatch.proposed_by.user.username }}  -->
-                <!--  {% if petmatch.proposed_by.photo %}    
-                    <img src="{{ STATIC_URL }}{{ petmatch.proposed_by.photo }}" class = "prdp_worker_img" />   
-                  {% else %}
-                    <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" class = "prdp_worker_img" />
-                  {% endif %}
-                </a>
-              </div> -->
             </div> 
           {% endfor %}
-
+        </div>
         </div>
 
         <!-- People Working on this Pet -->
         <div class="prdp_ppm_wk">
           <div class="prdp_subtitle"> People working on this pet </div>
+
+          <div class = "prdp_overflow"> 
             {% for worker in pet_report.workers.all  %}
               <div id = "prdp_user_box">
                 <a href= "{% url 'get_UserProfile_page' worker.id %}" title = "{{ worker.user.username }}" >
@@ -120,6 +145,7 @@
                 </a>
               </div> 
             {% endfor %}
+        </div>
         </div> 
 
         <!-- Messages -->

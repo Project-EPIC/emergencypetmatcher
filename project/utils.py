@@ -5,15 +5,14 @@ from home.models import *
 from constants import *
 import random, string, sys, time, datetime, lipsum, traceback
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 epm_utils.py: Utility Functions for EPM Utility and Testing
 
 When writing your test file (tests.py), make sure to have the following import:
 
-	import epm_utils as utils
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+	from utils import *
+==================================================================================='''
 
-#Control Variable
 NUMBER_OF_TESTS = 20
 
 #Setup Lorem Ipsum Generator
@@ -66,7 +65,7 @@ def simplify_model_dict(model_object):
 	return modeldict
 
 
-''' 
+'''===================================================================================
 generate_random_date():
 
 Referenced from: http://stackoverflow.com/questions/553303/generate-a-random-date-between-two-other-dates
@@ -76,7 +75,8 @@ start and end should be strings specifying times formated in the
 given format (strftime-style), giving an interval [start, end].
 prop specifies how a proportion of the interval to be taken after
 start.  The returned time will be in the specified format.
-'''
+
+==================================================================================='''
 def generate_random_date(start, end, format, prop):
 
     stime = time.mktime(time.strptime(start, format))
@@ -117,8 +117,8 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 	pr.date_lost_or_found = generate_random_date(DATE_LOWER_BOUND, DATE_UPPER_BOUND, "%Y-%m-%d", random.random())
 	pr.sex = random.choice(SEX_CHOICES)[0]
 	pr.size = random.choice(SIZE_CHOICES)[0] 
-	pr.location = generate_string(20) 
-	pr.color = generate_string(20)
+	pr.location = generate_string(PETREPORT_LOCATION_LENGTH) 
+	pr.color = generate_string(PETREPORT_COLOR_LENGTH)
 
 	#Randomly generate attributes, or not.
 	if status == "Found":
@@ -127,10 +127,10 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 			pr.pet_name = random.choice(PETREPORT_NAMES) 	
 
 		if random.random() > 0.3:
-			pr.description = generate_lipsum_paragraph(500) 
+			pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH) 
 
 		if random.random() > 0.3:
-			pr.breed = generate_string(15) 
+			pr.breed = generate_string(PETREPORT_BREED_LENGTH) 
 
 		if random.random() > 0.3:
 			pr.age = str(random.randrange(0, 15))
@@ -138,8 +138,8 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 	#The Pet Owner knows his/her own pet.
 	else:
 		pr.pet_name = random.choice(PETREPORT_NAMES)
-		pr.description = generate_lipsum_paragraph(500)
-		pr.breed = generate_string(15)
+		pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH)
+		pr.breed = generate_string(PETREPORT_BREED_LENGTH)
 		pr.age = str(random.randrange(0, 15))
 
 	pr.save()
@@ -162,6 +162,7 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 		pr.img_path.name = "images/defaults/other_silhouette.jpg"
 
 	pr.save()
+	log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr)
 	return pr
 
 #Create Random Object for: Chat
@@ -173,7 +174,7 @@ def create_random_Chat (pr):
 #Create Random Object for: ChatLine
 def create_random_ChatLine(user, chat):
 	chatline = ChatLine(userprofile = user.get_profile(), chat = chat)
-	chatline.text = generate_string(100)
+	chatline.text = generate_string(CHATLINE_TEXT_LENGTH)
 	chatline.save()
 	return chatline
 
@@ -294,6 +295,7 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 	petmatches = [ None for i in range (NUMBER_OF_TESTS/2) ]
 	pet_type = random.choice(PET_TYPE_CHOICES)[0]
 	status = None
+	petmatch_i=0
 
 	#Iterate w.r.t NUMBER_OF_TESTS control variable.
 	for i in range (NUMBER_OF_TESTS):
@@ -319,7 +321,8 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 		#(i >= 1 and i <= NUMBER_OF_TESTS/2)
 		if (create_petmatches == True) and (i % 2 == 1) and (i <= NUMBER_OF_TESTS/2):
 			pm = create_random_PetMatch(lost_pet=petreports[i-1], found_pet=petreports[i], pet_type=pet_type, user=user)
-			petmatches [i-1] = pm
+			petmatches [petmatch_i] = pm
+			petmatch_i += 1
 
 
 	if create_petreports == True and create_petmatches == True:

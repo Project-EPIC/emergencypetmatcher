@@ -1,6 +1,6 @@
 from constants import *
 from home.models import UserProfile, PetReport, PetMatch
-import os, time
+import os, sys, time
 
 '''===================================================================================
 [logging.py]: Logging Functionality for the EPM system
@@ -13,7 +13,7 @@ def log_activity (activity, userprofile, petreport=None, petmatch=None):
     #Define the user filename and logger.
     user = userprofile.user
     user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
-
+    print user_log_filename
     try:
         logger = open(user_log_filename, "a")
         if activity == ACTIVITY_ACCOUNT_CREATED:
@@ -45,14 +45,14 @@ def log_activity (activity, userprofile, petreport=None, petmatch=None):
         else:
             raise IOError
 
-    except IOError, AssertionError:
-        traceback.print_exc()
-        print "[ERROR]: log_activity not used correctly."
+        log = (time.asctime() + " [%s]: " + log) % activity
+        print log
+        logger.write(log)
+        logger.close()
 
-    log = (time.asctime() + " [%s]: " + log) % activity
-    print log
-    logger.write(log)    
-    logger.close() 
+    except IOError, AssertionError:
+        print "[ERROR]: problem in log_activity()."
+        
 
 ''' Helper function for returning an HTML representation for an input activity '''
 def get_activity_HTML(log, userprofile, petreport=None, petmatch=None):
@@ -66,7 +66,10 @@ def get_activity_HTML(log, userprofile, petreport=None, petmatch=None):
 
     elif ACTIVITY_PETREPORT_SUBMITTED in log:
         assert isinstance(petreport, PetReport)
-        html = "submitted a Pet Report named <a class='prdp_dialog' href= '" + URL_PRDP + str(petreport.id) + "/'>" + URL_petreport.pet_name + "</a>!"
+        if petreport.pet_name.strip() == "unknown" or petreport.pet_name.strip() == "":
+            html += "submitted a " + "<a class='prdp_dialog' href= '" + URL_PRDP + str(petreport.id) + "/'>" + "Pet Report </a> with no name."
+        else:
+            html += "submitted a Pet Report named <a class='prdp_dialog' href= '" + URL_PRDP + str(petreport.id) + "/'>" + petreport.pet_name + "</a>!"
 
     elif ACTIVITY_PETMATCH_PROPOSED in log:
         assert isinstance(petmatch, PetMatch)
@@ -86,10 +89,10 @@ def get_activity_HTML(log, userprofile, petreport=None, petmatch=None):
 '''Helper function to get the most recent activity from an input UserProfile and (optionally) activity type.'''
 def get_recent_log(userprofile, activity=None):
     assert isinstance(userprofile, UserProfile)
-
     #Define the user filename and logger.
     user = userprofile.user
     user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+    print user_log_filename
     recent_log = None
 
     with open(user_log_filename, 'r') as logger:
@@ -136,7 +139,11 @@ def get_recent_log(userprofile, activity=None):
             else:
                 break
 
-    return get_activity_HTML(recent_log, userprofile, petreport=petreport, petmatch=petmatch)
+    
+    if recent_log == None:
+        return "" #No log to return.
+    else:    
+        return get_activity_HTML(recent_log, userprofile, petreport=petreport, petmatch=petmatch)
 
 
 '''Helper function to determine if the input activity has been logged in the past'''
