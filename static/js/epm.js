@@ -1,0 +1,55 @@
+//GLOBAL Variables
+URL_HOME = '/'
+URL_GET_ACTIVITIES_JSON = "/get_activities_json"
+URL_LOGIN = '/login'
+URL_SUBMIT_PETREPORT ='/reporting/submit_PetReport'
+URL_USERPROFILE = '/UserProfile/'
+URL_PRDP = '/reporting/PetReport/'
+URL_PETREPORT_JSON = "/reporting/get_PetReport_json/"
+URL_PMDP = '/matching/PetMatch/'
+URL_VOTE_MATCH = '/matching/vote_PetMatch'
+URL_MATCHING = "/matching/match_PetReport/"
+URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
+
+//GLOBAL JS Functions
+function load_dialog(link, title, width, height){
+
+	//Take care of the options first.
+	var options = {
+
+		autoOpen: true,
+		position: "top",
+		closeOnEscape: true,
+		title: title,
+		width: width,
+		height: height,
+		modal: true,
+		resizable: false,
+		show: {effect:"fade", duration:500},
+		close: function (event, ui){
+			dialog_box.dialog("destroy").remove();
+		}
+	};
+
+	//Launch the dialog.
+	var dialog_box = $("<div></div>").load(link).dialog(options);
+	return false;
+
+}
+
+function get_PetReport_json (petreport_id){
+
+	$.ajax({
+
+		type:"GET",
+		url:"/reporting/get_PetReport_json/" + petreport_id + "/",
+		success: function(data){
+			var petreport = data;
+			return petreport;
+		},
+		error: function(data){
+			alert("An unexpected error occurred when trying to retrieve this Pet Report's attributes. Please try again."); 
+			return false;
+		}
+	});
+}

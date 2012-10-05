@@ -6,19 +6,17 @@ from django.contrib.auth import authenticate
 import utils
 import string, random, sys, os
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
 setup_model_fixture.py: Setup sample (random) data for your dev env.
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 
 #Control Variables
-NUM_PETREPORTS = 50
-NUM_USERS = 10
-NUM_PETMATCHES = 25
+NUM_PETREPORTS = 100
+NUM_USERS = 50
+NUM_PETMATCHES = 50
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''
-When Executed: Setup our fixture
-'''''''''''''''''''''''''''''''''''''''''''''''''''
 
+#When Executed: Setup our fixture
 if (len(sys.argv) < 2) == True or (len(sys.argv) > 3) == True:
 	print "[ERROR]: You must specify at least one argument or at most 2 arguments (not including the python script name):\n"
 	print "\t'setup' for setting up all data"
@@ -55,7 +53,7 @@ elif sys.argv[1] == 'setup':
 		allusers = UserProfile.objects.all()
 		for user in allusers:
 			user.friends = utils.create_random_Userlist(-1,True,user)#not working without supplying -1
-		print '%d Users created.' % (NUM_USERS)
+		print '[OK]: %d Users created.' % (len(User.objects.all()))
 
 	else:
 		for i in range (NUM_USERS):
@@ -63,20 +61,27 @@ elif sys.argv[1] == 'setup':
 			users.append(user)
 			passwords.append(pwd)
 		allusers = UserProfile.objects.all()
-		print '%d Users created.' % (NUM_USERS)
+		print '[OK]: %d Users created.' % (len(User.objects.all()))
 
 		for user in allusers:
 			user.friends = utils.create_random_Userlist(-1,True,user)#not working without supplying -1
 
+		num_lost = 0
+		num_found = 0
 		for i in range (NUM_PETREPORTS):
-			utils.create_random_PetReport(random.choice(users))
+			pr = utils.create_random_PetReport(random.choice(users))
+			if pr.status == "Lost":
+				num_lost += 1
+			else:
+				num_found += 1
 
-		print '%s Pet Reports created' % (NUM_PETREPORTS)	
+
+		print '[OK]: %d Pet Reports created, %d LOST, %d FOUND' % (len(PetReport.objects.all()), num_lost, num_found)	
 
 		for i in range (NUM_PETMATCHES):
 			utils.create_random_PetMatch(None,None,None)
 
-		print '%s Pet Matches created' % (NUM_PETMATCHES)	
+		print '[OK]: (n <= %s) = %d Pet Matches created (Some PetMatch objects could not be created due to uniqueness constraints)' % (NUM_PETMATCHES, len(PetMatch.objects.all()))	
 	print 'usernames with passwords are:'
 
 	for i in range (NUM_USERS):
