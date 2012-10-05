@@ -140,7 +140,7 @@ class PetMatch(models.Model):
     #add a field to keep track of a successful  pet match
     is_open = models.BooleanField(default=True)
     is_successful = models.BooleanField(default=False)
-    #pet match will always be pending until we hear about re-unification
+    #pet match will be pending until we hear about re-unification
     is_pending = models.BooleanField(default=True)
     score = models.IntegerField(default=0)
     closed_by = models.ForeignKey('UserProfile', null=True, related_name='closed_by_related')
