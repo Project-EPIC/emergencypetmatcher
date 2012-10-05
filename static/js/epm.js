@@ -53,3 +53,24 @@ function get_PetReport_json (petreport_id){
 		}
 	});
 }
+
+/*function that sends out a synchronous post request by creating an invisible form*/
+
+function postIt(url, data){
+
+    $('body').append($('<form/>', {
+      id: 'jQueryPostItForm',
+      method: 'POST',
+      action: url
+    }));
+
+    for(var i in data){
+      $('#jQueryPostItForm').append($('<input/>', {
+        type: 'hidden',
+        name: i,
+        value: data[i]
+      }));
+    }
+
+    $('#jQueryPostItForm').submit();
+}

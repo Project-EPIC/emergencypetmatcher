@@ -248,7 +248,7 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 			user_count = UserProfile.objects.all().count()
 			up_votes = create_random_Userlist(random.randint(1,((user_count/2)+1)),False,None)
 			down_votes = UserProfile.objects.all()	
-			
+			petmatch.verification_votes='00'
 			for up_vote in up_votes:
 				try:
 					down_votes = down_votes.exclude(id =up_vote.id)

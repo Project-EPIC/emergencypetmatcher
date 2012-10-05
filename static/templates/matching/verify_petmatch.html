@@ -42,7 +42,7 @@
     <script src = "{{ STATIC_URL }}js/epm.js" type = 'text/javascript'></script>
     <!-- Page-specific JS goes in this block -->
     {% block js %}
-    <script src = "{{ STATIC_URL }}js/local/epm-petmatch.js" type = 'text/javascript'></script>
+    <!--<script src = "{{ STATIC_URL }}js/local/epm-petmatch.js" type = 'text/javascript'></script>-->
     <script type="text/javascript">
 
       //Must have these django-rendered variables as global javascript variables in order to refer to them!
@@ -56,42 +56,26 @@
 
 
     </script>
-    <script type="text/javascript">
-        function post_user_response(response){
-            var url = URL_VERIFY_PETMATCH+PETMATCH_ID+"/";
-            var message =response;
-            var csrf_value = $("input").attr("value");
-            $.post(url, {"csrfmiddlewaretoken":csrf_value,"message":message},function(data){
-               alert("post success!");
-             });
-              
-        }
-     </script>
+    <script src = "{{ STATIC_URL }}js/local/epm-verify_petmatch.js" type="text/javascript"></script>
     {% endblock js %}
 
   </head>
 
   <body>
     <div id="pmdp_back" style="width:auto;">
-
- <!--      {% if user_has_voted %}
-      <p style = "text-align:center; color:gray; font-size:14pt;"> You have already voted for this PetMatch. </p>
-      {% endif %} -->
       <p class = "verification_message">
         This match could potentially be a success! Let us know what you think.
       </p>
           <!-- Buttons -->
-        <div id ="prdp_buttons">
+          <div id ="prdp_buttons">
 
-          {% csrf_token %}
-          <a class = "prdp_eachbutton"  title="Yes, this is a perfect match" style="float:left;cursor:pointer;margin-left:25%" onclick="post_user_response('yes')">
-            
-            Yes, this is a perfect match
-          </a>
-          <a class = "prdp_eachbutton" style="float:right;margin-right:25%" onclick="post_user_response('no')" >No, I do not agree with this match</a></br>
-        </div>
-      
-
+            {% csrf_token %}
+            <a class = "prdp_eachbutton"  title="Yes, this is a perfect match" style="float:left;cursor:pointer;margin-left:25%" onclick="post_user_response('yes')"> 
+              Yes, this is a perfect match
+            </a>
+            <a class = "prdp_eachbutton" style="float:right;margin-right:25%" onclick="post_user_response('no')" >No, I do not agree with this match</a></br>
+          </div>
+    
       <!-- PMDP Match Container - contains PMDP Images and Attributes -->
       <div id = "pmdp_match_container" style="width:auto;">
 
@@ -180,14 +164,8 @@
 
         <div style="margin-top:5px;">
 
-          <!-- Downvote Button -->
-          <div style="float:left;">
-            <img id= "pmdp_downvote_button" src="{{ STATIC_URL }}images/icons/button_downvote_active.png" alt="Downvote this Pet Match">
-            </img>
-          </div>
-
           <!-- UserBox Div -->
-          <div id = "pmdp_userbox_container" style="width:85%">
+          <div id = "pmdp_userbox_container" style="width:99%">
             {% for worker in voters %}
               <div id = "pmdp_user_box">
                 <a href= "{% url 'get_UserProfile_page' worker.id %}" title = "{{ worker.user.username }}">
@@ -199,13 +177,7 @@
                 </a>
               </div>
             {% endfor %}
-          </div>
-
-          <!-- Upvote Button -->
-          <div style="float:right;">
-            <img id = "pmdp_upvote_button" src= "{{ STATIC_URL }}images/icons/button_upvote_active.png" alt="Upvote this Pet Match">
-            </img>
-          </div>          
+          </div>      
 
         </div>
       </div>

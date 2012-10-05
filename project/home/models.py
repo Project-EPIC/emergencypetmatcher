@@ -139,6 +139,9 @@ class PetMatch(models.Model):
     '''Non-Required Fields'''
     #add a field to keep track of a successful  pet match
     is_open = models.BooleanField(default=True)
+    is_successful = models.BooleanField(default=False)
+    #pet match will always be pending until we hear about re-unification
+    is_pending = models.BooleanField(default=True)
     score = models.IntegerField(default=0)
     closed_by = models.ForeignKey('UserProfile', null=True, related_name='closed_by_related')
     closed_date = models.DateField(null=True)
@@ -261,9 +264,20 @@ class PetMatch(models.Model):
 
     def close_PetMatch(self):
         if '0' not in self.verification_votes:
-            self.is_open = False
-
+            self.is_open = False         
+            if self.verification_votes == 11:
+                self.is_successful = True
+            self.save()    
             print 'PetMatch %s has been closed' % (self)
+            for petmatch in self.lost_pet.lost_pet_related.all(): 
+                petmatch.is_open = False
+                petmatch.is_successful = False
+                PetMatch.save()
+            for petmatch in self.found_pet.found_pet_related.all():
+                petmatch.is_open = False
+                petmatch.is_successful = False
+                petmatch.save()
+
 
     def __unicode__ (self):
         return '{ID{%s} lost:%s, found:%s, proposed_by:%s}' % (self.id, self.lost_pet, self.found_pet, self.proposed_by)
