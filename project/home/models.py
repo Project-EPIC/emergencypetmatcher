@@ -5,8 +5,9 @@ from django import forms
 from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
 from django.dispatch import receiver
 from django.core.files.storage import FileSystemStorage
-import PIL, os, time
 from constants import *
+import PIL, os, time
+
 
 '''===================================================================================
 [models.py]: Models for the EPM system
@@ -18,6 +19,39 @@ STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
 SEX_CHOICES=[('M','Male'),('F','Female')]
 SIZE_CHOICES = [('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)')]
 BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador')]
+
+#The User Profile Model containing a 1-1 association with the 
+#django.contrib.auth.models.User object, among other attributes.
+class UserProfile (models.Model):
+
+    '''Required Fields'''
+    user = models.OneToOneField(User, null=False, default=None)
+    photo = models.ImageField(upload_to='images/profile_images', null=True)
+
+    '''Non-Required Fields'''
+    following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
+    is_test = models.BooleanField(default=False)
+    chats = models.ManyToManyField('Chat', null=True)
+    # facebook_cred = models.CharField(max_length=100, null=True)
+    # twitter_cred = models.CharField(max_length=100, null=True)
+    reputation = models.IntegerField(default=0, null=True)
+    #facebook_id = models.IntegerField(blank=True, null=True)
+    #twitter_id = models.IntegerField(blank=True, null=True)
+
+    #Create the activity log for this user
+    def set_activity_log(self, is_test=False):
+        if is_test == True:
+            self.is_test = True
+            print "[OK]: A new UserProfile TEST log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id)                        
+        else:
+            self.is_test = False
+            print "[OK]: A new UserProfile log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id)                        
+
+        self.save()
+        log_activity(ACTIVITY_ACCOUNT_CREATED, self)
+
+    def __unicode__ (self):
+         return '{ID{%s} %s}' % (self.id, self.user.username)
 
 class PetReport(models.Model):
 
@@ -44,6 +78,17 @@ class PetReport(models.Model):
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
     bookmarked_by = models.ManyToManyField('UserProfile', null=True, related_name='bookmarks_related')
 
+    #Override the save method for this model
+    def save(self, *args, **kwargs):
+
+        if self.id == None:
+            print "%s has been saved!" % self
+        else:
+            print "%s has been updated!" % self
+
+        super(PetReport, self).save(args, kwargs)            
+        return self
+
     ''' Determine if the input UserProfile (user) has bookmarked this PetReport already '''
     def UserProfile_has_bookmarked(self, user_profile):
         assert isinstance(user_profile, UserProfile)
@@ -56,16 +101,6 @@ class PetReport(models.Model):
         else:
             return False
         return False
-    
-    def save(self, *args, **kwargs):
-
-        if self.id == None:
-            print "%s has been saved!" % self
-        else:
-            print "%s has been updated!" % self
-
-        super(PetReport, self).save(args, kwargs)            
-        return self
 
     @staticmethod
     def get_PetReport(status, pet_type, pet_name=None, petreport_id=None):
@@ -82,8 +117,6 @@ class PetReport(models.Model):
 
         except PetReport.DoesNotExist:
             return None
-
-
 
     def has_image(self):
         if self.img_path == None:
@@ -102,29 +135,6 @@ class PetReport(models.Model):
     def convert_date_to_string(self):
         string = str(self.date_lost_or_found)
         return str
-        
-#The User Profile Model containing a 1-1 association with the 
-#django.contrib.auth.models.User object, among other attributes.
-class UserProfile (models.Model):
-
-    '''Required Fields'''
-    user = models.OneToOneField(User, null=False, default=None)
-    photo = models.ImageField(upload_to='images/profile_images', null=True)
-
-    '''Non-Required Fields'''
-    following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
-    chats = models.ManyToManyField('Chat', null=True)
-    # facebook_cred = models.CharField(max_length=100, null=True)
-    # twitter_cred = models.CharField(max_length=100, null=True)
-    reputation = models.IntegerField(default=0, null=True)
-    #facebook_id = models.IntegerField(blank=True, null=True)
-    #twitter_id = models.IntegerField(blank=True, null=True)
-    
-    def __unicode__ (self):
-         return '{ID{%s} %s}' % (self.id, self.user.username)
-
-    # post_save.connect(create_UserProfile, sender=User)   
-
 
 #The Pet Match Object Model
 class PetMatch(models.Model):
@@ -268,35 +278,30 @@ class PetReportForm (ModelForm):
         exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by')
 
 
-
 ''' ============================ [SIGNALS] ==================================== '''
 
-''' Create a post delete signal function to delete a UserProfile when a User/UserProfile is deleted'''
+#Create a pre-delete signal function to delete a UserProfile before a User/UserProfile is deleted
 @receiver (pre_delete, sender=UserProfile)
 def delete_UserProfile(sender, instance=None, **kwargs):
-    #Remove the Log file associated with this UserProfile.
-    log_path = ACTIVITY_LOG_DIRECTORY + str(instance.user.username) + ".log"
-    if os.path.isfile(log_path):
-        try:
-            print "removing %s" % (log_path)
-            os.unlink(log_path)
-        except Exception, e:
-            print e
+    if instance.user == None:
+        print "[ERROR]: User was deleted before UserProfile. Cannot delete log file."
 
-    #Instead of deleting the User (which might break foreign-key relationships), let's set the active flag to False (INACTIVE)
-    instance.user.is_active = False
+    else:    
+        #Delete the UserProfile log file.
+        delete_log(instance)
+        #Instead of deleting the User (which might break foreign-key relationships),
+        #set the active flag to False (INACTIVE)
+        instance.user.is_active = False
+        instance.user.save()
 
-''' Create a post save signal function to setup a UserProfile when a User is created'''
+#Create a post save signal function to setup a UserProfile when a User is created
 @receiver (post_save, sender=User)
 def setup_UserProfile(sender, instance, created, **kwargs):
     if created == True:
         #Create a UserProfile object.
         UserProfile.objects.create(user=instance)
-        #Create the first activity for this user
-        log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
-
 
 
 
 ''' Import statements placed at the bottom of the page to prevent circular import dependence '''
-from logging import log_activity
+from logging import *

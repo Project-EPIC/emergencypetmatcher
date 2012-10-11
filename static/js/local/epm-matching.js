@@ -100,12 +100,12 @@ $(document).ready(function(){
 
 function move_petreport_to_workspace_match_detail (petreport, img){
 
-	img_src = img.attr("src");
+	var img_src = img.attr("src");
 	var workspace_match_detail = $("#workspace_match_detail");
 
 	//If the workspace match detail div does not yet contain an img element...
 	workspace_match_detail.find(".matching_img").html("<a href = '" + URL_PRDP + 
-		petreport.id + "/' name = " + petreport.pet_name + "><img src= " + img_src + "/></a>");
+		petreport.id + "/' name = " + petreport.pet_name + "><img src= '" + img_src + "'/></a>");
 
 	//Change the border colors as necessary.
 	$(".droppable").each(function(){ $(this).css("border-color", "black"); });
