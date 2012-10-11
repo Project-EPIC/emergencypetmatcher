@@ -23,6 +23,9 @@ urlpatterns = patterns('home.views',
 	url(r'^activate/complete/$', "registration_activation_complete", name='registration_activation_complete'),
 	url(r'^register/complete/$', "registration_complete", name='registration_complete'),
 	url(r'^register/closed/$', "registration_disallowed", name='registration_disallowed'),
+	#email verification URL
+	url(r'^email_verification_complete/(?P<activation_key>\w+)/$', "email_verification_complete", name='email_verification_complete'),
+	
 	
 )
 

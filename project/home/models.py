@@ -8,7 +8,7 @@ from django.core.files.storage import FileSystemStorage
 import PIL, os, time
 from django import forms
 from constants import *
-
+from registration.models import RegistrationProfile
 '''===================================================================================
 [models.py]: Models for the EPM system
 ==================================================================================='''
@@ -272,17 +272,22 @@ class PetReportForm (ModelForm):
 #edit initial value of each field either in the view or in the template
 class UserProfileForm (forms.Form):
     '''Required Fields'''
-    username = forms.CharField(label="Username",max_length=30) 
+    username = forms.CharField(label="Username*",max_length=30) 
 
     '''Non-Required Fields'''
     first_name = forms.CharField(label="First Name",max_length=30,required=False)
     last_name = forms.CharField(label="Last Name",max_length=30,required=False)
     email = forms.EmailField(label="Email*",required=False)
-    old_password = forms.CharField(label="Old Password",max_length=30,widget = forms.PasswordInput) 
-    new_password = forms.CharField(label="New Password",max_length=30,widget = forms.PasswordInput) 
-    confirm_password = forms.CharField(label="Confirm Password",max_length=30,widget = forms.PasswordInput) 
+    old_password = forms.CharField(label="Old Password",max_length=30,widget = forms.PasswordInput,required=False) 
+    new_password = forms.CharField(label="New Password",max_length=30,widget = forms.PasswordInput,required=False) 
+    confirm_password = forms.CharField(label="Confirm Password",max_length=30,widget = forms.PasswordInput,required=False) 
     #photo = forms.ImageField(upload_to='images/profile_images', required=False)
 
+class EditUserProfile(models.Model):
+    #profile = models.OneToOneField(RegistrationProfile, null=False, default=None)
+    user = models.OneToOneField(User, null=False, default=None)
+    activation_key = models.CharField(default='activation key', max_length=40) 
+    new_email = models.EmailField(null=True)
 
 ''' ============================ [SIGNALS] ==================================== '''
 
