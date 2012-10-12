@@ -21,6 +21,7 @@ from django.utils import simplejson
 from home.models import *
 from constants import *
 from logging import *
+from registration import *
 import oauth2 as oauth, random, urllib
 
 #Home view, displays login mechanism
@@ -95,6 +96,11 @@ def login_User(request):
 
         if user is not None:
             if user.is_active:
+                userprofile = user.get_profile()
+
+                if log_exists(userprofile) == False:
+                    log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)
+
                 login(request, user)
                 messages.success(request, 'Welcome, %s!' % (username))
                 log_activity(ACTIVITY_LOGIN, user.get_profile())
@@ -122,11 +128,8 @@ def logout_User(request):
     return redirect(URL_HOME)
 
 def registration_activation_complete (request):
+    print request
     messages.success (request, "Alright, you are all set registering! You may now login to the system.")
-
-    #Create the log for this user.
-    userprofile = request.user.get_profile()
-    userprofile.setup_activity_log(is_test=False)
     return redirect (URL_LOGIN)
 
 def registration_complete (request):

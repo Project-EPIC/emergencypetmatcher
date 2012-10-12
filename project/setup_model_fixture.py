@@ -27,39 +27,61 @@ if (len(sys.argv) < 2) == True or (len(sys.argv) > 3) == True:
 if sys.argv[1] == 'wipeout':
 
 	if len(sys.argv) > 2 and sys.argv [2] == 'leaveusers':
-		delete_all(leave_users=True, use_test_activity_log_directory=True)
+		delete_all(leave_users=True)
 		print '[OK]: All data from model objects EXCEPT User and UserProfile have been wiped out.'
+
 	elif len(sys.argv) > 2:
 		print "[ERROR]: Invalid use of 'wipeout'. Please try again."
+
 	else:
-		delete_all()
+		delete_all(only_test_users=True)
 		print '[OK]: All data has been wiped out.'	
+
 	sys.exit()
 
 elif sys.argv[1] == 'setup':
 
-	print '\nSetting up model fixture....'
-	delete_all()
+	print '\n[INFO]: Setting up model fixture....'
+	delete_all(only_test_users=True)
 	users = []
 	passwords = []
 
 	if len(sys.argv) > 2 and sys.argv [2] == 'onlyusers':
-		for i in range (NUM_USERS):
-			user, pwd = create_random_User(i)
-			users.append(user)
-			passwords.append(pwd)
-		print '[OK]: %d Users created.' % (len(User.objects.all()))
+		#Loop the old-fashioned way: We need to iterate again sometimes in order to get #NUM_USER of Users.
+		index = 0
+		while index != NUM_USERS:
+			try:
+				user, pwd = create_random_User(index)
+				users.append(user)
+				passwords.append(pwd)
+				index += 1
+
+			except Exception as e:
+				print "[ERROR]: Problem when creating a random User (%s)" % e
+				continue #Need to try (index) again.
+			
+
+		print '[OK]: %d Users created.' % (NUM_USERS)
 
 	else:
-		for i in range (NUM_USERS):
-			user, pwd = create_random_User(i)
-			users.append(user)
-			passwords.append(pwd)
+		#Loop the old-fashioned way: We need to iterate again sometimes in order to get #NUM_USER of Users.
+		index = 0
+		while index != NUM_USERS:
+			try:
+				user, pwd = create_random_User(index)
+				users.append(user)
+				passwords.append(pwd)
+				index += 1
+
+			except Exception as e:
+				print "[ERROR]: Problem when creating a random User (%s)" % e
+				continue #Need to try (index) again.
+
 		allusers = UserProfile.objects.all()
 		print '[OK]: %d Users created.' % (len(User.objects.all()))
-
 		num_lost = 0
 		num_found = 0
+
 		for i in range (NUM_PETREPORTS):
 			pr = create_random_PetReport(random.choice(users))
 			if pr.status == "Lost":

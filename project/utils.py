@@ -85,14 +85,18 @@ def performance_report(total_time):
 	print '\tAVG Time Taken for a Single Test: %s sec' % (total_time/NUMBER_OF_TESTS)
 
 #Delete all model data
-def delete_all(leave_users = False):
+def delete_all(leave_users = False, only_test_users=True):
 	PetMatch.objects.all().delete()
 	PetReport.objects.all().delete()
 	Chat.objects.all().delete()
 	ChatLine.objects.all().delete()
 	#Delete Users if you want to.
 	if leave_users == False:
-		User.objects.all().delete()
+		if only_test_users == True:
+			test_users = User.objects.filter(userprofile__is_test=True)
+			test_users.all().delete()
+		else:
+			User.objects.all().delete()
 
 #Create Random Object for: User
 def create_random_User(i, pretty_name=True, test_user=True):
