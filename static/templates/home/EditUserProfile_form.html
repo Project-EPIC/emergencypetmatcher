@@ -4,73 +4,9 @@
 {% block js %}
 	<script type = 'text/javascript'>
 		var user_id = "{{ user.id }}";
-		
-		function saveProfile(){
-			// alert("we shall now save your changes!");
-			
-	        /*an anonymous user shouldn't be able to acess the bookmarks page*/
-	        if (user_id == "None"){
-	            return false;
-	        }
-        	var csrf_value = $(".edit_profile_input_box input").attr("value");
-	        email = $("#id_email").attr("value");
-	        first_name = $("#id_first_name").attr("value");
-	        last_name = $("#id_last_name").attr("value");
-	        username = $("#id_username").attr("value");
-	        /*ajax request to save the changes*/
-	        $.ajax({
-
-	          type:"POST",
-	          url:"{% url 'editUserProfile_page' %}",
-	          data: {"csrfmiddlewaretoken":csrf_value, "action":"saveProfile","username":username,"first_name":first_name,"last_name":last_name,"email":email},
-	            success: function(data){
-	            	$(".edituserprofile_messages").html(data.message);
-	            	
-	              return true;
-	            },
-	            error: function(data){
-	              alert("An unexpected error occurred when trying to save your changes. Please try again."); 
-	              return false;
-	            }
-	        });
-	        return true;
-		}
-		function savePassword(){
-
-			
-	        /*an anonymous user shouldn't be able to acess the bookmarks page*/
-	        if (user_id == "None"){
-	            return false;
-	        }
-	        var csrf_value = $("#edit_profile_password input").attr("value");
-	        old_password = $("#id_old_password").attr("value");
-	        new_password = $("#id_new_password").attr("value");
-	        confirm_password = $("#id_confirm_password").attr("value");       
-	        /*ajax request to save the password changes*/
-	        $.ajax({
-
-	          type:"POST",
-	          url:"{% url 'editUserProfile_page' %}",
-	          data: {"csrfmiddlewaretoken":csrf_value, "action":"savePassword","old_password":old_password,"new_password":new_password,"confirm_password":confirm_password},
-	            success: function(data){
-	            	
-	            	$("#id_old_password").attr("value","");
-	            	$("#id_new_password").attr("value","");
-	            	$("#id_confirm_password").attr("value","");
-	            	$(".edituserprofile_messages").html( data.message );
-           	
-	              return true;
-	            },
-	            error: function(data){
-	              // alert("An unexpected error occurred when trying to save your changes. Please try again."); 
-	              $(".edituserprofile_messages").html("<li class='error'>" + data.message + "</li>");
-	              alert(message);
-	              return false;
-	            }
-	        });
-	        return true;
-		}
-	</script> 
+		var URL_EDITUSERPROFILE = "{% url 'editUserProfile_page' %}"
+	</script>
+	<script src = "{{ STATIC_URL }}js/local/epm-edituserprofile_form.js" type = 'text/javascript'></script> 
 {% endblock js %}
 {% block content_title %} Edit your Profile {% endblock content_title %}
 	
@@ -88,10 +24,18 @@
 							<td ><div style="margin-left:40px;">{{ field }}</div></td>
 						</tr>
 					{% endfor %}
+					{% if profile_picture %}
+						<tr> 	
+							<td><img src="{{ STATIC_URL }}{{ profile_picture }}" style="width:95px;height:95px;float:right;"></td>	
+													
+							<td> <strong> <br> <br>  &nbsp;&nbsp;  Change your profile picture </strong>
+							</td>
+						</tr>
+					{% endif %}
 				</table>
 			</div>	
 			<input type="button" value="Save" style= "width:100px; height:25px; float:left;" onclick = "saveProfile()"/>
-			{% if form2 %}
+			{% ifequal social_auth_user "false" %}
 				<div id = "edit_profile_password" style = "margin-top:75px;">	
 					{% csrf_token %}
 		 			<div class = "edit_profile_subtitle">
@@ -109,7 +53,7 @@
 					</div>
 					<input type="button" value="Submit" style= "width:100px; height:25px; float:left;" onclick = "savePassword()" />
 				</div>	
-			{% endif %}
+			{% endifequal %}
 		
 	{% endblock content %}
 

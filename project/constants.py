@@ -73,3 +73,7 @@ HTML_PMDP = "matching/petmatch.html"
 HTML_MATCHING = "matching/matching.html"
 HTML_PROPOSE_MATCH = "matching/propose_match.html"
 HTML_SOCIAL_AUTH_FORM = "registration/social_auth_username_form.html"
+HTML_EDITUSERPROFILE_FORM ="home/EditUserProfile_form.html"
+
+TEXTFILE_EMAIL_ACTIVATION_SUBJECT="registration/activation_email_subject.txt"
+TEXTFILE_EMAIL_CHANGE_VERICATION="home/email_change_verification.txt"

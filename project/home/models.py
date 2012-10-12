@@ -281,12 +281,10 @@ class UserProfileForm (forms.Form):
     old_password = forms.CharField(label="Old Password",max_length=30,widget = forms.PasswordInput,required=False) 
     new_password = forms.CharField(label="New Password",max_length=30,widget = forms.PasswordInput,required=False) 
     confirm_password = forms.CharField(label="Confirm Password",max_length=30,widget = forms.PasswordInput,required=False) 
-    #photo = forms.ImageField(upload_to='images/profile_images', required=False)
+    photo = forms.ImageField(label="Profile Picture", required=False)
 
 class EditUserProfile(models.Model):
-    #profile = models.OneToOneField(RegistrationProfile, null=False, default=None)
-    user = models.OneToOneField(User, null=False, default=None)
-    activation_key = models.CharField(default='activation key', max_length=40) 
+    profile = models.OneToOneField(RegistrationProfile, null=False, default=None)
     new_email = models.EmailField(null=True)
 
 ''' ============================ [SIGNALS] ==================================== '''
