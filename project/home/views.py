@@ -28,6 +28,7 @@ import hashlib,random,re
 from registration.models import RegistrationProfile
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.utils.timezone import now as datetime_now
 
 """Home view, displays login mechanism"""
 def home (request):
@@ -179,8 +180,10 @@ def unfollow(request, userprofile_id1, userprofile_id2):
 @login_required
 def editUserProfile_page(request):
     '''unhandled issue: invalid email address'''
-    if request.method == 'POST' and request.is_ajax():
+    if request.method == 'POST':
         user = UserProfile.objects.get(pk = request.user.id).user        
+        '''SaveProfile workflow will be executed if the user clicks on "save" after editing
+        first_name, last_name, email or username'''
         if request.POST["action"] == 'saveProfile':         
             user_changed = False
             edit_userprofile_form = UserProfileForm(request.POST,request.FILES)
@@ -206,13 +209,12 @@ def editUserProfile_page(request):
                     try:
                         user.save()
                         message = "<li class='success'>Thank you. Your changes have been saved!</li>"
-                        
                     except:
                         print "Error while saving your changes, please try again!"      
                         message = "<li class='error'>unknown error while  saving</li>"                  
                     
                 if user.email != request.POST["email"]:
-                    #USE CONSTANTS
+                    
                     user_changed = True
                     subject = render_to_string(TEXTFILE_EMAIL_ACTIVATION_SUBJECT)
                     salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
@@ -222,17 +224,12 @@ def editUserProfile_page(request):
                     activation_key = hashlib.sha1(salt+username).hexdigest()
                     print 'user: %s \tactivation-key: %s' % (user,activation_key)
                     try:
-                        registration_profile = RegistrationProfile.objects.get(user=user)
-                        registration_profile.activation_key = activation_key
-                    except RegistrationProfile.DoesNotExist:
-                        registration_profile = RegistrationProfile.objects.create(user=user,activation_key=activation_key)
-                    registration_profile.save()
-                    try:
-                        edit_userprofile = EditUserProfile.objects.get(profile=registration_profile)
+                        edit_userprofile = EditUserProfile.objects.get(user=user)
+                        edit_userprofile.activation_key = activation_key
                     except EditUserProfile.DoesNotExist:
-                        edit_userprofile = EditUserProfile.objects.create(profile=registration_profile)                  
-                                        
+                        edit_userprofile = EditUserProfile.objects.create(user=user,activation_key=activation_key)
                     edit_userprofile.new_email = request.POST["email"]
+                    edit_userprofile.date_of_change = datetime_now()
                     edit_userprofile.save()
                     ctx = {"activation_key":activation_key,"expiration_days":settings.ACCOUNT_ACTIVATION_DAYS}
                     message = render_to_string(TEXTFILE_EMAIL_CHANGE_VERICATION,ctx)
@@ -241,11 +238,16 @@ def editUserProfile_page(request):
                     print "[INFO]: sent email verification"              
                     message = "<li class='success'>Thank you. Your changes have been saved! Your email will be updated once you verify it. Please check your email for more information on how to verify.</li>"
                 if not user_changed:
+                    '''If user does not make any changes to his profile then this message is sent back'''
                     message = "<li class='error'>No changes were made.</li>"
             else:
+                '''If UserProfileForm is invalid then the errors will be sent as a message 
+                which will be displayed as an error message'''
                 message = str(edit_userprofile_form.errors)
 
         elif request.POST["action"] == 'savePassword':
+            '''savePassword workflow will be executed if the user clicks on "submit" after 
+            changing the password'''
             old_password = request.POST["old_password"]
             new_password = request.POST["new_password"]
             confirm_password = request.POST["confirm_password"]
@@ -260,11 +262,14 @@ def editUserProfile_page(request):
         json = simplejson.dumps ({"message":message})
         print "JSON: " + str(json)
         return HttpResponse(json, mimetype="application/json")
-    else:
+    elif request.method=='GET':
         user = request.user
         form = UserProfileForm(initial={'first_name': user.first_name,'last_name': user.last_name,'username':user.username,'email':user.email})
+        ''' form1 is the form used for "saveProfile", form2 is used for "savePassword"'''
         form1 = []
         form2 = []
+        ''''form2 shouldn't be shown to social_auth users 
+        because they can't change their passwords '''
         if user.social_auth.count() == 0:
             social_auth_user = "false"
         else:
@@ -277,26 +282,28 @@ def editUserProfile_page(request):
                 form1.append(field)
         photo = str(user.get_profile().photo)
         return render_to_response(HTML_EDITUSERPROFILE_FORM, {'form1':form1,'form2':form2,'social_auth_user':social_auth_user,"profile_picture":photo}, RequestContext(request))
+    else:
+        return Http404()
 
 def email_verification_complete (request,activation_key):
+    '''SHA1_RE compiles the regular expression '^[a-f0-9]{40}$' 
+    to search for the activation key got from the GET request'''
     SHA1_RE = re.compile('^[a-f0-9]{40}$')
+
     if SHA1_RE.search(activation_key):
         try:
-            profile = RegistrationProfile.objects.get(activation_key=activation_key)
+            edituserprofile = EditUserProfile.objects.get(activation_key=activation_key)
         except:
             messages.error (request, "Invalid Activation Key!")
             return False
-        if not profile.activation_key_expired():
-            try:
-                edituserprofile = EditUserProfile.objects.get(profile = profile)
-            except:
-                return False
-            edituserprofile.profile.user.email = edituserprofile.new_email
-            edituserprofile.profile.user.save()      
+        if not edituserprofile.activation_key_expired():
+            edituserprofile.user.email = edituserprofile.new_email
+            edituserprofile.user.save()      
             messages.success (request, "You have successfully updated your email!")
+            edituserprofile.activation_key = "ACTIVATED"
+            edituserprofile.save()
         else:
             messages.error (request, "Sorry, Your activation key has expired.")
-
     else:
         messages.error (request, "Your request cannot be processed at the moment, invalid activation key!")
     return redirect (URL_HOME)

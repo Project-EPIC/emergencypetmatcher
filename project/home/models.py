@@ -8,7 +8,11 @@ from django.core.files.storage import FileSystemStorage
 import PIL, os, time
 from django import forms
 from constants import *
-from registration.models import RegistrationProfile
+from django.utils import timezone
+from django.utils.timezone import now as datetime_now
+import datetime
+from django.conf import settings
+
 '''===================================================================================
 [models.py]: Models for the EPM system
 ==================================================================================='''
@@ -284,8 +288,35 @@ class UserProfileForm (forms.Form):
     photo = forms.ImageField(label="Profile Picture", required=False)
 
 class EditUserProfile(models.Model):
-    profile = models.OneToOneField(RegistrationProfile, null=False, default=None)
+    user = models.OneToOneField(User,null=False,default=None)
+    activation_key = models.CharField(max_length=40,null=True)
+    date_of_change = models.DateTimeField(default=timezone.now)
     new_email = models.EmailField(null=True)
+    def activation_key_expired(self):
+        """
+        Determine whether this ``RegistrationProfile``'s activation
+        key has expired, returning a boolean -- ``True`` if the key
+        has expired.
+        
+        Key expiration is determined by a two-step process:
+        
+        1. If the user has already activated, the key will have been
+           reset to the string constant ``ACTIVATED``. Re-activating
+           is not permitted, and so this method returns ``True`` in
+           this case.
+
+        2. Otherwise, the date the user changed his email is incremented by
+           the number of days specified in the setting
+           ``ACCOUNT_ACTIVATION_DAYS`` (which should be the number of
+           days after change of email during which a user is allowed to
+           activate their account); if the result is less than or
+           equal to the current date, the key has expired and this
+           method returns ``True``.
+        
+        """
+        expiration_date = datetime.timedelta(days=settings.ACCOUNT_ACTIVATION_DAYS)
+        return self.activation_key == "ACTIVATED" or (self.date_of_change + expiration_date <= datetime_now())
+    activation_key_expired.boolean = True
 
 ''' ============================ [SIGNALS] ==================================== '''
 
@@ -312,9 +343,6 @@ def setup_UserProfile(sender, instance, created, **kwargs):
         UserProfile.objects.create(user=instance)
         #Create the first activity for this user
         log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
-
-
-
 
 ''' Import statements placed at the bottom of the page to prevent circular import dependence '''
 from logging import log_activity

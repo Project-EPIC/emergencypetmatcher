@@ -523,6 +523,130 @@ class UserProfileTesting (unittest.TestCase):
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)
 
+	'''EditUserProfile Tests'''
+	def test_editUserProfile_savePassword(self):
+		print_testing_name("test_editUserProfile_savePassword")
+		iteration_time = 0.00
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#objects
+			(user,password) = create_random_User(i,pretty_name=True)
+			client = Client (enforce_csrf_checks=False)
+			user_i = user.id
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)			
+			print "[INFO]:%s logs onto %s to enter the EditUserProfile page..." % (user, client)
+
+			
+			#Navigate to the EditUserProfile_form page
+			response = client.get(URL_EDITUSERPROFILE)
+			#Assert that the page was navigated to.
+			self.assertEquals(response.status_code,200) 
+			self.assertTrue(response.request ['PATH_INFO'] == URL_EDITUSERPROFILE)
+
+			#Change the user's password
+			new_password = generate_string (User._meta.get_field('password').max_length)
+			confirm_password = generate_string (User._meta.get_field('password').max_length)
+
+			#send the post request where the new_password & confirm_password do not match
+			post =  {"action":"savePassword","old_password":password,"new_password":new_password,"confirm_password":confirm_password}
+			
+			response = client.post(URL_EDITUSERPROFILE, post,follow=True)
+			user = User.objects.get(pk=user_i)
+			#the password shouldn't have changed
+			self.assertEquals(response.status_code,200) 
+			self.assertFalse(user.check_password(new_password))
+
+			#send the post request where the old password is not correct
+			post =  {"action":"savePassword","old_password":new_password,"new_password":new_password,"confirm_password":confirm_password}
+			
+			response = client.post(URL_EDITUSERPROFILE, post,follow=True)
+			user = User.objects.get(pk=user_i)
+			#the password shouldn't have changed
+			self.assertEquals(response.status_code,200) 
+			self.assertFalse(user.check_password(new_password))
+
+			#send the post request to change the password
+			post =  {"action":"savePassword","old_password":password,"new_password":new_password,"confirm_password":new_password}
+			
+			response = client.post(URL_EDITUSERPROFILE, post,follow=True)
+			user = User.objects.get(pk=user_i)
+			#the password shouldn't have changed
+			self.assertEquals(response.status_code,200) 
+			self.assertTrue(user.check_password(new_password))
+
+			print "[INFO]:Test test_editUserProfile_savePassword was successful for user %s" % (user)
+		
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)			
+
+		print ''
+		performance_report(iteration_time)
+
+	def test_editUserProfile_saveProfile(self):
+		print_testing_name("test_editUserProfile_saveProfile")
+		iteration_time = 0.00
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#objects
+			(user,password) = create_random_User(i,pretty_name=True)
+			client = Client (enforce_csrf_checks=False)
+			user_i = user.id
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)			
+			print "[INFO]:%s logs onto %s to enter the EditUserProfile page..." % (user, client)
+
+			#Edit the User's information and save it
+			username = generate_string (User._meta.get_field('username').max_length)
+			first_name = generate_string (User._meta.get_field('first_name').max_length)
+			last_name = generate_string (User._meta.get_field('last_name').max_length)
+			#email = user.email
+			email = TEST_EMAIL 
+
+			#Navigate to the EditUserProfile_form page
+			response = client.get(URL_EDITUSERPROFILE)
+			#Assert that the page was navigated to.
+			self.assertEquals(response.status_code,200) 
+			self.assertTrue(response.request ['PATH_INFO'] == URL_EDITUSERPROFILE)
+
+			#the post data
+			post =  {"action":"saveProfile","username":username,"first_name":first_name,"last_name":last_name,"email":email}
+			#send the post request with the changes
+			response = client.post(URL_EDITUSERPROFILE, post,follow=True)
+			
+			user = User.objects.get(pk=user_i)
+			
+			self.assertEquals(response.status_code,200) 
+			#IF USERNAME EXISTS, NOTHING SHOULD CHANGE
+			self.assertEquals(user.username,username)
+			self.assertEquals(user.first_name,first_name)
+			self.assertEquals(user.last_name,last_name)
+
+			edituserprofile = EditUserProfile.objects.get(user=user)
+			email_verification_url=URL_EMAIL_VERIFICATION_COMPLETE+edituserprofile.activation_key+"/"
+			#navigate to verify the new email address
+			response = client.get(email_verification_url)
+			self.assertEquals(response.status_code,302)
+			#assert that the user's email address has changed
+			user = User.objects.get(pk=user_i)
+			self.assertEquals(user.email,email)
+
+			print "[INFO]:Test test_editUserProfile_saveProfile was successful for user %s" % (user)
+		
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)			
+
+		print ''
+		performance_report(iteration_time)
+		
+
+
+
+
 '''===================================================================================
 LoggingTesting: Testing for EPM Logging Activities
 ==================================================================================='''
@@ -717,8 +841,6 @@ class LoggingTesting (unittest.TestCase):
 
 		print ''
 		performance_report(iteration_time)		
-		
-
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

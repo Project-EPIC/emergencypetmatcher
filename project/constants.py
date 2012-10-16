@@ -62,7 +62,8 @@ URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
 URL_BOOKMARKED = "/reporting/bookmarks/"
 URL_FOLLOW = "/follow/"
 URL_UNFOLLOW = "/unfollow/"
- 
+URL_EDITUSERPROFILE = "/edituserprofile/"
+URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/" 
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"
 HTML_LOGIN = "registration/login.html"
@@ -77,3 +78,5 @@ HTML_EDITUSERPROFILE_FORM ="home/EditUserProfile_form.html"
 
 TEXTFILE_EMAIL_ACTIVATION_SUBJECT="registration/activation_email_subject.txt"
 TEXTFILE_EMAIL_CHANGE_VERICATION="home/email_change_verification.txt"
+
+TEST_EMAIL="emergencypetmatchertest@gmail.com"
