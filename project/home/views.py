@@ -21,6 +21,7 @@ from django.utils import simplejson
 from home.models import *
 from constants import *
 from logging import *
+from registration import *
 import oauth2 as oauth, random, urllib
 from django.forms.models import model_to_dict
 import utils
@@ -30,7 +31,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.timezone import now as datetime_now
 
-"""Home view, displays login mechanism"""
+#Home view, displays login mechanism
 def home (request):
     #Get Pet Report objects and organize them into a Paginator Object.
     pet_reports = PetReport.objects.order_by("id").reverse()
@@ -51,32 +52,47 @@ def home (request):
         return render_to_response(HTML_HOME, {'pet_reports_list': pet_reports_list, 'version': version}, RequestContext(request))
 
 def get_activities_json(request):
+    print "======= [AJAX]: get_activities_json ========="
 
-    print "======= AJAX: get_activities_json ========="
     if request.is_ajax() == True:
         #Let's populate the activity feed based upon whether the user is logged in.
         activities = []
 
         if request.user.is_authenticated() == True:
-
-            print "Authenticated User -- following sample of activities..."
+            print "[INFO]: get_activities_json(): Authenticated User -- following sample of activities..."
             userprofile = request.user.get_profile()
 
             for following in userprofile.following.all().order_by("?")[:ACTIVITY_FEED_LENGTH]:
-                activities.append(get_recent_log(following))
+                log = get_recent_log(following)
+
+                if log != None:
+                    activities.append(log)
 
         else:
-            print "Anonymous User -- random sample of activities..."
-            for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:ACTIVITY_FEED_LENGTH]:
-                print userprof
-                activities.append(get_recent_log(userprof))
+            print "[INFO]: get_activities_json(): Anonymous User -- random sample of activities..."
 
+            for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:ACTIVITY_FEED_LENGTH]:
+                log = get_recent_log(userprof)
+
+                if log != None:
+                    activities.append(log)
+
+        #If there are no activities, let the user know!
         if len(activities) == 0:
             activities.append("<h3 style='text-align:center; color:gray;'> No Activities Yet.</h3>")
 
+        #ERROR message print to flag for potential problem in the log directory.
+        if request.user.is_authenticated() == False and len(activities) != ACTIVITY_FEED_LENGTH:
+            print "[ERROR]: Length of activity list is %d when it should be ACTIVITY_FEED_LENGTH = %d" % (len(activities), ACTIVITY_FEED_LENGTH)
+
+        print "======= END [AJAX]: get_activities_json =========\n"
+        #Zip it up in JSON and ship it out as an HTTP Response.
         json = simplejson.dumps ({"activities":activities})
-        print "JSON: " + str(json)
-        return HttpResponse(json, mimetype="application/json")                
+        return HttpResponse(json, mimetype="application/json")     
+
+    else:
+        print "[ERROR]: Request for get_activities_json not an AJAX request!"
+        raise Http404           
 
 
 def login_User(request):
@@ -87,6 +103,11 @@ def login_User(request):
 
         if user is not None:
             if user.is_active:
+                userprofile = user.get_profile()
+
+                if log_exists(userprofile) == False:
+                    log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)
+
                 login(request, user)
                 messages.success(request, 'Welcome, %s!' % (username))
                 log_activity(ACTIVITY_LOGIN, user.get_profile())
@@ -114,6 +135,7 @@ def logout_User(request):
     return redirect(URL_HOME)
 
 def registration_activation_complete (request):
+    print request
     messages.success (request, "Alright, you are all set registering! You may now login to the system.")
     return redirect (URL_LOGIN)
 

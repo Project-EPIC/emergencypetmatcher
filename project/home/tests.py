@@ -3,8 +3,16 @@ from django.test.client import Client
 from utils import *
 from constants import *
 from home.models import *
-from home import logging
-import unittest, string, random, sys, time
+from logging import *
+from time import sleep
+from selenium import webdriver
+from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD
+from project.settings import TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD
+from project.settings import TEST_DOMAIN
+import unittest, string, random, sys, time, urlparse
+
+#We are using the test log directory.
+ACTIVITY_LOG_DIRECTORY = TEST_ACTIVITY_LOG_DIRECTORY
 
 '''===================================================================================
 ModelTesting: Testing for EPM Models
@@ -32,7 +40,7 @@ class ModelTesting (unittest.TestCase):
 			username = user.username
 
 			user_profile = user.get_profile()
-			user_profile.reputation = random.randrange(0,100)
+			user_profile.reputation = random.randint(0,100)
 			user_profile.save()
 
 			# check we can find the user in the database again
@@ -67,7 +75,7 @@ class ModelTesting (unittest.TestCase):
 			username = user.username
 
 			user_profile = user.get_profile()
-			user_profile.reputation = random.randrange(0,100)
+			user_profile.reputation = random.randint(0,100)
 			user_profile.save()
 
 			# check that we can update the user's username
@@ -106,7 +114,7 @@ class ModelTesting (unittest.TestCase):
 			username = user.username
 
 			user_profile = user.get_profile()
-			user_profile.reputation = random.randrange(0,100)
+			user_profile.reputation = random.randint(0,100)
 			user_profile.save()
 
 			User.objects.get(username = username).delete()
@@ -183,7 +191,7 @@ class ModelTesting (unittest.TestCase):
 			pr.color = generate_string (PETREPORT_COLOR_LENGTH)
 			pr.breed = generate_string (PETREPORT_BREED_LENGTH)
 			pr.size = generate_string (PETREPORT_SIZE_LENGTH)
-			pr.age = str(random.randrange(0,15))
+			pr.age = str(random.randint(0,15))
 
 			# check we can find the PetReport in the database again
 			pr.save()
@@ -357,7 +365,7 @@ class ModelTesting (unittest.TestCase):
 			pm = create_random_PetMatch(pr1, pr2, user, pet_type=pet_type)
 
 			#UPDATES
-			pm.score = random.randrange(0, 10000)
+			pm.score = random.randint(0, 10000)
 			pm.is_open = random.choice ([True, False])
 
 			#Save it to the database.
@@ -660,6 +668,28 @@ class LoggingTesting (unittest.TestCase):
 	def tearDown(self):
 		delete_all()
 
+	def test_create_activity_log(self):
+		print_testing_name("test_create_activity_real_log")
+		iteration_time = 0.00
+
+		for i in range(NUMBER_OF_TESTS):
+			start_time = time.clock()
+			user = User.objects.create_user(username=generate_string(USER_USERNAME_LENGTH))
+			userprofile = user.get_profile()
+			is_test_user = random.choice([True,False])
+			userprofile.set_activity_log(is_test=is_test_user)
+
+			#Now check: Does the userprofile's log file exist where it should?
+			self.assertTrue(log_exists(userprofile) == True)
+			output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)	
+		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+		performance_report(iteration_time)				
+
 	def test_log_account_creations(self):
 		print_testing_name("test_log_account_creations")
 		iteration_time = 0.00
@@ -667,17 +697,18 @@ class LoggingTesting (unittest.TestCase):
 		for i in range(NUMBER_OF_TESTS):
 			start_time = time.clock()
 			(user, password) = create_random_User(i, pretty_name=True)
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 
 			with open(user_log_filename, 'r') as logger:
 
 				lines = list(iter(logger.readlines()))
 				print lines
-				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_ACCOUNT_CREATED, user.get_profile()) == True)
+				self.assertTrue(activity_has_been_logged(ACTIVITY_ACCOUNT_CREATED, user.get_profile()) == True)
 				self.assertEquals(len(lines), 1)
 
 			logger.close()
 			output_update(i + 1)
+			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
@@ -692,7 +723,7 @@ class LoggingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = create_test_view_setup(create_petreports=False)
+		(users, passwords, clients) = create_test_view_setup()
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -738,14 +769,14 @@ class LoggingTesting (unittest.TestCase):
 			client.logout()
 
 			#Now, check if the activity for submitting a PetReport appears in this user's log.
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 			petreport = PetReport.objects.get(proposed_by = user, pet_name = user.username + str(i))
 
 			with open(user_log_filename, 'r') as logger:
 
 				lines = list(iter(logger.readlines()))
 				print lines
-				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=petreport) == True)
+				self.assertTrue(activity_has_been_logged(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=petreport) == True)
 
 			logger.close()			
 			output_update(i + 1)
@@ -818,7 +849,7 @@ class LoggingTesting (unittest.TestCase):
 			self.assertEquals(response.request ['PATH_INFO'], URL_HOME)		
 
 			#Now, check if the activity for proposing a PetMatch appears in this user's log.
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 
 			with open(user_log_filename, 'r') as logger:
 				#Grab the PetMatch that has either been posted in the past or has been posted by this User.
@@ -827,11 +858,11 @@ class LoggingTesting (unittest.TestCase):
 
 				if match.UserProfile_has_voted(user.get_profile()) == UPVOTE:
 					print "[INFO]:A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user)
-					self.assertTrue(logging.activity_has_been_logged(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=match) == True)
+					self.assertTrue(activity_has_been_logged(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=match, ) == True)
 
 				else:
 					print "[INFO]:%s has successfully POSTED a new match!" % (user)
-					self.assertTrue(logging.activity_has_been_logged(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=match) == True)					
+					self.assertTrue(activity_has_been_logged(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=match, ) == True)					
 
 			logger.close()			
 			output_update(i + 1)
@@ -842,20 +873,71 @@ class LoggingTesting (unittest.TestCase):
 		print ''
 		performance_report(iteration_time)		
 
+	def test_get_activities_json(self):
+		print_testing_name("test_get_activities_json")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "[INFO]:%s logs onto %s to enter the matching interface..." % (user, client)	
+
+			#Request the get_activities_json view function()
+			response = client.get(URL_GET_ACTIVITIES, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+			client.logout()	
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], URL_GET_ACTIVITIES)
+
+			#But now, let's test to get and assert those actual activities
+			activities = []
+			random_activity_range = random.randrange(0, len(UserProfile.objects.all()))
+			for following in user.get_profile().following.all().order_by("?")[:random_activity_range]:
+				log = get_recent_log(following)
+				if log != None:
+					activities.append(log)
+
+			num_following = len(user.get_profile().following.all())
+			num_activities = len(activities)
+			print "[INFO]: %s has %d followers and got an activity feed list of size %d when ACTIVITY_FEED_LENGTH = %d" % (user, num_following, num_activities, random_activity_range)
+
+			#Bounds checking
+			self.assertTrue(num_activities >= 0 and num_activities <= random_activity_range)
+
+			if random_activity_range < num_following:
+				self.assertTrue(num_activities == random_activity_range)
+			else:
+				self.assertTrue(num_activities <= num_following)
+
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)		
+
+		print ''
+		performance_report(iteration_time)	
+
+
+'''===================================================================================
 SocialAuthTesting: Testing for Social Authentication
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+==================================================================================='''
 
-import urlparse
-from selenium import webdriver
-from django.test import TestCase
-from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD
-from project.settings import TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD
-from project.settings import TEST_DOMAIN
-from time import sleep
-
-class SocialAuthTesting(TestCase):
+class SocialAuthTesting(unittest.TestCase):
     def setUp(self):
         self.driver = webdriver.Chrome()
 
@@ -896,7 +978,7 @@ class SocialAuthTesting(TestCase):
             try:
 	        	assert "Username" in self.driver.title
 	        	username_field = self.driver.find_element_by_id('id_username')
-	        	username = "twitter_testing_user" + str(random.randrange(100, 999))
+	        	username = "twitter_testing_user" + str(random.randint(100, 999))
 	        	username_field.send_keys(username)
 	         	username_field.submit()
 	         	print "  Submitting a username '%s' for a created user profile account." % username
@@ -945,7 +1027,7 @@ class SocialAuthTesting(TestCase):
             try:
 	        	assert "Username" in self.driver.title
 	        	username_field = self.driver.find_element_by_id('id_username')
-	        	username = "facebook_testing_user" + str(random.randrange(100, 999))
+	        	username = "facebook_testing_user" + str(random.randint(100, 999))
 	        	username_field.send_keys(username)
 	         	username_field.submit()
 	         	print "  Submitting a username '%s' for a created user profile account." % username
@@ -964,11 +1046,10 @@ class SocialAuthTesting(TestCase):
         end_time = time.clock()
         print '\n\tTotal Time: %s sec' % (end_time - start_time)
  
+'''===================================================================================
+FollowTesting: Testing for EPM Following and Unfollowing functionality
+==================================================================================='''
 
-
-# '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-# FollowTesting: Testing for EPM Following and Unfollowing functionality
-# '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 class FollowingTesting (unittest.TestCase):
 
     # Get rid of all objects in the QuerySet.
