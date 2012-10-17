@@ -28,6 +28,10 @@
 					{% else %}
 						<h2>&nbsp;{{ show_profile.user.username }}</h2>
 					{% endif %}
+					{% ifequal show_profile.user.username user.username %}
+					<a class = "prdp_eachbutton" style="float:right;" href = "{% url 'editUserProfile_page' %}"> Edit your Profile </a>
+					{% endifequal %}
+
 				</td>
 			</tr>
 			</table>

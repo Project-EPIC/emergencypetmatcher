@@ -4,12 +4,18 @@ import os
 [constants.py]: Constants for the EPM system
 ==================================================================================='''
 
+#Number of Tests
+NUMBER_OF_TESTS = 10
+
 #Lower and Upper bounds for Lost and Found Dates
 DATE_LOWER_BOUND = "2012-01-01"
 DATE_UPPER_BOUND = "2012-08-16"
 
 #max_length for Model Fields
-
+USER_USERNAME_LENGTH = 30
+USER_FIRSTNAME_LENGTH = 30
+USER_LASTNAME_LENGTH = 30
+USER_PASSWORD_LENGTH = 30
 PETREPORT_PET_TYPE_LENGTH = 10
 PETREPORT_STATUS_LENGTH = 5
 PETREPORT_SEX_LENGTH = 6
@@ -20,9 +26,7 @@ PETREPORT_AGE_LENGTH = 10
 PETREPORT_COLOR_LENGTH =30
 PETREPORT_BREED_LENGTH = 30
 PETREPORT_DESCRIPTION_LENGTH = 500
-
 PETMATCH_DESCRIPTION_LENGTH = 300
-
 CHATLINE_TEXT_LENGTH = 10000
 
 #Small List of Names
@@ -37,6 +41,7 @@ DOWNVOTE = "downvote"
 
 #Activity Enum Values
 ACTIVITY_LOG_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/logs/activity_logs/"
+TEST_ACTIVITY_LOG_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/logs/test_activity_logs/"
 ACTIVITY_ACCOUNT_CREATED = "ACCOUNT_CREATED"
 ACTIVITY_LOGIN = "LOGIN"
 ACTIVITY_LOGOUT = "LOGOUT"
@@ -44,12 +49,15 @@ ACTIVITY_PETREPORT_SUBMITTED = "PETREPORT_SUBMITTED"
 ACTIVITY_PETMATCH_PROPOSED = "PETMATCH_PROPOSED"
 ACTIVITY_PETMATCH_UPVOTE = "PETMATCH_UPVOTE"
 ACTIVITY_PETMATCH_DOWNVOTE= "PETMATCH_DOWNVOTE"
+ACTIVITY_USER_CHANGED_USERNAME = "USER_CHANGED_USERNAME"
+
 
 #Represents how many activities to fetch per request.
-ACTIVITY_FEED_LENGTH = 25
+ACTIVITY_FEED_LENGTH = 10
 
 #URLS - use for redirect calls
 URL_HOME = '/'
+URL_GET_ACTIVITIES = "/get_activities_json"
 URL_LOGIN = '/login'
 URL_SUBMIT_PETREPORT ='/reporting/submit_PetReport'
 URL_USERPROFILE = '/UserProfile/'
@@ -62,7 +70,8 @@ URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
 URL_BOOKMARKED = "/reporting/bookmarks/"
 URL_FOLLOW = "/follow/"
 URL_UNFOLLOW = "/unfollow/"
- 
+URL_EDITUSERPROFILE = "/edituserprofile/"
+URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/" 
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"
 HTML_LOGIN = "registration/login.html"
@@ -74,4 +83,9 @@ HTML_MATCHING = "matching/matching.html"
 HTML_PROPOSE_MATCH = "matching/propose_match.html"
 HTML_SOCIAL_AUTH_FORM = "registration/social_auth_username_form.html"
 HTML_VERIFY_PETMATCH = "matching/verify_petmatch.html"
+HTML_EDITUSERPROFILE_FORM ="home/EditUserProfile_form.html"
 
+TEXTFILE_EMAIL_ACTIVATION_SUBJECT="registration/activation_email_subject.txt"
+TEXTFILE_EMAIL_CHANGE_VERICATION="home/email_change_verification.txt"
+
+TEST_EMAIL="emergencypetmatchertest@gmail.com"

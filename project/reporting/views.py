@@ -139,7 +139,7 @@ def bookmark_PetReport(request):
             text = "Remove Bookmark"
         else:
             print "User has bookmarked the pet: "+str(petreport.UserProfile_has_bookmarked(user))
-            message = "Unable to "+action
+            message = "Unable to "+action+"!"
             text = action
         json = simplejson.dumps ({"message":message, "text":text})
         print "JSON: " + str(json)

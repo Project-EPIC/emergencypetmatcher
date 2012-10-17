@@ -362,6 +362,43 @@ h1.found {
 	position:fixed;
 }
 
+/*CSS for the edit profile page*/
+#edit_profile_password{
+
+	margin-top:10px; 
+	margin-bottom:20px; 
+	width:350px;
+	padding: 5px; 
+/*	float:right;
+*/	top:130px;
+	position: absolute;
+	right: 100px;
+
+}
+
+.edit_profile_input_box{
+
+	margin-top:10px; 
+	margin-bottom:20px; 
+	width:350px;
+	padding: 5px; 
+	border:1px dotted;
+
+}
+
+.edit_profile_subtitle{
+
+	margin-top:20px;
+	height: 20px;
+	letter-spacing: -1px;
+	font-size: 20px;
+	font-weight: normal;
+	color: #000000;
+	/*padding-top:5px;
+	padding-bottom: 5px;*/
+}
+
+/*CSS used in the PRDP*/
 .prdp_title{
 
 	margin: 0;
