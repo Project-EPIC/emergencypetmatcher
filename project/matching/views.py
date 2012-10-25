@@ -21,6 +21,7 @@ from home.models import *
 from constants import *
 from logging import *
 import datetime, re
+from utils import *
 
 
 ''' Display the PetMatch object '''
@@ -54,11 +55,19 @@ def vote_PetMatch(request):
         print "#DOWNVOTES: %d" % len(pm.down_votes.all())
 
         if vote == "upvote":
+            # If the user is voting for the 1st time, add reputation points
+            if (userprofile not in pm.up_votes.all()) and (userprofile not in pm.down_votes.all()):
+                update_reputation(userprofile, ACTIVITY_PETMATCH_UPVOTE)
+            
             pm.up_votes.add(userprofile)
             pm.down_votes.remove(userprofile)
             log_activity(ACTIVITY_PETMATCH_UPVOTE, userprofile, petmatch=pm)
             message = "You have successfully upvoted this PetMatch!"
         elif vote == "downvote":
+            # If the user is voting for the 1st time, add reputation points
+            if (userprofile not in pm.up_votes.all()) and (userprofile not in pm.down_votes.all()):
+                update_reputation(userprofile, ACTIVITY_PETMATCH_DOWNVOTE)
+            
             pm.down_votes.add(userprofile)
             pm.up_votes.remove(userprofile)
             log_activity(ACTIVITY_PETMATCH_DOWNVOTE, userprofile, petmatch=pm)

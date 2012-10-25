@@ -323,6 +323,19 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 	#just return the simple ones, geez!		
 	return (users, passwords, clients)
 
+''' Update the current user's reputation points based on an activity '''
+def update_reputation(userprofile, activity):
+
+	if activity == ACTIVITY_PETMATCH_UPVOTE:
+		userprofile.reputation += 2
+		userprofile.save()
+
+	elif activity == ACTIVITY_PETMATCH_DOWNVOTE:
+		userprofile.reputation += 2
+		userprofile.save()
+
+	else:
+		print 'This is not a valid activity! \n'
 			
 
 
