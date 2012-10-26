@@ -39,9 +39,13 @@ PETREPORT_NAMES = ['Sparky', 'Nugget', 'Sydney', 'Missy', 'Marley', 'Fousey', 'D
 UPVOTE = "upvote"
 DOWNVOTE = "downvote"
 
-#Activity Enum Values
+#File Path Constants
 ACTIVITY_LOG_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/logs/activity_logs/"
 TEST_ACTIVITY_LOG_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/logs/test_activity_logs/"
+PETREPORT_IMAGES_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/static/images/petreport_images/"
+USERPROFILE_IMAGES_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/static/images/profile_images/"
+
+#Activity Enum Values
 ACTIVITY_ACCOUNT_CREATED = "ACCOUNT_CREATED"
 ACTIVITY_LOGIN = "LOGIN"
 ACTIVITY_LOGOUT = "LOGOUT"
@@ -50,7 +54,6 @@ ACTIVITY_PETMATCH_PROPOSED = "PETMATCH_PROPOSED"
 ACTIVITY_PETMATCH_UPVOTE = "PETMATCH_UPVOTE"
 ACTIVITY_PETMATCH_DOWNVOTE= "PETMATCH_DOWNVOTE"
 ACTIVITY_USER_CHANGED_USERNAME = "USER_CHANGED_USERNAME"
-
 
 #Represents how many activities to fetch per request.
 ACTIVITY_FEED_LENGTH = 10
@@ -72,6 +75,7 @@ URL_FOLLOW = "/follow/"
 URL_UNFOLLOW = "/unfollow/"
 URL_EDITUSERPROFILE = "/edituserprofile/"
 URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/" 
+
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"
 HTML_LOGIN = "registration/login.html"

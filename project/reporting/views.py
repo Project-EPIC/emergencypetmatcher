@@ -39,6 +39,7 @@ def submit_PetReport(request):
             pr = form.save(commit=False)
             #Create (but do not save) the Pet Report Object associated with this form data.
             pr.proposed_by = request.user.get_profile()
+            print "[INFO]: Pet Report Image Path: %s" % pr.img_path
             #If there was no image attached, let's take care of defaults.
             if pr.img_path == None:
                 if pr.pet_type == "Dog":

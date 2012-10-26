@@ -20,8 +20,11 @@ LIPSUM.sentence_sigma = 1
 LIPSUM.paragraph_mean = 3
 LIPSUM.paragraph_sigma = 1
 
-def print_testing_name(test_name):
-	print "\n[TEST]: Testing {%s} for %s iterations\n" % (test_name, NUMBER_OF_TESTS)
+def print_testing_name(test_name, single_test=False):
+	if single_test == True:
+		print "\n[TEST]: Testing {%s}\n" % (test_name)
+	else:
+		print "\n[TEST]: Testing {%s} for %s iterations\n" % (test_name, NUMBER_OF_TESTS)
 
 #Generate a random alpha-numeric string.
 def generate_string (size, chars = string.ascii_uppercase + string.digits):
@@ -93,10 +96,35 @@ def delete_all(leave_users = False, only_test_users=True):
 	#Delete Users if you want to.
 	if leave_users == False:
 		if only_test_users == True:
+			#Get the users whose userprofile.is_test attribute is set to TRUE
 			test_users = User.objects.filter(userprofile__is_test=True)
 			test_users.all().delete()
+
 		else:
 			User.objects.all().delete()
+
+#Deletes all PetReport images in the static/images/petreport_images folder
+def delete_PetReport_images(from_list=None):
+	for the_file in os.listdir(PETREPORT_IMAGES_DIRECTORY):
+		file_path = os.path.join(PETREPORT_IMAGES_DIRECTORY, the_file)
+		try:
+			if from_list != None:
+				if os.path.isfile(file_path) and the_file in from_list:
+					os.unlink(file_path)
+					print "[INFO]: Removed %s" % the_file
+			else:
+				if os.path.isfile(file_path):
+					os.unlink(file_path)
+
+		except Exception as e:
+			print "[ERROR]: Problem in delete_PetReport_images(): {%s}" % e
+			return False
+
+	if from_list != None:
+		print "[OK]: Specified Files in '%s' are now deleted." % PETREPORT_IMAGES_DIRECTORY
+	else:
+		print "[OK]: All Files in '%s' are now deleted." % PETREPORT_IMAGES_DIRECTORY
+
 
 #Create Random Object for: User
 def create_random_User(i, pretty_name=True, test_user=True):

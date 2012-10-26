@@ -71,7 +71,63 @@ class MatchingTesting (unittest.TestCase):
 			iteration_time += (end_time - start_time)
 
 		print ''
-		performance_report(iteration_time)			
+		performance_report(iteration_time)		
+
+	def test_UserProfile_added_to_PetReport_workers_list(self):
+		print_testing_name("test_UserProfile_added_to_PetReport_workers_list")
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petreport = petreports [petreport_i]
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "[INFO]:%s logs onto %s to enter the matching interface..." % (user, client)
+
+			#Go to the PRDP Page
+			prdp_url = URL_PRDP + str(petreport.id) + "/"
+			response = client.get(prdp_url)
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], prdp_url)
+			print "[SUCCESS]:%s has successfully requested page %s..." % (user, prdp_url)  
+
+			#From here, go to the matching interface
+			matching_url = URL_MATCHING + str(petreport.id) + "/"
+			response = client.get(matching_url)
+
+			if response.status_code == 302:
+				print "[INFO]:Oh! There are no PetReports to match this PetReport with - Back to the Home Page!"
+				continue
+			else:
+				self.assertEquals(response.status_code, 200)
+				print "[SUCCESS]:%s has successfully requested page %s..." % (user, matching_url)  	
+			
+			self.assertEquals(response.request ['PATH_INFO'], matching_url)	
+			self.assertTrue(user.get_profile() in petreport.workers.all())
+			self.assertTrue(petreport in user.get_profile().workers_related.all())
+			client.logout()	
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		performance_report(iteration_time)				
 
 	def test_get_propose_match_dialog (self):
 		print_testing_name("test_get_propose_match_dialog")
