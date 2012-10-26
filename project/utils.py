@@ -334,6 +334,10 @@ def update_reputation(userprofile, activity):
 		userprofile.reputation += 2
 		userprofile.save()
 
+	elif activity == ACTIVITY_PETREPORT_SUBMITTED:
+		userprofile.reputation += 5
+		userprofile.save()
+
 	else:
 		print 'This is not a valid activity! \n'
 			

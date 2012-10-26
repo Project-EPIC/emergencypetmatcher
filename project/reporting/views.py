@@ -57,6 +57,8 @@ def submit_PetReport(request):
                     pr.img_path.name = "images/defaults/other_silhouette.jpg"
     
             pr.save() #Now save the Pet Report.
+            # add reputation points for submitting a pet report
+            update_reputation(request.user.get_profile(), ACTIVITY_PETREPORT_SUBMITTED)
             if pr.status == 'Lost':
                 messages.success (request, 'Thank you for your submission! Your contribution will go a long way towards helping people find your lost pet.')
             else:
