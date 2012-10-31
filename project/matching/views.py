@@ -157,6 +157,10 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                     messages.error(request, "This Pet Match has already been proposed, and you have already voted for it already!")
                     return redirect(URL_MATCHING + target_petreport_id + "/")
 
+                # add voting reputation points if the user didn't vote before for this duplicate petmatch
+                if (proposed_by not in result.up_votes.all()) and (proposed_by not in result.down_votes.all()):
+                    update_reputation(proposed_by, ACTIVITY_PETMATCH_UPVOTE)
+
                 result.up_votes.add(proposed_by)
                 result.save()
                 messages.success(request, "Nice job! Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
@@ -164,7 +168,9 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
 
             elif outcome == "NEW PETMATCH":
                 messages.success(request, "Congratulations - The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
-                log_activity(ACTIVITY_PETMATCH_PROPOSED, proposed_by, petmatch=pm)
+                # add reputation points for proposing a new petmatch
+                update_reputation(proposed_by, ACTIVITY_PETMATCH_PROPOSED)
+                print "Your rep AFTER (if outcome == 'NEW PETMATCH'): %s" %proposed_by.reputation
 
         else:
             if outcome == "DUPLICATE PETMATCH":
@@ -175,6 +181,10 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                 if user_has_voted == "UPVOTE" or user_has_voted == "DOWNVOTE":
                     messages.error(request, "This Pet Match has already been proposed, and you have already voted for it already!")
                     return redirect(URL_MATCHING + target_petreport_id + "/")
+
+                # add voting reputation points if the user didn't vote before for this duplicate petmatch
+                if (proposed_by not in result.up_votes.all()) and (proposed_by not in result.down_votes.all()):
+                    update_reputation(proposed_by, ACTIVITY_PETMATCH_UPVOTE)
 
                 result.up_votes.add(proposed_by)
                 result.save()                

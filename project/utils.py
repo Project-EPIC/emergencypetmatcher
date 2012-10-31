@@ -338,6 +338,10 @@ def update_reputation(userprofile, activity):
 		userprofile.reputation += 5
 		userprofile.save()
 
+	elif activity == ACTIVITY_PETMATCH_PROPOSED:
+		userprofile.reputation += 5
+		userprofile.save()
+
 	else:
 		print 'This is not a valid activity! \n'
 			
