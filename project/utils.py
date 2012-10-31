@@ -338,18 +338,3 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 	return (users, passwords, clients)
 
 			
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

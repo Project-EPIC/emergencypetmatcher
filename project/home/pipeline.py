@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 
 def redirect_to_form(*args, **kwargs):
     if not kwargs['request'].session.get('saved_username') and kwargs.get('user') is None:
-        return HttpResponseRedirect('/form/')
+        return HttpResponseRedirect('/get_social_details/')
 
 def username(request, *args, **kwargs):
     if kwargs.get('user'):
@@ -12,17 +12,23 @@ def username(request, *args, **kwargs):
         username = request.session.get('saved_username')
     return {'username': username}
 
+def email(request, *args, **kwargs):
+    if kwargs.get('user'):
+        email = kwargs['user'].email
+    else:
+        email = request.session.get('saved_email')
+    return {'email': email}
 
-def redirect_to_form2(*args, **kwargs):
-    if not kwargs['request'].session.get('saved_first_name'):
-        return HttpResponseRedirect('/form2/')
+# def redirect_to_form2(*args, **kwargs):
+#     if not kwargs['request'].session.get('saved_first_name'):
+#         return HttpResponseRedirect('/form2/')
 
 
-def first_name(request, *args, **kwargs):
-    if 'saved_first_name' in request.session:
-        user = kwargs['user']
-        user.first_name = request.session.get('saved_first_name')
-        user.save()
+# def first_name(request, *args, **kwargs):
+#     if 'saved_first_name' in request.session:
+#         user = kwargs['user']
+#         user.first_name = request.session.get('saved_first_name')
+#         user.save()
 
 
 # Get profile pictures from social accounts
@@ -40,19 +46,14 @@ def get_user_avatar(backend, details, response, social_user, uid,\
  
     elif backend.__class__ == TwitterBackend:
         url = response.get('profile_image_url', '').replace('_normal', '')
-        #  https://github.com/omab/django-social-auth/issues/97
-        # user.social_auth.get(provider='twitter').extra_data['profile_image_url']
  
     if url:
         profile = user.get_profile()
         avatar = urlopen(url).read()
-        # file_path_name=settings.STATIC_URL+'images/profile_images/'+'pic_'+uid
         file_path_name=settings.STATIC_URL+'images/profile_images/'+ str(user) + '.jpg'
-        #fileName = "media/mugshots/"+ str(user) + ".jpg"
         fout = open(file_path_name, "wb") #file_path_name is where to save the image
         fout.write(avatar)
         fout.close()
-        # file_name='/images/profile_images/'+'pic_'+uid
         file_name='/images/profile_images/'+ str(user) + '.jpg'
         profile.photo = file_name # depends on where you saved it
         profile.save()

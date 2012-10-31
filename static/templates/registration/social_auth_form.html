@@ -1,0 +1,53 @@
+{% extends "home/index.html" %}
+{% load url from future %}
+
+{% block js %}
+{% endblock js %}
+
+{% block head_title %} EPM - Fill out Username {% endblock head_title %}
+{% block content_title %} Fill out your Username {% endblock content_title %}
+{% block content_subtitle %} Please give us a Username for your social media account so that we can create a full profile for you. {% endblock content_subtitle %}
+
+{% block content %}
+{% if form.errors %} {{ form.errors }} {% endif %}
+
+<form action="" method="post">
+    {% csrf_token %}
+    <p>
+    	<table border=0 cellpadding=5>
+    		<tr>
+    			<td><label for="id_username">Username:</label></td>
+       			<td><input type="text" name="username" id="id_username" value="{{social_detail.username}}" /></td>
+       		</tr>
+	    	<tr>
+	    			<td><label for="id_email">Email:</label></td>
+       				<td><input type="text" name="email" id="id_email" value="{{social_detail.email}}" /></td>             
+       		</tr>
+       		<tr>
+	    			<td><label for="id_fname">First Name:</label></td>
+       				<td><input type="text" name="firstname" id="id_fname" value="{{social_detail.first_name}}" /></td>
+       		</tr>
+       		<tr>
+	    			<td><label for="id_lname">Last Name:</label></td>
+       				<td><input type="text" name="lastname" id="id_lname" value="{{social_detail.last_name}}" /></td>
+       		</tr>
+       		<tr>
+	    			<td><label for="id_lname">Link:</label></td>
+	    			<td><label for="id_lname">{{link}}</label></td>
+       		</tr>
+       		<tr>
+       			<td>Profile Picture:</td>
+            <td><img src='{{pic_url}}' width=200 height=180></img>
+       			    </br>{{pic_url}}
+            </td>
+       		</tr>
+       		<tr>
+       			<td></td><td></br><input type="submit" value="Submit" /></td>
+       		</tr>
+
+       	</table>
+    </p>
+
+    
+</form>
+{% endblock %}
