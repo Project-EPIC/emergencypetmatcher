@@ -84,15 +84,15 @@ def match_PetReport(request, petreport_id):
     target_petreport = get_object_or_404(PetReport, pk=petreport_id)
 
     all_pet_reports = PetReport.objects.all().exclude(pk=petreport_id)
-    if len(all_pet_reports) == 0:
-        messages.info (request, "Sorry, there are no pet reports to match!")
-        return redirect(URL_HOME)
 
     #Place more PetReport filters here
     filtered_pet_reports = all_pet_reports.exclude(status = target_petreport.status).filter(pet_type = target_petreport.pet_type)
 
+    #Add the UserProfile to the PetReport's workers list.
+    target_petreport.workers.add(request.user.get_profile())
+
     if len(filtered_pet_reports) == 0:
-        messages.info (request, "Sorry, there are no pet reports for the selected pet report to match!")
+        messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added to this pet's working list for future reference.")
         return redirect(URL_HOME)
 
     paginator = Paginator(filtered_pet_reports, 100)

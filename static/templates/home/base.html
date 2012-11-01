@@ -139,8 +139,8 @@
 							<ul>
 							{% if user.is_authenticated %}
 								<li class="active"><a href="#">Newly Added</a></li>
+								<li><a href="{% url 'bookmarks' %}">Bookmarked</a></li>								
 								<li><a href="#">Following</a></li>
-								<li><a href="{% url 'bookmarks' %}">Bookmarked</a></li>
 								<li><a href="#">Pet Reports</a></li>
 								<li><a href="#">Pet Matches</a></li>
 

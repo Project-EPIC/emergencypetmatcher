@@ -28,16 +28,17 @@ SOCIAL_AUTH_PIPELINE = (
     'social_auth.backends.pipeline.misc.save_status_to_session',
     'social_auth.backends.pipeline.user.get_username',
     'home.pipeline.redirect_to_form',
-    # 'home.pipeline.username',
-    # 'home.pipeline.email',
+    'home.pipeline.username',
+    'home.pipeline.email',
     'social_auth.backends.pipeline.user.create_user',
     'social_auth.backends.pipeline.social.associate_user',
     'social_auth.backends.pipeline.social.load_extra_data',
     'social_auth.backends.pipeline.user.update_user_details',
     'social_auth.backends.pipeline.misc.save_status_to_session',
     'home.pipeline.get_user_avatar',
-)
+    'home.pipeline.create_user_log',
 
+)
 
 
 # Twitter testing

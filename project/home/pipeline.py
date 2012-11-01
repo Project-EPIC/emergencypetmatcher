@@ -1,4 +1,5 @@
 from django.http import HttpResponseRedirect
+from django.contrib import messages
 
 
 def redirect_to_form(*args, **kwargs):
@@ -19,17 +20,6 @@ def email(request, *args, **kwargs):
         email = request.session.get('saved_email')
     return {'email': email}
 
-# def redirect_to_form2(*args, **kwargs):
-#     if not kwargs['request'].session.get('saved_first_name'):
-#         return HttpResponseRedirect('/form2/')
-
-
-# def first_name(request, *args, **kwargs):
-#     if 'saved_first_name' in request.session:
-#         user = kwargs['user']
-#         user.first_name = request.session.get('saved_first_name')
-#         user.save()
-
 
 # Get profile pictures from social accounts
 # http://www.tryolabs.com/Blog/2012/02/13/get-user-data-using-django-social-auth/
@@ -38,8 +28,7 @@ from social_auth.backends.facebook import FacebookBackend
 from social_auth.backends.twitter import TwitterBackend
 from urllib import urlopen
 import settings
-def get_user_avatar(backend, details, response, social_user, uid,\
-                    user, *args, **kwargs):
+def get_user_avatar(backend, details, response, social_user, uid, user, *args, **kwargs):
     url = None
     if backend.__class__ == FacebookBackend:
         url = "http://graph.facebook.com/%s/picture?type=large" % response['id']
@@ -57,3 +46,12 @@ def get_user_avatar(backend, details, response, social_user, uid,\
         file_name='/images/profile_images/'+ str(user) + '.jpg'
         profile.photo = file_name # depends on where you saved it
         profile.save()
+
+
+from logging import *
+def create_user_log(backend, details, response, social_user, uid, user, *args, **kwargs):
+    userprofile = user.get_profile()
+    if log_exists(userprofile) == False:
+        log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)
+    log_activity(ACTIVITY_LOGIN, user.get_profile())
+           

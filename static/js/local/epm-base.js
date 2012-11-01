@@ -12,8 +12,16 @@ $(document).ready(function(){
 		return load_dialog(link.attr("href"), link.attr("name"), 700, "auto");
 	});
 
+	//Link to click to open to the PRDP
+	$("#feedlist .feedlist_prdp_dialog").click(function(){
+
+		var link = $(this);
+		//load_dialog(link, title, width, height)
+		return load_dialog(link.attr("href"), link.attr("name"), 700, "auto");
+	});	
+
 	//Link to click to open to the PMDP
-	$("#pmdp_dialog").click(function(){
+	$(".feedlist_pmdp_dialog").click(function(){
 
 		alert("HEY");
 		var link = $(this);
@@ -52,13 +60,14 @@ function index_fetch_activities (feedlist_item){
 			 	var activity = activities [i];
 			 	if (activity == "")
 			 		continue;
+
 			 	//Now add it to the list.
 			 	if (activity.indexOf("you") > 0)
-			 		feedlist.append("<li style=background:#FFFEB3; margin-left:2px; padding-left:0px;>" + activities[i] + "</li>");
+			 		feedlist.append("<li style=background:#FFFEB3; margin-left:2px; padding-left:0px;>" + activity + "</li>");
 			 	else if (activity.indexOf("Bookmark") >= 0)
-			 		feedlist.append("<li style=background:#CCE6FF; margin-left:2px; padding-left:0px;>" + activities[i] + "</li>");
+			 		feedlist.append("<li style=background:#CCE6FF; margin-left:2px; padding-left:0px;>" + activity + "</li>");
 			 	else
-			 		feedlist.append("<li style=margin-left:2px; padding-left:0px;>" + activities[i] + "</li>");
+			 		feedlist.append("<li style=margin-left:2px; padding-left:0px;>" + activity + "</li>");
 			}
 
 			// Prepare layout options.

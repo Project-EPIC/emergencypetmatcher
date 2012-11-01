@@ -13,8 +13,6 @@ When writing your test file (tests.py), make sure to have the following import:
 	from utils import *
 ==================================================================================='''
 
-NUMBER_OF_TESTS = 20
-
 #Setup Lorem Ipsum Generator
 LIPSUM = lipsum.Generator()
 LIPSUM.sentence_mean = 4
@@ -22,8 +20,11 @@ LIPSUM.sentence_sigma = 1
 LIPSUM.paragraph_mean = 3
 LIPSUM.paragraph_sigma = 1
 
-def print_testing_name(test_name):
-	print "\n[TEST]: Testing {%s} for %s iterations\n" % (test_name, NUMBER_OF_TESTS)
+def print_testing_name(test_name, single_test=False):
+	if single_test == True:
+		print "\n[TEST]: Testing {%s}\n" % (test_name)
+	else:
+		print "\n[TEST]: Testing {%s} for %s iterations\n" % (test_name, NUMBER_OF_TESTS)
 
 #Generate a random alpha-numeric string.
 def generate_string (size, chars = string.ascii_uppercase + string.digits):
@@ -64,7 +65,6 @@ def simplify_model_dict(model_object):
 	modeldict ["proposed_by_username"] = model_object.proposed_by.user.username		
 	return modeldict
 
-
 '''===================================================================================
 generate_random_date():
 
@@ -75,14 +75,11 @@ start and end should be strings specifying times formated in the
 given format (strftime-style), giving an interval [start, end].
 prop specifies how a proportion of the interval to be taken after
 start.  The returned time will be in the specified format.
-
 ==================================================================================='''
 def generate_random_date(start, end, format, prop):
-
     stime = time.mktime(time.strptime(start, format))
     etime = time.mktime(time.strptime(end, format))
     ptime = stime + prop * (etime - stime)
-
     return time.strftime(format, time.localtime(ptime))
 
 #Give the lap time (and AVG) for a 'critical section'.
@@ -90,8 +87,47 @@ def performance_report(total_time):
 	print '\tTotal Time: %s sec' % (total_time)
 	print '\tAVG Time Taken for a Single Test: %s sec' % (total_time/NUMBER_OF_TESTS)
 
+#Delete all model data
+def delete_all(leave_users = False, only_test_users=True):
+	PetMatch.objects.all().delete()
+	PetReport.objects.all().delete()
+	Chat.objects.all().delete()
+	ChatLine.objects.all().delete()
+	#Delete Users if you want to.
+	if leave_users == False:
+		if only_test_users == True:
+			#Get the users whose userprofile.is_test attribute is set to TRUE
+			test_users = User.objects.filter(userprofile__is_test=True)
+			test_users.all().delete()
+
+		else:
+			User.objects.all().delete()
+
+#Deletes all PetReport images in the static/images/petreport_images folder
+def delete_PetReport_images(from_list=None):
+	for the_file in os.listdir(PETREPORT_IMAGES_DIRECTORY):
+		file_path = os.path.join(PETREPORT_IMAGES_DIRECTORY, the_file)
+		try:
+			if from_list != None:
+				if os.path.isfile(file_path) and the_file in from_list:
+					os.unlink(file_path)
+					print "[INFO]: Removed %s" % the_file
+			else:
+				if os.path.isfile(file_path):
+					os.unlink(file_path)
+
+		except Exception as e:
+			print "[ERROR]: Problem in delete_PetReport_images(): {%s}" % e
+			return False
+
+	if from_list != None:
+		print "[OK]: Specified Files in '%s' are now deleted." % PETREPORT_IMAGES_DIRECTORY
+	else:
+		print "[OK]: All Files in '%s' are now deleted." % PETREPORT_IMAGES_DIRECTORY
+
+
 #Create Random Object for: User
-def create_random_User(i, pretty_name=True):
+def create_random_User(i, pretty_name=True, test_user=True):
 	if pretty_name == True:
 		username = random.choice(USERNAMES) + str(i)
 	else:
@@ -100,11 +136,42 @@ def create_random_User(i, pretty_name=True):
 	password = generate_string(10)
 	email = generate_string(6) + '@' + 'test.com'
 	user = User.objects.create_user(username = username, email = email, password = password)
+	userprofile = user.get_profile()
+	userprofile.set_activity_log(is_test=test_user)
+	#Also, don't forget to create his/her list of followers.
+	# create_random_following_list(userprofile)
 	return (user, password)
+
+#returns a random list of UserProfiles
+def create_random_Userlist(num_users = None): 
+	allusers = UserProfile.objects.all()
+	if num_users == None:
+		num_users = random.randint(0, len(allusers))
+	userlist = random.sample(allusers,num_users)
+	return userlist
+
+#creates a list of UserProfiles being followed by the input UserProfile
+def create_random_following_list (userprofile, num_following=None):
+	allusers = UserProfile.objects.exclude(pk = userprofile.user.id)
+	if num_following == None:
+		num_following = random.randint(0, len(allusers)/2)
+	following_list = random.sample(allusers, num_following)
+	for followed in following_list:
+		userprofile.following.add(followed)
+	return userprofile
+
+#creates a list of PetReports being bookmarked by the input UserProfile
+def create_random_bookmark_list (userprofile, num_bookmark=None):
+	allpetreports = PetReport.objects.all()
+	if num_bookmark == None:
+		num_bookmark = random.randint(0, len(allpetreports)/3)
+	bookmark_list = random.sample(allpetreports, num_bookmark)
+	for bookmark in bookmark_list:
+		userprofile.bookmarks_related.add(bookmark)
+	return userprofile
 
 #Create Random Object for: PetReport
 def create_random_PetReport(user=None, status=None, pet_type=None):
-	
 	if pet_type == None:
 		pet_type = random.choice(PET_TYPE_CHOICES)[0]
 	if status == None:
@@ -113,7 +180,6 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 		user = random.choice(User.objects.all())
 
 	pr = PetReport (pet_type = pet_type, status = status, proposed_by = user.get_profile())
-
 	pr.date_lost_or_found = generate_random_date(DATE_LOWER_BOUND, DATE_UPPER_BOUND, "%Y-%m-%d", random.random())
 	pr.sex = random.choice(SEX_CHOICES)[0]
 	pr.size = random.choice(SIZE_CHOICES)[0] 
@@ -122,28 +188,24 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 
 	#Randomly generate attributes, or not.
 	if status == "Found":
-
 		if random.random() > 0.5:
 			pr.pet_name = random.choice(PETREPORT_NAMES) 	
-
 		if random.random() > 0.3:
 			pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH) 
-
 		if random.random() > 0.3:
 			pr.breed = generate_string(PETREPORT_BREED_LENGTH) 
-
 		if random.random() > 0.3:
-			pr.age = str(random.randrange(0, 15))
+			pr.age = str(random.randint(0, 15))
 
 	#The Pet Owner knows his/her own pet.
 	else:
 		pr.pet_name = random.choice(PETREPORT_NAMES)
 		pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH)
 		pr.breed = generate_string(PETREPORT_BREED_LENGTH)
-		pr.age = str(random.randrange(0, 15))
+		pr.age = str(random.randint(0, 15))
 
 	pr.save()
-	pr.workers = create_random_Userlist(-1, False, None)
+	pr.workers = create_random_Userlist()
 
 	#Need to handle Image defaults...
 	if pr.pet_type == "Dog":
@@ -162,7 +224,7 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 		pr.img_path.name = "images/defaults/other_silhouette.jpg"
 
 	pr.save()
-	log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr)
+	log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr, )
 	return pr
 
 #Create Random Object for: Chat
@@ -178,41 +240,8 @@ def create_random_ChatLine(user, chat):
 	chatline.save()
 	return chatline
 
-#Delete all model data
-def delete_all(leave_users = False):
-	PetMatch.objects.all().delete()
-	PetReport.objects.all().delete()
-	Chat.objects.all().delete()
-	ChatLine.objects.all().delete()
-	#Delete Users if you want to.
-	if leave_users == False:
-		User.objects.all().delete()
-
-#returns a random list of users or a list of friends for a user (when friends = True)
-def create_random_Userlist(num_users = -1, friends=False, user=None):
-	allusers = UserProfile.objects.all()
-	if(num_users == -1):
-		num_users = random.randint(1,allusers.count())
-
-	userlist = random.sample(allusers,num_users)
-
-	if (friends == True):
-		if(user != None):
-			try:
-				userlist.remove(user)
-			except ValueError:
-				return userlist
-
-		elif (user == None):
-			print "Insufficient arguments, list of friends was not created successfully."
-			return userlist
-
-	return userlist
-
-
 #Create Random Object for: PetMatch
 def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None):
-	
 	#If the lost or found pet (or both) wasn't supplied, then get random Pet Reports.
 	if lost_pet == None or found_pet == None:
 
@@ -243,26 +272,20 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 	#If the PetMatch save was successful...
 	if (petmatch != None):
 		if outcome == "NEW PETMATCH":
-			petmatch.score = random.randrange(0, 10000)
+			petmatch.score = random.randint(0, 10000)
 			petmatch.is_open = random.choice ([True, False])
-			user_count = UserProfile.objects.all().count()
-			up_votes = create_random_Userlist(random.randint(1,((user_count/2)+1)),False,None)
-			down_votes = UserProfile.objects.all()	
-			
-			for up_vote in up_votes:
-				try:
-					down_votes = down_votes.exclude(id =up_vote.id)
-				except ValueError:
-					continue
-
-			petmatch.up_votes = up_votes
-			petmatch.down_votes = down_votes
+			user_count = len(UserProfile.objects.all())
+			up_votes = create_random_Userlist(num_users=random.randint(0, user_count))
+			down_votes = create_random_Userlist(num_users=random.randint(0, user_count))
+			petmatch.up_votes = set(up_votes) - set(down_votes)
+			petmatch.down_votes = set(down_votes) - set(up_votes) 
+			#Save the PetMatch again after modifying its model relationship attributes
 			petmatch.save()
-			log_activity(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=petmatch)
+			log_activity(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=petmatch, )
 		
 		elif outcome == "SQL UPDATE":
 			petmatch.up_votes.add(user.get_profile())
-			log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=petmatch)			
+			log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=petmatch, )			
 
 	else:
 		if outcome =="DUPLICATE PETMATCH":
@@ -271,11 +294,11 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 			if random.random() >= 0.5:
 				existing_petmatch.up_votes.add(user.get_profile())
 				existing_petmatch.down_votes.remove(user.get_profile())
-				log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=existing_petmatch)				
+				log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=existing_petmatch, )				
 			else:
 				existing_petmatch.down_votes.add(user.get_profile())
 				existing_petmatch.up_votes.remove(user.get_profile())
-				log_activity(ACTIVITY_PETMATCH_DOWNVOTE, user.get_profile(), petmatch=existing_petmatch)				
+				log_activity(ACTIVITY_PETMATCH_DOWNVOTE, user.get_profile(), petmatch=existing_petmatch, )				
 			
 	#Return the (possibly None) PetMatch
 	return petmatch
@@ -295,7 +318,7 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 	petmatches = [ None for i in range (NUMBER_OF_TESTS/2) ]
 	pet_type = random.choice(PET_TYPE_CHOICES)[0]
 	status = None
-	petmatch_i=0
+	petmatch_i = 0
 
 	#Iterate w.r.t NUMBER_OF_TESTS control variable.
 	for i in range (NUMBER_OF_TESTS):
@@ -319,21 +342,28 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 
 		#We can only create AT MOST NUMBER_OF_TESTS/2 PetMatch objects in total, so we need to be careful about indices.
 		#(i >= 1 and i <= NUMBER_OF_TESTS/2)
-		if (create_petmatches == True) and (i % 2 == 1) and (i <= NUMBER_OF_TESTS/2):
+		if (create_petmatches == True) and (i % 2 == 1):
 			pm = create_random_PetMatch(lost_pet=petreports[i-1], found_pet=petreports[i], pet_type=pet_type, user=user)
 			petmatches [petmatch_i] = pm
 			petmatch_i += 1
 
+	# allusers = UserProfile.objects.all()
+
+	# # Create random following list
+	# for userprofile in allusers:
+	# 	userprofile=create_random_following_list(userprofile)
+
+	# # Create random bookmark list
+	# if create_petreports == True:
+	# 	for userprofile in allusers:
+	# 		userprofile=create_random_bookmark_list(userprofile)
 
 	if create_petreports == True and create_petmatches == True:
 		return (users, passwords, clients, petreports, petmatches)
-
 	if create_petreports == True:
 		return (users, passwords, clients, petreports)
-
 	if create_petmatches == True:
 		return (users, passwords, clients, petmatches)
-
 	#just return the simple ones, geez!		
 	return (users, passwords, clients)
 

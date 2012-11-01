@@ -17,12 +17,15 @@ urlpatterns = patterns('home.views',
 	url (r'^follow/(?P<userprofile_id1>\d+)/(?P<userprofile_id2>\d+)/$','follow',name='follow'),
 	url (r'^unfollow/(?P<userprofile_id1>\d+)/(?P<userprofile_id2>\d+)/$','unfollow',name='unfollow'),
 	url(r'^', include('social_auth.urls')),
-
+	url(r'^edituserprofile/$', 'editUserProfile_page', name='editUserProfile_page'),
 	url (r'^accounts/', include('registration.backends.default.urls')),
 	#registration-related URLs that have been customized.
 	url(r'^activate/complete/$', "registration_activation_complete", name='registration_activation_complete'),
 	url(r'^register/complete/$', "registration_complete", name='registration_complete'),
 	url(r'^register/closed/$', "registration_disallowed", name='registration_disallowed'),
+	#email verification URL
+	url(r'^email_verification_complete/(?P<activation_key>\w+)/$', "email_verification_complete", name='email_verification_complete'),
+	
 	
 )
 

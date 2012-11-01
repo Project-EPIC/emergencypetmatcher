@@ -11,12 +11,20 @@ from datetime import datetime
 
 '''Method for logging activities given an input UserProfile, Activity Enum, and (optionally) PetReport and PetMatch objects.'''
 def log_activity(activity, userprofile, userprofile2=None, petreport=None, petmatch=None):
-    assert isinstance(userprofile, UserProfile)
+    # userprofile
+    # userprofile2
+    #
 
+    assert isinstance(userprofile, UserProfile)
     #Define the user filename and logger.
     user = userprofile.user
-    user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+
+    if userprofile.is_test == True:
+        user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
+    else:
+        user_log_filename = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
     # print user_log_filename
+
     try:
         logger = open(user_log_filename, "a")
         if activity == ACTIVITY_ACCOUNT_CREATED:
@@ -27,6 +35,9 @@ def log_activity(activity, userprofile, userprofile2=None, petreport=None, petma
 
         elif activity == ACTIVITY_LOGOUT:
             log = "%s with ID{%d} logged out of the system\n" % (user.username, userprofile.id)            
+
+        elif activity == ACTIVITY_USER_CHANGED_USERNAME:
+            log = "%s with ID{%d} renamed his/her username\n" % (user.username, userprofile.id)            
 
         elif activity == ACTIVITY_PETREPORT_SUBMITTED:
             assert isinstance(petreport, PetReport)
@@ -45,7 +56,6 @@ def log_activity(activity, userprofile, userprofile2=None, petreport=None, petma
             log = "%s proposed the PetMatch object with ID{%d}\n" % (user.username, petmatch.id)
 
         elif activity == ACTIVITY_PETMATCH_UPVOTE:
-            print petmatch
             assert isinstance(petmatch, PetMatch)
             log = "%s upvoted the PetMatch object with ID{%d}\n" % (user.username, petmatch.id)
 
@@ -81,14 +91,14 @@ def log_activity(activity, userprofile, userprofile2=None, petreport=None, petma
 
         else:
             raise IOError
+      
+        log = (time.asctime() + " [%s]: " + log) % activity
+        logger.write(log)
+        logger.close()
 
-        if activity != ACTIVITY_LOGIN:
-            log = (time.asctime() + " [%s]: " + log) % activity
-            logger.write(log)
-            logger.close()
 
-    except IOError, AssertionError:
-        print "[ERROR]: problem in log_activity()."
+    except Exception as e:
+        print "[ERROR]: problem in log_activity(%s)." % e
         
 
 ''' Helper function for returning an HTML representation for an input activity '''
@@ -105,7 +115,7 @@ def get_activity_HTML(log, userprofile, userprofile2=None, petreport=None, petma
     elif ACTIVITY_PETREPORT_SUBMITTED in log:
         assert isinstance(petreport, PetReport)
         if petreport.pet_name.strip() == "unknown" or petreport.pet_name.strip() == "":
-            html += "submitted a " + "<a class='prdp_dialog' href= '" + URL_PRDP + str(petreport.id) + "/'>" + "Pet Report </a> with no name."
+            html += "submitted a <a class='feedlist_prdp_dialog' href='" + URL_PRDP + str(petreport.id) + "/'>" + "Pet Report with no name.</a>"
         else:
             html += "submitted a Pet Report named <a class='prdp_dialog' href= '" + URL_PRDP + str(petreport.id) + "/'>" + petreport.pet_name + "</a>!"
 
@@ -165,9 +175,14 @@ def get_activity_HTML(log, userprofile, userprofile2=None, petreport=None, petma
     return html
 
 
-
 '''Helper function to get the most recent activity from an input UserProfile and (optionally) activity type.'''
 def get_recent_activites_from_log(userprofile, current_userprofile=None, since_date=None, num_activities=100, activity=None):
+
+    # userprofile: the userprofile whose log file is read to get recent activiy feeds
+    # current_userprofile: the authenticated user who gets the activity feeds
+    # since_date: used to get all log activities that happend before that date 
+    # num_activities: used to get a number of activites not more than this number
+    # activity: used to decide about one type of activity and ignore the other 
 
     assert isinstance(userprofile, UserProfile)
     if current_userprofile !=None:
@@ -175,7 +190,10 @@ def get_recent_activites_from_log(userprofile, current_userprofile=None, since_d
 
     # Define the user filename and logger.
     user = userprofile.user
-    user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+    if userprofile.is_test == True:
+        user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
+    else:
+        user_log_filename = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
     print user_log_filename
     recent_log = None
 
@@ -300,14 +318,16 @@ def get_bookmark_activities(userprofile, since_date=None):
     return activities
 
 
-
 '''Helper function to determine if the input activity has been logged in the past'''
 def activity_has_been_logged(activity, userprofile, userprofile2=None, petreport=None, petmatch=None):
     assert isinstance(userprofile, UserProfile)
 
     #Define the user filename and logger.
     user = userprofile.user
-    user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+    if userprofile.is_test == True:
+        user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
+    else:
+        user_log_filename = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
 
     #If this particular user log file exists, then continue.
     if os.path.exists(user_log_filename) == True:
@@ -323,15 +343,20 @@ def activity_has_been_logged(activity, userprofile, userprofile2=None, petreport
                         logger.close()
                         return True
 
-                if activity == ACTIVITY_LOGIN:
+                elif activity == ACTIVITY_LOGIN:
                     if str(userprofile.id) in identifier:
                         logger.close()
-                        return True                        
+                        return True
 
-                if activity == ACTIVITY_LOGOUT:
+                elif activity == ACTIVITY_LOGOUT:
                     if str(userprofile.id) in identifier:
                         logger.close()
-                        return True                                                
+                        return True
+
+                elif activity == ACTIVITY_USER_CHANGED_USERNAME:
+                    if str(userprofile.id) in identifier:
+                        logger.close()
+                        return True
 
                 elif activity == ACTIVITY_PETREPORT_SUBMITTED:
                     assert isinstance(petreport, PetReport)
@@ -396,10 +421,42 @@ def activity_has_been_logged(activity, userprofile, userprofile2=None, petreport
         logger.close()
         return False
 
-    print "The file %s was not found in the activity log directory" % user_log_filename
+    print "[ERROR]: The file (%s) was not found in the activity log directory." % user_log_filename
     return False
-            
 
 
+#Given a UserProfile instance, return True if its log file exists, False otherwise.
+def log_exists (userprofile):
+    assert isinstance(userprofile, UserProfile)
 
+    if userprofile.is_test == True:
+        log_path = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log" 
+    else:
+        log_path = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log" 
+
+    if os.path.isfile(log_path):
+        return True
+    else:
+        return False
+
+
+#Given a UserProfile instance, delete its log file.
+def delete_log (userprofile):
+    assert isinstance(userprofile, UserProfile)
+    #Are we deleting a test log or real log?
+    if userprofile.is_test == True:
+        log_path = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log" 
+    else:
+        log_path = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log" 
+
+    if os.path.isfile(log_path):
+        try:
+            os.unlink(log_path)
+            print "[OK]: UserProfile log file was deleted in (%s)" % log_path
+
+        except Exception as e:
+            print "[ERROR]: Could not delete UserProfile log file (%s)" % e
+    else:
+        print "[OK]: Could not find UserProfile log file in (%s).\nDid you set one up for this UserProfile?" % log_path
+          
 

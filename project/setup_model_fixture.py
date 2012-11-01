@@ -1,10 +1,9 @@
-import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'project.settings'
-
-from home.models import *
-from django.contrib.auth import authenticate
-import utils
 import string, random, sys, os
+os.environ['DJANGO_SETTINGS_MODULE']='project.settings'
+from home.models import *
+from utils import *
+from django.contrib.auth import authenticate
+
 
 '''===================================================================================
 setup_model_fixture.py: Setup sample (random) data for your dev env.
@@ -14,7 +13,6 @@ setup_model_fixture.py: Setup sample (random) data for your dev env.
 NUM_PETREPORTS = 100
 NUM_USERS = 50
 NUM_PETMATCHES = 50
-
 
 #When Executed: Setup our fixture
 if (len(sys.argv) < 2) == True or (len(sys.argv) > 3) == True:
@@ -29,57 +27,81 @@ if (len(sys.argv) < 2) == True or (len(sys.argv) > 3) == True:
 if sys.argv[1] == 'wipeout':
 
 	if len(sys.argv) > 2 and sys.argv [2] == 'leaveusers':
-		utils.delete_all(leave_users=True)
+		delete_all(leave_users=True)
 		print '[OK]: All data from model objects EXCEPT User and UserProfile have been wiped out.'
+
 	elif len(sys.argv) > 2:
 		print "[ERROR]: Invalid use of 'wipeout'. Please try again."
+
 	else:
-		utils.delete_all()
+		delete_all(only_test_users=True)
 		print '[OK]: All data has been wiped out.'	
+
 	sys.exit()
 
 elif sys.argv[1] == 'setup':
 
-	print '\nSetting up model fixture....'
-	utils.delete_all()
+	print '\n[INFO]: Setting up model fixture....'
+	delete_all(only_test_users=True)
 	users = []
 	passwords = []
 
 	if len(sys.argv) > 2 and sys.argv [2] == 'onlyusers':
-		for i in range (NUM_USERS):
-			user, pwd = utils.create_random_User(i)
-			users.append(user)
-			passwords.append(pwd)
-		allusers = UserProfile.objects.all()
-		for user in allusers:
-			user.friends = utils.create_random_Userlist(-1,True,user)#not working without supplying -1
-		print '[OK]: %d Users created.' % (len(User.objects.all()))
+		#Loop the old-fashioned way: We need to iterate again sometimes in order to get #NUM_USER of Users.
+		index = 0
+		while index != NUM_USERS:
+			try:
+				user, pwd = create_random_User(index)
+				users.append(user)
+				passwords.append(pwd)
+				index += 1
+
+			except Exception as e:
+				print "[ERROR]: Problem when creating a random User (%s)" % e
+				continue #Need to try (index) again.
+			
+
+		print '[OK]: %d Users created.' % (NUM_USERS)
 
 	else:
-		for i in range (NUM_USERS):
-			user, pwd = utils.create_random_User(i)
-			users.append(user)
-			passwords.append(pwd)
+		#Loop the old-fashioned way: We need to iterate again sometimes in order to get #NUM_USER of Users.
+		index = 0
+		while index != NUM_USERS:
+			try:
+				user, pwd = create_random_User(index)
+				users.append(user)
+				passwords.append(pwd)
+				index += 1
+
+			except Exception as e:
+				print "[ERROR]: Problem when creating a random User (%s)" % e
+				continue #Need to try (index) again.
+
 		allusers = UserProfile.objects.all()
+
+		# Create random following list
+		for userprofile in allusers:
+			userprofile=create_random_following_list(userprofile)
+
 		print '[OK]: %d Users created.' % (len(User.objects.all()))
-
-		for user in allusers:
-			user.friends = utils.create_random_Userlist(-1,True,user)#not working without supplying -1
-
 		num_lost = 0
 		num_found = 0
+
 		for i in range (NUM_PETREPORTS):
-			pr = utils.create_random_PetReport(random.choice(users))
+			pr = create_random_PetReport(random.choice(users))
 			if pr.status == "Lost":
 				num_lost += 1
 			else:
 				num_found += 1
 
+		print '[OK]: %d Pet Reports created, %d LOST, %d FOUND' % (len(PetReport.objects.all()), num_lost, num_found)
 
-		print '[OK]: %d Pet Reports created, %d LOST, %d FOUND' % (len(PetReport.objects.all()), num_lost, num_found)	
+		# Create random bookmark list
+		for userprofile in allusers:
+			userprofile=create_random_bookmark_list(userprofile)
 
 		for i in range (NUM_PETMATCHES):
-			utils.create_random_PetMatch(None,None,None)
+			create_random_PetMatch(None,None,None)
 
 		print '[OK]: (n <= %s) = %d Pet Matches created (Some PetMatch objects could not be created due to uniqueness constraints)' % (NUM_PETMATCHES, len(PetMatch.objects.all()))	
 	print 'usernames with passwords are:'
