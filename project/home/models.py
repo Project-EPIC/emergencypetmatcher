@@ -13,7 +13,6 @@ from django.utils.timezone import now as datetime_now
 import datetime
 from django.conf import settings
 
-
 '''===================================================================================
 [models.py]: Models for the EPM system
 ==================================================================================='''
@@ -32,16 +31,13 @@ class UserProfile (models.Model):
     '''Required Fields'''
     user = models.OneToOneField(User, null=False, default=None)
     photo = models.ImageField(upload_to='images/profile_images', null=True)
+    last_logout = models.DateTimeField(null=False, auto_now_add=True)
 
     '''Non-Required Fields'''
     following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
     is_test = models.BooleanField(default=False)
     chats = models.ManyToManyField('Chat', null=True)
-    # facebook_cred = models.CharField(max_length=100, null=True)
-    # twitter_cred = models.CharField(max_length=100, null=True)
-    reputation = models.IntegerField(default=0, null=True)
-    #facebook_id = models.IntegerField(blank=True, null=True)
-    #twitter_id = models.IntegerField(blank=True, null=True)
+    reputation = models.FloatField(default=0.0, null=True)
 
     #Create the activity log for this user
     def set_activity_log(self, is_test=False):
@@ -141,6 +137,7 @@ class PetReport(models.Model):
         string = str(self.date_lost_or_found)
         return str
 
+
 #The Pet Match Object Model
 class PetMatch(models.Model):
 
@@ -148,9 +145,9 @@ class PetMatch(models.Model):
     lost_pet = models.ForeignKey('PetReport', null=False, default=None, related_name='lost_pet_related')
     found_pet = models.ForeignKey('PetReport', null=False, default=None, related_name='found_pet_related')
     proposed_by = models.ForeignKey('UserProfile', null=False, related_name='proposed_by_related')
-    proposed_date = models.DateField(null=False, default=None, auto_now_add=True)
+    proposed_date = models.DateTimeField(null=False, auto_now_add=True)
     description = models.CharField(max_length=PETMATCH_DESCRIPTION_LENGTH, null=False, default=None)
-    
+ 
     '''Non-Required Fields'''
     is_open = models.BooleanField(default=True)
     score = models.IntegerField(default=0)
@@ -167,7 +164,7 @@ class PetMatch(models.Model):
         
         #PetMatch inserted improperly
         if (lost_pet.status != "Lost") or (found_pet.status != "Found"):
-            print "INSERTED IMPROPERLY"
+            print "[ERROR]: The PetMatch was not saved because it was inserted improperly. Check to make sure that the PetMatch consists of one lost and found pet and that they are being assigned to the lost and found fields, respectively."
             return (None, "INSERTED IMPROPERLY")
 
         existing_match = PetMatch.get_PetMatch(self.lost_pet, self.found_pet)            
@@ -183,7 +180,7 @@ class PetMatch(models.Model):
                 return (None, "DUPLICATE PETMATCH") #Duplicate PetMatch!
 
         #Good to go: Save the PetMatch Object.
-        super(PetMatch, self).save(args, kwargs)
+        super(PetMatch, self).save(*args, **kwargs)
         print "[OK]: PetMatch %s was saved!" % self
         return (self, "NEW PETMATCH")
 
@@ -271,7 +268,7 @@ class PetReportForm (ModelForm):
     location = forms.CharField(label = "Location", max_length = PETREPORT_LOCATION_LENGTH , required = True)
 
     '''Non-Required Fields'''
-    img_path = forms.ImageField(label = "Upload an Image ", required = False)
+    img_path = forms.ImageField(label = "Upload an Image (*.jpg, *.png, *.bmp, *.tif)", required = False)
     pet_name = forms.CharField(label = "Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False) 
     age = forms.CharField(label = "Age", max_length = PETREPORT_AGE_LENGTH, required = False)
     breed = forms.CharField(label = "Breed", max_length = PETREPORT_BREED_LENGTH, required = False)
@@ -282,7 +279,7 @@ class PetReportForm (ModelForm):
         model = PetReport
         exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by')
 
-#The UserProfile ModelForm - used for editing the user profile
+#The UserProfile Form - used for editing the user profile
 #edit initial value of each field either in the view or in the template
 class UserProfileForm (forms.Form):
     '''Required Fields'''
@@ -349,8 +346,6 @@ def setup_UserProfile(sender, instance, created, **kwargs):
     if created == True:
         #Create a UserProfile object.
         UserProfile.objects.create(user=instance)
-        #Create the first activity for this user
-        log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
 
 ''' Import statements placed at the bottom of the page to prevent circular import dependence '''
 from logging import *

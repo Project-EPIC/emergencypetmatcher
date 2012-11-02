@@ -20,8 +20,11 @@ LIPSUM.sentence_sigma = 1
 LIPSUM.paragraph_mean = 3
 LIPSUM.paragraph_sigma = 1
 
-def print_testing_name(test_name):
-	print "\n[TEST]: Testing {%s} for %s iterations\n" % (test_name, NUMBER_OF_TESTS)
+def print_testing_name(test_name, single_test=False):
+	if single_test == True:
+		print "\n[TEST]: Testing {%s}\n" % (test_name)
+	else:
+		print "\n[TEST]: Testing {%s} for %s iterations\n" % (test_name, NUMBER_OF_TESTS)
 
 #Generate a random alpha-numeric string.
 def generate_string (size, chars = string.ascii_uppercase + string.digits):
@@ -93,10 +96,35 @@ def delete_all(leave_users = False, only_test_users=True):
 	#Delete Users if you want to.
 	if leave_users == False:
 		if only_test_users == True:
+			#Get the users whose userprofile.is_test attribute is set to TRUE
 			test_users = User.objects.filter(userprofile__is_test=True)
 			test_users.all().delete()
+
 		else:
 			User.objects.all().delete()
+
+#Deletes all PetReport images in the static/images/petreport_images folder
+def delete_PetReport_images(from_list=None):
+	for the_file in os.listdir(PETREPORT_IMAGES_DIRECTORY):
+		file_path = os.path.join(PETREPORT_IMAGES_DIRECTORY, the_file)
+		try:
+			if from_list != None:
+				if os.path.isfile(file_path) and the_file in from_list:
+					os.unlink(file_path)
+					print "[INFO]: Removed %s" % the_file
+			else:
+				if os.path.isfile(file_path):
+					os.unlink(file_path)
+
+		except Exception as e:
+			print "[ERROR]: Problem in delete_PetReport_images(): {%s}" % e
+			return False
+
+	if from_list != None:
+		print "[OK]: Specified Files in '%s' are now deleted." % PETREPORT_IMAGES_DIRECTORY
+	else:
+		print "[OK]: All Files in '%s' are now deleted." % PETREPORT_IMAGES_DIRECTORY
+
 
 #Create Random Object for: User
 def create_random_User(i, pretty_name=True, test_user=True):
@@ -111,7 +139,7 @@ def create_random_User(i, pretty_name=True, test_user=True):
 	userprofile = user.get_profile()
 	userprofile.set_activity_log(is_test=test_user)
 	#Also, don't forget to create his/her list of followers.
-	create_random_following_list(user.get_profile())
+	# create_random_following_list(userprofile)
 	return (user, password)
 
 #returns a random list of UserProfiles
@@ -122,19 +150,25 @@ def create_random_Userlist(num_users = None):
 	userlist = random.sample(allusers,num_users)
 	return userlist
 
-#creates (and returns) a list of UserProfiles being followed by the input UserProfile
+#creates a list of UserProfiles being followed by the input UserProfile
 def create_random_following_list (userprofile, num_following=None):
 	allusers = UserProfile.objects.exclude(pk = userprofile.user.id)
-
 	if num_following == None:
-		num_following = random.randint(0, len(allusers))
-
+		num_following = random.randint(0, len(allusers)/2)
 	following_list = random.sample(allusers, num_following)
-
 	for followed in following_list:
 		userprofile.following.add(followed)
+	return userprofile
 
-	return userprofile.following.all()	
+#creates a list of PetReports being bookmarked by the input UserProfile
+def create_random_bookmark_list (userprofile, num_bookmark=None):
+	allpetreports = PetReport.objects.all()
+	if num_bookmark == None:
+		num_bookmark = random.randint(0, len(allpetreports)/3)
+	bookmark_list = random.sample(allpetreports, num_bookmark)
+	for bookmark in bookmark_list:
+		userprofile.bookmarks_related.add(bookmark)
+	return userprofile
 
 #Create Random Object for: PetReport
 def create_random_PetReport(user=None, status=None, pet_type=None):
@@ -313,6 +347,16 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 			petmatches [petmatch_i] = pm
 			petmatch_i += 1
 
+	# allusers = UserProfile.objects.all()
+
+	# # Create random following list
+	# for userprofile in allusers:
+	# 	userprofile=create_random_following_list(userprofile)
+
+	# # Create random bookmark list
+	# if create_petreports == True:
+	# 	for userprofile in allusers:
+	# 		userprofile=create_random_bookmark_list(userprofile)
 
 	if create_petreports == True and create_petmatches == True:
 		return (users, passwords, clients, petreports, petmatches)
@@ -353,18 +397,3 @@ def update_reputation(userprofile, activity):
 	else:
 		print 'This is not a valid activity! \n'
 			
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

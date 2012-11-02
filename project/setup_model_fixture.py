@@ -1,13 +1,13 @@
+import string, random, sys, os
+os.environ['DJANGO_SETTINGS_MODULE']='project.settings'
 from home.models import *
 from utils import *
 from django.contrib.auth import authenticate
-import string, random, sys, os
+
 
 '''===================================================================================
 setup_model_fixture.py: Setup sample (random) data for your dev env.
 ==================================================================================='''
-
-os.environ['DJANGO_SETTINGS_MODULE']='project.settings'
 
 #Control Variables
 NUM_PETREPORTS = 100
@@ -78,6 +78,11 @@ elif sys.argv[1] == 'setup':
 				continue #Need to try (index) again.
 
 		allusers = UserProfile.objects.all()
+
+		# Create random following list
+		for userprofile in allusers:
+			userprofile=create_random_following_list(userprofile)
+
 		print '[OK]: %d Users created.' % (len(User.objects.all()))
 		num_lost = 0
 		num_found = 0
@@ -89,7 +94,11 @@ elif sys.argv[1] == 'setup':
 			else:
 				num_found += 1
 
-		print '[OK]: %d Pet Reports created, %d LOST, %d FOUND' % (len(PetReport.objects.all()), num_lost, num_found)	
+		print '[OK]: %d Pet Reports created, %d LOST, %d FOUND' % (len(PetReport.objects.all()), num_lost, num_found)
+
+		# Create random bookmark list
+		for userprofile in allusers:
+			userprofile=create_random_bookmark_list(userprofile)
 
 		for i in range (NUM_PETMATCHES):
 			create_random_PetMatch(None,None,None)
