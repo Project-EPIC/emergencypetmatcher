@@ -5,6 +5,7 @@ from home.models import *
 from utils import *
 from constants import *
 import unittest, string, random, sys, time
+from django.contrib.messages import constants as messages
 
 '''===================================================================================
 MatchingTesting: Testing for EPM Matching
@@ -451,4 +452,207 @@ class PetMatchTesting (unittest.TestCase):
 		print ''
 		performance_report(iteration_time)
 
+class VerificationTesting (unittest.TestCase):
+	#Get rid of all objects in the QuerySet.
+	def setUp(self):
+		delete_all()
 
+	#Get rid of all objects in the QuerySet.
+	def tearDown(self):
+		delete_all()
+
+	def test_get_verification_page (self):
+		print_testing_name("test_get_verification_page")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords
+		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+			#indexes
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)
+			
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petmatch = petmatches [petmatch_i]			
+
+			#Log in First
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)			
+			print "[INFO]:%s logs onto %s to enter the verification page..." % (user, client)
+			
+			verification_page_url = URL_VERIFY_PETMATCH + str(petmatch.id) + "/"
+			print verification_page_url
+			response = client.get(verification_page_url)
+
+			userprofile = user.get_profile()
+
+			if response.status_code == 302:
+				if petmatch.PetMatch_has_reached_threshold():
+					self.assertFalse(( userprofile == petmatch.lost_pet.proposed_by) or (userprofile == petmatch.found_pet.proposed_by))
+				else:
+					self.assertFalse(petmatch.PetMatch_has_reached_threshold())	
+
+			user_indexes = [users.index(petmatch.lost_pet.proposed_by.user),users.index(petmatch.found_pet.proposed_by.user)]
+			user_i = random.choice(user_indexes)
+			user = users[user_i]
+			password = passwords[user_i]
+			userprofile = user.get_profile()
+			#Log in First
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)			
+			print "[INFO]:%s logs onto %s to enter the verification page..." % (user, client)
+			response = client.get(verification_page_url)
+
+			if petmatch.PetMatch_has_reached_threshold():
+				self.assertEquals(response.status_code, 200)
+				self.assertTrue(petmatch.PetMatch_has_reached_threshold())
+				self.assertTrue(( userprofile == petmatch.lost_pet.proposed_by) or (userprofile == petmatch.found_pet.proposed_by))
+
+	def test_post_verification_response(self):
+		print_testing_name("test_post_verification_response")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords
+		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+			#indexes
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)
+			
+			#objects
+			client = clients [client_i]
+			petmatch = petmatches [petmatch_i]			
+
+			if not petmatch.PetMatch_has_reached_threshold():
+				continue
+
+			user_indexes = [users.index(petmatch.lost_pet.proposed_by.user),users.index(petmatch.found_pet.proposed_by.user)]
+			for user_i in user_indexes:
+				#Get Lost/Found pet user
+				petmatch = PetMatch.objects.get(pk=petmatch.id)
+				user = users[user_i]
+				password = passwords[user_i]
+
+				#Log in First
+				loggedin = client.login(username = user.username, password = password)
+				self.assertTrue(loggedin == True)			
+				print "[INFO]:%s logs onto %s to enter the verification page..." % (user, client)
+				
+				print 'petmatch users: %s, %s ' % (str(petmatch.lost_pet.proposed_by.user),str(petmatch.found_pet.proposed_by.user))
+
+				verification_page_url = URL_VERIFY_PETMATCH + str(petmatch.id) + "/"
+				print verification_page_url
+				response = client.get(verification_page_url)
+
+				userprofile = user.get_profile()
+
+				self.assertEquals(response.status_code,200)
+				message = random.choice(['yes','no'])
+				post = {'message':message}
+				old_lost_pet_vote = petmatch.verification_votes[0]
+				response = client.post(verification_page_url,post,follow = True)
+				self.assertEquals(response.status_code,200)
+				petmatch = PetMatch.objects.get(pk=petmatch.id)
+				new_lost_pet_vote  = petmatch.verification_votes[0]
+				if old_lost_pet_vote == '0':
+					sent_vote = '1' if (message == 'yes') else '2'if (message == 'no') else '0'
+					self.assertEquals(sent_vote,new_lost_pet_vote)
+				else:
+					self.assertEquals(old_lost_pet_vote,new_lost_pet_vote)
+				
+				
+	def test_function_PetMatch_has_reached_threshold(self):
+		print_testing_name("test_function_PetMatch_has_reached_threshold")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords
+		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+			#indexes
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)	
+			#objects
+			client = clients [client_i]
+			petmatch = petmatches [petmatch_i]			
+			'''if PetMatch_has_reached_threshold() returns true, 
+			the PetMatch should satisfy the threshold condition'''
+			if petmatch.PetMatch_has_reached_threshold():
+				self.assertTrue(petmatch.up_votes.count() - petmatch.down_votes.count() >= 5)
+			else:
+				self.assertTrue(petmatch.up_votes.count() - petmatch.down_votes.count() < 5)
+			print 'Pet Match %s passed the test: test_function_PetMatch_has_reached_threshold' % (str(petmatch))
+
+	def test_function_verify_PetMatch(self):
+		print_testing_name("test_function_verify_PetMatch")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords
+		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+			#indexes
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)	
+			#objects
+			client = clients [client_i]
+			petmatch = PetMatch.objects.get(pk = petmatches[petmatch_i].id)
+			print 'PetMatch threshold reached: %s ' %(str(petmatch.PetMatch_has_reached_threshold()))
+			print 'PetMatch is_open: %s verification_triggered: %s' % (str(petmatch.is_open),str(petmatch.verification_triggered))
+			if petmatch.PetMatch_has_reached_threshold() is True:	
+				self.assertFalse(petmatch.is_open)
+				self.assertTrue(petmatch.verification_triggered)
+	    	else:
+	    		self.assertFalse(petmatch.is_successful)
+	    		# self.assertFalse(petmatch.verification_triggered)
+		print 'Pet Match has passed the test: test_function_verify_PetMatch'
+
+	def test_function_close_PetMatch(self):
+		print_testing_name("test_function_close_PetMatch")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords
+		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+			#indexes
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)	
+			#objects
+			client = clients [client_i]
+			petmatch = petmatches [petmatch_i]		
+			verification_page_url = URL_VERIFY_PETMATCH + str(petmatch.id) + "/"
+			if petmatch.PetMatch_has_reached_threshold():
+					self.assertTrue(petmatch.verification_triggered)
+					self.assertFalse(petmatch.is_open)
+					user_indexes = [users.index(petmatch.lost_pet.proposed_by.user),users.index(petmatch.found_pet.proposed_by.user)]
+					old_pet_vote = petmatch.verification_votes
+					for user_i in user_indexes:
+						petmatch = PetMatch.objects.get(pk=petmatch.id)
+						user = users[user_i]
+						password = passwords[user_i]
+						#Log in First
+						loggedin = client.login(username = user.username, password = password)
+						self.assertTrue(loggedin == True)			
+						print "[INFO]:%s logs onto %s to enter the verification page..." % (user, client)
+						user_response = random.randint(1,2)
+						message = random.choice(['yes','no'])
+						post = {'message':message}
+						response = client.post(verification_page_url,post,follow = True)
+						self.assertEquals(response.status_code,200)
+						petmatch = PetMatch.objects.get(pk=petmatch.id)					
+					petmatch = PetMatch.objects.get(pk=petmatch.id)
+					new_pet_vote  = petmatch.verification_votes
+					self.assertTrue(petmatch.closed_date != None)
+					if new_pet_vote == '11':
+						self.assertTrue(petmatch.is_successful)
+						for pm in petmatch.lost_pet.lost_pet_related.all(): 
+							self.assertFalse(pm.is_open)
+							self.assertTrue(pm.closed_date != None)
+						for pm in petmatch.found_pet.found_pet_related.all(): 
+							self.assertFalse(pm.is_open)
+							self.assertTrue(pm.closed_date != None)
+					else:
+						self.assertFalse(petmatch.is_successful)
+			print 'Pet Match has passed the test: test_function_verify_PetMatch'

@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ModelForm
 from django import forms
-from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
+from django.db.models.signals import post_save, pre_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
 from django.core.files.storage import FileSystemStorage
 import PIL, os, time
@@ -55,8 +55,16 @@ class UserProfile (models.Model):
         self.save()
         log_activity(ACTIVITY_ACCOUNT_CREATED, self)
 
+    #check if username exists in the database
+    @staticmethod
+    def username_exists(username):
+        if User.objects.filter(username=username).count():
+            return True
+        return False            
+
     def __unicode__ (self):
          return '{ID{%s} %s}' % (self.id, self.user.username)
+
 
 class PetReport(models.Model):
 
@@ -141,6 +149,7 @@ class PetReport(models.Model):
         string = str(self.date_lost_or_found)
         return str
 
+
 #The Pet Match Object Model
 class PetMatch(models.Model):
 
@@ -150,18 +159,30 @@ class PetMatch(models.Model):
     proposed_by = models.ForeignKey('UserProfile', null=False, related_name='proposed_by_related')
     proposed_date = models.DateField(null=False, default=None, auto_now_add=True)
     description = models.CharField(max_length=PETMATCH_DESCRIPTION_LENGTH, null=False, default=None)
+    is_test = models.BooleanField(default = False)
     '''Non-Required Fields'''
-    #add a field to keep track of a successful  pet match
+    '''is_open will be set to False once it is triggered for verification i.e., it will not be available
+    to the crowd for viewing/voting after this petmatch triggers the verification workflow or if it is 
+    declared as a Failed PetMatch when a successful PetMatch is found for either of the PetReports associated with
+    the current Petmatch instance'''
     is_open = models.BooleanField(default=True)
     is_successful = models.BooleanField(default=False)
-    #pet match will be pending until we hear about re-unification
-    is_pending = models.BooleanField(default=True)
+    '''verification_triggered will be set to true if and when a PetMatch reaches the 
+    threshold for verification'''
+    verification_triggered = models.BooleanField(default=False)
     score = models.IntegerField(default=0)
-    closed_by = models.ForeignKey('UserProfile', null=True, related_name='closed_by_related')
-    closed_date = models.DateField(null=True)
+    #closed_by = models.ForeignKey('UserProfile', null=True, related_name='closed_by_related')
+    '''closed_date is the date when the PetMatch is closed for good (after verification)'''
+    closed_date = models.DateTimeField(null=True)
     up_votes = models.ManyToManyField('UserProfile', null=True, related_name='up_votes_related')
     down_votes = models.ManyToManyField('UserProfile', null=True, related_name='down_votes_related')
-    verification_votes = models.CharField(max_length=3,null=True)
+    '''verification_votes represents user responses sent via the verify_petmatch webpage.
+    the first bit holds the Lost Contact's response and the second bit holds the 
+    Found Contact's response. 
+    0 - No response was recorded
+    1 - user clicked on Yes
+    2 - User clicked on No'''
+    verification_votes = models.CharField(max_length=PETMATCH_VERIFICATION_VOTES_LENGTH,default='00')
 
     '''Because of the Uniqueness constraint that the PetMatch must uphold, we override the save method'''
     def save(self, *args, **kwargs):
@@ -241,60 +262,65 @@ class PetMatch(models.Model):
         else:
             return False
 
+    #Change this to verify_PetMatch
     def verify_petmatch(self):
-
-        pet_match = self
+        self.is_open = False
+        self.verification_triggered = True
+        self.save()
+        print '[INFO]: PetMatch is now closed to the crowd, verification has been triggered'
         petmatch_owner = self.proposed_by.user
         lost_pet_contact = self.lost_pet.proposed_by.user
         found_pet_contact = self.found_pet.proposed_by.user
-        if petmatch_owner.username == lost_pet_contact.username:
+        if petmatch_owner.username == lost_pet_contact.username or petmatch_owner.username == found_pet_contact.username: 
             Optionally_discuss_with_digital_volunteer = ""
-            email_petmatch_owner = False
         else:
-            Optionally_discuss_with_digital_volunteer = "You may also discuss this pet match with %s, the digital volunteer who proposed this pet match. You can reach %s at %s" % (pet_match.proposed_by.user.username,pet_match.proposed_by.user.username,pet_match.proposed_by.user.email)
-            email_petmatch_owner = True
-
-        #An email is sent to the lost pet owner
-        ctx = {'pet_type':'your lost pet','opposite_pet_type_contact':found_pet_contact,'pet_status':"found",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer}
-        email_body = render_to_string('/srv/epm/static/templates/matching/verification_email_to_pet_owner.txt',ctx)
-        email_subject = "We have a found a potential match for your pet!"
-        #lost_pet_contact.email_user(email_subject,email_body,from_email=None)
-        print 'email to lost pet owner: '+email_body
-        
-        ''' An email is sent to the lost pet owner '''
-        ctx = {'pet_type':'the pet you found','opposite_pet_type_contact':lost_pet_contact,'pet_status':"lost",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer}
-        email_body = render_to_string('/srv/epm/static/templates/matching/verification_email_to_pet_owner.txt',ctx)
-        email_subject = "We have a found a potential match for your pet!"
-        #found_pet_contact.email_user(email_subject,email_body,from_email=None)
-        print 'email to found pet owner: '+email_body
+            Optionally_discuss_with_digital_volunteer = "You may also discuss this pet match with %s, the digital volunteer who proposed this pet match. You can reach %s at %s" % (self.proposed_by.user.username,self.proposed_by.user.username,self.proposed_by.user.email)
+        '''An email is sent to the lost pet owner'''
+        ctx = {'pet_type':'your lost pet','opposite_pet_type_contact':found_pet_contact,'pet_status':"found",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer,"petmatch_id":self.id}
+        email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH,ctx)
+        email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
+        if not lost_pet_contact.get_profile().is_test:
+            lost_pet_contact.email_user(email_subject,email_body,from_email=None)
+        print '[INFO]: Email to lost pet owner: '+email_body
+        ''' An email is sent to the found pet owner '''
+        ctx = {'pet_type':'the pet you found','opposite_pet_type_contact':lost_pet_contact,'pet_status':"lost",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer,"petmatch_id":self.id}
+        email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH,ctx)
+        email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
+        if not found_pet_contact.get_profile().is_test:
+            found_pet_contact.email_user(email_subject,email_body,from_email=None)
+        print '[INFO]: Email to found pet owner: '+email_body
        
         '''If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact,
         an email will be sent to this person '''
-        ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
-        email_body = render_to_string('/srv/epm/static/templates/matching/verification_email_to_digital_volunteer.txt',ctx)
-        email_subject = 'Your pet match is close to being successful!'    
-        #petmatch_owner.email_user(email_subject,email_body,from_email=None)
-        print 'email to pet match owner: '+email_body
+        if Optionally_discuss_with_digital_volunteer != "":
+            ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
+            email_body = render_to_string(TEXTFILE_EMAIL_PETMATCH_PROPOSER,ctx)
+            email_subject =  EMAIL_SUBJECT_PETMATCH_PROPOSER  
+            if not petmatch_owner.get_profile().is_test:
+                petmatch_owner.email_user(email_subject,email_body,from_email=None)
+            print '[INFO]: Email to pet match owner: '+email_body
 
     def close_PetMatch(self):
         if '0' not in self.verification_votes:
-            self.is_open = False         
-            if self.verification_votes == 11:
+            self.closed_date = datetime_now()         
+            '''If the PetMatch is successful, all related PetMatches will be closed 
+            and is_successful is set to True'''
+            if self.verification_votes == '11':
                 self.is_successful = True
+                for petmatch in self.lost_pet.lost_pet_related.all(): 
+                    petmatch.is_open = False
+                    petmatch.closed_date = datetime_now()
+                    petmatch.save()
+                for petmatch in self.found_pet.found_pet_related.all():
+                    petmatch.is_open = False
+                    petmatch.closed_date = datetime_now()
+                    petmatch.save()
             self.save()    
-            print 'PetMatch %s has been closed' % (self)
-            for petmatch in self.lost_pet.lost_pet_related.all(): 
-                petmatch.is_open = False
-                petmatch.is_successful = False
-                PetMatch.save()
-            for petmatch in self.found_pet.found_pet_related.all():
-                petmatch.is_open = False
-                petmatch.is_successful = False
-                petmatch.save()
-
-
+            print '[INFO]: PetMatch %s has been closed' % (self)
+    
     def __unicode__ (self):
         return '{ID{%s} lost:%s, found:%s, proposed_by:%s}' % (self.id, self.lost_pet, self.found_pet, self.proposed_by)
+
 
 #The Chat Object Model
 class Chat (models.Model):
@@ -350,6 +376,7 @@ class PetReportForm (ModelForm):
         model = PetReport
         exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by')
 
+
 #The UserProfile ModelForm - used for editing the user profile
 #edit initial value of each field either in the view or in the template
 class UserProfileForm (forms.Form):
@@ -364,23 +391,25 @@ class UserProfileForm (forms.Form):
     confirm_password = forms.CharField(label="Confirm Password",max_length=30,widget = forms.PasswordInput,required=False) 
     photo = forms.ImageField(label="Profile Picture", required=False)
 
+
 class EditUserProfile(models.Model):
     user = models.OneToOneField(User,null=False,default=None)
     activation_key = models.CharField(max_length=40,null=True)
     date_of_change = models.DateTimeField(default=timezone.now)
     new_email = models.EmailField(null=True)
     def activation_key_expired(self):
-        """
-        Determine whether this ``RegistrationProfile``'s activation
-        key has expired, returning a boolean -- ``True`` if the key
+        """ADAPTED FROM DJANGO-REGISTRATION: https://bitbucket.org/ubernostrum/django-registration
+
+        Determine whether this activation key has expired, 
+        returning a boolean -- ``True`` if the key
         has expired.
         
         Key expiration is determined by a two-step process:
         
-        1. If the user has already activated, the key will have been
-           reset to the string constant ``ACTIVATED``. Re-activating
-           is not permitted, and so this method returns ``True`` in
-           this case.
+        1. If the user has already activated his new email, 
+           the key will have been reset to the string constant 
+           ``ACTIVATED``. Re-activating is not permitted, and so 
+           this method returns ``True`` in this case.
 
         2. Otherwise, the date the user changed his email is incremented by
            the number of days specified in the setting
@@ -419,6 +448,18 @@ def setup_UserProfile(sender, instance, created, **kwargs):
         UserProfile.objects.create(user=instance)
         #Create the first activity for this user
         log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
+
+#Post Add Signal function to check if a PetMatch has reached threshold
+@receiver(m2m_changed, sender=PetMatch.up_votes.through)
+def trigger_PetMatch_verification(sender, instance,action,**kwargs):
+    '''Checking condition that will return true once PetMatch reaches a threshold value,
+    if it returns true, pet match verification work flow is triggered'''
+    #print 'trigger_PetMatch_verification sign triggered'
+    if action == 'post_add':
+        if instance.PetMatch_has_reached_threshold():
+            print '[INFO]: PetMatch has reached the threshold'
+            instance.verify_petmatch()   
+            instance.save()
 
 ''' Import statements placed at the bottom of the page to prevent circular import dependence '''
 from logging import *
