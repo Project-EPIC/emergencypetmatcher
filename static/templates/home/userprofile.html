@@ -9,7 +9,7 @@
 {% block content_title %} User Profile {% endblock content_title %}
 
 {% block content %}
-
+	
 	<table border=0 width="100%">
 	<tr>
 	<td width="70%">
@@ -52,76 +52,79 @@
 				{% endif %}
 			{% endif %}
 			
+			<!-- User Data -->
 			<hr size="10" width="100%" color="white"/>
 			<h3>User Data:</h3>
-			<table>
-			    <tr align="left" class="even"><th>Username:</th> <td>{{ show_profile.user.username }}</td></tr>
-			    <tr align="left" class="odd"><th>Email:</th> <td>{{ show_profile.user.email|default:"Not provided" }}</td></tr>
-			    <tr align="left" class="even"><th>First name:</th> <td>{{ show_profile.user.first_name|default:"Not provided" }}</td></tr>
-			    <tr align="left" class="odd"><th>Last name:</th> <td>{{ show_profile.user.last_name|default:"Not provided" }}</td></tr>
-			    <tr align="left" class="even"><th>Last login:</th> <td>{{ last_login }}</td></tr>
-			</table>
-			</br>
-
-			<!-- Proposed Pet Reports -->
+				<table>
+				{% if show_profile.user.username == user.username or show_profile in user.userprofile.following.all %}
+			    	<tr align="left"><th>Username:</th> <td>{{ show_profile.user.username }}</td></tr>
+				    <tr align="left"><th>Email:</th> <td>{{ show_profile.user.email|default:"Not provided" }}</td></tr>
+				    <tr align="left"><th>First name:</th> <td>{{ show_profile.user.first_name|default:"Not provided" }}</td></tr>
+				    <tr align="left"><th>Last name:</th> <td>{{ show_profile.user.last_name|default:"Not provided" }}</td></tr>
+		    	{% endif %}
+		    	{% if show_profile.user.username == user.username %}
+		    		<tr align="left"><th>Last login:</th> <td>{{ show_profile.user.last_login }}</td></tr>
+		    	{% endif %}
+			    <tr align="left"><th>Reputation:</th> <td>{{ show_profile.reputation }}</td></tr>
+				</table>
+				</br>
 			
-				<h3>Proposed Pet Reports:</h3>
-			    <div class="prdp_ppm_wk">	
-			    	<div class = "prdp_overflow1"> 
-						{% for pet_report in show_profile.petreport_set.all %}
-						<div class="prdp_dialog">
-							<a class="prdp_pmdp_dialog_pr" href= "{% url 'disp_PetReport' pet_report.id %}" 
+			<!-- Proposed Pet Reports -->
+			<h3>Proposed Pet Reports:</h3>
+		    <div class="prdp_ppm_wk">	
+		    	<div class = "prdp_overflow1"> 
+					{% for pet_report in show_profile.petreport_set.all %}
+					<div class="prdp_dialog">
+						<a class="prdp_pmdp_dialog_pr" href= "{% url 'disp_PetReport' pet_report.id %}" 
+						name = "{{ pet_report.pet_name }}"
+						style="text-decoration:none; color:#663399; font-size:12px;}"
+						title="{% if pet_report.pet_name %}{{ pet_report.pet_name }}: {% endif %}{{ pet_report.status }} {{ pet_report.pet_type }}">
+						<strong>&nbsp;&nbsp;{{ pet_report.pet_name }}</strong><br/>
+						<img src="{{ STATIC_URL }}{{ pet_report.img_path }}" border=1 width=60 height=60/>
+						</a>
+					</div>
+					{% endfor %}
+			    </div>
+			</div>	
+			
+
+			<!-- Proposed Pet Matches -->			
+			<h3> Proposed Pet Matches </h3>
+	 		<div class="prdp_ppm_wk">   
+	 			<div class = "prdp_overflow1">      
+	 			{% for pet_match in show_profile.proposed_by_related.all %}	
+	 				<div class="pmdp_dialog">
+			            <a class="prdp_pmdp_dialog_pr" 
+			            	href = "{% url 'display_PetMatch' pet_match.id %}" name = ""
+			            	style="text-decoration:none; color:#663399; font-size:12px;}"
+			           		title="{{ pet_match.lost_pet.pet_name }}: Lost {{ pet_match.lost_pet.pet_type }} / {{ pet_match.found_pet.pet_name }}: Found {{ pet_match.found_pet.pet_type }}">
+							&nbsp;&nbsp;{{ pet_match.lost_pet.pet_name }} / {{ pet_match.found_pet.pet_name }}</br>
+							<img src="{{ STATIC_URL}}{{ pet_match.lost_pet.img_path }}" width="60" height="60"/>
+							<img src="{{ STATIC_URL}}{{ pet_match.found_pet.img_path }}" width="60" height="60"/>
+	             	    </a>
+	             	</div>
+	            {% endfor %}
+	            </div>
+	        </div>
+			
+ 
+			<!-- Working on Pet Report -->
+	     	<h3>Working-On Pet Reports:</h3>
+	     	<div class="prdp_ppm_wk">   
+	 			<div class = "prdp_overflow1">      				
+				{% for pet_report in show_profile.workers_related.all %}
+				    <div class="prdp_dialog">
+						<a class="prdp_pmdp_dialog_pr" href= "{% url 'disp_PetReport' pet_report.id %}" 
 							name = "{{ pet_report.pet_name }}"
 							style="text-decoration:none; color:#663399; font-size:12px;}"
 							title="{% if pet_report.pet_name %}{{ pet_report.pet_name }}: {% endif %}{{ pet_report.status }} {{ pet_report.pet_type }}">
 							<strong>&nbsp;&nbsp;{{ pet_report.pet_name }}</strong><br/>
-							<img src="{{ STATIC_URL }}{{ pet_report.img_path }}" border=1 width=60 height=60/>
-							</a>
-						</div>
-						{% endfor %}
-				    </div>
-				</div>	
-			
-
-			<!-- Proposed Pet Matches -->
-			
-				<h3> Proposed Pet Matches </h3>
-		 		<div class="prdp_ppm_wk">   
-		 			<div class = "prdp_overflow1">      
-		 			{% for pet_match in show_profile.proposed_by_related.all %}	
-		 				<div class="pmdp_dialog">
-				            <a class="prdp_pmdp_dialog_pr" 
-				            	href = "{% url 'display_PetMatch' pet_match.id %}" name = ""
-				            	style="text-decoration:none; color:#663399; font-size:12px;}"
-				           		title="{{ pet_match.lost_pet.pet_name }}: Lost {{ pet_match.lost_pet.pet_type }} / {{ pet_match.found_pet.pet_name }}: Found {{ pet_match.found_pet.pet_type }}">
-								&nbsp;&nbsp;{{ pet_match.lost_pet.pet_name }} / {{ pet_match.found_pet.pet_name }}</br>
-								<img src="{{ STATIC_URL}}{{ pet_match.lost_pet.img_path }}" width="60" height="60"/>
-								<img src="{{ STATIC_URL}}{{ pet_match.found_pet.img_path }}" width="60" height="60"/>
-		             	    </a>
-		             	</div>
-		            {% endfor %}
-		            </div>
-		        </div>
-			
- 
-			<!-- Working on Pet Report -->
-			
-		     	<h3>Working-On Pet Reports:</h3>
-		     	<div class="prdp_ppm_wk">   
-		 			<div class = "prdp_overflow1">      				
-					{% for pet_report in show_profile.workers_related.all %}
-					    <div class="prdp_dialog">
-							<a class="prdp_pmdp_dialog_pr" href= "{% url 'disp_PetReport' pet_report.id %}" 
-								name = "{{ pet_report.pet_name }}"
-								style="text-decoration:none; color:#663399; font-size:12px;}"
-								title="{% if pet_report.pet_name %}{{ pet_report.pet_name }}: {% endif %}{{ pet_report.status }} {{ pet_report.pet_type }}">
-								<strong>&nbsp;&nbsp;{{ pet_report.pet_name }}</strong><br/>
-								<img src="{{ STATIC_URL }}{{ pet_report.img_path }}" border=1 width=60 	height=60/>
-							</a>
-						</div>
-					{% endfor %}
+							<img src="{{ STATIC_URL }}{{ pet_report.img_path }}" border=1 width=60 	height=60/>
+						</a>
 					</div>
+				{% endfor %}
 				</div>
+			</div>
 					
 			</br>
 			</br>
@@ -134,51 +137,47 @@
 			<tr>
 				<td>
 				<!-- Following list -->
-				{% if show_profile.user.username == user.username %}
-					<h3>Following:</h3>
-					<div class="prdp_ppm_wk2">  
-						<div class = "prdp_overflow2">  
-						{% for following in show_profile.following.all %}
-							<a  class="prdp_pmdp_dialog_pr2"
-								href="{% url 'get_UserProfile_page' following.user.id %}"
-								style="text-decoration:none; color:green; font-size:12px;}"
-								title="{% if following.user.first_name %} {{ following.user.first_name }} {% endif %}@{{ following.user.username }}">
-								{% if following.photo %}
-									<img src="{{ STATIC_URL }}{{ following.photo }}" width=60 height=60/>
-								{% else %}
-									<img src="{{ STATIC_URL }}images/defaults/anonymous.gif" width=60 height=60/>
-								{% endif %}	
-							</a>
-		
-						{% endfor %}
-						</div>	
-					</div>							
-				{% endif %}	
+				<h3>Following:</h3>
+				<div class="prdp_ppm_wk2">  
+					<div class = "prdp_overflow2">  
+					{% for following in show_profile.following.all %}
+						<a  class="prdp_pmdp_dialog_pr2"
+							href="{% url 'get_UserProfile_page' following.user.id %}"
+							style="text-decoration:none; color:green; font-size:12px;}"
+							title="{% if following.user.first_name %} {{ following.user.first_name }} {% endif %}@{{ following.user.username }}">
+							{% if following.photo %}
+								<img src="{{ STATIC_URL }}{{ following.photo }}" width=60 height=60/>
+							{% else %}
+								<img src="{{ STATIC_URL }}images/defaults/anonymous.gif" width=60 height=60/>
+							{% endif %}	
+						</a>
+	
+					{% endfor %}
+					</div>	
+				</div>							
 				</td>
 			</tr>
 
 			<tr>
 				<td></br>
 				<!-- Follower list -->
-				{% if show_profile.user.username == user.username %}
-					<h3>Followers:</h3>
-					<div class="prdp_ppm_wk2">  
-						<div class = "prdp_overflow2">  	
-						{% for follower in show_profile.followers.all %}	
-							<a  class="prdp_pmdp_dialog_pr2"
-								href="{% url 'get_UserProfile_page' follower.user.id %}"
-							   	style="text-decoration:none; color:green; font-size:12px;}"
-							   	title="{% if follower.user.first_name %} {{ follower.user.first_name }} {% endif %}@{{ follower.user.username }}">
-								{% if follower.photo %}
-									<img src="{{ STATIC_URL }}{{ follower.photo }}" width=60 height=60/>
-								{% else %}
-									<img src="{{ STATIC_URL }}images/defaults/anonymous.gif" width=60 height=60/>
-								{% endif %}	
-							</a>			
-						{% endfor %}
-						</div>
-					</div>															
-				{% endif %}	
+				<h3>Followers:</h3>
+				<div class="prdp_ppm_wk2">  
+					<div class = "prdp_overflow2">  	
+					{% for follower in show_profile.followers.all %}	
+						<a  class="prdp_pmdp_dialog_pr2"
+							href="{% url 'get_UserProfile_page' follower.user.id %}"
+						   	style="text-decoration:none; color:green; font-size:12px;}"
+						   	title="{% if follower.user.first_name %} {{ follower.user.first_name }} {% endif %}@{{ follower.user.username }}">
+							{% if follower.photo %}
+								<img src="{{ STATIC_URL }}{{ follower.photo }}" width=60 height=60/>
+							{% else %}
+								<img src="{{ STATIC_URL }}images/defaults/anonymous.gif" width=60 height=60/>
+							{% endif %}	
+						</a>			
+					{% endfor %}
+					</div>
+				</div>															
 				</td>
 			</tr>
 

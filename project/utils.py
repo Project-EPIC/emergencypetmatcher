@@ -139,7 +139,7 @@ def create_random_User(i, pretty_name=True, test_user=True):
 	userprofile = user.get_profile()
 	userprofile.set_activity_log(is_test=test_user)
 	#Also, don't forget to create his/her list of followers.
-	create_random_following_list(user.get_profile())
+	# create_random_following_list(userprofile)
 	return (user, password)
 
 #returns a random list of UserProfiles
@@ -150,19 +150,25 @@ def create_random_Userlist(num_users = None):
 	userlist = random.sample(allusers,num_users)
 	return userlist
 
-#creates (and returns) a list of UserProfiles being followed by the input UserProfile
+#creates a list of UserProfiles being followed by the input UserProfile
 def create_random_following_list (userprofile, num_following=None):
 	allusers = UserProfile.objects.exclude(pk = userprofile.user.id)
-
 	if num_following == None:
-		num_following = random.randint(0, len(allusers))
-
+		num_following = random.randint(0, len(allusers)/2)
 	following_list = random.sample(allusers, num_following)
-
 	for followed in following_list:
 		userprofile.following.add(followed)
+	return userprofile
 
-	return userprofile.following.all()	
+#creates a list of PetReports being bookmarked by the input UserProfile
+def create_random_bookmark_list (userprofile, num_bookmark=None):
+	allpetreports = PetReport.objects.all()
+	if num_bookmark == None:
+		num_bookmark = random.randint(0, len(allpetreports)/3)
+	bookmark_list = random.sample(allpetreports, num_bookmark)
+	for bookmark in bookmark_list:
+		userprofile.bookmarks_related.add(bookmark)
+	return userprofile
 
 #Create Random Object for: PetReport
 def create_random_PetReport(user=None, status=None, pet_type=None):
@@ -341,6 +347,16 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 			petmatches [petmatch_i] = pm
 			petmatch_i += 1
 
+	# allusers = UserProfile.objects.all()
+
+	# # Create random following list
+	# for userprofile in allusers:
+	# 	userprofile=create_random_following_list(userprofile)
+
+	# # Create random bookmark list
+	# if create_petreports == True:
+	# 	for userprofile in allusers:
+	# 		userprofile=create_random_bookmark_list(userprofile)
 
 	if create_petreports == True and create_petmatches == True:
 		return (users, passwords, clients, petreports, petmatches)
@@ -352,18 +368,3 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 	return (users, passwords, clients)
 
 			
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

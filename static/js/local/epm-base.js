@@ -62,8 +62,13 @@ function index_fetch_activities (feedlist_item){
 			 		continue;
 
 			 	//Now add it to the list.
-			 	feedlist.append("<li style='margin-left:2px; padding-left:0px;'>" + activity + "</li>");
-			 }
+			 	if (activity.indexOf("you") > 0)
+			 		feedlist.append("<li style=background:#FFFEB3; margin-left:2px; padding-left:0px;>" + activity + "</li>");
+			 	else if (activity.indexOf("Bookmark") >= 0)
+			 		feedlist.append("<li style=background:#CCE6FF; margin-left:2px; padding-left:0px;>" + activity + "</li>");
+			 	else
+			 		feedlist.append("<li style=margin-left:2px; padding-left:0px;>" + activity + "</li>");
+			}
 
 			// Prepare layout options.
 			var options = {

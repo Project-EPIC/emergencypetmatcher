@@ -13,7 +13,6 @@ from django.utils.timezone import now as datetime_now
 import datetime
 from django.conf import settings
 
-
 '''===================================================================================
 [models.py]: Models for the EPM system
 ==================================================================================='''
@@ -32,14 +31,15 @@ class UserProfile (models.Model):
     '''Required Fields'''
     user = models.OneToOneField(User, null=False, default=None)
     photo = models.ImageField(upload_to='images/profile_images', null=True)
+    last_logout = models.DateTimeField(null=False, auto_now_add=True)
 
     '''Non-Required Fields'''
     following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
     is_test = models.BooleanField(default=False)
     chats = models.ManyToManyField('Chat', null=True)
+    reputation = models.FloatField(default=0, null=True)
     # facebook_cred = models.CharField(max_length=100, null=True)
     # twitter_cred = models.CharField(max_length=100, null=True)
-    reputation = models.FloatField(default=0, null=True)
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
 
@@ -141,6 +141,7 @@ class PetReport(models.Model):
         string = str(self.date_lost_or_found)
         return str
 
+
 #The Pet Match Object Model
 class PetMatch(models.Model):
 
@@ -148,9 +149,9 @@ class PetMatch(models.Model):
     lost_pet = models.ForeignKey('PetReport', null=False, default=None, related_name='lost_pet_related')
     found_pet = models.ForeignKey('PetReport', null=False, default=None, related_name='found_pet_related')
     proposed_by = models.ForeignKey('UserProfile', null=False, related_name='proposed_by_related')
-    proposed_date = models.DateTimeField(default=None, null=False, auto_now_add=True)
+    proposed_date = models.DateTimeField(null=False, auto_now_add=True)
     description = models.CharField(max_length=PETMATCH_DESCRIPTION_LENGTH, null=False, default=None)
-    
+ 
     '''Non-Required Fields'''
     is_open = models.BooleanField(default=True)
     score = models.IntegerField(default=0)
