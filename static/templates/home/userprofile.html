@@ -15,14 +15,14 @@
 	<td width="70%">
 			<table>
 			<tr>
-				<td>
+				<td style="padding: 0px 30px 0px 0px;">
 					{% if show_profile.photo %}		
 						<img src="{{ STATIC_URL }}{{ show_profile.photo }}" width=95 height=95/>	
 					{% else %}
 						<img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" width=95 height=95/>
 					{% endif %}
 				</td>
-				<td>
+				<td style="padding: 0px 20px 0px 0px;">
 					{% if show_profile.user.username == user.username %}
 						<h2>&nbsp;<i>Hi, {{ show_profile.user.username }}</i></h2>
 					{% else %}
@@ -32,6 +32,12 @@
 					<a class = "prdp_eachbutton" style="float:right;" href = "{% url 'editUserProfile_page' %}"> Edit your Profile </a>
 					{% endifequal %}
 
+				</td>
+				<td style="width:200px; background-color:white;">
+					<h3 style="text-align:center;"> Social Points </h3>
+					<div>
+						<h3 style="text-align:center; font-size:16px; color:blue;">{{ show_profile.reputation }} </h3>
+					</div>
 				</td>
 			</tr>
 			</table>

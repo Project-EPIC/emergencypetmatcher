@@ -95,7 +95,7 @@
 						{% if user.is_authenticated %}
 						
 						<li>
-							<a href= "{% url 'get_UserProfile_page' user.id %}">{{ user.username }}</a>
+							<a href= "{% url 'get_UserProfile_page' user.get_profile.id %}">{{ user.username }}</a>
 	
 						</li>
 							<form method = "post" action= "{% url 'logout_User' %}">

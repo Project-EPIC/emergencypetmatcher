@@ -666,15 +666,14 @@ class LoggingTesting (unittest.TestCase):
 		delete_all()
 
 	def test_create_activity_log(self):
-		print_testing_name("test_create_activity_real_log")
+		print_testing_name("test_create_activity_log")
 		iteration_time = 0.00
 
 		for i in range(NUMBER_OF_TESTS):
 			start_time = time.clock()
 			user = User.objects.create_user(username=generate_string(USER_USERNAME_LENGTH))
 			userprofile = user.get_profile()
-			is_test_user = random.choice([True,False])
-			userprofile.set_activity_log(is_test=is_test_user)
+			userprofile.set_activity_log(is_test=True)
 
 			#Now check: Does the userprofile's log file exist where it should?
 			self.assertTrue(log_exists(userprofile) == True)
@@ -694,7 +693,7 @@ class LoggingTesting (unittest.TestCase):
 		for i in range(NUMBER_OF_TESTS):
 			start_time = time.clock()
 			(user, password) = create_random_User(i, pretty_name=True)
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
+			user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 
 			with open(user_log_filename, 'r') as logger:
 
@@ -766,7 +765,7 @@ class LoggingTesting (unittest.TestCase):
 			client.logout()
 
 			#Now, check if the activity for submitting a PetReport appears in this user's log.
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
+			user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 			petreport = PetReport.objects.get(proposed_by = user, pet_name = user.username + str(i))
 
 			with open(user_log_filename, 'r') as logger:
@@ -846,7 +845,7 @@ class LoggingTesting (unittest.TestCase):
 			self.assertEquals(response.request ['PATH_INFO'], URL_HOME)		
 
 			#Now, check if the activity for proposing a PetMatch appears in this user's log.
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
+			user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 
 			with open(user_log_filename, 'r') as logger:
 				#Grab the PetMatch that has either been posted in the past or has been posted by this User.

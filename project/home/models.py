@@ -39,7 +39,7 @@ class UserProfile (models.Model):
     chats = models.ManyToManyField('Chat', null=True)
     # facebook_cred = models.CharField(max_length=100, null=True)
     # twitter_cred = models.CharField(max_length=100, null=True)
-    reputation = models.FloatField(default=0.0, null=True)
+    reputation = models.FloatField(default=0, null=True)
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
 
@@ -261,7 +261,6 @@ class ChatLine (models.Model):
 
 #The PetReport ModelForm
 class PetReportForm (ModelForm):
-    '''TODO: Use max_length values from constants.py'''
     '''Required Fields'''
     pet_type = forms.ChoiceField(label = 'Pet Type', choices = PET_TYPE_CHOICES, required = True)
     status = forms.ChoiceField(label = "Status (Lost/Found)", choices = STATUS_CHOICES, required = True)

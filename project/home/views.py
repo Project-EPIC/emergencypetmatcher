@@ -1,4 +1,3 @@
-# Create your views here.
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth import logout, login, authenticate 
 from django.contrib.auth.decorators import login_required
@@ -14,6 +13,11 @@ from django.http import Http404
 from django.core import mail
 from django.core.urlresolvers import reverse
 from registration.forms import RegistrationForm
+from django.forms.models import model_to_dict
+from registration.models import RegistrationProfile
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.utils.timezone import now as datetime_now
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
@@ -22,14 +26,9 @@ from home.models import *
 from constants import *
 from logging import *
 from registration import *
+from utils import *
 import oauth2 as oauth, random, urllib
-from django.forms.models import model_to_dict
-import utils
-import hashlib,random,re
-from registration.models import RegistrationProfile
-from django.template.loader import render_to_string
-from django.conf import settings
-from django.utils.timezone import now as datetime_now
+import hashlib, random, re
 
 #Home view, displays login mechanism
 def home (request):
@@ -101,8 +100,8 @@ def login_User(request):
         password = request.POST['password']
         user = authenticate(username=username, password=password)
 
-        if user is not None:
-            if user.is_active:
+        if user != None:
+            if user.is_active == True:
                 userprofile = user.get_profile()
 
                 if log_exists(userprofile) == False:
@@ -111,11 +110,15 @@ def login_User(request):
                 login(request, user)
                 messages.success(request, 'Welcome, %s!' % (username))
                 log_activity(ACTIVITY_LOGIN, user.get_profile())
-                return redirect(request.REQUEST ['next'])
+                next_url = request.REQUEST ['next']
+
+                if "//" in next_url and re.match(r'[^\?]*//', next_url):
+                    next_url = settings.LOGIN_REDIRECT_URL
+
+                return redirect(next_url)
 
             else:
                 messages.error(request, "You haven't activated your account yet. Please check your email.")
-                
         else:
             messages.error(request, 'Invalid Login credentials. Please try again.')
 
