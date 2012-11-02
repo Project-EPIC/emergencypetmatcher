@@ -327,19 +327,27 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 def update_reputation(userprofile, activity):
 
 	if activity == ACTIVITY_PETMATCH_UPVOTE:
-		userprofile.reputation += 2
+		userprofile.reputation += REWARD_PETMATCH_VOTE
 		userprofile.save()
 
 	elif activity == ACTIVITY_PETMATCH_DOWNVOTE:
-		userprofile.reputation += 2
+		userprofile.reputation += REWARD_PETMATCH_VOTE
 		userprofile.save()
 
 	elif activity == ACTIVITY_PETREPORT_SUBMITTED:
-		userprofile.reputation += 5
+		userprofile.reputation += REWARD_PETREPORT_SUBMIT
 		userprofile.save()
 
 	elif activity == ACTIVITY_PETMATCH_PROPOSED:
-		userprofile.reputation += 5
+		userprofile.reputation += REWARD_PETMATCH_PROPOSE
+		userprofile.save()
+
+	elif activity == ACTIVITY_USER_BEING_FOLLOWED:
+		userprofile.reputation += REWARD_USER_FOLLOWED
+		userprofile.save()
+
+	elif activity == ACTIVITY_USER_BEING_UNFOLLOWED:
+		userprofile.reputation -= REWARD_USER_FOLLOWED
 		userprofile.save()
 
 	else:

@@ -30,6 +30,7 @@ from registration.models import RegistrationProfile
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.timezone import now as datetime_now
+from utils import *
 
 #Home view, displays login mechanism
 def home (request):
@@ -186,7 +187,10 @@ def follow(request, userprofile_id1, userprofile_id2):
             messages.success(request, "You are already following '" + str(follow.user.username) + "'")        
         else:
             me.following.add(follow)
-            messages.success(request, "You have successfully followed '" + str(follow.user.username) + "'") 
+            # add points to the user who is being followed (i.e. the user under variable "follow") 
+            update_reputation(follow, ACTIVITY_USER_BEING_FOLLOWED)
+
+            messages.success(request, "You have successfully followed '" + str(follow.user.username) + "'")
     return redirect('/UserProfile/' + userprofile_id1)
 
 @login_required
@@ -196,6 +200,9 @@ def unfollow(request, userprofile_id1, userprofile_id2):
     if not userprofile_id1 == userprofile_id2:
         if unfollow in me.following.all():
             me.following.remove(unfollow)
+            # remove points to the use who has been unfollowed (i.e. the user under variable "unfollow")
+            update_reputation(unfollow, ACTIVITY_USER_BEING_UNFOLLOWED)
+
             messages.success(request, "You have successfully unfollowed '" + str(unfollow.user.username) + "'") 
     return redirect('/UserProfile/' + userprofile_id1)
 
