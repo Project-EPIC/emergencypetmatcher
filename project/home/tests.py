@@ -11,9 +11,6 @@ from project.settings import TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD
 from project.settings import TEST_DOMAIN
 import unittest, string, random, sys, time, urlparse
 
-#We are using the test log directory.
-ACTIVITY_LOG_DIRECTORY = TEST_ACTIVITY_LOG_DIRECTORY
-
 '''===================================================================================
 ModelTesting: Testing for EPM Models
 ==================================================================================='''
@@ -483,6 +480,134 @@ class LoginTesting (unittest.TestCase):
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)
 
+
+'''===================================================================================
+SocialAuthTesting: Testing for Social Authentication
+==================================================================================='''
+import urlparse
+from selenium import webdriver
+from django.test import TestCase
+from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD
+from project.settings import TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD
+from project.settings import TEST_DOMAIN
+from time import sleep
+
+class SocialAuthTesting(TestCase):
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+
+    def tearDown(self):
+        self.driver.quit()
+        # pass
+
+    def url(self, path):
+        return urlparse.urljoin(TEST_DOMAIN, path)
+
+    def test_twitter_authentication(self):
+    	print "\n>>>> Testing 'test_twitter_authentication'"
+
+        start_time = time.clock()
+
+        # Assert the username and passward for the testing Twitter account are not none
+        self.assertTrue(TEST_TWITTER_USER)
+        self.assertTrue(TEST_TWITTER_PASSWORD)
+
+        # Go to Twitter App Authorization page
+        self.driver.get(self.url('/login/twitter/'))
+        self.assertEqual("Twitter / Authorize an application", self.driver.title)
+        print "  Redirecting to log in Twitter App Authorization page."
+
+        # Log in Twitter using the testing user credential
+        username_field = self.driver.find_element_by_id('username_or_email')
+        username_field.send_keys(TEST_TWITTER_USER)
+        password_field = self.driver.find_element_by_id('password')
+        password_field.send_keys(TEST_TWITTER_PASSWORD)
+ 
+        try:
+        	# Try to log in
+            password_field.submit()           
+            sleep(5)
+        
+	        # If the testing user is not found in the user profile table,
+	        # the user will be prompted to submit a username 
+            try:
+	        	assert "Social Account" in self.driver.title
+	        	username_field = self.driver.find_element_by_id('username_id')
+	        	# username = "twitter_test_user" + str(random.randrange(100, 999))
+	        	username =  str(random.randrange(100, 999))
+	        	username_field.send_keys(username)
+	        	email_field = self.driver.find_element_by_id('email_id')
+	         	email = "twitter_test_user@twitter.com"
+	         	email_field.send_keys(email)
+	         	# username_field.submit()	  
+	         	self.driver.find_element_by_id("submit").click()
+	         	# print "  Submitting a username '%s' for a created user profile account." % username
+            except:
+                pass
+	        
+	        # Assert the user logged in and has been redirected to the app home page 
+	        # after successful authentication by Twitter 
+            assert "EPM" in self.driver.title
+            self.assertTrue(self.driver.find_element_by_id('logout'))
+            print "  Successfully logging in EPM home page with Twitter authentication."
+        except:
+        	print "  Unable to authenticate the testing user with Twitter."
+
+        end_time = time.clock()
+        print '\n\tTotal Time: %s sec' % (end_time - start_time)
+       
+
+    def test_facebook_authentication(self):
+    	print "\n>>>> Testing 'test_facebook_authentication'"
+
+        start_time = time.clock()
+
+        # Assert the username and passward for the testing Facebook account are not none
+        self.assertTrue(TEST_FACEBOOK_USER)
+        self.assertTrue(TEST_FACEBOOK_PASSWORD)
+
+        # Go to Facebook App Authorization page
+        self.driver.get(self.url('/login/facebook/'))
+        self.assertEqual("Log In | Facebook", self.driver.title)
+        print "  Redirecting to log in Facebook App Authorization page."
+
+        # Log in Facebook using the testing user credential
+        username_field = self.driver.find_element_by_id('email')
+        username_field.send_keys(TEST_FACEBOOK_USER)
+        password_field = self.driver.find_element_by_id('pass')
+        password_field.send_keys(TEST_FACEBOOK_PASSWORD)
+
+        try:
+        	# Try to log in
+            password_field.submit()           
+            sleep(5)
+             
+            # If the testing user is not found in the user profile table,
+            # the user will be prompted to submit a username
+            try:
+	        	assert "Social Account" in self.driver.title
+	        	username_field = self.driver.find_element_by_id('username_id')
+	        	# username = "facebook_test_user" + str(random.randrange(100, 999))
+	        	username = str(random.randrange(100, 999))
+	        	username_field.send_keys(username)
+	         	username_field.submit()
+	         	# print "  Submitting a username '%s' for a created user profile account." % username
+            except:
+                pass
+  
+            # Assert the user logged in and has been redirected to the app home page
+            # after successful authentication by Facebook
+            assert "EPM" in self.driver.title
+            self.assertTrue(self.driver.find_element_by_id('logout'))
+            print "  Successfully logging in EPM home page with Facebook authentication."
+
+        except:
+        	print "  Unable to authenticate the testing user with Facebook."
+        	
+        end_time = time.clock()
+        print '\n\tTotal Time: %s sec' % (end_time - start_time)
+ 
+
 '''===================================================================================
 UserProfileTesting: Testing for EPM User Profile Page
 ==================================================================================='''
@@ -530,6 +655,7 @@ class UserProfileTesting (unittest.TestCase):
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)
+
 
 	'''EditUserProfile Tests'''
 	def test_editUserProfile_savePassword(self):
@@ -593,6 +719,7 @@ class UserProfileTesting (unittest.TestCase):
 		print ''
 		performance_report(iteration_time)
 
+
 	def test_editUserProfile_saveProfile(self):
 		print_testing_name("test_editUserProfile_saveProfile")
 		iteration_time = 0.00
@@ -652,7 +779,111 @@ class UserProfileTesting (unittest.TestCase):
 		performance_report(iteration_time)
 		
 
+'''===================================================================================
+FollowTesting: Testing for EPM Following and Unfollowing functionalities
+==================================================================================='''
+class FollowingTesting (unittest.TestCase):
 
+    # Get rid of all objects in the QuerySet.
+    def setUp(self):
+        User.objects.all().delete()
+        UserProfile.objects.all().delete()
+
+    # Get rid of all objects in the QuerySet.
+    def tearDown(self):
+        User.objects.all().delete()
+        UserProfile.objects.all().delete()
+
+    def test_following_and_unfollowing_a_user(self):
+        print "\n>>>> Testing 'test_following_and_unfollowing_a_user' for %d iterations " % NUMBER_OF_TESTS
+
+        iteration_time = 0.00
+
+        # Need to setup clients, users, and their passwords in order to simula the following function.
+        (users, passwords, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
+        print users
+        for i in range (NUMBER_OF_TESTS):
+            start_time = time.clock()
+
+			# indexes
+            user_one_i = random.randrange(0, NUMBER_OF_TESTS)
+            user_two_i = random.randrange(0, NUMBER_OF_TESTS)
+            if user_one_i == user_two_i: 
+            	continue
+            client_i = random.randrange(0, NUMBER_OF_TESTS)
+
+            # objects
+            user_one = users [user_one_i]
+            password_one = passwords [user_one_i]
+            client = clients [client_i]
+            user_two = users [user_two_i]
+            password_two = passwords [user_two_i]
+            print "\n%s ............................................................." % i
+            print "  %s (id:%s) and %s (id:%s) have been created." % (user_one, user_one.id, user_two, user_two.id)
+
+			#Log onto the first user.
+            client = clients [client_i]
+            loggedin = client.login(username = user_one.username, password = password_one)
+            self.assertTrue(loggedin == True)			
+            print "  %s logs onto %s to follow %s." % (user_one, client, user_two)
+
+            # Go to the second user's profile page
+            response = client.get(URL_USERPROFILE + str(user_two.id) + "/")
+            self.assertEquals(response.status_code, 200)
+
+            # ...................Testing Following Function.........................
+
+            # Make the POST request Call for following the second user
+            follow_url = URL_FOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
+            post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
+            response = client.post(follow_url, post, follow=True)
+
+			# Make assertions
+            self.assertEquals(response.status_code, 200)
+            self.assertTrue(len(response.redirect_chain) == 2)
+            self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/UserProfile/'+ str(user_two.id) )
+            self.assertEquals(response.redirect_chain[0][1], 302)
+            self.assertTrue(response.request ['PATH_INFO'] == URL_USERPROFILE + str(user_two.id) + "/")
+
+            # Assert that 
+            # the second user is in the first user's following list, and 
+            # the first user is in the second user's followers list
+            self.assertTrue(user_two.userprofile in user_one.userprofile.following.all())
+            self.assertTrue(user_one.userprofile in user_two.userprofile.followers.all())
+            print "  %s first followed %s." % (user_one, user_two)
+ 
+            # ...................Testing Unfollowing Function.........................
+
+            # Make the POST request Call for unfollowing the second user
+            unfollow_url = URL_UNFOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
+            post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
+            response = client.post(unfollow_url, post, follow=True)
+
+			# Make assertions
+            self.assertEquals(response.status_code, 200)
+            self.assertTrue(len(response.redirect_chain) == 2)
+            self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/UserProfile/'+ str(user_two.id) )
+            self.assertEquals(response.redirect_chain[0][1], 302)
+            self.assertTrue(response.request ['PATH_INFO'] == URL_USERPROFILE + str(user_two.id) + "/")
+ 
+            # Assert that 
+            # the second user is not in the first user's following list, and 
+            # the first user is not in the second user's followers list
+            self.assertTrue(not user_two.userprofile in user_one.userprofile.following.all())
+            self.assertTrue(not user_one.userprofile in user_two.userprofile.followers.all())
+            print "  %s then unfollowed %s." % (user_one, user_two)
+
+            # Logout the first user
+            client.logout()
+
+            end_time = time.clock()
+            iteration_time += (end_time - start_time)
+
+
+        print ''
+        self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
+        self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+        performance_report(iteration_time)
 
 
 '''===================================================================================
@@ -669,15 +900,14 @@ class LoggingTesting (unittest.TestCase):
 		delete_all()
 
 	def test_create_activity_log(self):
-		print_testing_name("test_create_activity_real_log")
+		print_testing_name("test_create_activity_log")
 		iteration_time = 0.00
 
 		for i in range(NUMBER_OF_TESTS):
 			start_time = time.clock()
 			user = User.objects.create_user(username=generate_string(USER_USERNAME_LENGTH))
 			userprofile = user.get_profile()
-			is_test_user = random.choice([True,False])
-			userprofile.set_activity_log(is_test=is_test_user)
+			userprofile.set_activity_log(is_test=True)
 
 			#Now check: Does the userprofile's log file exist where it should?
 			self.assertTrue(log_exists(userprofile) == True)
@@ -697,7 +927,7 @@ class LoggingTesting (unittest.TestCase):
 		for i in range(NUMBER_OF_TESTS):
 			start_time = time.clock()
 			(user, password) = create_random_User(i, pretty_name=True)
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
+			user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 
 			with open(user_log_filename, 'r') as logger:
 
@@ -769,7 +999,7 @@ class LoggingTesting (unittest.TestCase):
 			client.logout()
 
 			#Now, check if the activity for submitting a PetReport appears in this user's log.
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
+			user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 			petreport = PetReport.objects.get(proposed_by = user, pet_name = user.username + str(i))
 
 			with open(user_log_filename, 'r') as logger:
@@ -849,7 +1079,7 @@ class LoggingTesting (unittest.TestCase):
 			self.assertEquals(response.request ['PATH_INFO'], URL_HOME)		
 
 			#Now, check if the activity for proposing a PetMatch appears in this user's log.
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
+			user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 
 			with open(user_log_filename, 'r') as logger:
 				#Grab the PetMatch that has either been posted in the past or has been posted by this User.
@@ -871,7 +1101,271 @@ class LoggingTesting (unittest.TestCase):
 			iteration_time += (end_time - start_time)		
 
 		print ''
-		performance_report(iteration_time)		
+		performance_report(iteration_time)
+
+
+	def test_log_following_UserProfile(self):
+		print_testing_name("test_log_following_UserProfile")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_one_i = random.randrange(0, NUMBER_OF_TESTS)
+			user_two_i = random.randrange(0, NUMBER_OF_TESTS)
+			if user_one_i == user_two_i:
+			    continue
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+
+			#objects
+			user_one = users [user_one_i]
+			password_one = passwords [user_one_i]
+			user_two = users [user_two_i]
+			password_two = passwords [user_two_i]
+			print "%s" % i
+			print "%s (id:%s) and %s (id:%s) have been created." % (user_one, user_one.id, user_two, user_two.id)
+
+			#Log in First.
+			client = clients [client_i]
+			loggedin = client.login(username = user_one.username, password = password_one)
+			self.assertTrue(loggedin == True)
+			print "[INFO]:%s logs onto %s to follow %s." % (user_one, client, user_two)			
+
+			# Go to the second user's profile page
+			response = client.get(URL_USERPROFILE + str(user_two.id) + "/")
+			self.assertEquals(response.status_code, 200)
+
+			# Make the POST request Call for following the second user
+			follow_url = URL_FOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
+			post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
+			response = client.post(follow_url, post, follow=True)
+			self.assertEquals(response.status_code, 200)
+			client.logout()						
+
+			# Check if the activity for following a UserProfile appears in this user_one's log.
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + user_one.username + ".log"
+			with open(user_log_filename, 'r') as logger:
+				print "[INFO]:%s has followed %s" % (user_one, user_two)
+				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_FOLLOWING, userprofile=user_one.get_profile(), userprofile2=user_two.get_profile()) == True)
+
+			# Check if the activity for following a UserProfile appears in this user_two's log.
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + user_two.username + ".log"
+			with open(user_log_filename, 'r') as logger:
+				print "[INFO]:%s has been followed by %s" % (user_two, user_one)
+				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_FOLLOWER, userprofile=user_two.get_profile(), userprofile2=user_one.get_profile()) == True)
+
+			logger.close()			
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)		
+
+		print ''
+		performance_report(iteration_time)
+
+
+	def test_log_unfollowing_UserProfile(self):
+		print_testing_name("test_log_unfollowing_UserProfile")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_one_i = random.randrange(0, NUMBER_OF_TESTS)
+			user_two_i = random.randrange(0, NUMBER_OF_TESTS)
+			if user_one_i == user_two_i:
+			    continue
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+
+			#objects
+			user_one = users [user_one_i]
+			password_one = passwords [user_one_i]
+			user_two = users [user_two_i]
+			password_two = passwords [user_two_i]
+			print "%s" % i
+			print "%s (id:%s) and %s (id:%s) have been created." % (user_one, user_one.id, user_two, user_two.id)
+
+			#Log in First.
+			client = clients [client_i]
+			loggedin = client.login(username = user_one.username, password = password_one)
+			self.assertTrue(loggedin == True)
+			print "[INFO]:%s logs onto %s to follow %s." % (user_one, client, user_two)			
+
+			# Go to the second user's profile page
+			response = client.get(URL_USERPROFILE + str(user_two.id) + "/")
+			self.assertEquals(response.status_code, 200)
+
+			# Make the POST request Call for following the second user
+			follow_url = URL_FOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
+			post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
+			response = client.post(follow_url, post, follow=True)
+			self.assertEquals(response.status_code, 200)
+
+			# Make the POST request Call for unfollowing the second user
+			unfollow_url = URL_UNFOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
+			post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
+			response = client.post(unfollow_url, post, follow=True)
+			self.assertEquals(response.status_code, 200)
+			client.logout()						
+
+			# Check if the activity for unfollowing a UserProfile appears in this user_one's log.
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + user_one.username + ".log"
+			with open(user_log_filename, 'r') as logger:
+				print "[INFO]:%s has unfollowed %s" % (user_one, user_two)
+				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_UNFOLLOWING, userprofile=user_one.get_profile(), userprofile2=user_two.get_profile()) == True)
+
+			# Check if the activity for unfollowing a UserProfile appears in this user_two's log.
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + user_two.username + ".log"
+			with open(user_log_filename, 'r') as logger:
+				print "[INFO]:%s has been unfollowed by %s" % (user_two, user_one)
+				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_UNFOLLOWER, userprofile=user_two.get_profile(), userprofile2=user_one.get_profile()) == True)
+
+			logger.close()			
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)		
+
+		print ''
+		performance_report(iteration_time)
+
+
+	def test_log_add_PetReport_bookmark(self):
+		print_testing_name("test_log_add_PetReport_bookmark")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petreport = petreports [petreport_i]
+			print "%s" % i
+			print "A user %s and a pet report %s have been created." % (user.userprofile, petreport)
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "[INFO]:%s logs onto %s to enter the prdp interface to add a bookmark." % (user, client)			
+
+			# Go to the PRDP (Pet Report Detailed Page) interface
+			response = client.get(URL_PRDP + str(petreport.id) + "/")
+			self.assertEquals(response.status_code, 200)
+			old_bookmarks_count = user.get_profile().bookmarks_related.count()
+
+			#if user has bookmarked this petreport previously,
+			if(petreport.UserProfile_has_bookmarked(user.get_profile())):
+				previously_bookmarked = True
+			else:
+				previously_bookmarked = False
+
+			# Add a bookmark
+			add_bookmark_url = URL_BOOKMARK_PETREPORT
+			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Bookmark this Pet"}
+			response = client.post(add_bookmark_url, post, follow=True)
+			self.assertEquals(response.status_code, 200)
+			client.logout()	
+			new_bookmarks_count = user.get_profile().bookmarks_related.count()
+			
+			#Make assertions
+			if(not previously_bookmarked):
+				self.assertEquals(old_bookmarks_count, (new_bookmarks_count-1))
+
+			# Check if the activity for adding a PetReport bookmark appears in this user's log.
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+			with open(user_log_filename, 'r') as logger:
+				print "[INFO]:%s has added a bookmark for %s." % (user, petreport)
+				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)
+
+			logger.close()			
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)		
+
+		print ''
+		performance_report(iteration_time)
+
+
+	def test_log_remove_PetReport_bookmark(self):
+		print_testing_name("test_log_remove_PetReport_bookmark")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petreport = petreports [petreport_i]
+			print "%s" % i
+			print "A user %s and a pet report %s have been created." % (user.userprofile, petreport)
+
+			# Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "[INFO]:%s logs onto %s to enter the prdp interface to remove a bookmark." % (user, client)			
+
+			# Go to the PRDP (Pet Report Detailed Page) interface
+			response = client.get(URL_PRDP + str(petreport.id) + "/")
+			self.assertEquals(response.status_code, 200)
+
+			# Add a bookmark
+			add_bookmark_url = URL_BOOKMARK_PETREPORT
+			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Bookmark this Pet"}
+			response = client.post(add_bookmark_url, post, follow=True)	
+			self.assertEquals(response.status_code, 200)
+			old_bookmarks_count = user.get_profile().bookmarks_related.count()
+
+			# Remove the bookmark
+			remove_bookmark_url = URL_BOOKMARK_PETREPORT
+			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Remove Bookmark"}
+			response = client.post(remove_bookmark_url, post, follow=True)
+			self.assertEquals(response.status_code, 200)
+			new_bookmarks_count = user.get_profile().bookmarks_related.count()
+			client.logout()	
+
+			#Make assertions
+			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
+
+			# Check if the activity for adding a PetReport bookmark appears in this user's log.
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
+			with open(user_log_filename, 'r') as logger:
+				print "[INFO]:%s has removed a bookmark for %s." % (user, petreport)
+				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)
+
+			logger.close()			
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)		
+
+		print ''
+		performance_report(iteration_time)
+
 
 	def test_get_activities_json(self):
 		print_testing_name("test_get_activities_json")
@@ -908,7 +1402,7 @@ class LoggingTesting (unittest.TestCase):
 			activities = []
 			random_activity_range = random.randrange(0, len(UserProfile.objects.all()))
 			for following in user.get_profile().following.all().order_by("?")[:random_activity_range]:
-				log = get_recent_log(following)
+				log = get_recent_activites_from_log(following)
 				if log != None:
 					activities.append(log)
 
@@ -933,223 +1427,137 @@ class LoggingTesting (unittest.TestCase):
 		performance_report(iteration_time)	
 
 
-'''===================================================================================
-SocialAuthTesting: Testing for Social Authentication
-==================================================================================='''
+	def test_get_activities_json_for_anonymous_user(self):
+		print_testing_name("test_get_activities_json_for_anonymous_user")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients) = create_test_view_setup()
 
-class SocialAuthTesting(unittest.TestCase):
-    def setUp(self):
-        self.driver = webdriver.Chrome()
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
 
-    def tearDown(self):
-        self.driver.quit()
-        # pass
+			#indexes
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
 
-    def url(self, path):
-        return urlparse.urljoin(TEST_DOMAIN, path)
+			#objects
+			client = clients [client_i]
+			
+			#Request the get_activities_json view function()
+			response = client.get(URL_GET_ACTIVITIES, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
-    def test_twitter_authentication(self):
-    	print "\n>>>> Testing 'test_twitter_authentication'"
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], URL_GET_ACTIVITIES)
 
-        start_time = time.clock()
+			#But now, let's test to get and assert those actual activities
+			activities = []
+			max_num_activities = ACTIVITY_FEED_LENGTH
+			for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:max_num_activities]:
+				activities += get_recent_activites_from_log(userprofile=userprof, num_activities=1)			
+			num_activities = len(activities)
+			print "=======[INFO]: The anonymous user got an activity feed list of size %d when the maximum length = %d" % (num_activities, max_num_activities)
 
-        # Assert the username and passward for the testing Twitter account are not none
-        self.assertTrue(TEST_TWITTER_USER)
-        self.assertTrue(TEST_TWITTER_PASSWORD)
+			#Bounds checking
+			self.assertTrue(num_activities >=0 and num_activities <= max_num_activities)
 
-        # Go to Twitter App Authorization page
-        self.driver.get(self.url('/login/twitter/'))
-        self.assertEqual("Twitter / Authorize an application", self.driver.title)
-        print "  Redirecting to log in Twitter App Authorization page."
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)		
 
-        # Log in Twitter using the testing user credential
-        username_field = self.driver.find_element_by_id('username_or_email')
-        username_field.send_keys(TEST_TWITTER_USER)
-        password_field = self.driver.find_element_by_id('password')
-        password_field.send_keys(TEST_TWITTER_PASSWORD)
- 
-        try:
-        	# Try to log in
-            password_field.submit()           
-            sleep(5)
-        
-	        # If the testing user is not found in the user profile table,
-	        # the user will be prompted to submit a username 
-            try:
-	        	assert "Username" in self.driver.title
-	        	username_field = self.driver.find_element_by_id('id_username')
-	        	username = "twitter_testing_user" + str(random.randint(100, 999))
-	        	username_field.send_keys(username)
-	         	username_field.submit()
-	         	print "  Submitting a username '%s' for a created user profile account." % username
-            except:
-                pass
-	        
-	        # Assert the user logged in and has been redirected to the app home page 
-	        # after successful authentication by Twitter 
-            assert "EPM" in self.driver.title
-            self.assertTrue(self.driver.find_element_by_id('logout'))
-            print "  Successfully logging in EPM home page with Twitter authentication."
-        except:
-        	print "  Unable to authenticate the testing user with Twitter."
-
-        end_time = time.clock()
-        print '\n\tTotal Time: %s sec' % (end_time - start_time)
-       
-
-    def test_facebook_authentication(self):
-    	print "\n>>>> Testing 'test_facebook_authentication'"
-
-        start_time = time.clock()
-
-        # Assert the username and passward for the testing Facebook account are not none
-        self.assertTrue(TEST_FACEBOOK_USER)
-        self.assertTrue(TEST_FACEBOOK_PASSWORD)
-
-        # Go to Facebook App Authorization page
-        self.driver.get(self.url('/login/facebook/'))
-        self.assertEqual("Log In | Facebook", self.driver.title)
-        print "  Redirecting to log in Facebook App Authorization page."
-
-        # Log in Facebook using the testing user credential
-        username_field = self.driver.find_element_by_id('email')
-        username_field.send_keys(TEST_FACEBOOK_USER)
-        password_field = self.driver.find_element_by_id('pass')
-        password_field.send_keys(TEST_FACEBOOK_PASSWORD)
-
-        try:
-        	# Try to log in
-            password_field.submit()           
-            sleep(5)
-             
-            # If the testing user is not found in the user profile table,
-            # the user will be prompted to submit a username
-            try:
-	        	assert "Username" in self.driver.title
-	        	username_field = self.driver.find_element_by_id('id_username')
-	        	username = "facebook_testing_user" + str(random.randint(100, 999))
-	        	username_field.send_keys(username)
-	         	username_field.submit()
-	         	print "  Submitting a username '%s' for a created user profile account." % username
-            except:
-                pass
-  
-            # Assert the user logged in and has been redirected to the app home page
-            # after successful authentication by Facebook
-            assert "EPM" in self.driver.title
-            self.assertTrue(self.driver.find_element_by_id('logout'))
-            print "  Successfully logging in EPM home page with Facebook authentication."
-
-        except:
-        	print "  Unable to authenticate the testing user with Facebook."
-        	
-        end_time = time.clock()
-        print '\n\tTotal Time: %s sec' % (end_time - start_time)
- 
-'''===================================================================================
-FollowTesting: Testing for EPM Following and Unfollowing functionality
-==================================================================================='''
-
-class FollowingTesting (unittest.TestCase):
-
-    # Get rid of all objects in the QuerySet.
-    def setUp(self):
-        User.objects.all().delete()
-        UserProfile.objects.all().delete()
-
-    # Get rid of all objects in the QuerySet.
-    def tearDown(self):
-        User.objects.all().delete()
-        UserProfile.objects.all().delete()
-
-    def test_following_and_unfollowing_a_user(self):
-        print "\n>>>> Testing 'test_following_and_unfollowing_a_user' for %d iterations " % NUMBER_OF_TESTS
-
-        iteration_time = 0.00
-
-        # Need to setup clients, users, and their passwords in order to simula the following function.
-        (users, passwords, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
-
-        for i in range (NUMBER_OF_TESTS):
-            start_time = time.clock()
-
-			# indexes
-            user_one_i = random.randrange(0, NUMBER_OF_TESTS)
-            user_two_i = random.randrange(0, NUMBER_OF_TESTS)
-            if user_one_i == user_two_i: 
-            	continue
-            client_i = random.randrange(0, NUMBER_OF_TESTS)
-
-            # objects
-            user_one = users [user_one_i]
-            password_one = passwords [user_one_i]
-            client = clients [client_i]
-            user_two = users [user_two_i]
-            password_two = passwords [user_two_i]
-            print "%s" % i
-            print "  %s (id:%s) and %s (id:%s) have been created." % (user_one, user_one.id, user_two, user_two.id)
-
-			#Log onto the first user.
-            client = clients [client_i]
-            loggedin = client.login(username = user_one.username, password = password_one)
-            self.assertTrue(loggedin == True)			
-            print "  %s logs onto %s to follow %s." % (user_one, client, user_two)
-
-            # Go to the second user's profile page
-            response = client.get(URL_USERPROFILE + str(user_two.id) + "/")
-            self.assertEquals(response.status_code, 200)
-
-            # ...................Testing Following Function.........................
-
-            # Make the POST request Call for following the second user
-            follow_url = URL_FOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
-            post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
-            response = client.post(follow_url, post, follow=True)
-
-			# Make assertions
-            self.assertEquals(response.status_code, 200)
-            self.assertTrue(len(response.redirect_chain) == 2)
-            self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/UserProfile/'+ str(user_one.id) )
-            self.assertEquals(response.redirect_chain[0][1], 302)
-            self.assertTrue(response.request ['PATH_INFO'] == URL_USERPROFILE + str(user_one.id) + "/")
-
-            # Assert that 
-            # the second user is in the first user's following list, and 
-            # the first user is in the second user's followers list
-            self.assertTrue(user_two.userprofile in user_one.userprofile.following.all())
-            self.assertTrue(user_one.userprofile in user_two.userprofile.followers.all())
-            print "  %s first followed %s." % (user_one, user_two)
- 
-            # ...................Testing Unfollowing Function.........................
-
-            # Make the POST request Call for unfollowing the second user
-            unfollow_url = URL_UNFOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
-            post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
-            response = client.post(unfollow_url, post, follow=True)
-
-			# Make assertions
-            self.assertEquals(response.status_code, 200)
-            self.assertTrue(len(response.redirect_chain) == 2)
-            self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/UserProfile/'+ str(user_one.id) )
-            self.assertEquals(response.redirect_chain[0][1], 302)
-            self.assertTrue(response.request ['PATH_INFO'] == URL_USERPROFILE + str(user_one.id) + "/")
- 
-            # Assert that 
-            # the second user is not in the first user's following list, and 
-            # the first user is not in the second user's followers list
-            self.assertTrue(not user_two.userprofile in user_one.userprofile.following.all())
-            self.assertTrue(not user_one.userprofile in user_two.userprofile.followers.all())
-            print "  %s then unfollowed %s." % (user_one, user_two)
-
-            # Logout the first user
-            client.logout()
-
-            end_time = time.clock()
-            iteration_time += (end_time - start_time)
+		print ''
+		performance_report(iteration_time)	
 
 
-        print ''
-        self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
-        self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
-        performance_report(iteration_time)
+	def test_get_activities_json_for_authenticated_user(self):
+		print_testing_name("test_get_activities_json_for_authenticated_user")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			another_user_i = random.randrange(0, NUMBER_OF_TESTS)
+			if user_i == another_user_i:
+			    continue
+			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			another_user = users [another_user_i]
+			another_user_password = passwords [another_user_i]
+			petreport = petreports [petreport_i]
+
+			#Log into another_user.
+			client = clients [client_i]
+			loggedin = client.login(username = another_user.username, password = another_user_password)
+			self.assertTrue(loggedin == True)
+
+			# Make the POST request Call for another_user to follow the user
+			follow_url = URL_FOLLOW + str(another_user.id) + "/" + str(user.id) + "/"
+			post = {'userprofile_id1': another_user.id, 'userprofile_id2': user.id}
+			response = client.post(follow_url, post, follow=True)
+			self.assertEquals(response.status_code, 200)
+			client.logout()	
+
+			#Log into user.
+			client = clients [client_i]
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+
+			# Make the POST request Call for user to follow the another_user
+			follow_url = URL_FOLLOW + str(user.id) + "/" + str(another_user.id) + "/"
+			post = {'userprofile_id1': user.id, 'userprofile_id2': another_user.id}
+			response = client.post(follow_url, post, follow=True)
+			self.assertEquals(response.status_code, 200)
+
+			# Make the POST request Call for user to add a bookmark for a random petreport
+			add_bookmark_url = URL_BOOKMARK_PETREPORT
+			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Bookmark this Pet"}
+			response = client.post(add_bookmark_url, post, follow=True)
+			self.assertEquals(response.status_code, 200)
+
+			#Summing up the minimum value of user's activity feeds
+			min_num_activities = len(user.get_profile().followers.all()) + len(user.get_profile().following.all())
+
+			#Request the get_activities_json view function()
+			response = client.get(URL_GET_ACTIVITIES, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+			client.logout()	
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], URL_GET_ACTIVITIES)
+
+			#But now, let's test to get and assert those actual activities
+			activities = []
+
+			# Get all activities from this UserProfile's log file that show who has followed this UserProfile 
+			activities += get_recent_activites_from_log(userprofile=user.get_profile(), current_userprofile=user.get_profile(), since_date=user.get_profile().last_logout, activity=ACTIVITY_FOLLOWER)
+
+			# Get all activities that associated to the PetReports I bookmarked
+			activities += get_bookmark_activities(userprofile=user.get_profile(), since_date=user.get_profile().last_logout)
+
+            # Get all activities that are associated with the UserProfiles I follow
+			for following in user.get_profile().following.all():
+				activities += get_recent_activites_from_log(userprofile=following, current_userprofile=user.get_profile(), since_date=user.get_profile().last_logout)
+
+			num_following = len(user.get_profile().following.all())
+			num_activities = len(activities)
+			print "[INFO]: %s has %d followers and got an activity feed list of size %d when the minimum length = %d" % (user, num_following, num_activities, min_num_activities)
+
+			#Bounds checking
+			# self.assertTrue(num_activities >= min_num_activities)
+
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)		
+
+		print ''
+		performance_report(iteration_time)	
 
