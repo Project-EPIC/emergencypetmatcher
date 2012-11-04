@@ -132,12 +132,20 @@ def bookmark_PetReport(request):
             petreport.save()
             message = "You have successfully removed the bookmark for this Pet Report." 
             text = "Bookmark this Pet"
+
+            # Log removing the PetReport bookmark for this UserProfile
+            log_activity(ACTIVITY_PETREPORT_REMOVE_BOOKMARK, request.user.get_profile(), petreport=petreport)
+
         elif ((not petreport.UserProfile_has_bookmarked(user)) and (action == "Bookmark this Pet")):
             petreport.bookmarked_by.add(user)
             petreport.save()
             print 'Bookmarked pet report #'+str(petreport_id)+" for user #"+str(user.id)
             message = "You have successfully bookmarked this Pet Report!" 
             text = "Remove Bookmark"
+
+            # Log adding the PetReport bookmark for this UserProfile
+            log_activity(ACTIVITY_PETREPORT_ADD_BOOKMARK, request.user.get_profile(), petreport=petreport)
+
         else:
             print "User has bookmarked the pet: "+str(petreport.UserProfile_has_bookmarked(user))
             message = "Unable to "+action+"!"

@@ -1,0 +1,49 @@
+{% extends "home/index.html" %}
+{% load url from future %}
+{% block head_title %} EPM - Fill out Social Account {% endblock head_title %}
+{% block content_title %} Fill out your social account {% endblock content_title %}
+{% block content_subtitle %} Please give us some information for your social media account so that we can create a full profile for you. {% endblock content_subtitle %}
+
+
+{% block content %}
+
+<form action="" method="post">
+    {% csrf_token %}
+    <p>
+    	<table border=0 cellpadding=5>
+    		<tr>
+    			<td><label for="id_username">Username:</label></td>
+       			<td><input type="text" name="username" id="username_id" value="{{username}}" /> <font color=red size=+1>*</font></td>
+       		</tr>
+	    	<tr>
+	    			<td><label for="email_id">Email:</label></td>
+       				<td><input type="text" name="email" id="email_id" value="{{email}}" /> <font color=red size=+1>*</font></td>             
+       		</tr>
+       		<tr>
+	    			<td><label for="first_name_id">First Name:</label></td>
+       				<td><input type="text" name="first_name" id="first_name_id" value="{{first_name}}" /></td>
+       		</tr>
+       		<tr>
+	    			<td><label for="last_name_id">Last Name:</label></td>
+       				<td><input type="text" name="last_name" id="last_name_id" value="{{last_name}}" /></td>
+       		</tr>
+       		<tr>
+	    			<td><label>Link:</label></td>
+	    			<td><label>{{link}}</label></td>
+       		</tr>
+       		<tr>
+       			<td>Profile Picture:</td>
+            <td><img src='{{pic_url}}' width=200 height=180></img>
+       			    </br>{{pic_url}}
+            </td>
+       		</tr>
+       		<tr>
+       			<td></td><td></br><input type="submit" id="submit" value="Submit" /></td>
+       		</tr>
+
+       	</table>
+    </p>    
+</form>
+
+{% endblock content %}
+

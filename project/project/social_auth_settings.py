@@ -19,19 +19,27 @@ SOCIAL_AUTH_FORCE_RANDOM_USERNAME = False
 SOCIAL_AUTH_ERROR_KEY             = 'socialauth_error'
 # SOCIAL_AUTH_CHANGE_SIGNAL_ONLY = True   #?????
 
+FACEBOOK_EXTENDED_PERMISSIONS = ['email']
+# No permisson for email in Twitter, check this https://dev.twitter.com/discussions/4019
+
 SOCIAL_AUTH_PIPELINE = (
     'social_auth.backends.pipeline.social.social_auth_user',
     'social_auth.backends.pipeline.associate.associate_by_email',
     'social_auth.backends.pipeline.misc.save_status_to_session',
+    'social_auth.backends.pipeline.user.get_username',
     'home.pipeline.redirect_to_form',
     'home.pipeline.username',
+    'home.pipeline.email',
     'social_auth.backends.pipeline.user.create_user',
     'social_auth.backends.pipeline.social.associate_user',
     'social_auth.backends.pipeline.social.load_extra_data',
     'social_auth.backends.pipeline.user.update_user_details',
     'social_auth.backends.pipeline.misc.save_status_to_session',
     'home.pipeline.get_user_avatar',
+    'home.pipeline.create_user_log',
+
 )
+
 
 # Twitter testing
 TEST_TWITTER_USER = 'epicdatascouts'

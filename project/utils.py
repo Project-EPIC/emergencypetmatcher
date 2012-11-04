@@ -133,13 +133,24 @@ def create_random_User(i, pretty_name=True, test_user=True):
 	else:
 		username = generate_string(10) + str(i)
 
+	#To prevent duplicate usernames
+	while(UserProfile.username_exists(username)):
+		if pretty_name == True:
+			username = random.choice(USERNAMES) + str(i)
+		else:
+			username = generate_string(10) + str(i)
+
 	password = generate_string(10)
 	email = generate_string(6) + '@' + 'test.com'
-	user = User.objects.create_user(username = username, email = email, password = password)
+	try:
+		user = User.objects.create_user(username = username, email = email, password = password)
+	except IntegrityError, e:
+		print '[ERROR]: '+str(e.message)
+
 	userprofile = user.get_profile()
 	userprofile.set_activity_log(is_test=test_user)
 	#Also, don't forget to create his/her list of followers.
-	create_random_following_list(user.get_profile())
+	# create_random_following_list(userprofile)
 	return (user, password)
 
 #returns a random list of UserProfiles
@@ -150,19 +161,25 @@ def create_random_Userlist(num_users = None):
 	userlist = random.sample(allusers,num_users)
 	return userlist
 
-#creates (and returns) a list of UserProfiles being followed by the input UserProfile
+#creates a list of UserProfiles being followed by the input UserProfile
 def create_random_following_list (userprofile, num_following=None):
 	allusers = UserProfile.objects.exclude(pk = userprofile.user.id)
-
 	if num_following == None:
-		num_following = random.randint(0, len(allusers))
-
+		num_following = random.randint(0, len(allusers)/2)
 	following_list = random.sample(allusers, num_following)
-
 	for followed in following_list:
 		userprofile.following.add(followed)
+	return userprofile
 
-	return userprofile.following.all()	
+#creates a list of PetReports being bookmarked by the input UserProfile
+def create_random_bookmark_list (userprofile, num_bookmark=None):
+	allpetreports = PetReport.objects.all()
+	if num_bookmark == None:
+		num_bookmark = random.randint(0, len(allpetreports)/3)
+	bookmark_list = random.sample(allpetreports, num_bookmark)
+	for bookmark in bookmark_list:
+		userprofile.bookmarks_related.add(bookmark)
+	return userprofile
 
 #Create Random Object for: PetReport
 def create_random_PetReport(user=None, status=None, pet_type=None):
@@ -235,7 +252,7 @@ def create_random_ChatLine(user, chat):
 	return chatline
 
 #Create Random Object for: PetMatch
-def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None):
+def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None,threshold_bias = True):
 	#If the lost or found pet (or both) wasn't supplied, then get random Pet Reports.
 	if lost_pet == None or found_pet == None:
 
@@ -269,10 +286,19 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 			petmatch.score = random.randint(0, 10000)
 			petmatch.is_open = random.choice ([True, False])
 			user_count = len(UserProfile.objects.all())
-			up_votes = create_random_Userlist(num_users=random.randint(0, user_count))
-			down_votes = create_random_Userlist(num_users=random.randint(0, user_count))
-			petmatch.up_votes = set(up_votes) - set(down_votes)
-			petmatch.down_votes = set(down_votes) - set(up_votes) 
+			'''if threshold_bias = True, the petmatch has a chance of reaching the threshold.
+			if the random integer generated is 1, the petmatch matches/exceeds the threshold
+			if the random integer is 2, the petmatch might not exceed the threshold'''
+			if threshold_bias and random.randint(1,2) == 1 and user_count >=5:
+				up_votes = create_random_Userlist(num_users=random.randint(5, user_count))
+				down_votes = create_random_Userlist(num_users=random.randint(0, len(up_votes)-5 ))
+				petmatch.up_votes = set(up_votes)
+				petmatch.down_votes = set(down_votes) - set(up_votes)
+			else:
+				up_votes = create_random_Userlist(num_users=random.randint(0, user_count))
+				down_votes = create_random_Userlist(num_users=random.randint(0, user_count))
+				petmatch.up_votes = set(up_votes) - set(down_votes)
+				petmatch.down_votes = set(down_votes) - set(up_votes) 
 			#Save the PetMatch again after modifying its model relationship attributes
 			petmatch.save()
 			log_activity(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=petmatch, )
@@ -341,6 +367,16 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 			petmatches [petmatch_i] = pm
 			petmatch_i += 1
 
+	# allusers = UserProfile.objects.all()
+
+	# # Create random following list
+	# for userprofile in allusers:
+	# 	userprofile=create_random_following_list(userprofile)
+
+	# # Create random bookmark list
+	# if create_petreports == True:
+	# 	for userprofile in allusers:
+	# 		userprofile=create_random_bookmark_list(userprofile)
 
 	if create_petreports == True and create_petmatches == True:
 		return (users, passwords, clients, petreports, petmatches)
@@ -350,20 +386,3 @@ def create_test_view_setup(create_petreports=False, create_petmatches=False):
 		return (users, passwords, clients, petmatches)
 	#just return the simple ones, geez!		
 	return (users, passwords, clients)
-
-			
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

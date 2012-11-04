@@ -199,7 +199,7 @@ class ReportingTesting (unittest.TestCase):
 		#Look in the test_images and append all images to the images list to do this.
 		images = []
 		for f in os.listdir("/srv/epm/static/images/test_images"):
-			if f != ".DS_Store":
+			if f != ".DS_Store" and f != ".anchor":
 				images.append("/srv/epm/static/images/test_images/" + f)
 
 		saved_images = []

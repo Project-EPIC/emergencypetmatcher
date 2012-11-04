@@ -15,7 +15,7 @@ class PetReportAdmin(admin.ModelAdmin):
     list_display = ('id','pet_type', 'status', 'date_lost_or_found','proposed_by','sex','size','location','pet_name','age','color','breed') 
 
 class PetMatchAdmin(admin.ModelAdmin):   
-    list_display = ('id','lost_pet','found_pet','proposed_by','proposed_date','score','closed_by','closed_date')
+    list_display = ('id','lost_pet','found_pet','proposed_by','proposed_date','score','closed_date')
 
 class UserProfileInline(admin.StackedInline):
 	model = UserProfile
