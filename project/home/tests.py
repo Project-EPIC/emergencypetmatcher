@@ -999,16 +999,9 @@ class LoggingTesting (unittest.TestCase):
 			client.logout()
 
 			#Now, check if the activity for submitting a PetReport appears in this user's log.
-			user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 			petreport = PetReport.objects.get(proposed_by = user, pet_name = user.username + str(i))
+			self.assertTrue(activity_has_been_logged(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=petreport) == True)	
 
-			with open(user_log_filename, 'r') as logger:
-
-				lines = list(iter(logger.readlines()))
-				print lines
-				self.assertTrue(activity_has_been_logged(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=petreport) == True)
-
-			logger.close()			
 			output_update(i + 1)
 			print "\n"
 			end_time = time.clock()
@@ -1078,23 +1071,19 @@ class LoggingTesting (unittest.TestCase):
 			self.assertEquals(response.redirect_chain[0][1], 302)
 			self.assertEquals(response.request ['PATH_INFO'], URL_HOME)		
 
-			#Now, check if the activity for proposing a PetMatch appears in this user's log.
-			user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
+			#Grab the PetMatch that has either been posted in the past or has been posted by this User.
+			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
 
-			with open(user_log_filename, 'r') as logger:
-				#Grab the PetMatch that has either been posted in the past or has been posted by this User.
-				match = PetMatch.get_PetMatch(petreport, candidate_petreport)
-				print match
+			#Either the User upvoting an already existing PetMatch...
+			if match.UserProfile_has_voted(user.get_profile()) == UPVOTE:
+				print "[INFO]:A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user)
+				self.assertTrue(activity_has_been_logged(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=match) == True)
 
-				if match.UserProfile_has_voted(user.get_profile()) == UPVOTE:
-					print "[INFO]:A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user)
-					self.assertTrue(activity_has_been_logged(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=match, ) == True)
-
-				else:
-					print "[INFO]:%s has successfully POSTED a new match!" % (user)
-					self.assertTrue(activity_has_been_logged(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=match, ) == True)					
-
-			logger.close()			
+			#...Or the User successfully proposed a NEW PetMatch.
+			else:
+				print "[INFO]:%s has successfully POSTED a new match!" % (user)
+				self.assertTrue(activity_has_been_logged(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=match) == True)					
+	
 			output_update(i + 1)
 			print "\n"
 			end_time = time.clock()
@@ -1102,7 +1091,6 @@ class LoggingTesting (unittest.TestCase):
 
 		print ''
 		performance_report(iteration_time)
-
 
 	def test_log_following_UserProfile(self):
 		print_testing_name("test_log_following_UserProfile")
@@ -1116,17 +1104,18 @@ class LoggingTesting (unittest.TestCase):
 			#indexes
 			user_one_i = random.randrange(0, NUMBER_OF_TESTS)
 			user_two_i = random.randrange(0, NUMBER_OF_TESTS)
-			if user_one_i == user_two_i:
-			    continue
 			client_i = random.randrange(0, NUMBER_OF_TESTS)
+
+			if user_one_i == user_two_i:
+				continue
 
 			#objects
 			user_one = users [user_one_i]
 			password_one = passwords [user_one_i]
 			user_two = users [user_two_i]
 			password_two = passwords [user_two_i]
-			print "%s" % i
-			print "%s (id:%s) and %s (id:%s) have been created." % (user_one, user_one.id, user_two, user_two.id)
+
+			print "[INFO]:%s (id:%s) and %s (id:%s) have been created." % (user_one, user_one.id, user_two, user_two.id)
 
 			#Log in First.
 			client = clients [client_i]
@@ -1146,18 +1135,13 @@ class LoggingTesting (unittest.TestCase):
 			client.logout()						
 
 			# Check if the activity for following a UserProfile appears in this user_one's log.
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + user_one.username + ".log"
-			with open(user_log_filename, 'r') as logger:
-				print "[INFO]:%s has followed %s" % (user_one, user_two)
-				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_FOLLOWING, userprofile=user_one.get_profile(), userprofile2=user_two.get_profile()) == True)
+			self.assertTrue(activity_has_been_logged(ACTIVITY_FOLLOWING, userprofile=user_one.get_profile(), userprofile2=user_two.get_profile()) == True)		
+			print "[INFO]:%s has followed %s" % (user_one.username, user_two.username)
 
 			# Check if the activity for following a UserProfile appears in this user_two's log.
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + user_two.username + ".log"
-			with open(user_log_filename, 'r') as logger:
-				print "[INFO]:%s has been followed by %s" % (user_two, user_one)
-				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_FOLLOWER, userprofile=user_two.get_profile(), userprofile2=user_one.get_profile()) == True)
-
-			logger.close()			
+			self.assertTrue(activity_has_been_logged(ACTIVITY_FOLLOWER, userprofile=user_two.get_profile(), userprofile2=user_one.get_profile()) == True)				
+			print "[INFO]:%s has been followed by %s" % (user_two.username, user_one.username)
+	
 			output_update(i + 1)
 			print "\n"
 			end_time = time.clock()
@@ -1179,8 +1163,10 @@ class LoggingTesting (unittest.TestCase):
 			#indexes
 			user_one_i = random.randrange(0, NUMBER_OF_TESTS)
 			user_two_i = random.randrange(0, NUMBER_OF_TESTS)
+
 			if user_one_i == user_two_i:
 			    continue
+
 			client_i = random.randrange(0, NUMBER_OF_TESTS)
 
 			#objects
@@ -1188,8 +1174,8 @@ class LoggingTesting (unittest.TestCase):
 			password_one = passwords [user_one_i]
 			user_two = users [user_two_i]
 			password_two = passwords [user_two_i]
-			print "%s" % i
-			print "%s (id:%s) and %s (id:%s) have been created." % (user_one, user_one.id, user_two, user_two.id)
+
+			print "[INFO]:%s (id:%s) and %s (id:%s) have been created." % (user_one, user_one.id, user_two, user_two.id)
 
 			#Log in First.
 			client = clients [client_i]
@@ -1215,18 +1201,13 @@ class LoggingTesting (unittest.TestCase):
 			client.logout()						
 
 			# Check if the activity for unfollowing a UserProfile appears in this user_one's log.
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + user_one.username + ".log"
-			with open(user_log_filename, 'r') as logger:
-				print "[INFO]:%s has unfollowed %s" % (user_one, user_two)
-				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_UNFOLLOWING, userprofile=user_one.get_profile(), userprofile2=user_two.get_profile()) == True)
-
+			self.assertTrue(activity_has_been_logged(ACTIVITY_UNFOLLOWING, userprofile=user_one.get_profile(), userprofile2=user_two.get_profile()) == True)			
+			print "[INFO]:%s has unfollowed %s" % (user_one.username, user_two.username)
+				
 			# Check if the activity for unfollowing a UserProfile appears in this user_two's log.
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + user_two.username + ".log"
-			with open(user_log_filename, 'r') as logger:
-				print "[INFO]:%s has been unfollowed by %s" % (user_two, user_one)
-				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_UNFOLLOWER, userprofile=user_two.get_profile(), userprofile2=user_one.get_profile()) == True)
-
-			logger.close()			
+			self.assertTrue(activity_has_been_logged(ACTIVITY_UNFOLLOWER, userprofile=user_two.get_profile(), userprofile2=user_one.get_profile()) == True)			
+			print "[INFO]:%s has been unfollowed by %s" % (user_two.username, user_one.username)
+				
 			output_update(i + 1)
 			print "\n"
 			end_time = time.clock()
@@ -1255,8 +1236,7 @@ class LoggingTesting (unittest.TestCase):
 			password = passwords [user_i]
 			client = clients [client_i]
 			petreport = petreports [petreport_i]
-			print "%s" % i
-			print "A user %s and a pet report %s have been created." % (user.userprofile, petreport)
+			print "[INFO]:A user %s and a pet report %s have been created." % (user.userprofile, petreport)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -1287,12 +1267,9 @@ class LoggingTesting (unittest.TestCase):
 				self.assertEquals(old_bookmarks_count, (new_bookmarks_count-1))
 
 			# Check if the activity for adding a PetReport bookmark appears in this user's log.
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
-			with open(user_log_filename, 'r') as logger:
-				print "[INFO]:%s has added a bookmark for %s." % (user, petreport)
-				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)
+			print "[INFO]:%s has added a bookmark for %s." % (user, petreport)
+			self.assertTrue(activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)
 
-			logger.close()			
 			output_update(i + 1)
 			print "\n"
 			end_time = time.clock()
@@ -1321,8 +1298,7 @@ class LoggingTesting (unittest.TestCase):
 			password = passwords [user_i]
 			client = clients [client_i]
 			petreport = petreports [petreport_i]
-			print "%s" % i
-			print "A user %s and a pet report %s have been created." % (user.userprofile, petreport)
+			print "[INFO]: A user %s and a pet report %s have been created." % (user.userprofile, petreport)
 
 			# Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -1352,12 +1328,9 @@ class LoggingTesting (unittest.TestCase):
 			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
 
 			# Check if the activity for adding a PetReport bookmark appears in this user's log.
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + user.username + ".log"
-			with open(user_log_filename, 'r') as logger:
-				print "[INFO]:%s has removed a bookmark for %s." % (user, petreport)
-				self.assertTrue(logging.activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)
+			print "[INFO]:%s has removed a bookmark for %s." % (user, petreport)
+			self.assertTrue(activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)				
 
-			logger.close()			
 			output_update(i + 1)
 			print "\n"
 			end_time = time.clock()

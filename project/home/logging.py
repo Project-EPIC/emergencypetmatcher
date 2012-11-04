@@ -11,10 +11,6 @@ from datetime import datetime
 
 '''Method for logging activities given an input UserProfile, Activity Enum, and (optionally) PetReport and PetMatch objects.'''
 def log_activity(activity, userprofile, userprofile2=None, petreport=None, petmatch=None):
-    # userprofile
-    # userprofile2
-    #
-
     assert isinstance(userprofile, UserProfile)
     #Define the user filename and logger.
     user = userprofile.user
@@ -23,7 +19,6 @@ def log_activity(activity, userprofile, userprofile2=None, petreport=None, petma
         user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
     else:
         user_log_filename = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
-    # print user_log_filename
 
     try:
         logger = open(user_log_filename, "a")
@@ -65,29 +60,25 @@ def log_activity(activity, userprofile, userprofile2=None, petreport=None, petma
  
         elif activity == ACTIVITY_FOLLOWING:
             assert isinstance(userprofile2, UserProfile)
-            user2 = userprofile2.user
-            log = "%s has followed {%s} with ID{%d}\n" % (user.username, user2.username, userprofile2.id)                 
- 
-            # Write the same following info into the follwer's log file
-            user2_log_filename = ACTIVITY_LOG_DIRECTORY + user2.username + ".log"
-            logger2 = open(user2_log_filename, "a")
-            log2 = "%s has been followed by {%s} with ID{%d}\n" % (user2.username, user.username, userprofile.id)               
-            log2 = (time.asctime() + " [%s]: " + log2) % ACTIVITY_FOLLOWER
-            logger2.write(log2)
-            logger2.close()
+            log = "%s has followed {%s} with ID{%d}\n" % (user.username, userprofile2.user.username, userprofile2.id)                 
+
+            # Write the same following info into the follower's log file
+            log_activity(ACTIVITY_FOLLOWER, userprofile=userprofile2, userprofile2=userprofile)
 
         elif activity == ACTIVITY_UNFOLLOWING:
             assert isinstance(userprofile2, UserProfile)
-            user2 = userprofile2.user
-            log = "%s has unfollowed {%s} with ID{%d}\n" % (user.username, user2.username, userprofile2.id)                 
- 
-            # Write the same unfollowing info into the unfollwer's log file
-            user2_log_filename = ACTIVITY_LOG_DIRECTORY + user2.username + ".log"
-            logger2 = open(user2_log_filename, "a")
-            log2 = "%s has been unfollowed by {%s} with ID{%d}\n" % (user2.username, user.username, userprofile.id)               
-            log2 = (time.asctime() + " [%s]: " + log2) % ACTIVITY_UNFOLLOWER
-            logger2.write(log2)
-            logger2.close()
+            log = "%s has unfollowed {%s} with ID{%d}\n" % (user.username, userprofile2.user.username, userprofile2.id)                 
+
+            # Write the same unfollowing info into the unfollower's log file
+            log_activity(ACTIVITY_UNFOLLOWER, userprofile=userprofile2, userprofile2=userprofile)
+  
+        elif activity == ACTIVITY_FOLLOWER:
+            assert isinstance(userprofile2, UserProfile)
+            log = "%s has been followed by {%s} with ID{%d}\n" % (user.username, userprofile2.user.username, userprofile2.id)                           
+
+        elif activity == ACTIVITY_UNFOLLOWER:
+            assert isinstance(userprofile2, UserProfile)
+            log = "%s has been unfollowed by {%s} with ID{%d}\n" % (user.username, userprofile2.user.username, userprofile2.id)                           
 
         else:
             raise IOError
@@ -95,7 +86,6 @@ def log_activity(activity, userprofile, userprofile2=None, petreport=None, petma
         log = (time.asctime() + " [%s]: " + log) % activity
         logger.write(log)
         logger.close()
-
 
     except Exception as e:
         print "[ERROR]: problem in log_activity(%s)." % e
