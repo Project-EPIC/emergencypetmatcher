@@ -36,6 +36,9 @@ $(document).ready(function(){
 		
 		//Call the AJAX GET request.
 		index_fetch_activities(feedlist_item);
+
+		//Prepare_layout
+		refresh_layout();
 	});
 
 }); //END document.ready()
@@ -69,28 +72,32 @@ function index_fetch_activities (feedlist_item){
 			 	else
 			 		feedlist.append("<li style=margin-left:2px; padding-left:0px;>" + activity + "</li>");
 			}
-
-			// Prepare layout options.
-			var options = {
-				autoResize: true, // This will auto-update the layout when the browser window is resized.
-				container: $('#tiles'), // Optional, used for some extra CSS styling
-				offset: 2, // Optional, the distance between grid items
-				itemWidth: 210 // Optional, the width of a grid item
-			};
-
-			// Now we're ready to call some wookmarking: get reference to your grid items.
-			var handler = $('#tiles li.item');
-
-			// Call the layout function.
-			handler.wookmark(options);								 
-		
+			
+			//Refresh the layout once this is done.
+			refresh_layout()		
 		},
+
 		error: function(data){
 			alert("An unexpected error occurred when trying to retrieve the activities. Please try again."); 
 			return false;
 		}						
 	});
+}
 
+function refresh_layout(){
 
+	// Prepare layout options.
+	var options = {
+		autoResize: true, // This will auto-update the layout when the browser window is resized.
+		container: $('#tiles'), // Optional, used for some extra CSS styling
+		offset: 2, // Optional, the distance between grid items
+		itemWidth: 210 // Optional, the width of a grid item
+	};
+
+	// Now we're ready to call some wookmarking: get reference to your grid items.
+	var handler = $('#tiles li.item');
+
+	// Call the layout function.
+	handler.wookmark(options);	
 }
 

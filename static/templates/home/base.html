@@ -74,14 +74,15 @@
 		                   type="button_count"
 		                   expr:share_url='data:post.url'  
 		                   href="http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/&p[images][0]={{ STATIC_URL }}/images/epm.jpg&p[title]=EmergencyPetMatcher Website&p[summary]=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder."
-		                   onclick="window.open('http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/&p[images][0]={{ STATIC_URL }}/images/epm.jpg&p[title]=EmergencyPetMatcher Website&p[summary]=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.', 
-		                   'newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a>
+		                   onclick="window.open('http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/&p[images][0]={{ STATIC_URL }}/images/epm.jpg&p[title]=EmergencyPetMatcher Website&p[summary]=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.','newWindow', 'width=700, height=430'); return false;">
+		                   <img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a>
 
 		                <a title="Share on Twitter" 
 		                    target="_blank" 
 		                    expr:share_url='data:post.url'
 		                    href="http://twitter.com/share?text=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.&url=http://emergencypetmatcher.herokuapp.com:8000/" 
-		                    onclick="window.open('http://twitter.com/share?text=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.&url=http://emergencypetmatcher.herokuapp.com:8000/', 'newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22"></a> 
+		                    onclick="window.open('http://twitter.com/share?text=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.&url=http://emergencypetmatcher.herokuapp.com:8000/', 'newWindow', 'width=700, height=430'); return false;">
+		                    <img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22"></a> 
 		              </div>
 			     </div>
 
@@ -123,13 +124,11 @@
 				<h3>{% block content_subtitle %}{% endblock content_subtitle %}</h3>
 
 				{% block messages %}
-					{% if messages %}
 					<ul id="messages">
 					    {% for message in messages %}
 					    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
 					    {% endfor %}
 					</ul>
-					{% endif %}
 				{% endblock messages %}
 
 				<!-- start content -->
@@ -138,15 +137,15 @@
 						<div id="nav">
 							<ul>
 							{% if user.is_authenticated %}
-								<li class="active"><a href="#">Newly Added</a></li>
+								<li class="active"><a href="{% url 'home' %}">Newly Added</a></li>
 								<li><a href="{% url 'bookmarks' %}">Bookmarked</a></li>								
-								<li><a href="#">Following</a></li>
-								<li><a href="#">Pet Reports</a></li>
-								<li><a href="#">Pet Matches</a></li>
+								<!-- Put this in once ready: <li><a href="#">Following</a></li> -->
+								<!-- Put this in once ready: <li><a href="#">Pet Reports</a></li> -->
+								<!-- Put this in once ready: <li><a href="#">Pet Matches</a></li> -->
 
 							{% else %}
-								<li class="active"><a href="#">Newly Added</a></li>
-								<li><a href="#">Proposed Pet Matches</a></li>
+								<li class="active"><a href="{% url 'home' %}">Newly Added</a></li>
+								<!-- Put this in once ready: <li><a href="#">Proposed Pet Matches</a></li> -->
 							{% endif %}
 							</ul>
 						</div>

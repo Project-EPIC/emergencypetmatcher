@@ -10,6 +10,7 @@ URL_PMDP = '/matching/PetMatch/'
 URL_VOTE_MATCH = '/matching/vote_PetMatch'
 URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
+URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport/"
 
 //GLOBAL JS Functions
 function load_dialog(link, title, width, height){

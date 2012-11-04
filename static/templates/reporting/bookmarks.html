@@ -1,172 +1,58 @@
 {% extends 'home/index.html' %}
 {% load url from future %}
+<!-- Page-specific JS goes in this block -->
 {% block js %}
-		<script type = 'text/javascript'>
+<script src = "{{ STATIC_URL }}js/local/epm-bookmarks.js" type = 'text/javascript'></script>
+<script type = 'text/javascript'>
+USER_ID = "{{ user.id }}";
+</script>
+{% endblock js %}
 
-			function remove_bookmark(petreport_id,parent){
-				
-				/*display a confirmation dialog with options yes and no*/
-				$('<div></div>').appendTo('body')
-                    .html('<div><h4>Are you sure you want to remove this bookmark?</h4></div>')
-                    .dialog({
-                        modal: true, title: 'Confirm Bookmark Removal', zIndex: 10000, autoOpen: true,
-                        width: 'auto', resizable: false,
-                        buttons: {
-                        	/*if the option is yes, an AJAX request will be sent to remove the bookmark*/
-                            Yes: function () {
-                                
-                                $(this).dialog("close");
-                                        var user_id = "{{ user.id }}";
-								        /*an anonymous user shouldn't be able to acess the bookmarks page*/
-								        if (user_id == "None"){
-								            return false;
-								        }
-
-								        csrf_value = $("input").attr("value");
-								        /*ajax request to remove the bookmark*/
-								        $.ajax({
-
-								          type:"POST",
-								          url:"{% url 'bookmark_PetReport' %}",
-								          data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":petreport_id, "user_id":"{{ user.id }}", "action":"Remove Bookmark"},
-								            success: function(data){
-								            	$(".bookmarks_messages").html("<li class='success'>" + data.message + "</li>");
-								            	parent.remove();
-												loadImages();
-								            	
-								              return true;
-								            },
-								            error: function(data){
-								              alert("An unexpected error occurred when trying to bookmark this Pet Report. Please try again."); 
-								              return false;
-								            }
-								        });
-								        return true;
-	
-
-                            },
-                            No: function () {
-                                $(this).dialog("close");
-                            }
-                        },
-                        close: function (event, ui) {
-                            $(this).remove();
-                        }
-                    });
-
-			}
-
-			//This function allows us to prepare a popup upon clicking several elements.
-			$(document).ready(function(){
-
-				$("img.bookmark_x").click(function(){
-					var img = $(this);
-					remove_bookmark(img.attr('petreportid'),img.parent())
-					//$(this).parent().remove();
-						
-				});
-
-				$(".prdpdialog").click(function(){
-
-					var link = $(this);
-					var dialog_box = $("<div></div>").load(link.attr('url')).dialog ({
-
-						autoOpen: true,
-						position: "top",
-						closeOnEscape: true,
-						title:link.attr("name"),
-						height: "auto",
-						modal: true,
-						width: 700,
-						resizable: false,
-						show: {effect:"fade", duration:500},
-						close: function(event, ui){ 
-							dialog_box.dialog("destroy").remove();
-						}
-
-					});
-					return false;
-				});
-
-				loadImages();
-
-			});
-
-			function loadImages(){
-
-				// $('#tiles').imagesLoaded(function() {
-				
-				
-				// });
-				// Prepare layout options.
-				var options = {
-					autoResize: true, // This will auto-update the layout when the browser window is resized.
-					container: $('#tiles'), // Optional, used for some extra CSS styling
-					offset: 2, // Optional, the distance between grid items
-					itemWidth: 210 // Optional, the width of a grid item
-				};
-				
-				// Get a reference to your grid items.
-				var handler = $('#tiles li.item');
-				// Call the layout function.
-				handler.wookmark(options);
-					
-			}
-		</script>
-{% endblock js %}	
-
-<!-- Messages -->
-	{% block messages %}
-    <ul id="messages" class="bookmarks_messages">
-      {% for message in messages %}
-        <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-      {% endfor %}
-    </ul>      
-    {% endblock messages %}   
-
-
-	{% block navbar %}
-		<div id="nav">
-			<ul>
-			{% if user.is_authenticated %}
-				<li><a href="{% url 'home' %}">Newly Added</a></li>
-				<li class="active"><a href="{% url 'bookmarks' %}">Bookmarked</a></li>
-				<li><a href="#">Following</a></li>
-				<li><a href="#">Pet Reports</a></li>
-				<li><a href="#">Pet Matches</a></li>
-			{% else %}
-				<li class="active"><a href="#">Newly Added</a></li>
-				<li><a href="#">Proposed Pet Matches</a></li>
-			{% endif %}
-			</ul>
-		</div>
-	{% endblock navbar %}
-
-	<ul id="tiles">
-
-		{% block friends_activity_feed %}
-		
-		{% endblock friends_activity_feed %}
-
-
-		{% block pet_reports_content %}
-			{% if pet_reports_list %}
-				{% for pet_report in pet_reports_list %}
-					<li class="item"  >
-						<img title="Remove Bookmark" class="bookmark_x" src="{{ STATIC_URL }}images/icons/button_bookmark_X.png" petreportid="{{ pet_report.id }}" />
-						<!--onclick="remove_bookmark({{ pet_report.id }})"-->
-						{% csrf_token %}
-						<a class = "prdpdialog" url="{% url 'disp_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}">
-							<strong>{{ pet_report.pet_name }}</strong><br/>
-							{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
-							Contact : {{  pet_report.proposed_by.user.username }}
-							<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
-							
-						</a>
-					</li>	
-				{% endfor %}						
-			{% else %}
-			    <li style="text-align:center;"><h3>No pet reports are available.</h3></li>
-			{% endif %}
-		{% endblock pet_reports_content %}
+{% block messages %}
+	<ul id="messages">
+	    {% for message in messages %}
+	    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+	    {% endfor %}
 	</ul>
+{% endblock messages %}
+
+{% block navbar %}
+	<div id="nav">
+		<ul>
+		{% if user.is_authenticated %}
+			<li><a href="{% url 'home' %}">Newly Added</a></li>
+			<li class="active"><a href="{% url 'bookmarks' %}">Bookmarked</a></li>
+			<!-- Put this in once ready: <li><a href="#">Following</a></li> -->
+			<!-- Put this in once ready: <li><a href="#">Pet Reports</a></li> -->
+			<!-- Put this in once ready: <li><a href="#">Pet Matches</a></li> -->
+		{% else %}
+			<li><a href="{% url 'home' %}">Newly Added</a></li>
+		{% endif %}
+		</ul>
+	</div>
+{% endblock navbar %}
+
+<ul id="tiles">
+
+	{% block friends_activity_feed %}{% endblock friends_activity_feed %}
+	{% block pet_reports_content %}
+		{% if pet_reports_list %}
+			{% for pet_report in pet_reports_list %}
+				<li class="item"  >
+					<img title="Remove Bookmark" class="bookmark_x" src="{{ STATIC_URL }}images/icons/button_bookmark_X.png" petreportid="{{ pet_report.id }}" />
+					<!--onclick="remove_bookmark({{ pet_report.id }})"-->
+					{% csrf_token %}
+					<a class = "prdpdialog" url="{% url 'disp_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}">
+						<strong>{{ pet_report.pet_name }}</strong><br/>
+						{{ pet_report.status }}: {{ pet_report.pet_type }} <br/>
+						Contact : {{  pet_report.proposed_by.user.username }}
+						<img src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
+						
+					</a>
+				</li>	
+			{% endfor %}						
+		{% else %}
+		    <li style="text-align:center;"><h3>No pet reports are available.</h3></li>
+		{% endif %}
+	{% endblock pet_reports_content %}
+</ul>
