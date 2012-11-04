@@ -656,8 +656,19 @@ class UserProfileTesting (unittest.TestCase):
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)
 
+'''===================================================================================
+EditUserProfileTesting: Testing for EPM Edit User Profile Page
+==================================================================================='''
+class EditUserProfileTesting (unittest.TestCase):
 
-	'''EditUserProfile Tests'''
+	#Get rid of all objects in the QuerySet.
+	def setUp(self):
+		delete_all()
+
+	#Get rid of all objects in the QuerySet.
+	def tearDown(self):
+		delete_all()
+	
 	def test_editUserProfile_savePassword(self):
 		print_testing_name("test_editUserProfile_savePassword")
 		iteration_time = 0.00

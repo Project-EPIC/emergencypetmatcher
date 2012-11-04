@@ -18,20 +18,21 @@
 			<div class = "edit_profile_input_box">
 				{% csrf_token %}
 				<table>
-					{% for field in form1 %}
-						<tr>
-							<td><strong> {{ field.label }} </strong></td>
-							<td ><div style="margin-left:40px;">{{ field }}</div></td>
-						</tr>
-					{% endfor %}
 					{% if profile_picture %}
 						<tr> 	
 							<td><img src="{{ STATIC_URL }}{{ profile_picture }}" style="width:95px;height:95px;float:right;"></td>	
 													
-							<td> <strong> <br> <br>  &nbsp;&nbsp;  Change your profile picture </strong>
-							</td>
+							<!-- <td> <strong> <br> <br>  &nbsp;&nbsp;  Change your profile picture </strong></td> -->
 						</tr>
 					{% endif %}
+					{% for field in form1 %}
+						{% if field.label != 'Profile Picture' %}
+							<tr>
+								<td><strong> {{ field.label }} </strong></td>
+								<td ><div style="margin-left:40px;">{{ field }}</div></td>
+							</tr>
+						{% endif %}
+					{% endfor %}
 				</table>
 			</div>	
 			<input type="button" value="Save" style= "width:100px; height:25px; float:left;" onclick = "saveProfile()"/>
