@@ -11,7 +11,7 @@ from constants import *
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.timezone import now as datetime_now
-import datetime
+from datetime import timedelta
 from django.conf import settings
 
 '''===================================================================================
@@ -31,10 +31,9 @@ class UserProfile (models.Model):
 
     '''Required Fields'''
     user = models.OneToOneField(User, null=False, default=None)
-    photo = models.ImageField(upload_to='images/profile_images', null=True)
-    last_logout = models.DateTimeField(null=False, auto_now_add=True)
-
+    photo = models.ImageField(upload_to='images/profile_images', null=True) 
     '''Non-Required Fields'''
+    last_logout = models.DateTimeField(null=True, auto_now_add=True)
     following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
     is_test = models.BooleanField(default=False)
     chats = models.ManyToManyField('Chat', null=True)
@@ -418,7 +417,7 @@ class EditUserProfile(models.Model):
            method returns ``True``.
         
         """
-        expiration_date = datetime.timedelta(days=settings.ACCOUNT_ACTIVATION_DAYS)
+        expiration_date = timedelta(days=settings.ACCOUNT_ACTIVATION_DAYS)
         return self.activation_key == "ACTIVATED" or (self.date_of_change + expiration_date <= datetime_now())
     activation_key_expired.boolean = True
 
