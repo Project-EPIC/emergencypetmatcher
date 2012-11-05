@@ -155,14 +155,16 @@ def login_User(request):
 
 @login_required
 def logout_User(request):
-    messages.success(request, "You have successfully logged out.")
+
+    print "[INFO]: Logging out UserProfile {%s}" % request.user.get_profile()
 
     # Update to last_logout date field
-    u = get_object_or_404(UserProfile, pk=request.user.id)
+    u = get_object_or_404(UserProfile, pk=request.user.get_profile().id)
     u.last_logout = datetime.now()
     u.save()
  
     log_activity(ACTIVITY_LOGOUT, request.user.get_profile())
+    messages.success(request, "You have successfully logged out.")
     logout(request)
     return redirect(URL_HOME)
     
