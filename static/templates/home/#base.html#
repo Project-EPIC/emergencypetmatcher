@@ -74,7 +74,8 @@
 		                   type="button_count"
 		                   expr:share_url='data:post.url'  
 		                   href="http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/&p[images][0]={{ STATIC_URL }}/images/epm.jpg&p[title]=EmergencyPetMatcher Website&p[summary]=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder."
-		                   onclick="window.open('http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/&p[images][0]={{ STATIC_URL }}/images/epm.jpg&p[title]=EmergencyPetMatcher Website&p[summary]=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.','newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a>
+		                   onclick="window.open('http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/&p[images][0]={{ STATIC_URL }}/images/epm.jpg&p[title]=EmergencyPetMatcher Website&p[summary]=EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.','newWindow', 'width=700, height=430'); return false;">
+		                   <img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a>
 
 		                <a title="Share on Twitter" 
 		                    target="_blank" 

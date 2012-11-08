@@ -1,6 +1,6 @@
 Hi there, 
 
-Congratulations! Your pet match on EmergencyPetMatcher is close to being a success! We encourage you to discuss this match with {{ lost_pet_contact.username }}, and {{ found_pet_contact.username }} the person who found a pet. You can reach {{ lost_pet_contact.username }} at {{ lost_pet_contact.email }} and {{ found_pet_contact.username }} at {{ found_pet_contact.email }}. 
+Congratulations! Your pet match on EmergencyPetMatcher is close to being a success! We encourage you to discuss this match with {{ lost_pet_contact.username }} (the lost pet contact) and {{ found_pet_contact.username }} (the found pet contact). You can reach {{ lost_pet_contact.username }} at {{ lost_pet_contact.email }} and {{ found_pet_contact.username }} at {{ found_pet_contact.email }}. 
 
 Good Luck!
 

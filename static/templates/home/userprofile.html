@@ -47,9 +47,9 @@
 			<!-- Follow link -->
 			{% if show_profile.user.username != user.username %}
 				{% if not show_profile in user.userprofile.following.all %}
-					<a href="{% url 'follow' user.id show_profile.user.id %}">Follow</a>
+					<a href="{% url 'follow' userprofile.id show_profile.id %}">Follow</a>
 				{% else %}
-					<a href="{% url 'unfollow' user.id show_profile.user.id %}">Unfollow</a>
+					<a href="{% url 'unfollow' userprofile.id show_profile.id %}">Unfollow</a>
 
 				{% endif %}
 			{% endif %}

@@ -4,7 +4,7 @@ This message is to inform you that you have created an account for the Emergency
 
 http://{{ site.domain }}{% url registration_activate activation_key %}
 
-The link is valid for {{ expiration_days }} day.
+The link is valid for {{ expiration_days }} day(s).
 
 Thank you,
 
