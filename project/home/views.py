@@ -432,3 +432,8 @@ def email_verification_complete (request,activation_key):
     else:
         messages.error (request, "Your request cannot be processed at the moment, invalid activation key!")
     return redirect (URL_HOME)
+
+
+def about (request):
+    petreports = PetReport.objects.order_by("?")[:4]
+    return render_to_response(HTML_ABOUT, {'petreports':petreports}, RequestContext(request))
