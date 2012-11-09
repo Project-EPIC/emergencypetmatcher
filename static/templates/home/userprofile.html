@@ -5,7 +5,7 @@
 <script src = "{{ STATIC_URL }}/js/local/epm-userprofile.js" type = 'text/javascript'></script>
 {% endblock js %}
 
-{% block head_title %}EPM - User Profile: {{ userprofile.user.username }} {% endblock head_title %}
+{% block head_title %}EPM - User Profile: {{ show_profile.user.username }} {% endblock head_title %}
 {% block content_title %} User Profile {% endblock content_title %}
 
 {% block content %}
@@ -47,9 +47,9 @@
 			<!-- Follow link -->
 			{% if show_profile.user.username != user.username %}
 				{% if not show_profile in user.userprofile.following.all %}
-					<a href="{% url 'follow' userprofile.id show_profile.id %}">Follow</a>
+					<a href="{% url 'follow' user.userprofile.id show_profile.id %}">Follow</a>
 				{% else %}
-					<a href="{% url 'unfollow' userprofile.id show_profile.id %}">Unfollow</a>
+					<a href="{% url 'unfollow' user.userprofile.id show_profile.id %}">Unfollow</a>
 
 				{% endif %}
 			{% endif %}
