@@ -56,7 +56,7 @@ def vote_PetMatch(request):
 
         if vote == "upvote":
             # If the user is voting for the 1st time, add reputation points
-            if (userprofile not in pm.up_votes.all()) and (userprofile not in pm.down_votes.all()):
+            if pm.UserProfile_has_voted(userprofile) is False:
                 update_reputation(userprofile, ACTIVITY_PETMATCH_UPVOTE)
             
             pm.up_votes.add(userprofile)
@@ -65,7 +65,7 @@ def vote_PetMatch(request):
             message = "You have successfully upvoted this PetMatch!"
         elif vote == "downvote":
             # If the user is voting for the 1st time, add reputation points
-            if (userprofile not in pm.up_votes.all()) and (userprofile not in pm.down_votes.all()):
+            if pm.UserProfile_has_voted(userprofile) is False:
                 update_reputation(userprofile, ACTIVITY_PETMATCH_DOWNVOTE)
             
             pm.down_votes.add(userprofile)
