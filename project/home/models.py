@@ -26,6 +26,7 @@ STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
 SEX_CHOICES=[('M','Male'),('F','Female')]
 SIZE_CHOICES = [('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)')]
 BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador')]
+SPAYED_OR_NEUTERED_CHOICES = [('Spayed', 'Spayed'), ('Neutered', 'Neutered'), ("Don't Know", "Don't Know")]
 
 #The User Profile Model containing a 1-1 association with the 
 #django.contrib.auth.models.User object, among other attributes.
@@ -83,6 +84,7 @@ class PetReport(models.Model):
 
     '''Non-Required Fields'''
     img_path = models.ImageField(upload_to='images/petreport_images', null=True)
+    spayed_or_neutered = models.CharField(max_length=PETREPORT_SPAYED_OR_NEUTERED_LENGTH, choices=SPAYED_OR_NEUTERED_CHOICES, null=True, default="Don't Know")
     pet_name = models.CharField(max_length=PETREPORT_PET_NAME_LENGTH, null=True, default='unknown') 
     age = models.CharField(max_length=PETREPORT_AGE_LENGTH, null=True, default= 'unknown')
     color = models.CharField(max_length=PETREPORT_COLOR_LENGTH, null=True,default='unknown')
@@ -374,6 +376,7 @@ class PetReportForm (ModelForm):
     location = forms.CharField(label = "Location", max_length = PETREPORT_LOCATION_LENGTH , required = True)
 
     '''Non-Required Fields'''
+    spayed_or_neutered = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False)
     img_path = forms.ImageField(label = "Upload an Image (*.jpg, *.png, *.bmp, *.tif)", required = False)
     pet_name = forms.CharField(label = "Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False) 
     age = forms.CharField(label = "Age", max_length = PETREPORT_AGE_LENGTH, required = False)
