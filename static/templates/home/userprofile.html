@@ -47,10 +47,17 @@
 			<!-- Follow link -->
 			{% if show_profile.user.username != user.username %}
 				{% if not show_profile in user.userprofile.following.all %}
-					<a href="{% url 'follow' user.id show_profile.user.id %}">Follow</a>
+					<form action = "{% url 'follow_UserProfile' %}" method="post">
+						{% csrf_token %}
+						<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
+						<input style="margin: 15px; 5px; 5px; 5px; width:auto; height:auto;" class="prdp_eachbutton" type="Submit" value="Follow"/>
+					</form>
 				{% else %}
-					<a href="{% url 'unfollow' user.id show_profile.user.id %}">Unfollow</a>
-
+					<form action = "{% url 'unfollow_UserProfile' %}" method="post">
+						{% csrf_token %}
+						<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>						
+						<input style="margin: 15px; 5px; 5px; 5px; width:auto; height:auto;" class="prdp_eachbutton" type="Submit" value="Unfollow"/>
+					</form>
 				{% endif %}
 			{% endif %}
 			
@@ -58,7 +65,9 @@
 			<hr size="10" width="100%" color="white"/>
 			<h3>User Data:</h3>
 				<table>
-				{% if show_profile.user.username == user.username or show_profile in user.userprofile.following.all %}
+				<!-- If the UserProfile looking at this is show_profile OR that show_profile is being followed by this UserProfile -->
+
+				{% if user.userprofile.id == show_profile.user.userprofile.id or show_profile in user.userprofile.following.all %}
 			    	<tr align="left"><th>Username:</th> <td>{{ show_profile.user.username }}</td></tr>
 				    <tr align="left"><th>Email:</th> <td>{{ show_profile.user.email|default:"Not provided" }}</td></tr>
 				    <tr align="left"><th>First name:</th> <td>{{ show_profile.user.first_name|default:"Not provided" }}</td></tr>
@@ -143,7 +152,7 @@
 					<div class = "prdp_overflow2">  
 					{% for following in show_profile.following.all %}
 						<a  class="prdp_pmdp_dialog_pr2"
-							href="{% url 'get_UserProfile_page' following.user.id %}"
+							href="{% url 'get_UserProfile_page' following.id %}"
 							style="text-decoration:none; color:green; font-size:12px;}"
 							title="{% if following.user.first_name %} {{ following.user.first_name }} {% endif %}@{{ following.user.username }}">
 							{% if following.photo %}
@@ -167,7 +176,7 @@
 					<div class = "prdp_overflow2">  	
 					{% for follower in show_profile.followers.all %}	
 						<a  class="prdp_pmdp_dialog_pr2"
-							href="{% url 'get_UserProfile_page' follower.user.id %}"
+							href="{% url 'get_UserProfile_page' follower.id %}"
 						   	style="text-decoration:none; color:green; font-size:12px;}"
 						   	title="{% if follower.user.first_name %} {{ follower.user.first_name }} {% endif %}@{{ follower.user.username }}">
 							{% if follower.photo %}

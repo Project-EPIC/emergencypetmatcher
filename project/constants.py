@@ -5,7 +5,7 @@ import os
 ==================================================================================='''
 
 #Number of Tests
-NUMBER_OF_TESTS = 50
+NUMBER_OF_TESTS = 100
 
 #Lower and Upper bounds for Lost and Found Dates
 DATE_LOWER_BOUND = "2012-01-01"
@@ -81,8 +81,8 @@ URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
 URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
 URL_BOOKMARKED = "/reporting/bookmarks/"
-URL_FOLLOW = "/follow/"
-URL_UNFOLLOW = "/unfollow/"
+URL_FOLLOW = "/follow"
+URL_UNFOLLOW = "/unfollow"
 URL_EDITUSERPROFILE = "/edituserprofile/"
 URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/" 
 URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"

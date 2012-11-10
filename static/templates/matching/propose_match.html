@@ -118,11 +118,14 @@
         </div>
         <!-- End Second PetReport Match -->
 
+        <!-- Form to create PetMatch -->
+        <div>
           <form method="post" style="margin:5px;" action="{% url 'propose_PetMatch' target.id candidate.id %}" >
             {% csrf_token %}
             <textarea name='description' rows='5' cols ='100' style="display:block; margin: 0 auto;"> </textarea>
             <input type="Submit" value="Submit" style="margin-top: 10px; width:100px; height:35px; float:right;"/>
           </form>
+        </div>
 
       </div>
     {%  endblock petreportcontent %}

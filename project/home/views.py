@@ -271,36 +271,59 @@ def get_social_details(request):
 def get_UserProfile_page(request, userprofile_id):   
     u = get_object_or_404(UserProfile, pk=userprofile_id)
     return render_to_response(HTML_USERPROFILE, {'show_profile':u}, RequestContext(request))
- 
+
 @login_required
-def follow(request, userprofile_id1, userprofile_id2): 
-    me = get_object_or_404(UserProfile, pk=userprofile_id1) 
-    follow = get_object_or_404(UserProfile, pk=userprofile_id2) 
-    if not userprofile_id1 == userprofile_id2:
-        if follow in me.following.all():
-            messages.success(request, "You are already following '" + str(follow.user.username) + "'")        
+def follow_UserProfile(request): 
+    if request.method == "POST":
+        userprofile = request.user.userprofile
+        target_userprofile_id = request.POST["target_userprofile_id"]
+        target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
+
+        #If the userprofile IDs do not match...
+        if userprofile.id != target_userprofile.id:
+            #Has this UserProfile already followed this target UserProfile?
+            if target_userprofile in userprofile.following.all():
+                messages.error(request, "You are already following " + str(target_userprofile.user.username) + ".")
+
+            else:
+                userprofile.following.add(target_userprofile)
+                messages.success(request, "You are now following " + str(target_userprofile.user.username) + ".")     
+
+                # Log the following activity for this UserProfile
+                log_activity(ACTIVITY_FOLLOWING, userprofile, target_userprofile)
+
+            return redirect (URL_USERPROFILE + str(target_userprofile.id))
         else:
-            me.following.add(follow)
-            messages.success(request, "You have successfully followed '" + str(follow.user.username) + "'") 
- 
-            # Log the following activity for this UserProfile
-            log_activity(ACTIVITY_FOLLOWING, me.user.get_profile(), follow.user.get_profile())
- 
-    return redirect(URL_USERPROFILE + userprofile_id2)
+            raise Http404
+    else:
+        raise Http404
 
 @login_required
-def unfollow(request, userprofile_id1, userprofile_id2): 
-    me = get_object_or_404(UserProfile, pk=userprofile_id1) 
-    unfollow = get_object_or_404(UserProfile, pk=userprofile_id2) 
-    if not userprofile_id1 == userprofile_id2:
-        if unfollow in me.following.all():
-            me.following.remove(unfollow)
-            messages.success(request, "You have successfully unfollowed '" + str(unfollow.user.username) + "'") 
+def unfollow_UserProfile(request): 
+    if request.method == "POST":
+        userprofile = request.user.userprofile
+        target_userprofile_id = request.POST["target_userprofile_id"]
+        target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
 
-            # Log the unfollowing activity for this UserProfile
-            log_activity(ACTIVITY_UNFOLLOWING, me.user.get_profile(), unfollow.user.get_profile())
+        #If the userprofile IDs do not match...
+        if userprofile.id != target_userprofile.id:
 
-    return redirect(URL_USERPROFILE + userprofile_id2)
+            #If this UserProfile is actually following the target UserProfile...
+            if target_userprofile in userprofile.following.all():
+                userprofile.following.remove(target_userprofile)
+                messages.success(request, "You are no longer following " + str(target_userprofile.user.username) + ".") 
+
+                # Log the unfollowing activity for this UserProfile
+                log_activity(ACTIVITY_UNFOLLOWING, userprofile, target_userprofile)
+                return redirect(URL_USERPROFILE + str(target_userprofile.id))
+
+            else:
+                raise Http404
+        else:
+            raise Http404
+    else:
+        raise Http404
+
 
 @login_required
 def editUserProfile_page(request):
