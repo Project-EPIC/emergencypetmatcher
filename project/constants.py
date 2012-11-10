@@ -87,9 +87,11 @@ URL_EDITUSERPROFILE = "/edituserprofile"
 URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/" 
 URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
 
+
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"
 HTML_LOGIN = "registration/login.html"
+HTML_ABOUT = "home/about.html"
 HTML_SUBMIT_PETREPORT = "reporting/petreport_form.html"
 HTML_USERPROFILE = "home/userprofile.html"
 HTML_PRDP = "reporting/petreport.html"

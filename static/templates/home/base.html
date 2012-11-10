@@ -107,7 +107,8 @@
 						<li><a href= "{% url 'login_User' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
 						{% endif %}
 
-						<li><a href="#">About</a></li>
+						<li><a href="{% url 'about' %}">About</a></li>
+						<li><a href="https://docs.google.com/spreadsheet/viewform?formkey=dG9XTzRzNlB3Nl9KWGRMb2Jnd2tObnc6MQ#gid=0">Feedback</a></li>
 						
 						{% endblock menu %}
 					</ul>
