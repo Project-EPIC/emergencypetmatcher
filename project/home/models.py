@@ -454,8 +454,8 @@ def setup_UserProfile(sender, instance, created, **kwargs):
         #Create a UserProfile object.
         UserProfile.objects.create(user=instance)
     elif instance.is_active:
-    	if log_exists(instance.get_profile()) == False:
-		log_activity(ACTIVITY_ACCOUNT_CREATED,instance.get_profile())
+        if log_exists(instance.get_profile()) == False:
+            log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
 
 #Post Add Signal function to check if a PetMatch has reached threshold
 @receiver(m2m_changed, sender=PetMatch.up_votes.through)

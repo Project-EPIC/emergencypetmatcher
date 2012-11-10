@@ -176,6 +176,7 @@ AUTHENTICATION_BACKENDS = (
 SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter', 'facebook',)
 
 
+DOMAIN_URL = 'http://www.emergencypetmatcher.com/'
 
 try:
     from social_auth_settings import *

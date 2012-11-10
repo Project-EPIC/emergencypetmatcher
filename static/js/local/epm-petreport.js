@@ -1,27 +1,35 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
-
   
-  var bookmark_button = $("#prdp_bookmark");
+    var bookmark_button = $("#prdp_bookmark");
 
-  //user is authenticated and has bookmarked this pet 
-  if (bookmarked == "true"){
-    bookmark_button.text("Remove Bookmark");
-    bookmark_button.attr("title","Remove Bookmark");
-  }
+    //user is authenticated and has bookmarked this pet 
+    if (bookmarked == "true"){
+      bookmark_button.text("Remove Bookmark");
+      bookmark_button.attr("title","Remove Bookmark");
+    }
 
-  //user has not bookmarked this pet (or) user is not authenticated
-  else {
-    bookmark_button.text("Bookmark this Pet");
-    bookmark_button.attr("title","Bookmark this Pet");
-  }
+    //user has not bookmarked this pet (or) user is not authenticated
+    else {
+      bookmark_button.text("Bookmark this Pet");
+      bookmark_button.attr("title","Bookmark this Pet");
+    }
 
-  $(".prdp_pmdp_dialog a").click(function(){
+    $(".prdp_pmdp_dialog a").click(function(){
 
-    var link = $(this);
-    return load_dialog(link.attr("href"), "Pet Match Detailed Page", 850, "auto");  
+      var link = $(this);
+      return load_dialog(link.attr("href"), "Pet Match Detailed Page", 850, "auto");  
 
-  });
+    });
+
+    //Update the share buttons' click event.
+    $("#facebook_share_pr").click(function(){
+      share_on_facebook(URL, IMAGE, TITLE, SUMMERY);
+    });
+
+    $("#twitter_share_pr").click(function(){
+      share_on_twitter(URL, IMAGE, TITLE, SUMMERY);
+    });
 
 });
 

@@ -41,7 +41,18 @@ $(document).ready(function(){
 		refresh_layout();
 	});
 
+	//Update the share buttons on click.
+	$("#facebook_share_epm").click(function(){
+		share_on_facebook(URL, IMAGE, TITLE, SUMMERY);
+	});
+
+	$("#twitter_share_epm").click(function(){
+		share_on_twitter(URL, IMAGE, TITLE, SUMMERY);
+	});
+
+
 }); //END document.ready()
+
 
 
 //Function to fetch the local activities using AJAX GET
