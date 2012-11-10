@@ -1116,37 +1116,34 @@ class LoggingTesting (unittest.TestCase):
 				continue
 
 			#objects
-			user_one = users [user_one_i]
+			userprofile_one = users [user_one_i].get_profile()
 			password_one = passwords [user_one_i]
-			user_two = users [user_two_i]
+			userprofile_two = users [user_two_i].get_profile()
 			password_two = passwords [user_two_i]
-
-			print "[INFO]:%s (id:%s) and %s (id:%s) have been created." % (user_one, user_one.id, user_two, user_two.id)
 
 			#Log in First.
 			client = clients [client_i]
-			loggedin = client.login(username = user_one.username, password = password_one)
+			loggedin = client.login(username = userprofile_one.user.username, password = password_one)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to follow %s." % (user_one, client, user_two)			
+			print "[INFO]:%s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username)
 
 			# Go to the second user's profile page
-			response = client.get(URL_USERPROFILE + str(user_two.id) + "/")
+			response = client.get(URL_USERPROFILE + str(userprofile_two.id) + "/")
 			self.assertEquals(response.status_code, 200)
 
 			# Make the POST request Call for following the second user
-			follow_url = URL_FOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
-			post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
-			response = client.post(follow_url, post, follow=True)
+			post = {'target_userprofile_id': userprofile_two.id}
+			response = client.post(URL_FOLLOW, post, follow=True)
 			self.assertEquals(response.status_code, 200)
 			client.logout()						
 
-			# Check if the activity for following a UserProfile appears in this user_one's log.
-			self.assertTrue(activity_has_been_logged(ACTIVITY_FOLLOWING, userprofile=user_one.get_profile(), userprofile2=user_two.get_profile()) == True)		
-			print "[INFO]:%s has followed %s" % (user_one.username, user_two.username)
+			# Check if the activity for following a UserProfile appears in this userprofile_one's log.
+			self.assertTrue(activity_has_been_logged(ACTIVITY_FOLLOWING, userprofile=userprofile_one, userprofile2=userprofile_two) == True)		
+			print "[OK]:%s has followed %s" % (userprofile_one.user.username, userprofile_two.user.username)
 
-			# Check if the activity for following a UserProfile appears in this user_two's log.
-			self.assertTrue(activity_has_been_logged(ACTIVITY_FOLLOWER, userprofile=user_two.get_profile(), userprofile2=user_one.get_profile()) == True)				
-			print "[INFO]:%s has been followed by %s" % (user_two.username, user_one.username)
+			# Check if the activity for following a UserProfile appears in this userprofile_two's log.
+			self.assertTrue(activity_has_been_logged(ACTIVITY_FOLLOWER, userprofile=userprofile_two, userprofile2=userprofile_one) == True)				
+			print "[OK]:%s has been followed by %s" % (userprofile_two.user.username, userprofile_one.user.username)
 	
 			output_update(i + 1)
 			print "\n"
@@ -1176,43 +1173,39 @@ class LoggingTesting (unittest.TestCase):
 			client_i = random.randrange(0, NUMBER_OF_TESTS)
 
 			#objects
-			user_one = users [user_one_i]
+			userprofile_one = users [user_one_i].get_profile()
 			password_one = passwords [user_one_i]
-			user_two = users [user_two_i]
+			userprofile_two = users [user_two_i].get_profile()
 			password_two = passwords [user_two_i]
-
-			print "[INFO]:%s (id:%s) and %s (id:%s) have been created." % (user_one, user_one.id, user_two, user_two.id)
 
 			#Log in First.
 			client = clients [client_i]
-			loggedin = client.login(username = user_one.username, password = password_one)
+			loggedin = client.login(username = userprofile_one.user.username, password = password_one)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to follow %s." % (user_one, client, user_two)			
+			print "[INFO]:%s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username)			
 
 			# Go to the second user's profile page
-			response = client.get(URL_USERPROFILE + str(user_two.id) + "/")
+			response = client.get(URL_USERPROFILE + str(userprofile_two.id) + "/")
 			self.assertEquals(response.status_code, 200)
 
 			# Make the POST request Call for following the second user
-			follow_url = URL_FOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
-			post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
-			response = client.post(follow_url, post, follow=True)
+			post = {'target_userprofile_id': userprofile_two.id}
+			response = client.post(URL_FOLLOW, post, follow=True)
 			self.assertEquals(response.status_code, 200)
 
 			# Make the POST request Call for unfollowing the second user
-			unfollow_url = URL_UNFOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
-			post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
-			response = client.post(unfollow_url, post, follow=True)
+			post = {'target_userprofile_id': userprofile_two.id}
+			response = client.post(URL_UNFOLLOW, post, follow=True)
 			self.assertEquals(response.status_code, 200)
 			client.logout()						
 
-			# Check if the activity for unfollowing a UserProfile appears in this user_one's log.
-			self.assertTrue(activity_has_been_logged(ACTIVITY_UNFOLLOWING, userprofile=user_one.get_profile(), userprofile2=user_two.get_profile()) == True)			
-			print "[INFO]:%s has unfollowed %s" % (user_one.username, user_two.username)
+			# Check if the activity for unfollowing a UserProfile appears in this userprofile_one's log.
+			self.assertTrue(activity_has_been_logged(ACTIVITY_UNFOLLOWING, userprofile=userprofile_one, userprofile2=userprofile_two) == True)			
+			print "[OK]:%s has unfollowed %s" % (userprofile_one.user.username, userprofile_two.user.username)
 				
-			# Check if the activity for unfollowing a UserProfile appears in this user_two's log.
-			self.assertTrue(activity_has_been_logged(ACTIVITY_UNFOLLOWER, userprofile=user_two.get_profile(), userprofile2=user_one.get_profile()) == True)			
-			print "[INFO]:%s has been unfollowed by %s" % (user_two.username, user_one.username)
+			# Check if the activity for unfollowing a UserProfile appears in this userprofile_two's log.
+			self.assertTrue(activity_has_been_logged(ACTIVITY_UNFOLLOWER, userprofile=userprofile_two, userprofile2=userprofile_one) == True)			
+			print "[OK]:%s has been unfollowed by %s" % (userprofile_two.user.username, userprofile_one.user.username)
 				
 			output_update(i + 1)
 			print "\n"
@@ -1478,9 +1471,8 @@ class LoggingTesting (unittest.TestCase):
 			self.assertTrue(loggedin == True)
 
 			# Make the POST request Call for another_user to follow the user
-			follow_url = URL_FOLLOW + str(another_user.id) + "/" + str(user.id) + "/"
-			post = {'userprofile_id1': another_user.id, 'userprofile_id2': user.id}
-			response = client.post(follow_url, post, follow=True)
+			post = {'target_userprofile_id': user.userprofile.id}
+			response = client.post(URL_FOLLOW, post, follow=True)
 			self.assertEquals(response.status_code, 200)
 			client.logout()	
 
@@ -1490,15 +1482,13 @@ class LoggingTesting (unittest.TestCase):
 			self.assertTrue(loggedin == True)
 
 			# Make the POST request Call for user to follow the another_user
-			follow_url = URL_FOLLOW + str(user.id) + "/" + str(another_user.id) + "/"
-			post = {'userprofile_id1': user.id, 'userprofile_id2': another_user.id}
-			response = client.post(follow_url, post, follow=True)
+			post = {'target_userprofile_id': another_user.userprofile.id}
+			response = client.post(URL_FOLLOW, post, follow=True)
 			self.assertEquals(response.status_code, 200)
 
 			# Make the POST request Call for user to add a bookmark for a random petreport
-			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Bookmark this Pet"}
-			response = client.post(add_bookmark_url, post, follow=True)
+			response = client.post(URL_BOOKMARK_PETREPORT, post, follow=True)
 			self.assertEquals(response.status_code, 200)
 
 			#Summing up the minimum value of user's activity feeds
