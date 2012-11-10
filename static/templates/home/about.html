@@ -1,0 +1,34 @@
+{% extends 'home/index.html' %}
+{% load url from future %}
+
+{% block js %}{% endblock js %}
+
+{% block head_title %}EPM - About{% endblock head_title %}
+{% block content_title %} About EmergencyPetMatcher{% endblock content_title %}
+
+{% block content %}
+{% block messages %}{% endblock messages %}
+
+<div id ="about_pets">
+	{% for pet_report in petreports %}
+			<img style="border:1px solid black;"src="{{ STATIC_URL }}{{ pet_report.img_path }}"/>
+	{% endfor %}
+</div>
+
+<div style="margin:10px; 10px; 10px; 10px;" id ="about_desc">
+	<strong style="font-size:14pt;">Welcome, digital volunteer! </strong>
+
+	<p class="about_p">Thanks again for being part of something bigger than yourself - an online community that helps submit lost and found pet reports, match pet reports, vote on pet matches, verify pet matches, and most importantly, connect with other digital volunteers in doing all that you can to help pet owners find their lost pets during and after a disaster. We count on you to be active and make these connections happen, because it is important to see that with a community of volunteers that want to make a difference, you all are thereby supporting pet shelters, clinics, hospitals, foster homes, and thousands of people in the disaster scene who have lost their pets to connect with each other. Therefore, you are helping to build a greater social network of volunteers that can help one another and use the EmergencyPetMatcher (EPM) system to aid in the efforts to bring those pets back home.</p>
+
+	<p class="about_p">The EPM system is a conception of design and research that seeks to foster a digital volunteer community in performing a very important task - the pet-to-family reunification task. With the user central to our minds as engineers and scientists, the EPM team have carefully and briskly prepared this system in order to help those who have lost their domestic companions - from dogs, cats, horses, rabbits, even snakes and turtles - in the wake of a mass emergency to find them again with the help of the community. Since we’re comprised of busy professors and students, we ask that you provide your candid and insightful feedback to us at the “Feedback” tab at the top of the page. For the foreseeable future, The EPM team will be engineering, testing, and fine-tuning the system so that it is easy-to-use and valuable to you. So, please don’t be shy in giving us your opinions!</p>
+
+	<p class="about_p">On behalf of all of us at the project EPIC (Empowering the Public with Information in Crisis) team at the University of Colorado at Boulder, thank you for your contributions on EPM!</p>
+
+	<div style="margin:40px; 40px; 40px; 0px;"id ="about_images">
+		<img style="border:1px solid black;"src="{{ STATIC_URL }}/images/about_images/about_amrutha.jpg"/>
+		<img style="border:1px solid black;"src="{{ STATIC_URL }}/images/about_images/about_sahar.jpg"/>
+		<img style="border:1px solid black;"src="{{ STATIC_URL }}/images/about_images/about_mario.jpg"/>
+		<img style="border:1px solid black;"src="{{ STATIC_URL }}/images/about_images/about_mazin.jpg"/>
+	</div>		
+</div>
+{% endblock content %}

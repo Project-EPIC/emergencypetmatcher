@@ -447,6 +447,6 @@ def delete_log (userprofile):
         except Exception as e:
             print "[ERROR]: Could not delete UserProfile log file (%s)" % e
     else:
-        print "[OK]: Could not find UserProfile log file in (%s).\nDid you set one up for this UserProfile?" % log_path
+        print "[ERROR]: Could not find UserProfile log file in (%s).\nDid you set one up for this UserProfile?" % log_path
           
 

@@ -5,7 +5,7 @@ import os
 ==================================================================================='''
 
 #Number of Tests
-NUMBER_OF_TESTS = 30
+NUMBER_OF_TESTS = 100
 
 #Lower and Upper bounds for Lost and Found Dates
 DATE_LOWER_BOUND = "2012-01-01"
@@ -81,15 +81,17 @@ URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
 URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
 URL_BOOKMARKED = "/reporting/bookmarks/"
-URL_FOLLOW = "/follow/"
-URL_UNFOLLOW = "/unfollow/"
-URL_EDITUSERPROFILE = "/edituserprofile/"
+URL_FOLLOW = "/follow"
+URL_UNFOLLOW = "/unfollow"
+URL_EDITUSERPROFILE = "/edituserprofile"
 URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/" 
 URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
+
 
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"
 HTML_LOGIN = "registration/login.html"
+HTML_ABOUT = "home/about.html"
 HTML_SUBMIT_PETREPORT = "reporting/petreport_form.html"
 HTML_USERPROFILE = "home/userprofile.html"
 HTML_PRDP = "reporting/petreport.html"

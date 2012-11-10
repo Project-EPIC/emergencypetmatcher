@@ -805,14 +805,13 @@ class FollowingTesting (unittest.TestCase):
         User.objects.all().delete()
         UserProfile.objects.all().delete()
 
-    def test_following_and_unfollowing_a_user(self):
-        print "\n>>>> Testing 'test_following_and_unfollowing_a_user' for %d iterations " % NUMBER_OF_TESTS
-
+    def test_following_and_unfollowing_a_UserProfile(self):
+    	print_testing_name("test_following_and_unfollowing_a_UserProfile")
         iteration_time = 0.00
 
         # Need to setup clients, users, and their passwords in order to simula the following function.
         (users, passwords, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
-        print users
+        
         for i in range (NUMBER_OF_TESTS):
             start_time = time.clock()
 
@@ -824,65 +823,61 @@ class FollowingTesting (unittest.TestCase):
             client_i = random.randrange(0, NUMBER_OF_TESTS)
 
             # objects
-            user_one = users [user_one_i]
+            userprofile_one = users [user_one_i].get_profile()
             password_one = passwords [user_one_i]
             client = clients [client_i]
-            user_two = users [user_two_i]
+            userprofile_two = users [user_two_i].get_profile()
             password_two = passwords [user_two_i]
             print "\n%s ............................................................." % i
-            print "  %s (id:%s) and %s (id:%s) have been created." % (user_one, user_one.id, user_two, user_two.id)
+            print "[INFO]: %s (id:%s) and %s (id:%s) have been created." % (userprofile_one, userprofile_one.id, userprofile_two, userprofile_two.id)
 
 			#Log onto the first user.
             client = clients [client_i]
-            loggedin = client.login(username = user_one.username, password = password_one)
+            loggedin = client.login(username = userprofile_one.user.username, password = password_one)
             self.assertTrue(loggedin == True)			
-            print "  %s logs onto %s to follow %s." % (user_one, client, user_two)
+            print "[INFO]: %s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username)
 
             # Go to the second user's profile page
-            response = client.get(URL_USERPROFILE + str(user_two.id) + "/")
+            response = client.get(URL_USERPROFILE + str(userprofile_two.id) + "/")
             self.assertEquals(response.status_code, 200)
 
             # ...................Testing Following Function.........................
 
             # Make the POST request Call for following the second user
-            follow_url = URL_FOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
-            post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
-            response = client.post(follow_url, post, follow=True)
+            post = {"target_userprofile_id": userprofile_two.id}
+            response = client.post(URL_FOLLOW, post, follow=True)
 
 			# Make assertions
             self.assertEquals(response.status_code, 200)
-            self.assertTrue(len(response.redirect_chain) == 2)
-            self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/UserProfile/'+ str(user_two.id) )
+            self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/UserProfile/'+ str(userprofile_two.id))
             self.assertEquals(response.redirect_chain[0][1], 302)
-            self.assertTrue(response.request ['PATH_INFO'] == URL_USERPROFILE + str(user_two.id) + "/")
+            self.assertTrue(response.request ['PATH_INFO'] == URL_USERPROFILE + str(userprofile_two.id) + "/")
 
             # Assert that 
             # the second user is in the first user's following list, and 
             # the first user is in the second user's followers list
-            self.assertTrue(user_two.userprofile in user_one.userprofile.following.all())
-            self.assertTrue(user_one.userprofile in user_two.userprofile.followers.all())
-            print "  %s first followed %s." % (user_one, user_two)
+            self.assertTrue(userprofile_two in userprofile_one.following.all())
+            self.assertTrue(userprofile_one in userprofile_two.followers.all())
+            print "[INFO]: %s has followed %s." % (userprofile_one.user.username, userprofile_two.user.username)
  
             # ...................Testing Unfollowing Function.........................
 
             # Make the POST request Call for unfollowing the second user
-            unfollow_url = URL_UNFOLLOW + str(user_one.id) + "/" + str(user_two.id) + "/"
-            post = {'userprofile_id1': user_one.id, 'userprofile_id2': user_two.id}
-            response = client.post(unfollow_url, post, follow=True)
+            post = {"target_userprofile_id": userprofile_two.id}
+            response = client.post(URL_UNFOLLOW, post, follow=True)
 
 			# Make assertions
             self.assertEquals(response.status_code, 200)
-            self.assertTrue(len(response.redirect_chain) == 2)
-            self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/UserProfile/'+ str(user_two.id) )
+            self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/UserProfile/'+ str(userprofile_two.id))
             self.assertEquals(response.redirect_chain[0][1], 302)
-            self.assertTrue(response.request ['PATH_INFO'] == URL_USERPROFILE + str(user_two.id) + "/")
+            self.assertTrue(response.request ['PATH_INFO'] == URL_USERPROFILE + str(userprofile_two.id) + "/")
  
             # Assert that 
             # the second user is not in the first user's following list, and 
             # the first user is not in the second user's followers list
-            self.assertTrue(not user_two.userprofile in user_one.userprofile.following.all())
-            self.assertTrue(not user_one.userprofile in user_two.userprofile.followers.all())
-            print "  %s then unfollowed %s." % (user_one, user_two)
+            self.assertTrue(not userprofile_two in userprofile_one.following.all())
+            self.assertTrue(not userprofile_one in userprofile_two.followers.all())
+            print "[INFO]: %s then unfollowed %s." % (userprofile_one, userprofile_two)
 
             # Logout the first user
             client.logout()

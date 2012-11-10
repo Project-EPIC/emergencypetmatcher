@@ -1,12 +1,11 @@
 
 /** General page styling **/
-  
 html, body {
 
 	margin: 0;
 	padding: 0;
 	height: 100%;
-	min-width: 1000px;
+	min-width: 1200px;
 	background: #ECF0EC url(../images/background.gif) repeat;
 	font: 13px Arial, Helvetica, sans-serif;
 	color: #787878;
@@ -360,6 +359,29 @@ h1.found {
 
 .sticky .prdpdialog {
 	position:fixed;
+}
+
+/******* About Page *******/
+
+#about_pets {
+
+	margin: 10px 10px 10px 10px;
+	height: 300px;
+	width: 100%;
+	overflow-x: scroll;
+
+}
+
+#about_desc {
+
+
+}
+
+.about_p {
+
+	font-size:13pt;
+
+
 }
 
 /*CSS for the edit profile page*/

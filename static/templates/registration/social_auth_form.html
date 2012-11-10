@@ -1,5 +1,9 @@
 {% extends "home/index.html" %}
 {% load url from future %}
+
+{% block js %}
+{% endblock js %}
+
 {% block head_title %} EPM - Fill out Social Account {% endblock head_title %}
 {% block content_title %} Fill out your social account {% endblock content_title %}
 {% block content_subtitle %} Please give us some information for your social media account so that we can create a full profile for you. {% endblock content_subtitle %}
@@ -34,11 +38,11 @@
        		<tr>
        			<td>Profile Picture:</td>
             <td><img src='{{pic_url}}' width=200 height=180></img>
-       			    </br>{{pic_url}}
+       			    <br/>
             </td>
        		</tr>
        		<tr>
-       			<td></td><td></br><input type="submit" id="submit" value="Submit" /></td>
+       			<td></td><td><br/><input type="submit" id="submit" value="Submit" /></td>
        		</tr>
 
        	</table>

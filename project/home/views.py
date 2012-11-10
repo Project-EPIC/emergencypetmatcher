@@ -2,6 +2,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth import logout, login, authenticate 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import *
+from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect
 from django.contrib.messages.api import get_messages
@@ -11,6 +12,7 @@ from social_auth.views import auth
 from django.db import IntegrityError
 from django.http import Http404
 from django.core import mail
+from django.core.validators import email_re
 from django.core.urlresolvers import reverse
 from registration.forms import RegistrationForm
 from django.forms.models import model_to_dict
@@ -126,8 +128,8 @@ def login_User(request):
             if user.is_active == True:
                 userprofile = user.get_profile()
 
-                # if log_exists(userprofile) == False:
-                #     log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)
+                #if log_exists(userprofile) == False:
+                 #   log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)
 
                 login(request, user)
                 messages.success(request, 'Welcome, %s!' % (username))
@@ -155,14 +157,16 @@ def login_User(request):
 
 @login_required
 def logout_User(request):
-    messages.success(request, "You have successfully logged out.")
+
+    print "[INFO]: Logging out UserProfile {%s}" % request.user.get_profile()
 
     # Update to last_logout date field
-    u = get_object_or_404(UserProfile, pk=request.user.id)
+    u = get_object_or_404(UserProfile, pk=request.user.get_profile().id)
     u.last_logout = datetime.now()
     u.save()
  
     log_activity(ACTIVITY_LOGOUT, request.user.get_profile())
+    messages.success(request, "You have successfully logged out.")
     logout(request)
     return redirect(URL_HOME)
     
@@ -269,55 +273,85 @@ def get_social_details(request):
 def get_UserProfile_page(request, userprofile_id):   
     u = get_object_or_404(UserProfile, pk=userprofile_id)
     return render_to_response(HTML_USERPROFILE, {'show_profile':u}, RequestContext(request))
- 
+
 @login_required
-def follow(request, userprofile_id1, userprofile_id2): 
-    me = get_object_or_404(UserProfile, pk=userprofile_id1) 
-    follow = get_object_or_404(UserProfile, pk=userprofile_id2) 
-    if not userprofile_id1 == userprofile_id2:
-        if follow in me.following.all():
-            messages.success(request, "You are already following '" + str(follow.user.username) + "'")        
+def follow_UserProfile(request): 
+    if request.method == "POST":
+        userprofile = request.user.userprofile
+        target_userprofile_id = request.POST["target_userprofile_id"]
+        target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
+
+        #If the userprofile IDs do not match...
+        if userprofile.id != target_userprofile.id:
+            #Has this UserProfile already followed this target UserProfile?
+            if target_userprofile in userprofile.following.all():
+                messages.error(request, "You are already following " + str(target_userprofile.user.username) + ".")
+
+            else:
+                userprofile.following.add(target_userprofile)
+                messages.success(request, "You are now following " + str(target_userprofile.user.username) + ".")     
+
+                # Log the following activity for this UserProfile
+                log_activity(ACTIVITY_FOLLOWING, userprofile, target_userprofile)
+
+            return redirect (URL_USERPROFILE + str(target_userprofile.id))
         else:
-            me.following.add(follow)
-            messages.success(request, "You have successfully followed '" + str(follow.user.username) + "'") 
- 
-            # Log the following activity for this UserProfile
-            log_activity(ACTIVITY_FOLLOWING, me.user.get_profile(), follow.user.get_profile())
- 
-    return redirect(URL_USERPROFILE + userprofile_id2)
+            raise Http404
+    else:
+        raise Http404
 
 @login_required
-def unfollow(request, userprofile_id1, userprofile_id2): 
-    me = get_object_or_404(UserProfile, pk=userprofile_id1) 
-    unfollow = get_object_or_404(UserProfile, pk=userprofile_id2) 
-    if not userprofile_id1 == userprofile_id2:
-        if unfollow in me.following.all():
-            me.following.remove(unfollow)
-            messages.success(request, "You have successfully unfollowed '" + str(unfollow.user.username) + "'") 
+def unfollow_UserProfile(request): 
+    if request.method == "POST":
+        userprofile = request.user.userprofile
+        target_userprofile_id = request.POST["target_userprofile_id"]
+        target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
 
-            # Log the unfollowing activity for this UserProfile
-            log_activity(ACTIVITY_UNFOLLOWING, me.user.get_profile(), unfollow.user.get_profile())
+        #If the userprofile IDs do not match...
+        if userprofile.id != target_userprofile.id:
 
-    return redirect(URL_USERPROFILE + userprofile_id2)
+            #If this UserProfile is actually following the target UserProfile...
+            if target_userprofile in userprofile.following.all():
+                userprofile.following.remove(target_userprofile)
+                messages.success(request, "You are no longer following " + str(target_userprofile.user.username) + ".") 
+
+                # Log the unfollowing activity for this UserProfile
+                log_activity(ACTIVITY_UNFOLLOWING, userprofile, target_userprofile)
+                return redirect(URL_USERPROFILE + str(target_userprofile.id))
+
+            else:
+                raise Http404
+        else:
+            raise Http404
+    else:
+        raise Http404
+
 
 @login_required
 def editUserProfile_page(request):
-    '''unhandled issue: invalid email address'''
+
     if request.method == 'POST':
-        user = UserProfile.objects.get(pk = request.user.id).user        
+        user = request.user        
         '''SaveProfile workflow will be executed if the user clicks on "save" after editing
         first_name, last_name, email or username'''
         if request.POST["action"] == 'saveProfile':         
             user_changed = False
             edit_userprofile_form = UserProfileForm(request.POST,request.FILES)
             if edit_userprofile_form.is_valid():
+                ''' If the user enters a blank/ invalid email, it would be caught by this condition'''
+                if not email_re.match(request.POST["email"]):
+                    print '[INFO]:  Invalid Email!'
+                    message = "<li class='error'>Please enter a valid email address!</li>"
+                    json = simplejson.dumps ({"message":message})
+                    print "JSON: " + str(json)
+                    return HttpResponse(json, mimetype="application/json")
                 if request.POST["username"] != user.username:
                     user.username = request.POST["username"]
                     try:
                         user.save()
                         user_changed = True
                     except:
-                        message = "<li class='error'>This username is  unavailable, please try another one.</li>"
+                        message = "<li class='error'>This username is unavailable, please try another one.</li>"
                         json = simplejson.dumps ({"message":message})
                         print "JSON: " + str(json)
                         return HttpResponse(json, mimetype="application/json")
@@ -333,11 +367,11 @@ def editUserProfile_page(request):
                         user.save()
                         message = "<li class='success'>Thank you. Your changes have been saved!</li>"
                     except:
-                        print "Error while saving your changes, please try again!"      
-                        message = "<li class='error'>unknown error while  saving</li>"                  
-                    
+                        print "[ERROR]: Error while saving your changes, please try again!"      
+                        message = "<li class='error'>Error while saving your changes. Please try again.</li>"                  
+                
+                #Email change.
                 if user.email != request.POST["email"]:
-                    
                     user_changed = True
                     subject = render_to_string(TEXTFILE_EMAIL_ACTIVATION_SUBJECT)
                     salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
@@ -354,12 +388,16 @@ def editUserProfile_page(request):
                     edit_userprofile.new_email = request.POST["email"]
                     edit_userprofile.date_of_change = datetime_now()
                     edit_userprofile.save()
-                    ctx = {"activation_key":activation_key,"expiration_days":settings.ACCOUNT_ACTIVATION_DAYS}
-                    message = render_to_string(TEXTFILE_EMAIL_CHANGE_VERICATION,ctx)
+
+                    #Grab the Site object for the context
+                    site = Site.objects.get(pk=1)
+                    ctx = {"site":site, "activation_key":activation_key,"expiration_days":settings.ACCOUNT_ACTIVATION_DAYS}
+                    message = render_to_string(TEXTFILE_EMAIL_CHANGE_VERICATION, ctx)
                     user.email = request.POST["email"]
                     user.email_user(subject, message, from_email = None)
                     print "[INFO]: sent email verification"              
                     message = "<li class='success'>Thank you. Your changes have been saved! Your email will be updated once you verify it. Please check your email for more information on how to verify.</li>"
+
                 if not user_changed:
                     '''If user does not make any changes to his profile then this message is sent back'''
                     message = "<li class='error'>No changes were made.</li>"
@@ -379,12 +417,13 @@ def editUserProfile_page(request):
             elif new_password != confirm_password:
                 message = "<li class='error'>Please confirm your new password. Your new passwords do not match!</li>"
             else:
-                user.set_password(new_password)  
+                user.set_password(new_password)
                 message = "<li class='success'>Congratulations! Your password has been changed successfully.</li>"
                 user.save()  
         json = simplejson.dumps ({"message":message})
         print "JSON: " + str(json)
         return HttpResponse(json, mimetype="application/json")
+
     elif request.method=='GET':
         user = request.user
         form = UserProfileForm(initial={'first_name': user.first_name,'last_name': user.last_name,'username':user.username,'email':user.email})
@@ -430,3 +469,8 @@ def email_verification_complete (request,activation_key):
     else:
         messages.error (request, "Your request cannot be processed at the moment, invalid activation key!")
     return redirect (URL_HOME)
+
+
+def about (request):
+    petreports = PetReport.objects.order_by("?")[:4]
+    return render_to_response(HTML_ABOUT, {'petreports':petreports}, RequestContext(request))
