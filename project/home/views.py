@@ -126,8 +126,8 @@ def login_User(request):
             if user.is_active == True:
                 userprofile = user.get_profile()
 
-                if log_exists(userprofile) == False:
-                    log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)
+                # if log_exists(userprofile) == False:
+                #     log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)
 
                 login(request, user)
                 messages.success(request, 'Welcome, %s!' % (username))

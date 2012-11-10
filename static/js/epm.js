@@ -11,6 +11,8 @@ URL_VOTE_MATCH = '/matching/vote_PetMatch'
 URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
 
+
+
 //GLOBAL JS Functions
 function load_dialog(link, title, width, height){
 
@@ -74,3 +76,13 @@ function postIt(url, data){
 
     $('#jQueryPostItForm').submit();
 }
+
+function share_on_facebook(url, image, title, summary){
+	window.open('http://www.facebook.com/sharer.php?s=100&p[url]=' + url + '&p[images][0]=' + image + '&p[title]=' + title + '&p[summary]=' + summary,'newWindow', 'width=700, height=430');
+	return false;
+}	
+
+function share_on_twitter(url, image, title, summary){
+	window.open('http://twitter.com/share?url=' + url + '&text=' + title + ': ' + summary, 'newWindow', 'width=700, height=430');
+}
+

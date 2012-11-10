@@ -54,6 +54,15 @@
       var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";      
 
     </script>
+
+    <!-- Setting up parameters for sharing on facebook and twitter -->
+    <script type="text/javascript">
+      var URL = 'http://www.emergencypetmatcher.com/matching/PetMatch/{{  petmatch.id }}';
+      var IMAGE = 'http://www.emergencypetmatcher.com/{{ STATIC_URL }}{{ petmatch.lost_pet.img_path }}';
+      var TITLE = 'A Pet Report Matching at EPM';
+      var SUMMERY = 'A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
+    </script>
+
     {% endblock js %}
 
 
@@ -62,23 +71,14 @@
 
   <body>
 
-      <!-- Share Buttons -->
-      <div id="sharebuttons" style="float:right; margin-bottom:10px; width:100%;">         
+     <!-- Share Buttons -->
+      <div id="sharebuttons" style="float:right; margin-bottom:10px; width:100%;"> 
           <div style="float:right; margin:3px 0 0 7px;">
-              <font size=-1> Share on: </font></span>
-              <a title="Share on Facebook"
-                 target='_blank' 
-                 name="fb_share" 
-                 type="button_count"
-                 expr:share_url='data:post.url'  
-                 href="http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/matching/PetMatch/{{petmatch.id}}/&p[images][0]={{ STATIC_URL}}{{ petmatch.lost_pet.img_path }}&p[images][1]={{ STATIC_URL}}{{ petmatch.found_pet.img_path }}&p[title]=A Pet Report Matching at EPM&p[summary]=A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder."
-                 onclick="window.open('http://www.facebook.com/sharer.php?s=100&p[url]=http://emergencypetmatcher.herokuapp.com:8000/matching/PetMatch/{{petmatch.id}}/&p[images][0]={{ STATIC_URL}}{{ petmatch.lost_pet.img_path }}&p[title]=A Pet Report Matching at EPM&p[summary]=A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.', 'newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a>
-
-              <a title="Share on Twitter" 
-                  target="_blank" 
-                  expr:share_url='data:post.url'
-                  href="http://twitter.com/share?url=http://emergencypetmatcher.herokuapp.com:8000/matching/PetMatch/{{petmatch.id}}/&text=A Pet Report Matching at EPM. A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder." 
-                  onclick="window.open('http://twitter.com/share?url=http://emergencypetmatcher.herokuapp.com:8000/matching/PetMatch/{{petmatch.id}}/&text=A Pet Report Matching at EPM. A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.', 'newWindow', 'width=700, height=430'); return false;"><img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22"></a>         
+            <font size=-1> Share on: </font></span>
+            <a id="facebook_share_pm" title="Share on Facebook" name="fb_share" type="button_count">
+            <img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a>
+            <a id="twitter_share_pm" title="Share on Twitter">
+            <img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22" /></a>   
           </div>
       </div>
         
