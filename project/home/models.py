@@ -1,9 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.forms import ModelForm
 from django import forms
 from django.db.models.signals import post_save, pre_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
+from django.core.validators import email_re
 from django.core.files.storage import FileSystemStorage
 import PIL, os, time
 from django import forms
@@ -263,41 +265,50 @@ class PetMatch(models.Model):
 
     #Change this to verify_PetMatch
     def verify_petmatch(self):
-        self.is_open = False
-        self.verification_triggered = True
-        self.save()
-        print '[INFO]: PetMatch is now closed to the crowd, verification has been triggered'
-        petmatch_owner = self.proposed_by.user
-        lost_pet_contact = self.lost_pet.proposed_by.user
-        found_pet_contact = self.found_pet.proposed_by.user
-        if petmatch_owner.username == lost_pet_contact.username or petmatch_owner.username == found_pet_contact.username: 
-            Optionally_discuss_with_digital_volunteer = ""
-        else:
-            Optionally_discuss_with_digital_volunteer = "You may also discuss this pet match with %s, the digital volunteer who proposed this pet match. You can reach %s at %s" % (self.proposed_by.user.username,self.proposed_by.user.username,self.proposed_by.user.email)
-        '''An email is sent to the lost pet owner'''
-        ctx = {'pet_type':'your lost pet','opposite_pet_type_contact':found_pet_contact,'pet_status':"found",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer,"petmatch_id":self.id}
-        email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH,ctx)
-        email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
-        if not lost_pet_contact.get_profile().is_test:
-            lost_pet_contact.email_user(email_subject,email_body,from_email=None)
-        print '[INFO]: Email to lost pet owner: '+email_body
-        ''' An email is sent to the found pet owner '''
-        ctx = {'pet_type':'the pet you found','opposite_pet_type_contact':lost_pet_contact,'pet_status':"lost",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer,"petmatch_id":self.id}
-        email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH,ctx)
-        email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
-        if not found_pet_contact.get_profile().is_test:
-            found_pet_contact.email_user(email_subject,email_body,from_email=None)
-        print '[INFO]: Email to found pet owner: '+email_body
-       
-        '''If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact,
-        an email will be sent to this person '''
-        if Optionally_discuss_with_digital_volunteer != "":
-            ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
-            email_body = render_to_string(TEXTFILE_EMAIL_PETMATCH_PROPOSER,ctx)
-            email_subject =  EMAIL_SUBJECT_PETMATCH_PROPOSER  
-            if not petmatch_owner.get_profile().is_test:
-                petmatch_owner.email_user(email_subject,email_body,from_email=None)
-            print '[INFO]: Email to pet match owner: '+email_body
+        if self.verification_triggered == False:
+            self.is_open = False
+            self.verification_triggered = True
+            self.save()
+            print '[INFO]: PetMatch is now closed to the crowd, verification has been triggered'
+            petmatch_owner = self.proposed_by.user
+            lost_pet_contact = self.lost_pet.proposed_by.user
+            found_pet_contact = self.found_pet.proposed_by.user
+
+            #Grab the Site object for the context variables
+            site = Site.objects.get(pk=1)
+            if petmatch_owner.username == lost_pet_contact.username or petmatch_owner.username == found_pet_contact.username: 
+                Optionally_discuss_with_digital_volunteer = ""
+            else:
+                Optionally_discuss_with_digital_volunteer = "You may also discuss this pet match with %s, the digital volunteer who proposed this pet match. You can reach %s at %s" % (self.proposed_by.user.username,self.proposed_by.user.username,self.proposed_by.user.email)
+            '''An email is sent to the lost pet owner'''
+            if email_re.match(lost_pet_contact.email):
+                ctx = {"site":site, 'pet_type':'your lost pet','opposite_pet_type_contact':found_pet_contact,'pet_status':"found",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer,"petmatch_id":self.id}
+                email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH,ctx)
+                email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
+                if not lost_pet_contact.get_profile().is_test:
+                    lost_pet_contact.email_user(email_subject,email_body,from_email=None)
+                print '[INFO]: Email to lost pet owner: '+email_body
+            else:
+                print '[ERROR] User %s does not have a valid email address' %(str(lost_pet_contact.get_profile()))
+            ''' An email is sent to the found pet owner '''
+            if email_re.match(found_pet_contact.email):
+                ctx = {"site":site, 'pet_type':'the pet you found','opposite_pet_type_contact':lost_pet_contact,'pet_status':"lost",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer,"petmatch_id":self.id}
+                email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH,ctx)
+                email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
+                if not found_pet_contact.get_profile().is_test:
+                    found_pet_contact.email_user(email_subject,email_body,from_email=None)
+                print '[INFO]: Email to found pet owner: '+email_body
+            else:
+                print '[ERROR] User %s does not have a valid email address' %(str(found_pet_contact.get_profile()))           
+            '''If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact,
+            an email will be sent to this person '''
+            if Optionally_discuss_with_digital_volunteer != "":
+                ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
+                email_body = render_to_string(TEXTFILE_EMAIL_PETMATCH_PROPOSER,ctx)
+                email_subject =  EMAIL_SUBJECT_PETMATCH_PROPOSER  
+                if not petmatch_owner.get_profile().is_test:
+                    petmatch_owner.email_user(email_subject,email_body,from_email=None)
+                print '[INFO]: Email to pet match owner: '+email_body
 
     def close_PetMatch(self):
         if '0' not in self.verification_votes:
@@ -388,7 +399,6 @@ class UserProfileForm (forms.Form):
     confirm_password = forms.CharField(label="Confirm Password",max_length=30,widget = forms.PasswordInput,required=False) 
     photo = forms.ImageField(label="Profile Picture", required=False)
 
-
 class EditUserProfile(models.Model):
     user = models.OneToOneField(User,null=False,default=None)
     activation_key = models.CharField(max_length=40,null=True)
@@ -443,10 +453,13 @@ def setup_UserProfile(sender, instance, created, **kwargs):
     if created == True:
         #Create a UserProfile object.
         UserProfile.objects.create(user=instance)
+    elif instance.is_active:
+    	if log_exists(instance.get_profile()) == False:
+		log_activity(ACTIVITY_ACCOUNT_CREATED,instance.get_profile())
 
 #Post Add Signal function to check if a PetMatch has reached threshold
 @receiver(m2m_changed, sender=PetMatch.up_votes.through)
-def trigger_PetMatch_verification(sender, instance,action,**kwargs):
+def trigger_PetMatch_verification(sender, instance, action,**kwargs):
     '''Checking condition that will return true once PetMatch reaches a threshold value,
     if it returns true, pet match verification work flow is triggered'''
     #print 'trigger_PetMatch_verification sign triggered'

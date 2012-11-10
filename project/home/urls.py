@@ -18,7 +18,7 @@ urlpatterns = patterns('home.views',
 	url (r'^follow$','follow_UserProfile',name='follow_UserProfile'),
 	url (r'^unfollow$','unfollow_UserProfile',name='unfollow_UserProfile'),
 	url(r'^', include('social_auth.urls')),
-	url(r'^edituserprofile/$', 'editUserProfile_page', name='editUserProfile_page'),
+	url(r'^edituserprofile', 'editUserProfile_page', name='editUserProfile_page'),
 	url (r'^accounts/', include('registration.backends.default.urls')),
 	#registration-related URLs that have been customized.
 	url(r'^activate/complete/$', "registration_activation_complete", name='registration_activation_complete'),
