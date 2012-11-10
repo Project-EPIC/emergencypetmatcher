@@ -187,7 +187,7 @@ def verify_PetMatch(request, petmatch_id):
     '''This page is only accessible by either the found pet contact or the lost pet contact'''
     if  (user == pm.lost_pet.proposed_by) or (user == pm.found_pet.proposed_by):
         '''this page cannot be rendered if the threshold has not been reached'''
-        if pm.PetMatch_has_reached_threshold(): 
+        if pm..verification_triggered == True: 
             if request.method == "GET":
                 voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
                 num_upvotes = len(pm.up_votes.all())
