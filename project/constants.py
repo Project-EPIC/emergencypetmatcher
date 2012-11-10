@@ -83,7 +83,7 @@ URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
 URL_BOOKMARKED = "/reporting/bookmarks/"
 URL_FOLLOW = "/follow/"
 URL_UNFOLLOW = "/unfollow/"
-URL_EDITUSERPROFILE = "/edituserprofile/"
+URL_EDITUSERPROFILE = "/edituserprofile"
 URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/" 
 URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
 

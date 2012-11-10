@@ -12,6 +12,7 @@ from social_auth.views import auth
 from django.db import IntegrityError
 from django.http import Http404
 from django.core import mail
+from django.core.validators import email_re
 from django.core.urlresolvers import reverse
 from registration.forms import RegistrationForm
 from django.forms.models import model_to_dict
@@ -305,7 +306,7 @@ def unfollow(request, userprofile_id1, userprofile_id2):
 
 @login_required
 def editUserProfile_page(request):
-    '''unhandled issue: invalid email address'''
+
     if request.method == 'POST':
         user = request.user        
         '''SaveProfile workflow will be executed if the user clicks on "save" after editing
@@ -314,6 +315,13 @@ def editUserProfile_page(request):
             user_changed = False
             edit_userprofile_form = UserProfileForm(request.POST,request.FILES)
             if edit_userprofile_form.is_valid():
+                ''' If the user enters a blank/ invalid email, it would be caught by this condition'''
+                if not email_re.match(request.POST["email"]):
+                    print '[INFO]:  Invalid Email!'
+                    message = "<li class='error'>Please enter a valid email address!</li>"
+                    json = simplejson.dumps ({"message":message})
+                    print "JSON: " + str(json)
+                    return HttpResponse(json, mimetype="application/json")
                 if request.POST["username"] != user.username:
                     user.username = request.POST["username"]
                     try:
