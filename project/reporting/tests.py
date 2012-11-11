@@ -207,6 +207,9 @@ class ReportingTesting (unittest.TestCase):
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
 		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
 
+		#We need this because PostgreSQL doesn't start IDs at 0 if running previous tests.
+		petreport_lower_bound_index = petreports[0].id
+
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
@@ -246,7 +249,8 @@ class ReportingTesting (unittest.TestCase):
 			image_file.close()
 
 			#Get the new PetReport created with new image file path.
-			new_petreport_index = (NUMBER_OF_TESTS + 1) + i
+			new_petreport_index = (petreport_lower_bound_index + NUMBER_OF_TESTS + i)
+			print "[INFO]: New PetReport index [%s]" % str(new_petreport_index)
 			new_petreport = PetReport.objects.get(pk=new_petreport_index)
 			#Just grab the name of the file, nothing else.
 			img_name = new_petreport.img_path.name.split("/")[2]
