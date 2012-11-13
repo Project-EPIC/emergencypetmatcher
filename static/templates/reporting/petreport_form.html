@@ -25,7 +25,7 @@
 		 If the pet report meets these criteria, click the 'Submit' button at the end of the form.
 	</div>
 
-	<div id="detail" style="width:500px; height:450px; padding: 5px; border:1px dotted;">
+	<div id="detail" style="width:600px; height:100%; overflow:auto; margin-bottom: 50px; padding:5px; border:1px dotted;">
 
 		{% if form.errors %} <strong> {{ form.errors }} </strong> {% endif %}
 
@@ -45,7 +45,7 @@
 					</tr>
 				{% endfor %}
 			</table><br/>
-			<input type="submit" value="Submit" style= "width:100px; height:25px; float:right;"/>
+			<input type="submit" value="Submit" style= "margin: 10px 0px 10px 0px; width:150px; height:50px; font-size:13pt;float:right;"/>
 		</form>
 	</div>
 

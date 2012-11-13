@@ -26,7 +26,9 @@ PETREPORT_AGE_LENGTH = 10
 PETREPORT_COLOR_LENGTH =30
 PETREPORT_BREED_LENGTH = 30
 PETREPORT_DESCRIPTION_LENGTH = 500
+PETREPORT_SPAYED_OR_NEUTERED_LENGTH = 10
 PETMATCH_DESCRIPTION_LENGTH = 300
+PETMATCH_VERIFICATION_VOTES_LENGTH = 2
 CHATLINE_TEXT_LENGTH = 10000
 
 #Small List of Names
@@ -88,22 +90,34 @@ URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
 URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
 URL_BOOKMARKED = "/reporting/bookmarks/"
-URL_FOLLOW = "/follow/"
-URL_UNFOLLOW = "/unfollow/"
-URL_EDITUSERPROFILE = "/edituserprofile/"
+URL_FOLLOW = "/follow"
+URL_UNFOLLOW = "/unfollow"
+URL_EDITUSERPROFILE = "/edituserprofile"
 URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/" 
+URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
+
 
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"
 HTML_LOGIN = "registration/login.html"
+HTML_ABOUT = "home/about.html"
 HTML_SUBMIT_PETREPORT = "reporting/petreport_form.html"
 HTML_USERPROFILE = "home/userprofile.html"
 HTML_PRDP = "reporting/petreport.html"
 HTML_PMDP = "matching/petmatch.html"
 HTML_MATCHING = "matching/matching.html"
 HTML_PROPOSE_MATCH = "matching/propose_match.html"
+HTML_SOCIAL_AUTH_FORM = "registration/social_auth_username_form.html"
+HTML_VERIFY_PETMATCH = "matching/verify_petmatch.html"
 HTML_SOCIAL_AUTH_FORM = "registration/social_auth_form.html"
 HTML_EDITUSERPROFILE_FORM ="home/EditUserProfile_form.html"
+
 TEXTFILE_EMAIL_ACTIVATION_SUBJECT="registration/activation_email_subject.txt"
 TEXTFILE_EMAIL_CHANGE_VERICATION="home/email_change_verification.txt"
+TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH = "matching/verification_email_to_pet_owner.txt"
+TEXTFILE_EMAIL_PETMATCH_PROPOSER = "matching/verification_email_to_digital_volunteer.txt"
+
+EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH="Emergency Pet Matcher: We have found a potential match for your pet!"
+EMAIL_SUBJECT_PETMATCH_PROPOSER='Your pet match is close to being successful!'
+
 TEST_EMAIL="emergencypetmatchertest@gmail.com"
