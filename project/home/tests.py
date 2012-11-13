@@ -1562,3 +1562,367 @@ class LoggingTesting (unittest.TestCase):
 		print ''
 		performance_report(iteration_time)	
 
+'''===================================================================================
+RepuationPointsTesting: Testing for EPM User Reputation Points
+==================================================================================='''
+class RepuationPointsTesting(unittest.TestCase):
+
+	#Get rid of all objects in the QuerySet.
+	def setUp(self):
+		delete_all()
+		# User.objects.all().delete()
+		# UserProfile.objects.all().delete()
+
+	#Get rid of all objects in the QuerySet.
+	def tearDown(self):
+		delete_all()
+		# User.objects.all().delete()
+		# UserProfile.objects.all().delete()
+
+	def test_reputation_points_for_upvoting_PetMatch (self):
+		print_testing_name("test_reputation_points_for_upvoting_PetMatch")
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petmatch = petmatches [petmatch_i]
+			
+			""" r_user is for using a fresh user object from the db for checking reputation
+			points purposes rather than using a stale "user" object that gives old results. """
+			r_user = User.objects.get(pk=user.id)
+			old_reputation = r_user.get_profile().reputation
+			voted = False
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)			
+			print "[INFO]:%s logs onto %s to enter the PMDP..." % (user, client)
+
+			pmdp_url = URL_PMDP + str(petmatch.id) + "/"
+			print pmdp_url
+			response = client.get(pmdp_url)
+			
+			print "Reputation points BEFORE upvoting: %s" %(old_reputation)
+			print "Voted or not for this petmatch before: %s" %petmatch.UserProfile_has_voted(user.get_profile())
+			
+			# check if the user has voted before or not and set the 'voted' flag accordingly
+			if petmatch.UserProfile_has_voted(user.get_profile()) is False:
+				voted = False
+				print "*** User has NEVER voted for this petmatch ***"
+			elif petmatch.UserProfile_has_voted(user.get_profile()) is not False:
+				voted = True
+				print "*** User has Voted for this petmatch before ***"
+			else:
+				print "Something is wrong!"
+
+			vote_url = URL_VOTE_MATCH
+			post =  {"vote":"upvote", "match_id":petmatch.id, "user_id":user.id}
+			response = client.post(vote_url, post, follow=True)
+
+			# reset r_user with a new fresh copy from the db
+			r_user = User.objects.get(pk=user.id)
+			print "Reputation points AFTER upvoting: %s" %(r_user.get_profile().reputation)
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], vote_url)
+			self.assertTrue(petmatch.UserProfile_has_voted(user.get_profile()) == UPVOTE)
+			self.assertEquals(petmatch.up_votes.get(pk = user.id), user.get_profile())
+			if not voted:
+				self.assertEquals(r_user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE)
+			elif voted:
+				self.assertEquals(r_user.get_profile().reputation, old_reputation)
+			else:
+				print "Assert FAILED! Something is wrong!"
+
+			output_update(i + 1)
+			print '\n'
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		performance_report(iteration_time)
+
+
+	def test_reputation_points_for_downvoting_PetMatch (self):
+		print_testing_name("test_reputation_points_for_downvoting_PetMatch")
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petmatch = petmatches [petmatch_i]
+			
+			""" r_user is for using a fresh user object from the db for checking reputation
+			points purposes rather than using a stale "user" object that gives old results. """
+			r_user = User.objects.get(pk=user.id)
+			old_reputation = r_user.get_profile().reputation
+			voted = False
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)			
+			print "[INFO]:%s logs onto %s to enter the PMDP..." % (user, client)
+
+			pmdp_url = URL_PMDP + str(petmatch.id) + "/"
+			print pmdp_url
+			response = client.get(pmdp_url)
+			
+			print "[INFO]: Reputation points BEFORE downvoting: %s" %(old_reputation)
+			print "[INFO]: Voted or not for this petmatch before: %s" %petmatch.UserProfile_has_voted(user.get_profile())
+			
+			# check if the user has voted before or not and set the 'voted' flag accordingly
+			if petmatch.UserProfile_has_voted(user.get_profile()) is False:
+				voted = False
+				print "[INFO]: *** User has NEVER voted for this petmatch ***"
+			elif petmatch.UserProfile_has_voted(user.get_profile()) is not False:
+				voted = True
+				print "[INFO]: *** User has Voted for this petmatch before ***"
+			else:
+				print "[ERROR]:Something is wrong!"
+
+			vote_url = URL_VOTE_MATCH
+			post =  {"vote":"downvote", "match_id":petmatch.id, "user_id":user.id}
+			response = client.post(vote_url, post, follow=True)
+
+			# reset r_user with a new fresh copy from the db
+			r_user = User.objects.get(pk=user.id)
+			print "[INFO]: Reputation points AFTER downvoting: %s" %(r_user.get_profile().reputation)
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], vote_url)
+			self.assertTrue(petmatch.UserProfile_has_voted(user.get_profile()) == DOWNVOTE)
+			self.assertEquals(petmatch.down_votes.get(pk = user.id), user.get_profile())
+			if not voted:
+				self.assertEquals(r_user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE)
+			elif voted:
+				self.assertEquals(r_user.get_profile().reputation, old_reputation)
+			else:
+				print "[ERROR]:Assert FAILED! Something is wrong!"
+
+			output_update(i + 1)
+			print '\n'
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		performance_report(iteration_time)
+
+
+	def test_reputation_points_for_submitting_PetReport(self):
+		print_testing_name("test_reputation_points_for_submitting_PetReport")
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients) = create_test_view_setup(create_petreports=False)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			""" r_user is for using a fresh user object from the db for checking reputation
+			points purposes rather than using a stale "user" object that gives old results. """
+			r_user = User.objects.get(pk=user.id)
+			old_reputation = r_user.get_profile().reputation
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "[INFO]:%s logs onto %s to enter the pet report form..." % (user, client)
+
+			#Go to the Pet Report Form Page
+			response = client.get(URL_SUBMIT_PETREPORT)
+
+			#Create and submit a Pet Report object as form content
+			pr = create_random_PetReport(users [user_i])
+
+			#Note here that we convert the PetReport attributes into a dictionary in order to pass it into the POST request object.
+			pr_dict = model_to_dict(pr) 
+			pr_dict ['img_path'] = None #Nullify the img_path attribute
+			form  = PetReportForm() #Create an unbound form
+			post = {'form': form}
+			post.update(pr_dict)
+
+			print "[INFO]: Reputation points BEFORE submitting a PetReport: %s" %(old_reputation)
+
+			#Make the POST request Call
+			response = client.post(URL_SUBMIT_PETREPORT, post, follow=True)
+
+			# reset r_user with a new fresh copy from the db
+			r_user = User.objects.get(pk=user.id)
+			print "[INFO]: Reputation points AFTER submitting a PetReport: %s" %(r_user.get_profile().reputation)
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertTrue(len(response.redirect_chain) == 1) 
+			# self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/')
+			self.assertEquals(response.redirect_chain[0][1], 302)
+			self.assertTrue(response.request ['PATH_INFO'] == URL_HOME)
+			self.assertTrue(len(PetReport.objects.all()) == 2*i + 2)
+			self.assertNotEquals(r_user.get_profile().reputation, old_reputation)
+			self.assertEquals(r_user.get_profile().reputation, old_reputation + REWARD_PETREPORT_SUBMIT)
+			client.logout()
+
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
+		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+		self.assertTrue(len(PetReport.objects.all()) == 2*NUMBER_OF_TESTS) 
+		performance_report(iteration_time)
+
+
+	def test_repution_points_for_proposing_PetMatch (self):
+		print_testing_name("test_repution_points_for_proposing_PetMatch")
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		num_petmatches = 0
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#indexes
+			user_i = random.randrange(0, NUMBER_OF_TESTS)
+			client_i = random.randrange(0, NUMBER_OF_TESTS)
+			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
+
+			#objects
+			user = users [user_i]
+			password = passwords [user_i]
+			client = clients [client_i]
+			petreport = petreports [petreport_i]
+			""" r_user is for using a fresh user object from the db for checking reputation
+			points purposes rather than using a stale "user" object that gives old results. """
+			r_user = User.objects.get(pk=user.id)
+			old_reputation = r_user.get_profile().reputation
+			""" PetMatch status flag to check if the user gets proposing points for proposing a new petmatch
+			 or for voting points when proposing a duplicate petmatch but never voted it before """
+			pm_status = ACTIVITY_PETMATCH_PROPOSED
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "[INFO]:%s logs onto %s to enter the matching interface..." % (user, client)			
+
+			#Go to the matching interface
+			matching_url = URL_MATCHING + str(petreport.id) + "/"
+			response = client.get(matching_url)
+
+			#Generate the PetReport filters for this target PetReport so we take care of the case where there are NO PetReports to match! (causes a 302)
+			filtered_pet_reports = PetReport.objects.all().exclude(pk=petreport.id).exclude(status = petreport.status).filter(pet_type = petreport.pet_type)
+			if len(filtered_pet_reports) == 0:
+				self.assertEquals(response.status_code, 302)
+				print "[INFO]:Oh! There are no PetReports to match this PetReport with - Back to the Home Page!"
+				continue
+
+			self.assertEquals(response.status_code, 200)
+			print "[INFO]:%s has successfully requested page '%s'..." % (user, matching_url) 
+			candidate_petreport = random.choice(filtered_pet_reports) 
+
+			#Go to the propose match dialog
+			propose_match_url = URL_PROPOSE_MATCH + str(petreport.id) + "/" + str(candidate_petreport.id) + "/"
+			response = client.get(propose_match_url)
+			print "[INFO]:%s has successfully requested page '%s'..." % (user, propose_match_url) 
+			print "[INFO]: Reputation points BEFORE proposing a PetMatch: %s" %(old_reputation)
+
+			#Grab the PetMatch that is either a new one, has been posted in the past or has been posted by this User, and set the pm_status flag accordingly based on the activities.
+			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
+			if match is not None:
+				if match.UserProfile_has_voted(user.get_profile()) is not False:
+					print "[OK]:A duplicate PetMatch, and %s has VOTED this match before!" % (user)
+					print "[INFO]: User will get no points."
+					pm_status = None
+				elif match.UserProfile_has_voted(user.get_profile()) is False:
+					print "[OK]: A duplicate PetMatch, and %s has NEVER voted this match before!" % (user)
+					print "[INFO]: User will get voting points."
+					pm_status = ACTIVITY_PETMATCH_UPVOTE
+				else:
+					print "[ERROR]:Something went wrong with checking the UserProfile_has_voted function!"
+			elif match is None:
+				print "[OK]:This will be a new PetMatch."
+				print "[INFO]: User will get proposing points."
+				pm_status = ACTIVITY_PETMATCH_PROPOSED
+			else:
+				print "[ERROR]:Something went wrong while checking of the 'match exists or not!"
+
+			#Make the POST request Call		
+			description = generate_lipsum_paragraph(500)
+			post = {'description': description}
+			response = client.post(propose_match_url, post, follow=True)
+			client.logout()
+
+			# reset r_user with a new fresh copy from the db
+			r_user = User.objects.get(pk=user.id)
+			print "[INFO]: Reputation points AFTER proposing a PetMatch: %s" %(r_user.get_profile().reputation)
+
+			#Grab the PetMatch, again, that has either been posted in the past or has been posted by this User.
+			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
+			if match.UserProfile_has_voted(user.get_profile()) is not False:
+				print "[OK]:A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user)
+			else:
+				print "[OK]: has successfully POSTED a new match!" % (user)				
+				num_petmatches += 1
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(len(response.redirect_chain), 1)
+			# self.assertEquals(response.redirect_chain[0][0], 'http://testserver/')
+			self.assertEquals(response.redirect_chain[0][1], 302)
+			self.assertEquals(response.request ['PATH_INFO'], URL_HOME)	
+			if pm_status == ACTIVITY_PETMATCH_PROPOSED:
+				self.assertEquals(r_user.get_profile().reputation, old_reputation+REWARD_PETMATCH_PROPOSE)
+			elif pm_status == ACTIVITY_PETMATCH_UPVOTE:
+				self.assertEquals(r_user.get_profile().reputation, old_reputation+REWARD_PETMATCH_VOTE)
+			elif pm_status == None:
+				self.assertEquals(r_user.get_profile().reputation, old_reputation)
+			else:
+				print "[ERROR]:Assert Failed! Something went wrong with reputation points!"			
+
+			#Some checks for the PetMatch objects stored
+			self.assertTrue(len(PetMatch.objects.all()) == num_petmatches or len(PetMatch.objects.all()) <= i)
+			output_update(i + 1)
+			print '\n'
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)			
+
+		print ''
+		performance_report(iteration_time)
+

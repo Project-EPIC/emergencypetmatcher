@@ -158,7 +158,8 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                     return redirect(URL_MATCHING + target_petreport_id + "/")
 
                 # add voting reputation points if the user didn't vote before for this duplicate petmatch
-                if (proposed_by not in result.up_votes.all()) and (proposed_by not in result.down_votes.all()):
+                # if (proposed_by not in result.up_votes.all()) and (proposed_by not in result.down_votes.all()):
+                if pm.UserProfile_has_voted(userprofile) is False:
                     update_reputation(proposed_by, ACTIVITY_PETMATCH_UPVOTE)
 
                 result.up_votes.add(proposed_by)
@@ -170,7 +171,6 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                 messages.success(request, "Congratulations - The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
                 # add reputation points for proposing a new petmatch
                 update_reputation(proposed_by, ACTIVITY_PETMATCH_PROPOSED)
-                print "Your rep AFTER (if outcome == 'NEW PETMATCH'): %s" %proposed_by.reputation
 
         else:
             if outcome == "DUPLICATE PETMATCH":
@@ -183,7 +183,7 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                     return redirect(URL_MATCHING + target_petreport_id + "/")
 
                 # add voting reputation points if the user didn't vote before for this duplicate petmatch
-                if (proposed_by not in result.up_votes.all()) and (proposed_by not in result.down_votes.all()):
+                if user_has_voted == False:
                     update_reputation(proposed_by, ACTIVITY_PETMATCH_UPVOTE)
 
                 result.up_votes.add(proposed_by)
