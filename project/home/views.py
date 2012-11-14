@@ -122,6 +122,7 @@ def get_activities_json(request):
 
 def login_User(request):
     if request.method == "POST":
+        
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
@@ -336,11 +337,13 @@ def editUserProfile_page(request):
 
     if request.method == 'POST':
         user = request.user        
+
         '''SaveProfile workflow will be executed if the user clicks on "save" after editing
         first_name, last_name, email or username'''
         if request.POST["action"] == 'saveProfile':         
             user_changed = False
             edit_userprofile_form = UserProfileForm(request.POST,request.FILES)
+
             if edit_userprofile_form.is_valid():
                 ''' If the user enters a blank/ invalid email, it would be caught by this condition'''
                 if not email_re.match(request.POST["email"]):
@@ -349,6 +352,7 @@ def editUserProfile_page(request):
                     json = simplejson.dumps ({"message":message})
                     print "JSON: " + str(json)
                     return HttpResponse(json, mimetype="application/json")
+
                 if request.POST["username"] != user.username:
                     user.username = request.POST["username"]
                     try:
@@ -388,14 +392,14 @@ def editUserProfile_page(request):
                         edit_userprofile = EditUserProfile.objects.get(user=user)
                         edit_userprofile.activation_key = activation_key
                     except EditUserProfile.DoesNotExist:
-                        edit_userprofile = EditUserProfile.objects.create(user=user,activation_key=activation_key)
+                        edit_userprofile = EditUserProfile.objects.create(user=user, activation_key=activation_key)
                     edit_userprofile.new_email = request.POST["email"]
                     edit_userprofile.date_of_change = datetime_now()
                     edit_userprofile.save()
 
                     #Grab the Site object for the context
                     site = Site.objects.get(pk=1)
-                    ctx = {"site":site, "activation_key":activation_key,"expiration_days":settings.ACCOUNT_ACTIVATION_DAYS}
+                    ctx = {"site":site, "activation_key":activation_key, "expiration_days":settings.ACCOUNT_ACTIVATION_DAYS}
                     message = render_to_string(TEXTFILE_EMAIL_CHANGE_VERICATION, ctx)
                     user.email = request.POST["email"]
                     user.email_user(subject, message, from_email = None)

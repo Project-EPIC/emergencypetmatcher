@@ -170,7 +170,7 @@ def get_recent_activites_from_log(userprofile, current_userprofile=None, since_d
 
     # userprofile: the userprofile whose log file is read to get recent activiy feeds
     # current_userprofile: the authenticated user who gets the activity feeds
-    # since_date: used to get all log activities that happend before that date 
+    # since_date: used to get all log activities that happened before that date 
     # num_activities: used to get a number of activites not more than this number
     # activity: used to decide about one type of activity and ignore the other 
 
@@ -221,7 +221,7 @@ def get_recent_activites_from_log(userprofile, current_userprofile=None, since_d
             if (log_date < since_date) or (num_log >= num_activities):
                 break
   
-            # Every line has an ID to denote what is being identified (PetMatchc, UserProfile, etc).
+            # Every line has an ID to denote what is being identified (PetMatch, UserProfile, etc).
             identifier = line.split("ID")[1].replace('}','').replace('{','')   
 
             if ACTIVITY_ACCOUNT_CREATED in line:
@@ -262,7 +262,7 @@ def get_recent_activites_from_log(userprofile, current_userprofile=None, since_d
 
             if recent_log != None:   
                 feed = get_activity_HTML(recent_log, userprofile, userprofile2=userprofile2, petreport=petreport, petmatch=petmatch, current_userprofile=current_userprofile)
-                if feed not in activities and feed!="":
+                if feed not in activities and feed != "":
                     activities.append([str(log_date),feed])
 
     logger.close()

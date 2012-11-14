@@ -25,33 +25,27 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the matching interface..." % (user, client)
+			print "[INFO]: %s logs onto %s to enter the matching interface..." % (user, client)
 
 			#Go to the PRDP Page
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
 			response = client.get(prdp_url)
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], prdp_url)
-			print "[SUCCESS]:%s has successfully requested page %s..." % (user, prdp_url)  
+			print "[SUCCESS]: %s has successfully requested page %s..." % (user, prdp_url)  
 
 			#From here, go to the matching interface
 			matching_url = URL_MATCHING + str(petreport.id) + "/"
@@ -79,21 +73,15 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -135,21 +123,15 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -195,22 +177,16 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 		num_petmatches = 0
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -274,22 +250,16 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 		num_petmatches = 0
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -337,12 +307,9 @@ class MatchingTesting (unittest.TestCase):
 		print ''
 		performance_report(iteration_time)	
 
-
-
-
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-PetMatchTesting: Testing for EPM Pet Match functionality
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''===================================================================================
+PetMatchTesting: Testing for EPM PetMatch-ing functionality
+==================================================================================='''
 class PetMatchTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
@@ -359,7 +326,7 @@ class PetMatchTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -371,13 +338,11 @@ class PetMatchTesting (unittest.TestCase):
 			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)
 
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
-			petmatch = petmatches [petmatch_i]
-			print "PETMATCH: %s %d " % (petmatch, petmatch_i)
-
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
+			petmatch = random.choice(petmatches)
+			print "[INFO]: PetMatch: %s" % petmatch
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -416,21 +381,15 @@ class PetMatchTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petmatch = petmatches [petmatch_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petmatch = random.choice(petmatches)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -465,21 +424,15 @@ class PetMatchTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petmatch = petmatches [petmatch_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petmatch = random.choice(petmatches)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -508,6 +461,11 @@ class PetMatchTesting (unittest.TestCase):
 		print ''
 		performance_report(iteration_time)
 
+
+
+'''===================================================================================
+VerificationTesting: Testing for EPM Verification
+==================================================================================='''
 class VerificationTesting (unittest.TestCase):
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
@@ -520,20 +478,17 @@ class VerificationTesting (unittest.TestCase):
 	def test_get_verification_page (self):
 		print_testing_name("test_get_verification_page")
 		iteration_time = 0.00
+
 		#Need to setup clients, users, and their passwords
-		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)
-			
+		
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petmatch = petmatches [petmatch_i]			
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petmatch = random.choice(petmatches)
 
 			#Log in First
 			loggedin = client.login(username = user.username, password = password)
@@ -552,46 +507,55 @@ class VerificationTesting (unittest.TestCase):
 				else:
 					self.assertFalse(petmatch.PetMatch_has_reached_threshold())	
 
-			user_indexes = [users.index(petmatch.lost_pet.proposed_by.user),users.index(petmatch.found_pet.proposed_by.user)]
-			user_i = random.choice(user_indexes)
-			user = users[user_i]
-			password = passwords[user_i]
-			userprofile = user.get_profile()
+			#Looking for other users and their passwords in the users list.
+			proposers = [petmatch.lost_pet.proposed_by.user, petmatch.found_pet.proposed_by.user]
+			proposer = random.choice(proposers)
+			userprofile = proposer.get_profile()
+			password = None
+
+			for (user_obj, user_password) in users:
+				if user_obj == proposer:
+					password = user_password
+
 			#Log in First
-			loggedin = client.login(username = user.username, password = password)
+			loggedin = client.login(username = proposer.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the verification page..." % (user, client)
+			print "[INFO]:%s logs onto %s to enter the verification page..." % (proposer, client)
 			response = client.get(verification_page_url)
 
-			if petmatch.PetMatch_has_reached_threshold():
+			if petmatch.PetMatch_has_reached_threshold() == True:
 				self.assertEquals(response.status_code, 200)
 				self.assertTrue(petmatch.PetMatch_has_reached_threshold())
-				self.assertTrue(( userprofile == petmatch.lost_pet.proposed_by) or (userprofile == petmatch.found_pet.proposed_by))
+				self.assertTrue((userprofile == petmatch.lost_pet.proposed_by) or (userprofile == petmatch.found_pet.proposed_by))
+
+			output_update(i + 1)
+			print '\n'
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)				
+
 
 	def test_post_verification_response(self):
 		print_testing_name("test_post_verification_response")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords
-		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-			#indexes
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)
 			
 			#objects
-			client = clients [client_i]
-			petmatch = petmatches [petmatch_i]			
+			client = random.choice(clients)
+			petmatch = random.choice(petmatches)
 
-			if not petmatch.PetMatch_has_reached_threshold():
+			if petmatch.PetMatch_has_reached_threshold() == False:
 				continue
 
-			user_indexes = [users.index(petmatch.lost_pet.proposed_by.user),users.index(petmatch.found_pet.proposed_by.user)]
-			for user_i in user_indexes:
-				#Get Lost/Found pet user
-				petmatch = PetMatch.objects.get(pk=petmatch.id)
-				user = users[user_i]
-				password = passwords[user_i]
+			#Looking for other users and their passwords in the users list.
+			proposers = [petmatch.lost_pet.proposed_by.user, petmatch.found_pet.proposed_by.user]
+			lostpet_proposer_index = [user[0] for user in users].index(proposers[0])
+			foundpet_proposer_index = [user[0] for user in users].index(proposers[1])
+
+			for (user, password) in [users[lostpet_proposer_index], users[foundpet_proposer_index]]:
 
 				#Log in First
 				loggedin = client.login(username = user.username, password = password)
@@ -619,75 +583,96 @@ class VerificationTesting (unittest.TestCase):
 					self.assertEquals(sent_vote,new_lost_pet_vote)
 				else:
 					self.assertEquals(old_lost_pet_vote,new_lost_pet_vote)
+
+			output_update(i + 1)
+			print '\n'
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)					
 				
 				
 	def test_function_PetMatch_has_reached_threshold(self):
 		print_testing_name("test_function_PetMatch_has_reached_threshold")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords
-		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-			#indexes
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)	
+
 			#objects
-			client = clients [client_i]
-			petmatch = petmatches [petmatch_i]			
+			client = random.choice(clients)
+			petmatch = random.choice(petmatches)
+
 			'''if PetMatch_has_reached_threshold() returns true, 
 			the PetMatch should satisfy the threshold condition'''
 			if petmatch.PetMatch_has_reached_threshold():
 				self.assertTrue(petmatch.up_votes.count() - petmatch.down_votes.count() >= 5)
 			else:
 				self.assertTrue(petmatch.up_votes.count() - petmatch.down_votes.count() < 5)
-			print 'Pet Match %s passed the test: test_function_PetMatch_has_reached_threshold' % (str(petmatch))
+			print 'Pet Match %s passed the test: test_function_PetMatch_has_reached_threshold' % petmatch
+
+			output_update(i + 1)
+			print '\n'
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)			
 
 	def test_function_verify_PetMatch(self):
 		print_testing_name("test_function_verify_PetMatch")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords
-		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 			#indexes
 			client_i = random.randrange(0, NUMBER_OF_TESTS)
 			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)	
 			#objects
-			client = clients [client_i]
-			petmatch = PetMatch.objects.get(pk = petmatches[petmatch_i].id)
-			print 'PetMatch threshold reached: %s ' %(str(petmatch.PetMatch_has_reached_threshold()))
-			print 'PetMatch is_open: %s verification_triggered: %s' % (str(petmatch.is_open),str(petmatch.verification_triggered))
-			if petmatch.PetMatch_has_reached_threshold() is True:	
+			client = random.choice(clients)
+			petmatch = random.choice(petmatches)
+
+			print '[INFO]: PetMatch threshold reached: %s ' %(str(petmatch.PetMatch_has_reached_threshold()))
+			print '[INFO]: PetMatch is_open: %s verification_triggered: %s' % (str(petmatch.is_open),str(petmatch.verification_triggered))
+
+			if petmatch.PetMatch_has_reached_threshold() == True:	
 				self.assertFalse(petmatch.is_open)
 				self.assertTrue(petmatch.verification_triggered)
 	    	else:
 	    		self.assertFalse(petmatch.is_successful)
 	    		# self.assertFalse(petmatch.verification_triggered)
-		print 'Pet Match has passed the test: test_function_verify_PetMatch'
+
+	    	print '[OK]: Pet Match has passed the test: test_function_verify_PetMatch'
+	    	output_update(i + 1)
+	    	print '\n'
+	    	end_time = time.clock()
+	    	iteration_time += (end_time - start_time)
+
+
 
 	def test_function_close_PetMatch(self):
 		print_testing_name("test_function_close_PetMatch")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords
-		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-			#indexes
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)	
-			#objects
-			client = clients [client_i]
-			petmatch = petmatches [petmatch_i]		
+			
+			client = random.choice(clients)
+			petmatch = random.choice(petmatches)
 			verification_page_url = URL_VERIFY_PETMATCH + str(petmatch.id) + "/"
-			if petmatch.PetMatch_has_reached_threshold():
+
+			if petmatch.PetMatch_has_reached_threshold() == True:
 					self.assertTrue(petmatch.verification_triggered)
 					self.assertFalse(petmatch.is_open)
-					user_indexes = [users.index(petmatch.lost_pet.proposed_by.user),users.index(petmatch.found_pet.proposed_by.user)]
 					old_pet_vote = petmatch.verification_votes
-					for user_i in user_indexes:
-						petmatch = PetMatch.objects.get(pk=petmatch.id)
-						user = users[user_i]
-						password = passwords[user_i]
+
+					#Looking for other users and their passwords in the users list.
+					proposers = [petmatch.lost_pet.proposed_by.user, petmatch.found_pet.proposed_by.user]
+					lostpet_proposer_index = [user[0] for user in users].index(proposers[0])
+					foundpet_proposer_index = [user[0] for user in users].index(proposers[1])
+
+					for (user, password) in [users[lostpet_proposer_index], users[foundpet_proposer_index]]:
 						#Log in First
 						loggedin = client.login(username = user.username, password = password)
 						self.assertTrue(loggedin == True)			
@@ -695,20 +680,40 @@ class VerificationTesting (unittest.TestCase):
 						user_response = random.randint(1,2)
 						message = random.choice(['yes','no'])
 						post = {'message':message}
-						response = client.post(verification_page_url,post,follow = True)
-						self.assertEquals(response.status_code,200)
-						petmatch = PetMatch.objects.get(pk=petmatch.id)					
+						response = client.post(verification_page_url, post, follow = True)
+						self.assertEquals(response.status_code, 200)
+						petmatch = PetMatch.objects.get(pk=petmatch.id)
+
 					petmatch = PetMatch.objects.get(pk=petmatch.id)
 					new_pet_vote  = petmatch.verification_votes
 					self.assertTrue(petmatch.closed_date != None)
+
 					if new_pet_vote == '11':
 						self.assertTrue(petmatch.is_successful)
+
 						for pm in petmatch.lost_pet.lost_pet_related.all(): 
 							self.assertFalse(pm.is_open)
 							self.assertTrue(pm.closed_date != None)
+
 						for pm in petmatch.found_pet.found_pet_related.all(): 
 							self.assertFalse(pm.is_open)
 							self.assertTrue(pm.closed_date != None)
 					else:
 						self.assertFalse(petmatch.is_successful)
+
 			print 'Pet Match has passed the test: test_function_verify_PetMatch'
+			output_update(i + 1)
+			print '\n'
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+
+
+
+
+
+
+
+
+
+

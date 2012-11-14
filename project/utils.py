@@ -149,24 +149,27 @@ def create_random_User(i, pretty_name=True, test_user=True):
 
 	userprofile = user.get_profile()
 	userprofile.set_activity_log(is_test=test_user)
-	#Also, don't forget to create his/her list of followers.
-	# create_random_following_list(userprofile)
 	return (user, password)
 
 #returns a random list of UserProfiles
 def create_random_Userlist(num_users = None): 
 	allusers = UserProfile.objects.all()
+
 	if num_users == None:
 		num_users = random.randint(0, len(allusers))
+
 	userlist = random.sample(allusers,num_users)
 	return userlist
 
 #creates a list of UserProfiles being followed by the input UserProfile
 def create_random_following_list (userprofile, num_following=None):
 	allusers = UserProfile.objects.exclude(pk = userprofile.user.id)
+
 	if num_following == None:
 		num_following = random.randint(0, len(allusers)/2)
+
 	following_list = random.sample(allusers, num_following)
+
 	for followed in following_list:
 		userprofile.following.add(followed)
 	return userprofile
@@ -174,9 +177,12 @@ def create_random_following_list (userprofile, num_following=None):
 #creates a list of PetReports being bookmarked by the input UserProfile
 def create_random_bookmark_list (userprofile, num_bookmark=None):
 	allpetreports = PetReport.objects.all()
+
 	if num_bookmark == None:
 		num_bookmark = random.randint(0, len(allpetreports)/3)
+
 	bookmark_list = random.sample(allpetreports, num_bookmark)
+
 	for bookmark in bookmark_list:
 		userprofile.bookmarks_related.add(bookmark)
 	return userprofile
@@ -251,26 +257,48 @@ def create_random_ChatLine(user, chat):
 	chatline.save()
 	return chatline
 
+
+#Find all potential PetMatch PetReport (Lost, Found) pairs and return a list of them.
+def get_potential_PetMatch_PetReport_pairs(pet_type=None):
+
+	if pet_type == None:
+		allpets = PetReport.objects.all()
+	else:
+		allpets = PetReport.objects.all(pet_type=pet_type)
+
+	#Organize and filter based on status
+	lostpets = allpets.filter(status = "Lost")
+	foundpets = allpets.filter(status = "Found")
+	#This list will contain any potential matches that can be made.
+	potential_matches = []
+
+	#Iterate through both lists and find potential matches.
+	for lostpet in lostpets:
+		for foundpet in foundpets:
+			if lostpet.pet_type == foundpet.pet_type:
+				potential_matches.append((lostpet, foundpet))
+
+	return potential_matches
+
+
 #Create Random Object for: PetMatch
-def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None,threshold_bias = True):
-	#If the lost or found pet (or both) wasn't supplied, then get random Pet Reports.
+def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None, threshold_bias = True):
+	#If the lost or found pet (or both) wasn't supplied, then search for potential PetMatch PetReport pairs
 	if lost_pet == None or found_pet == None:
 
-		if pet_type == None:
-			pet_type = random.choice(PET_TYPE_CHOICES)[0]
-
-		allpets = PetReport.objects.filter(pet_type=pet_type)
-		prlost = allpets.filter(status = "Lost")
-		prfound = allpets.filter(status = "Found")
-
-		if len(prlost.all()) == 0 or len(prfound.all()) == 0:
+		#Get some potential matches
+		potential_matches = get_potential_PetMatch_PetReport_pairs(pet_type=pet_type)
+		if len(potential_matches) == 0:
 			print "[ERROR]: Can't create random PetMatch: There isn't at least one lost and found %s." % pet_type
 			return None
+		
+		#Get a random match.	
+		potential_match = random.choice(potential_matches)
 
 		if(lost_pet == None):
-			lost_pet = random.choice(prlost)
+			lost_pet = potential_match[0]
 		if(found_pet == None):
-			found_pet = random.choice(prfound)
+			found_pet = potential_match[1]
 
 	#If no user supplied, then get a random one.
 	if(user == None):
@@ -286,10 +314,11 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 			petmatch.score = random.randint(0, 10000)
 			petmatch.is_open = random.choice ([True, False])
 			user_count = len(UserProfile.objects.all())
+
 			'''if threshold_bias = True, the petmatch has a chance of reaching the threshold.
 			if the random integer generated is 1, the petmatch matches/exceeds the threshold
 			if the random integer is 2, the petmatch might not exceed the threshold'''
-			if threshold_bias and random.randint(1,2) == 1 and user_count >=5:
+			if threshold_bias == True and random.randint(1,2) == 1 and user_count >=5:
 				up_votes = create_random_Userlist(num_users=random.randint(5, user_count))
 				down_votes = create_random_Userlist(num_users=random.randint(0, len(up_votes)-5 ))
 				petmatch.up_votes = set(up_votes)
@@ -299,6 +328,7 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 				down_votes = create_random_Userlist(num_users=random.randint(0, user_count))
 				petmatch.up_votes = set(up_votes) - set(down_votes)
 				petmatch.down_votes = set(down_votes) - set(up_votes) 
+
 			#Save the PetMatch again after modifying its model relationship attributes
 			petmatch.save()
 			log_activity(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=petmatch, )
@@ -324,98 +354,89 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 	return petmatch
 
 
-''' Function for setting up Client, User (with passwords), and (optionally) PetReport objects for testing purposes.'''
-def create_test_view_setup(create_petreports=False, create_petmatches=False):
+''' Function for setting up Client, User (with passwords), and (optionally) following lists, PetReport, and PetMatch objects for testing purposes.'''
+def create_test_view_setup(create_clients=True, create_following_lists=False, create_petreports=False, create_petmatches=False):
 
 	#Firstly, delete everything existing.
-	delete_all()
+	delete_all(only_test_users=True)
 	
-	#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+	#Need to setup the object lists. The users list encapsulates tuples of <user, password>
+	users = [ (None, None) for i in range (NUMBER_OF_TESTS) ]
 	clients = [ None for i in range (NUMBER_OF_TESTS) ]
-	users = [ None for i in range (NUMBER_OF_TESTS) ]
-	passwords = [ None for i in range (NUMBER_OF_TESTS) ]
 	petreports = [ None for i in range (NUMBER_OF_TESTS) ]
-	petmatches = [ None for i in range (NUMBER_OF_TESTS/2) ]
-	pet_type = random.choice(PET_TYPE_CHOICES)[0]
-	status = None
-	petmatch_i = 0
+	petmatches = [] #Cannot determine size of petmatch list up front.
 
-	#Iterate w.r.t NUMBER_OF_TESTS control variable.
+	#First, create random Users
 	for i in range (NUMBER_OF_TESTS):
-		user, password = create_random_User(i, pretty_name=True)
-		users [i] = user
-		passwords [i] = password
-		client = Client (enforce_csrf_checks=False)
-		clients [i] = client
+		(user, password) = create_random_User(i, pretty_name=True)
+		users [i] = (user, password)
 
-		if create_petreports == True:
+	#Then, create the Users' following lists (if specified)
+	if create_following_lists == True:
+		for user in users:
+			userprofile = user[0].get_profile()
+			create_random_following_list(userprofile)
 
-			#reset the pet_type: This is done so that the pet reports are generated with one pet type per two Pet Reports.
-			if i % 2 == 0:
-				status = "Lost"
-				pet_type = random.choice(PET_TYPE_CHOICES)[0]				
-			else:
-				status = "Found"
+	#Then, create the Client objects (if specified)
+	if create_clients == True:
+		for i in range (NUMBER_OF_TESTS):
+			clients [i] = Client (enforce_csrf_checks=False)
 
-			pr = create_random_PetReport(user, status=status, pet_type=pet_type)
-			petreports [i] = pr
-
-		#We can only create AT MOST NUMBER_OF_TESTS/2 PetMatch objects in total, so we need to be careful about indices.
-		#(i >= 1 and i <= NUMBER_OF_TESTS/2)
-		if (create_petmatches == True) and (i % 2 == 1):
-			pm = create_random_PetMatch(lost_pet=petreports[i-1], found_pet=petreports[i], pet_type=pet_type, user=user)
-			petmatches [petmatch_i] = pm
-			petmatch_i += 1
-
-	# allusers = UserProfile.objects.all()
-
-	# # Create random following list
-	# for userprofile in allusers:
-	# 	userprofile=create_random_following_list(userprofile)
-
-	# # Create random bookmark list
-	# if create_petreports == True:
-	# 	for userprofile in allusers:
-	# 		userprofile=create_random_bookmark_list(userprofile)
-
-	if create_petreports == True and create_petmatches == True:
-		return (users, passwords, clients, petreports, petmatches)
+	#Then, create random PetReport objects (if specified)
 	if create_petreports == True:
-		return (users, passwords, clients, petreports)
-	if create_petmatches == True:
-		return (users, passwords, clients, petmatches)
+		for i in range (NUMBER_OF_TESTS):
+			(user, password) = random.choice(users)
+			petreports [i] = create_random_PetReport(user=user)
+
+		#Finally, create PetMatch objects (if specified)
+		if create_petmatches == True:
+			for i in range (NUMBER_OF_TESTS):
+				(user, password) = random.choice(users)
+				petmatch = create_random_PetMatch(user=user, threshold_bias=False)
+
+				#If we get back None, try again.
+				if petmatch == None:
+					continue
+				petmatches.append(petmatch)
+
+	if create_petmatches == True and create_petreports == True:
+		return (users, clients, petreports, petmatches)
+	if create_petreports == True:
+		return (users, clients, petreports)
 	#just return the simple ones, geez!		
-	return (users, passwords, clients)
+	return (users, clients)
 
 
 ''' Update the current user's reputation points based on an activity '''
 def update_reputation(userprofile, activity):
+	assert isinstance(UserProfile, userprofile)
 
 	if activity == ACTIVITY_PETMATCH_UPVOTE:
 		userprofile.reputation += REWARD_PETMATCH_VOTE
-		userprofile.save()
 
 	elif activity == ACTIVITY_PETMATCH_DOWNVOTE:
 		userprofile.reputation += REWARD_PETMATCH_VOTE
-		userprofile.save()
 
 	elif activity == ACTIVITY_PETREPORT_SUBMITTED:
 		userprofile.reputation += REWARD_PETREPORT_SUBMIT
-		userprofile.save()
 
 	elif activity == ACTIVITY_PETMATCH_PROPOSED:
 		userprofile.reputation += REWARD_PETMATCH_PROPOSE
-		userprofile.save()
 
 	elif activity == ACTIVITY_USER_BEING_FOLLOWED:
 		userprofile.reputation += REWARD_USER_FOLLOWED
-		userprofile.save()
 
 	elif activity == ACTIVITY_USER_BEING_UNFOLLOWED:
 		userprofile.reputation -= REWARD_USER_FOLLOWED
-		userprofile.save()
 
 	else:
-		print 'This is not a valid activity! \n'
-			
+		print '[ERROR]: Cannot update reputation points: This is not a valid activity! \n'
+		return False
+
+	#Save the UserProfile and return True
+	userprofile.save()
+	return True
+	
+
+
 
