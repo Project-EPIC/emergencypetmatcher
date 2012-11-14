@@ -1583,18 +1583,18 @@ class RepuationPointsTesting(unittest.TestCase):
 			print pmdp_url
 			response = client.get(pmdp_url)
 			
-			print "Reputation points BEFORE upvoting: %s" %(old_reputation)
-			print "Voted or not for this petmatch before: %s" %petmatch.UserProfile_has_voted(user.get_profile())
+			print "[INFO]: Reputation points BEFORE upvoting: %s" %(old_reputation)
+			# print "Voted or not for this petmatch before: %s" %petmatch.UserProfile_has_voted(user.get_profile())
 			
 			# check if the user has voted before or not and set the 'voted' flag accordingly
 			if petmatch.UserProfile_has_voted(user.get_profile()) is False:
 				voted = False
-				print "*** User has NEVER voted for this petmatch ***"
+				print "[INFO]: *** User has NEVER voted for this petmatch ***"
 			elif petmatch.UserProfile_has_voted(user.get_profile()) is not False:
 				voted = True
-				print "*** User has Voted for this petmatch before ***"
+				print "[INFO]: *** User has Voted for this petmatch before ***"
 			else:
-				print "Something is wrong!"
+				print "[ERROR]: Something is wrong!"
 
 			vote_url = URL_VOTE_MATCH
 			post =  {"vote":"upvote", "match_id":petmatch.id, "user_id":user.id}
@@ -1602,7 +1602,7 @@ class RepuationPointsTesting(unittest.TestCase):
 
 			# reset r_user with a new fresh copy from the db
 			r_user = User.objects.get(pk=user.id)
-			print "Reputation points AFTER upvoting: %s" %(r_user.get_profile().reputation)
+			print "[INFO]: Reputation points AFTER upvoting: %s" %(r_user.get_profile().reputation)
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
@@ -1614,7 +1614,7 @@ class RepuationPointsTesting(unittest.TestCase):
 			elif voted:
 				self.assertEquals(r_user.get_profile().reputation, old_reputation)
 			else:
-				print "Assert FAILED! Something is wrong!"
+				print "[ERROR]: Assert FAILED! Something is wrong!"
 
 			output_update(i + 1)
 			print '\n'
@@ -1776,8 +1776,8 @@ class RepuationPointsTesting(unittest.TestCase):
 		performance_report(iteration_time)
 
 
-	def test_repution_points_for_proposing_PetMatch (self):
-		print_testing_name("test_repution_points_for_proposing_PetMatch")
+	def test_reputation_points_for_proposing_PetMatch (self):
+		print_testing_name("test_reputation_points_for_proposing_PetMatch")
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
@@ -1893,4 +1893,113 @@ class RepuationPointsTesting(unittest.TestCase):
 
 		print ''
 		performance_report(iteration_time)
+
+
+	def test_reputation_points_for_a_UserProfile_being_followed_and_unfollowed(self):
+	    print_testing_name("test_reputation_points_for_a_UserProfile_being_followed_and_unfollowed")
+	    iteration_time = 0.00
+
+	    # Need to setup clients, users, and their passwords in order to simula the following function.
+	    (users, passwords, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
+	        
+	    for i in range (NUMBER_OF_TESTS):
+	        start_time = time.clock()
+
+			# indexes
+	        user_one_i = random.randrange(0, NUMBER_OF_TESTS)
+	        user_two_i = random.randrange(0, NUMBER_OF_TESTS)
+	        if user_one_i == user_two_i: 
+	        	continue
+	        client_i = random.randrange(0, NUMBER_OF_TESTS)
+
+	        # objects
+	        userprofile_one = users [user_one_i].get_profile()
+	        password_one = passwords [user_one_i]
+	        client = clients [client_i]
+	        userprofile_two = users [user_two_i].get_profile()
+	        password_two = passwords [user_two_i]
+	        """ r_userprofile is for using a fresh userprofile object from the db for checking reputation 
+	        points purposes rather than using a stale "userprofile" object that gives old results. """
+	        r_userprofile = UserProfile.objects.get(pk=userprofile_two.id)
+	        old_reputation = r_userprofile.reputation
+
+	        print "\n%s ............................................................." % i
+	        print "[INFO]: %s (id:%s) and %s (id:%s) have been created." % (userprofile_one, userprofile_one.id, userprofile_two, userprofile_two.id)
+
+			#Log onto the first user.
+	        client = clients [client_i]
+	        loggedin = client.login(username = userprofile_one.user.username, password = password_one)
+	        self.assertTrue(loggedin == True)			
+	        print "[INFO]: %s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username)
+
+	        # Go to the second user's profile page
+	        response = client.get(URL_USERPROFILE + str(userprofile_two.id) + "/")
+	        self.assertEquals(response.status_code, 200)
+
+	        print "[INFO]: Reputation points for %s BEFORE being followed: %s" %(userprofile_two, old_reputation)
+
+	        # ...................Testing Following Function.........................
+
+	        # Make the POST request Call for following the second user
+	        post = {"target_userprofile_id": userprofile_two.id}
+	        response = client.post(URL_FOLLOW, post, follow=True)
+
+	        # reset r_userprofile with a new fresh copy from the db
+	        r_userprofile = UserProfile.objects.get(pk=userprofile_two.id)
+	        print "[INFO]: Reputation points for %s AFTER being followed: %s" %(userprofile_two, r_userprofile.reputation)
+
+			# Make assertions
+	        self.assertEquals(response.status_code, 200)
+	        self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/UserProfile/'+ str(userprofile_two.id))
+	        self.assertEquals(response.redirect_chain[0][1], 302)
+	        self.assertTrue(response.request ['PATH_INFO'] == URL_USERPROFILE + str(userprofile_two.id) + "/")
+	        self.assertEquals(r_userprofile.reputation, old_reputation+REWARD_USER_FOLLOWED)
+
+	        # Assert that 
+	        # the second user is in the first user's following list, and 
+	        # the first user is in the second user's followers list
+	        self.assertTrue(userprofile_two in userprofile_one.following.all())
+	        self.assertTrue(userprofile_one in userprofile_two.followers.all())
+	        print "[INFO]: %s has followed %s." % (userprofile_one.user.username, userprofile_two.user.username)
+
+	        # ...................Testing Unfollowing Function.........................
+
+	        # reset old_reputation with a new fresh copy from the db
+	        old_reputation = r_userprofile.reputation
+	        print "[INFO]: Reputation points for %s BEFORE being unfollowed: %s" %(userprofile_two, old_reputation)
+
+	        # Make the POST request Call for unfollowing the second user
+	        post = {"target_userprofile_id": userprofile_two.id}
+	        response = client.post(URL_UNFOLLOW, post, follow=True)
+
+	        # reset r_userprofile with a new fresh copy from the db
+	        r_userprofile = UserProfile.objects.get(pk=userprofile_two.id)
+	        print "[INFO]: Reputation points for %s AFTER being unfollowed: %s" %(userprofile_two, r_userprofile.reputation)
+
+			# Make assertions
+	        self.assertEquals(response.status_code, 200)
+	        self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/UserProfile/'+ str(userprofile_two.id))
+	        self.assertEquals(response.redirect_chain[0][1], 302)
+	        self.assertTrue(response.request ['PATH_INFO'] == URL_USERPROFILE + str(userprofile_two.id) + "/")
+
+	        # Assert that 
+	        # the second user is not in the first user's following list, and 
+	        # the first user is not in the second user's followers list
+	        self.assertTrue(not userprofile_two in userprofile_one.following.all())
+	        self.assertTrue(not userprofile_one in userprofile_two.followers.all())
+	        print "[INFO]: %s then unfollowed %s." % (userprofile_one, userprofile_two)
+
+	        self.assertEquals(r_userprofile.reputation, old_reputation-REWARD_USER_FOLLOWED)
+
+	        # Logout the first user
+	        client.logout()
+
+	        end_time = time.clock()
+	        iteration_time += (end_time - start_time)
+
+
+	        print ''
+	        self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
+	        self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+	        performance_report(iteration_time)
 

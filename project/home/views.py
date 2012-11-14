@@ -32,8 +32,6 @@ from utils import *
 from datetime import datetime
 # from pytz import timezone
 import utils
-from django.template.loader import render_to_string
-from django.conf import settings
 import oauth2 as oauth, random, urllib
 import hashlib, random, re
 
@@ -293,6 +291,8 @@ def follow_UserProfile(request):
 
             else:
                 userprofile.following.add(target_userprofile)
+                # add points to the user who is being followed (i.e. the target_userprofile) 
+                update_reputation(target_userprofile, ACTIVITY_USER_BEING_FOLLOWED)
                 messages.success(request, "You are now following " + str(target_userprofile.user.username) + ".")     
 
                 # Log the following activity for this UserProfile
@@ -316,6 +316,8 @@ def unfollow_UserProfile(request):
             #If this UserProfile is actually following the target UserProfile...
             if target_userprofile in userprofile.following.all():
                 userprofile.following.remove(target_userprofile)
+                # remove points to the use who has been unfollowed (i.e. the target_userprofile)
+                update_reputation(target_userprofile, ACTIVITY_USER_BEING_UNFOLLOWED)
                 messages.success(request, "You are no longer following " + str(target_userprofile.user.username) + ".") 
                 # Log the unfollowing activity for this UserProfile
                 log_activity(ACTIVITY_UNFOLLOWING, userprofile, target_userprofile)
