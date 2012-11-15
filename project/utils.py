@@ -172,6 +172,8 @@ def create_random_following_list (userprofile, num_following=None):
 
 	for followed in following_list:
 		userprofile.following.add(followed)
+		log_activity(ACTIVITY_FOLLOWING, userprofile, userprofile2=followed)
+
 	return userprofile
 
 #creates a list of PetReports being bookmarked by the input UserProfile
@@ -350,6 +352,7 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 				existing_petmatch.up_votes.remove(user.get_profile())
 				log_activity(ACTIVITY_PETMATCH_DOWNVOTE, user.get_profile(), petmatch=existing_petmatch, )				
 			
+	print "\n"
 	#Return the (possibly None) PetMatch
 	return petmatch
 
