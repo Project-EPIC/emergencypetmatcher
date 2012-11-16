@@ -440,16 +440,16 @@ class LoginTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = create_test_view_setup(create_petreports=False)	
+		(users, clients) = create_test_view_setup()	
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			user = users [user_i]
-			client = clients [client_i]
 
-			print "[INFO]:%s logs onto %s and attempts to login..." % (user, client)
+			#Get the test objects.
+			user, password = random.choice(users)
+			client = random.choice(clients)
+
+			print "[INFO]:%s logs onto %s and attempts to login..." % (user.username, client)
 
 			#Go to the Login Page
 			response = client.get(URL_LOGIN)
@@ -459,8 +459,7 @@ class LoginTesting (unittest.TestCase):
 			self.assertTrue(next == URL_HOME)
 
 			#Submit Login information
-			response = client.post (URL_LOGIN, 
-				{'username':users [user_i].username, 'password': passwords [user_i], 'next': next}, follow=True)
+			response = client.post (URL_LOGIN, {'username': user.username, 'password': password, 'next': next}, follow=True)
 
 			#Get Redirected back to the home page.
 			self.assertTrue(response.status_code == 200)
@@ -626,20 +625,19 @@ class UserProfileTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate accessing UserProfile pages.
-		(users, passwords, clients) = create_test_view_setup(create_petreports=False)
+		(users, clients) = create_test_view_setup()
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			user = users [user_i]
-			client = clients [client_i]
+
+			user, password = random.choice(users)
+			client = random.choice(clients)
 
 			print "[INFO]:%s logs onto %s to render the profile page..." % (user, client)
 
-			loggedin = client.login(username = users [user_i].username, password = passwords[user_i])
+			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			response = client.get(URL_USERPROFILE + str(user.id) + '/')
+			response = client.get(URL_USERPROFILE + str(user.userprofile.id) + '/')
 
 			self.assertTrue(response.status_code == 200)
 			#We should have the base.html -> index.html -> userprofile.html
@@ -723,7 +721,7 @@ class EditUserProfileTesting (unittest.TestCase):
 			self.assertTrue(user.check_password(new_password))
 
 			print "[INFO]:Test test_editUserProfile_savePassword was successful for user %s" % (user)
-		
+			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
@@ -782,7 +780,7 @@ class EditUserProfileTesting (unittest.TestCase):
 			self.assertEquals(user.email,email)
 
 			print "[INFO]:Test test_editUserProfile_saveProfile was successful for user %s" % (user)
-		
+			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
@@ -791,7 +789,7 @@ class EditUserProfileTesting (unittest.TestCase):
 		
 
 '''===================================================================================
-FollowTesting: Testing for EPM Following and Unfollowing functionalities
+FollowingTesting: Testing for EPM Following and Unfollowing functionalities
 ==================================================================================='''
 class FollowingTesting (unittest.TestCase):
 
@@ -810,29 +808,23 @@ class FollowingTesting (unittest.TestCase):
         iteration_time = 0.00
 
         # Need to setup clients, users, and their passwords in order to simula the following function.
-        (users, passwords, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
+        (users, clients) = create_test_view_setup()
         
         for i in range (NUMBER_OF_TESTS):
             start_time = time.clock()
 
-			# indexes
-            user_one_i = random.randrange(0, NUMBER_OF_TESTS)
-            user_two_i = random.randrange(0, NUMBER_OF_TESTS)
-            if user_one_i == user_two_i: 
-            	continue
-            client_i = random.randrange(0, NUMBER_OF_TESTS)
+            user_one, password_one = random.choice(users)
+            user_two, password_two = random.choice(users)
+            userprofile_one = user_one.get_profile()
+            userprofile_two = user_two.get_profile()
+            client = random.choice(clients)
 
-            # objects
-            userprofile_one = users [user_one_i].get_profile()
-            password_one = passwords [user_one_i]
-            client = clients [client_i]
-            userprofile_two = users [user_two_i].get_profile()
-            password_two = passwords [user_two_i]
-            print "\n%s ............................................................." % i
+            if user_one.id == user_two.id:
+            	continue
+           
             print "[INFO]: %s (id:%s) and %s (id:%s) have been created." % (userprofile_one, userprofile_one.id, userprofile_two, userprofile_two.id)
 
 			#Log onto the first user.
-            client = clients [client_i]
             loggedin = client.login(username = userprofile_one.user.username, password = password_one)
             self.assertTrue(loggedin == True)			
             print "[INFO]: %s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username)
@@ -881,7 +873,7 @@ class FollowingTesting (unittest.TestCase):
 
             # Logout the first user
             client.logout()
-
+            output_update(i + 1)
             end_time = time.clock()
             iteration_time += (end_time - start_time)
 
@@ -926,6 +918,50 @@ class LoggingTesting (unittest.TestCase):
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)				
 
+
+	def test_delete_objects_and_check_log (self):
+		print_testing_name("test_delete_objects_and_check_log")
+		iteration_time = 0.00
+
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_following_lists=True, create_petreports=True, create_petmatches=True)
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+			user, password = users.pop()
+			client = random.choice(clients)
+			petreport = petreports.pop()
+			petmatch = None
+
+			#Delete the objects.
+			if len(petmatches) != 0:
+				petmatch = petmatches.pop() 
+				petmatch.delete()
+
+			petreport.delete()
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "[INFO]:%s logs onto %s..." % (user, client)
+
+			#We expect the system not to throw errors but to catch them.
+			activities = get_recent_activites_from_log(userprofile=user.userprofile)
+			activities += get_bookmark_activities(userprofile=user.userprofile)
+			print "[INFO]: %s has an activity feed list of size [%d]" % (user, len(activities))
+			self.assertTrue(log_exists(user.userprofile))
+
+			#Now, delete the user.
+			user.delete()
+			self.assertFalse(log_exists(user.userprofile))
+
+			output_update(i + 1)
+			print '\n'
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		performance_report(iteration_time)
+
+
 	def test_log_account_creations(self):
 		print_testing_name("test_log_account_creations")
 		iteration_time = 0.00
@@ -959,19 +995,14 @@ class LoggingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = create_test_view_setup()
+		(users, clients) = create_test_view_setup()
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -982,7 +1013,7 @@ class LoggingTesting (unittest.TestCase):
 			response = client.get(URL_SUBMIT_PETREPORT)
 
 			#Create and submit a Pet Report object as form content
-			pr = create_random_PetReport(users [user_i])
+			pr = create_random_PetReport(user=user)
 
 			#Note here that we convert the PetReport attributes into a dictionary in order to pass it into the POST request object.
 			pr_dict = model_to_dict(pr) 
@@ -1024,21 +1055,15 @@ class LoggingTesting (unittest.TestCase):
 		print_testing_name("test_log_propose_PetMatch")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -1102,27 +1127,21 @@ class LoggingTesting (unittest.TestCase):
 		print_testing_name("test_log_following_UserProfile")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
+		(users, clients) = create_test_view_setup()
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_one_i = random.randrange(0, NUMBER_OF_TESTS)
-			user_two_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-
-			if user_one_i == user_two_i:
+			user_one, password_one = random.choice(users)
+			user_two, password_two = random.choice(users)
+			userprofile_one = user_one.get_profile()
+			userprofile_two = user_two.get_profile()
+			client = random.choice(clients)
+			
+			if user_one.id == user_two.id:
 				continue
 
-			#objects
-			userprofile_one = users [user_one_i].get_profile()
-			password_one = passwords [user_one_i]
-			userprofile_two = users [user_two_i].get_profile()
-			password_two = passwords [user_two_i]
-
 			#Log in First.
-			client = clients [client_i]
 			loggedin = client.login(username = userprofile_one.user.username, password = password_one)
 			self.assertTrue(loggedin == True)
 			print "[INFO]:%s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username)
@@ -1158,28 +1177,21 @@ class LoggingTesting (unittest.TestCase):
 		print_testing_name("test_log_unfollowing_UserProfile")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
+		(users, clients) = create_test_view_setup()
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_one_i = random.randrange(0, NUMBER_OF_TESTS)
-			user_two_i = random.randrange(0, NUMBER_OF_TESTS)
-
-			if user_one_i == user_two_i:
-			    continue
-
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-
-			#objects
-			userprofile_one = users [user_one_i].get_profile()
-			password_one = passwords [user_one_i]
-			userprofile_two = users [user_two_i].get_profile()
-			password_two = passwords [user_two_i]
+			user_one, password_one = random.choice(users)
+			user_two, password_two = random.choice(users)
+			userprofile_one = user_one.get_profile()
+			userprofile_two = user_two.get_profile()
+			client = random.choice(clients)
+			
+			if user_one.id == user_two.id:
+				continue
 
 			#Log in First.
-			client = clients [client_i]
 			loggedin = client.login(username = userprofile_one.user.username, password = password_one)
 			self.assertTrue(loggedin == True)
 			print "[INFO]:%s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username)			
@@ -1220,27 +1232,21 @@ class LoggingTesting (unittest.TestCase):
 		print_testing_name("test_log_add_PetReport_bookmark")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
-			print "[INFO]:A user %s and a pet report %s have been created." % (user.userprofile, petreport)
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
+			print "[INFO]: A user %s and a pet report %s have been created." % (user.userprofile, petreport)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the prdp interface to add a bookmark." % (user, client)			
+			print "[INFO]: %s logs onto %s to enter the prdp interface to add a bookmark." % (user, client)			
 
 			# Go to the PRDP (Pet Report Detailed Page) interface
 			response = client.get(URL_PRDP + str(petreport.id) + "/")
@@ -1262,11 +1268,11 @@ class LoggingTesting (unittest.TestCase):
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
 			
 			#Make assertions
-			if(not previously_bookmarked):
+			if not previously_bookmarked:
 				self.assertEquals(old_bookmarks_count, (new_bookmarks_count-1))
 
 			# Check if the activity for adding a PetReport bookmark appears in this user's log.
-			print "[INFO]:%s has added a bookmark for %s." % (user, petreport)
+			print "[INFO]: %s has added a bookmark for %s." % (user, petreport)
 			self.assertTrue(activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)
 
 			output_update(i + 1)
@@ -1282,21 +1288,15 @@ class LoggingTesting (unittest.TestCase):
 		print_testing_name("test_log_remove_PetReport_bookmark")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
 			print "[INFO]: A user %s and a pet report %s have been created." % (user.userprofile, petreport)
 
 			# Log in First.
@@ -1327,7 +1327,7 @@ class LoggingTesting (unittest.TestCase):
 			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
 
 			# Check if the activity for adding a PetReport bookmark appears in this user's log.
-			print "[INFO]:%s has removed a bookmark for %s." % (user, petreport)
+			print "[INFO]: %s has removed a bookmark for %s." % (user, petreport)
 			self.assertTrue(activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)				
 
 			output_update(i + 1)
@@ -1343,19 +1343,14 @@ class LoggingTesting (unittest.TestCase):
 		print_testing_name("test_get_activities_json")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -1403,16 +1398,13 @@ class LoggingTesting (unittest.TestCase):
 		print_testing_name("test_get_activities_json_for_anonymous_user")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = create_test_view_setup()
+		(users, clients) = create_test_view_setup()
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			client = clients [client_i]
+			client = random.choice(clients)
 			
 			#Request the get_activities_json view function()
 			response = client.get(URL_GET_ACTIVITIES, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
@@ -1430,7 +1422,7 @@ class LoggingTesting (unittest.TestCase):
 			print "=======[INFO]: The anonymous user got an activity feed list of size %d when the maximum length = %d" % (num_activities, max_num_activities)
 
 			#Bounds checking
-			self.assertTrue(num_activities >=0 and num_activities <= max_num_activities)
+			self.assertTrue(num_activities >= 0 and num_activities <= max_num_activities)
 
 			output_update(i + 1)
 			print "\n"
@@ -1445,28 +1437,21 @@ class LoggingTesting (unittest.TestCase):
 		print_testing_name("test_get_activities_json_for_authenticated_user")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			another_user_i = random.randrange(0, NUMBER_OF_TESTS)
-			if user_i == another_user_i:
-			    continue
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			another_user = users [another_user_i]
-			another_user_password = passwords [another_user_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			another_user, another_user_password = random.choice(users)
+			petreport = random.choice(petreports)
+			client = random.choice(clients)
+
+			if user.id == another_user.id:
+				continue
 
 			#Log into another_user.
-			client = clients [client_i]
 			loggedin = client.login(username = another_user.username, password = another_user_password)
 			self.assertTrue(loggedin == True)
 
@@ -1477,7 +1462,6 @@ class LoggingTesting (unittest.TestCase):
 			client.logout()	
 
 			#Log into user.
-			client = clients [client_i]
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
 
