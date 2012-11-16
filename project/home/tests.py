@@ -1492,21 +1492,15 @@ class RepuationPointsTesting(unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petmatch = petmatches [petmatch_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petmatch = random.choice(petmatches)
 			
 			""" r_user is for using a fresh user object from the db for checking reputation
 			points purposes rather than using a stale "user" object that gives old results. """
@@ -1570,21 +1564,15 @@ class RepuationPointsTesting(unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petmatch = petmatches [petmatch_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petmatch = random.choice(petmatches)
 			
 			""" r_user is for using a fresh user object from the db for checking reputation
 			points purposes rather than using a stale "user" object that gives old results. """
@@ -1648,19 +1636,15 @@ class RepuationPointsTesting(unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = create_test_view_setup(create_petreports=False)
+		(users, clients) = create_test_view_setup(create_petreports=False)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+		
 			""" r_user is for using a fresh user object from the db for checking reputation
 			points purposes rather than using a stale "user" object that gives old results. """
 			r_user = User.objects.get(pk=user.id)
@@ -1675,7 +1659,7 @@ class RepuationPointsTesting(unittest.TestCase):
 			response = client.get(URL_SUBMIT_PETREPORT)
 
 			#Create and submit a Pet Report object as form content
-			pr = create_random_PetReport(users [user_i])
+			pr = create_random_PetReport(user=user)
 
 			#Note here that we convert the PetReport attributes into a dictionary in order to pass it into the POST request object.
 			pr_dict = model_to_dict(pr) 
@@ -1716,27 +1700,22 @@ class RepuationPointsTesting(unittest.TestCase):
 		performance_report(iteration_time)
 
 
-	def test_reputation_points_for_proposing_PetMatch (self):
+	def test_reputation_points_for_proposing_PetMatch(self):
 		print_testing_name("test_reputation_points_for_proposing_PetMatch")
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 		num_petmatches = 0
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
+
 			""" r_user is for using a fresh user object from the db for checking reputation
 			points purposes rather than using a stale "user" object that gives old results. """
 			r_user = User.objects.get(pk=user.id)
@@ -1840,34 +1819,30 @@ class RepuationPointsTesting(unittest.TestCase):
 	    iteration_time = 0.00
 
 	    # Need to setup clients, users, and their passwords in order to simula the following function.
-	    (users, passwords, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
+	    (users, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
 	        
 	    for i in range (NUMBER_OF_TESTS):
 	        start_time = time.clock()
 
-			# indexes
-	        user_one_i = random.randrange(0, NUMBER_OF_TESTS)
-	        user_two_i = random.randrange(0, NUMBER_OF_TESTS)
-	        if user_one_i == user_two_i: 
-	        	continue
-	        client_i = random.randrange(0, NUMBER_OF_TESTS)
-
 	        # objects
-	        userprofile_one = users [user_one_i].get_profile()
-	        password_one = passwords [user_one_i]
-	        client = clients [client_i]
-	        userprofile_two = users [user_two_i].get_profile()
-	        password_two = passwords [user_two_i]
+	        user_one, password_one = random.choice(users)
+	        user_two, password_two = random.choice(users)
+	        userprofile_one = user_one.get_profile()
+	        userprofile_two = user_two.get_profile()
+	        client = random.choice(clients)
+
 	        """ r_userprofile is for using a fresh userprofile object from the db for checking reputation 
 	        points purposes rather than using a stale "userprofile" object that gives old results. """
 	        r_userprofile = UserProfile.objects.get(pk=userprofile_two.id)
 	        old_reputation = r_userprofile.reputation
 
+	        if user_one.id == user_two.id:
+	        	continue
+
 	        print "\n%s ............................................................." % i
 	        print "[INFO]: %s (id:%s) and %s (id:%s) have been created." % (userprofile_one, userprofile_one.id, userprofile_two, userprofile_two.id)
 
 			#Log onto the first user.
-	        client = clients [client_i]
 	        loggedin = client.login(username = userprofile_one.user.username, password = password_one)
 	        self.assertTrue(loggedin == True)			
 	        print "[INFO]: %s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username)

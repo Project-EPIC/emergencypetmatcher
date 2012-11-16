@@ -409,7 +409,7 @@ def create_test_view_setup(create_clients=True, create_following_lists=False, cr
 
 ''' Update the current user's reputation points based on an activity '''
 def update_reputation(userprofile, activity):
-	assert isinstance(UserProfile, userprofile)
+	assert isinstance(userprofile, UserProfile)
 
 	if activity == ACTIVITY_PETMATCH_UPVOTE:
 		userprofile.reputation += REWARD_PETMATCH_VOTE
