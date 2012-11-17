@@ -84,6 +84,9 @@ class UserProfile (models.Model):
         elif activity == ACTIVITY_PETREPORT_REMOVE_BOOKMARK:
             self.reputation -= REWARD_PETREPORT_BOOKMARK
 
+        elif activity == ACTIVITY_ACCOUNT_CREATED:
+            self.reputation += REWARD_NEW_ACCOUNT
+
         else:
             print '[ERROR]: Cannot update reputation points: This is not a valid activity! \n'
             return False
@@ -489,7 +492,8 @@ def delete_UserProfile(sender, instance=None, **kwargs):
 def setup_UserProfile(sender, instance, created, **kwargs):
     if created == True:
         #Create a UserProfile object.
-        UserProfile.objects.create(user=instance)
+        userprofile = UserProfile.objects.create(user=instance)
+        userprofile.update_reputation(ACTIVITY_ACCOUNT_CREATED)
     elif instance.is_active:
         if log_exists(instance.get_profile()) == False:
             log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
