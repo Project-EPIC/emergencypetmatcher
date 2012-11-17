@@ -5,7 +5,7 @@ import os
 ==================================================================================='''
 
 #Number of Tests
-NUMBER_OF_TESTS = 50
+NUMBER_OF_TESTS = 10
 
 #Lower and Upper bounds for Lost and Found Dates
 DATE_LOWER_BOUND = "2012-01-01"
@@ -72,6 +72,7 @@ REWARD_PETMATCH_VOTE = 2
 REWARD_PETREPORT_SUBMIT = 5
 REWARD_PETMATCH_PROPOSE = 5
 REWARD_USER_FOLLOWED = 2
+REWARD_PETREPORT_BOOKMARK = 1
 
 #Represents how many activities to fetch per request.
 ACTIVITY_FEED_LENGTH = 10

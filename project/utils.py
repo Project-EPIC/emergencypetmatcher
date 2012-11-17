@@ -429,6 +429,12 @@ def update_reputation(userprofile, activity):
 	elif activity == ACTIVITY_USER_BEING_UNFOLLOWED:
 		userprofile.reputation -= REWARD_USER_FOLLOWED
 
+	elif activity == ACTIVITY_PETREPORT_ADD_BOOKMARK:
+		userprofile.reputation += REWARD_PETREPORT_BOOKMARK
+
+	elif activity == ACTIVITY_PETREPORT_REMOVE_BOOKMARK:
+		userprofile.reputation -= REWARD_PETREPORT_BOOKMARK
+
 	else:
 		print '[ERROR]: Cannot update reputation points: This is not a valid activity! \n'
 		return False

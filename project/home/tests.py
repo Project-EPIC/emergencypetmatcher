@@ -1918,3 +1918,82 @@ class RepuationPointsTesting(unittest.TestCase):
 	        self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 	        performance_report(iteration_time)
 
+
+	def test_reputation_points_for_adding_and_removing_PetReport_bookmark(self):
+		print_testing_name("test_reputation_points_for_adding_and_removing_PetReport_bookmark")
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate bookmarking of PetReport objects.
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#objects
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
+			""" r_user is for using a fresh user object from the db for checking reputation
+			points purposes rather than using a stale "user" object that gives old results. """
+			r_user = User.objects.get(pk=user.id)
+			old_reputation = r_user.get_profile().reputation
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)			
+			print "[INFO]:%s logs onto %s to enter the PRDP..." % (user, client)
+
+			#navigate to the prdp
+			prdp_url = URL_PRDP + str(petreport.id) + "/"
+			print prdp_url
+			response = client.get(prdp_url)
+
+			# ...................Testing Adding a Bookmark.........................
+			print "[INFO]: Reputation points BEFORE bookmarking a PetReport: %s" %(old_reputation)
+
+			add_bookmark_url = URL_BOOKMARK_PETREPORT
+			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
+			response = client.post(add_bookmark_url, post, follow=True)
+			old_bookmarks_count = user.get_profile().bookmarks_related.count()
+
+			# reset r_user with a new fresh copy from the db
+			r_user = User.objects.get(pk=user.id)
+			print "[INFO]: Reputation points AFTER bookmarking a PetReport: %s" %(r_user.get_profile().reputation)
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], add_bookmark_url)
+			self.assertEquals(r_user.get_profile().reputation, old_reputation+REWARD_PETREPORT_BOOKMARK)
+
+
+			# ...................Testing Removing a Bookmark.........................
+			old_reputation = r_user.get_profile().reputation
+			print "[INFO]: Reputation points BEFORE unbookmarking a PetReport: %s" %(old_reputation)
+
+			remove_bookmark_url = URL_BOOKMARK_PETREPORT
+			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Remove Bookmark"}
+			response = client.post(remove_bookmark_url, post, follow=True)
+			new_bookmarks_count = user.get_profile().bookmarks_related.count()
+
+			# reset r_user with a new fresh copy from the db
+			r_user = User.objects.get(pk=user.id)
+			print "[INFO]: Reputation points AFTER unbookmarking a PetReport: %s" %(r_user.get_profile().reputation)
+
+			#Make assertions
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ['PATH_INFO'], remove_bookmark_url)
+			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
+			self.assertEquals(r_user.get_profile().reputation, old_reputation-REWARD_PETREPORT_BOOKMARK)
+
+
+			output_update(i + 1)
+			print "\n"
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+
+		performance_report(iteration_time)
+
+
+
