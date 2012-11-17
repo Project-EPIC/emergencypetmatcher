@@ -58,6 +58,40 @@ class UserProfile (models.Model):
         self.save()
         log_activity(ACTIVITY_ACCOUNT_CREATED, self)
 
+    ''' Update the current user's reputation points based on an activity '''
+    def update_reputation(self, activity):
+        if activity == ACTIVITY_PETMATCH_UPVOTE:
+            self.reputation += REWARD_PETMATCH_VOTE
+
+        elif activity == ACTIVITY_PETMATCH_DOWNVOTE:
+            self.reputation += REWARD_PETMATCH_VOTE
+
+        elif activity == ACTIVITY_PETREPORT_SUBMITTED:
+            self.reputation += REWARD_PETREPORT_SUBMIT
+
+        elif activity == ACTIVITY_PETMATCH_PROPOSED:
+            self.reputation += REWARD_PETMATCH_PROPOSE
+
+        elif activity == ACTIVITY_USER_BEING_FOLLOWED:
+            self.reputation += REWARD_USER_FOLLOWED
+
+        elif activity == ACTIVITY_USER_BEING_UNFOLLOWED:
+            self.reputation -= REWARD_USER_FOLLOWED
+
+        elif activity == ACTIVITY_PETREPORT_ADD_BOOKMARK:
+            self.reputation += REWARD_PETREPORT_BOOKMARK
+
+        elif activity == ACTIVITY_PETREPORT_REMOVE_BOOKMARK:
+            self.reputation -= REWARD_PETREPORT_BOOKMARK
+
+        else:
+            print '[ERROR]: Cannot update reputation points: This is not a valid activity! \n'
+            return False
+
+        #Save the UserProfile and return True
+        self.save()
+        return True
+
     #check if username exists in the database
     @staticmethod
     def username_exists(username):

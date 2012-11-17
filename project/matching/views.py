@@ -57,7 +57,7 @@ def vote_PetMatch(request):
         if vote == "upvote":
             # If the user is voting for the 1st time, add reputation points
             if pm.UserProfile_has_voted(userprofile) is False:
-                update_reputation(userprofile, ACTIVITY_PETMATCH_UPVOTE)
+                userprofile.update_reputation(ACTIVITY_PETMATCH_UPVOTE)
             
             pm.up_votes.add(userprofile)
             pm.down_votes.remove(userprofile)
@@ -66,7 +66,7 @@ def vote_PetMatch(request):
         elif vote == "downvote":
             # If the user is voting for the 1st time, add reputation points
             if pm.UserProfile_has_voted(userprofile) is False:
-                update_reputation(userprofile, ACTIVITY_PETMATCH_DOWNVOTE)
+                userprofile.update_reputation(ACTIVITY_PETMATCH_DOWNVOTE)
             
             pm.down_votes.add(userprofile)
             pm.up_votes.remove(userprofile)
@@ -160,7 +160,7 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                 # add voting reputation points if the user didn't vote before for this duplicate petmatch
                 # if (proposed_by not in result.up_votes.all()) and (proposed_by not in result.down_votes.all()):
                 if pm.UserProfile_has_voted(userprofile) is False:
-                    update_reputation(proposed_by, ACTIVITY_PETMATCH_UPVOTE)
+                    proposed_by.update_reputation(ACTIVITY_PETMATCH_UPVOTE)
 
                 result.up_votes.add(proposed_by)
                 result.save()
@@ -170,7 +170,7 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
             elif outcome == "NEW PETMATCH":
                 messages.success(request, "Congratulations - The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
                 # add reputation points for proposing a new petmatch
-                update_reputation(proposed_by, ACTIVITY_PETMATCH_PROPOSED)
+                proposed_by.update_reputation(ACTIVITY_PETMATCH_PROPOSED)
 
         else:
             if outcome == "DUPLICATE PETMATCH":
@@ -184,7 +184,7 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
 
                 # add voting reputation points if the user didn't vote before for this duplicate petmatch
                 if user_has_voted == False:
-                    update_reputation(proposed_by, ACTIVITY_PETMATCH_UPVOTE)
+                    proposed_by.update_reputation(ACTIVITY_PETMATCH_UPVOTE)
 
                 result.up_votes.add(proposed_by)
                 result.save()          
