@@ -10,7 +10,6 @@
 	        first_name = $("#id_first_name").attr("value");
 	        last_name = $("#id_last_name").attr("value");
 	        username = $("#id_username").attr("value");
-	        $("input[type=button]").prop("disabled", true);
 	        /*ajax request to save the changes*/
 	        $.ajax({
 
@@ -19,12 +18,10 @@
 	          data: {"csrfmiddlewaretoken":csrf_value, "action":"saveProfile","username":username,"first_name":first_name,"last_name":last_name,"email":email},
 	          success: function(data){
 	            	$(".edituserprofile_messages").html(data.message);
-	            	$("input[type=button]").prop("disabled", false);
-	              return true;
+	            	return true;
 	          },
 	          error: function(data){
 	              alert("An unexpected error occurred when trying to save your changes. Please try again."); 
-	              $("input[type=button]").prop("disabled", false);
 	              return false;
 	          }
 	        });
@@ -41,7 +38,6 @@
 	        old_password = $("#id_old_password").attr("value");
 	        new_password = $("#id_new_password").attr("value");
 	        confirm_password = $("#id_confirm_password").attr("value");       
-	        $("input[type=submit]").attr("disabled", "disabled");
 	        /*ajax request to save the password changes*/
 	        $.ajax({
 
