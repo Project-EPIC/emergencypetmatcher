@@ -1506,6 +1506,11 @@ class RepuationPointsTesting(unittest.TestCase):
 			points purposes rather than using a stale "user" object that gives old results. """
 			r_user = User.objects.get(pk=user.id)
 			old_reputation = r_user.get_profile().reputation
+
+			""" checking reputation points for the user who proposed a petmatch"""
+			pm_proposed_by_user = PetMatch.objects.get(pk=petmatch.id).proposed_by
+			p_old_reputation = pm_proposed_by_user.reputation
+
 			voted = False
 
 			#Log in First.
@@ -1517,15 +1522,16 @@ class RepuationPointsTesting(unittest.TestCase):
 			print pmdp_url
 			response = client.get(pmdp_url)
 			
-			print "[INFO]: Reputation points BEFORE upvoting: %s" %(old_reputation)
-			# print "Voted or not for this petmatch before: %s" %petmatch.UserProfile_has_voted(user.get_profile())
+			print "[INFO]: Reputation points for %s BEFORE upvoting: %s" %(user, old_reputation)
+			print "[INFO]: Reputation points for %s (who proposed this PetMatch) BEFORE upvoting: %s" %(pm_proposed_by_user, p_old_reputation)
+			print "[INFO] Voted or not for this petmatch before: %s" %petmatch.UserProfile_has_voted(user.get_profile())
 			
 			# check if the user has voted before or not and set the 'voted' flag accordingly
 			if petmatch.UserProfile_has_voted(user.get_profile()) is False:
 				voted = False
 				print "[INFO]: *** User has NEVER voted for this petmatch ***"
 			elif petmatch.UserProfile_has_voted(user.get_profile()) is not False:
-				voted = True
+				voted = petmatch.UserProfile_has_voted(user.get_profile())
 				print "[INFO]: *** User has Voted for this petmatch before ***"
 			else:
 				print "[ERROR]: Something is wrong!"
@@ -1536,17 +1542,32 @@ class RepuationPointsTesting(unittest.TestCase):
 
 			# reset r_user with a new fresh copy from the db
 			r_user = User.objects.get(pk=user.id)
-			print "[INFO]: Reputation points AFTER upvoting: %s" %(r_user.get_profile().reputation)
+			print "[INFO]: Reputation points for %s AFTER upvoting: %s" %(user, r_user.get_profile().reputation)
+			pm_proposed_by_user = PetMatch.objects.get(pk=petmatch.id).proposed_by
+			print "[INFO]: Reputation points for %s (who proposed this PetMatch) AFTER upvoting: %s" %(pm_proposed_by_user, pm_proposed_by_user.reputation)
+
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], vote_url)
 			self.assertTrue(petmatch.UserProfile_has_voted(user.get_profile()) == UPVOTE)
 			self.assertEquals(petmatch.up_votes.get(pk = user.id), user.get_profile())
-			if not voted:
+
+			if (voted == False) and (user.get_profile().id != pm_proposed_by_user.id):
 				self.assertEquals(r_user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE)
-			elif voted:
+				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_USER_PROPOSED_PETMATCH_VOTE)
+			
+			elif (voted == UPVOTE) and (user.get_profile().id != pm_proposed_by_user.id):
 				self.assertEquals(r_user.get_profile().reputation, old_reputation)
+				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation)
+
+			elif (voted == DOWNVOTE) and (user.get_profile().id != pm_proposed_by_user.id):
+				self.assertEquals(r_user.get_profile().reputation, old_reputation)
+				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_USER_PROPOSED_PETMATCH_VOTE)
+			
+			elif (voted == False) and (user.get_profile().id == pm_proposed_by_user.id):
+				self.assertEquals(r_user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE + REWARD_USER_PROPOSED_PETMATCH_VOTE)
+				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_PETMATCH_VOTE + REWARD_USER_PROPOSED_PETMATCH_VOTE)
 			else:
 				print "[ERROR]: Assert FAILED! Something is wrong!"
 
@@ -1578,6 +1599,10 @@ class RepuationPointsTesting(unittest.TestCase):
 			points purposes rather than using a stale "user" object that gives old results. """
 			r_user = User.objects.get(pk=user.id)
 			old_reputation = r_user.get_profile().reputation
+
+			""" checking reputation points for the user who proposed a petmatch"""
+			pm_proposed_by_user = PetMatch.objects.get(pk=petmatch.id).proposed_by
+			p_old_reputation = pm_proposed_by_user.reputation
 			voted = False
 
 			#Log in First.
@@ -1591,13 +1616,14 @@ class RepuationPointsTesting(unittest.TestCase):
 			
 			print "[INFO]: Reputation points BEFORE downvoting: %s" %(old_reputation)
 			print "[INFO]: Voted or not for this petmatch before: %s" %petmatch.UserProfile_has_voted(user.get_profile())
+			print "[INFO]: Reputation points for %s (who proposed this PetMatch) BEFORE downvoting: %s" %(pm_proposed_by_user, p_old_reputation)
 			
 			# check if the user has voted before or not and set the 'voted' flag accordingly
 			if petmatch.UserProfile_has_voted(user.get_profile()) is False:
 				voted = False
 				print "[INFO]: *** User has NEVER voted for this petmatch ***"
 			elif petmatch.UserProfile_has_voted(user.get_profile()) is not False:
-				voted = True
+				voted = petmatch.UserProfile_has_voted(user.get_profile())
 				print "[INFO]: *** User has Voted for this petmatch before ***"
 			else:
 				print "[ERROR]:Something is wrong!"
@@ -1609,16 +1635,30 @@ class RepuationPointsTesting(unittest.TestCase):
 			# reset r_user with a new fresh copy from the db
 			r_user = User.objects.get(pk=user.id)
 			print "[INFO]: Reputation points AFTER downvoting: %s" %(r_user.get_profile().reputation)
+			pm_proposed_by_user = PetMatch.objects.get(pk=petmatch.id).proposed_by
+			print "[INFO]: Reputation points for %s (who proposed this PetMatch) AFTER downvoting: %s" %(pm_proposed_by_user, pm_proposed_by_user.reputation)
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], vote_url)
 			self.assertTrue(petmatch.UserProfile_has_voted(user.get_profile()) == DOWNVOTE)
 			self.assertEquals(petmatch.down_votes.get(pk = user.id), user.get_profile())
-			if not voted:
+			
+			if (voted == False) and (user.get_profile().id != pm_proposed_by_user.id):
 				self.assertEquals(r_user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE)
-			elif voted:
+				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation - REWARD_USER_PROPOSED_PETMATCH_VOTE)
+			
+			elif (voted == DOWNVOTE) and (user.get_profile().id != pm_proposed_by_user.id):
 				self.assertEquals(r_user.get_profile().reputation, old_reputation)
+				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation)
+			
+			elif (voted == UPVOTE) and (user.get_profile().id != pm_proposed_by_user.id):
+				self.assertEquals(r_user.get_profile().reputation, old_reputation)
+				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation - REWARD_USER_PROPOSED_PETMATCH_VOTE)
+			
+			elif (not voted) and (user.get_profile().id == pm_proposed_by_user.id):
+				self.assertEquals(r_user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE - REWARD_USER_PROPOSED_PETMATCH_VOTE)
+				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_PETMATCH_VOTE - REWARD_USER_PROPOSED_PETMATCH_VOTE)
 			else:
 				print "[ERROR]:Assert FAILED! Something is wrong!"
 
@@ -1995,5 +2035,4 @@ class RepuationPointsTesting(unittest.TestCase):
 
 		performance_report(iteration_time)
 
-
-
+	

@@ -87,6 +87,12 @@ class UserProfile (models.Model):
         elif activity == ACTIVITY_ACCOUNT_CREATED:
             self.reputation += REWARD_NEW_ACCOUNT
 
+        elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE:
+            self.reputation += REWARD_USER_PROPOSED_PETMATCH_VOTE
+
+        elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_DOWNVOTE:
+            self.reputation -= REWARD_USER_PROPOSED_PETMATCH_VOTE
+
         else:
             print '[ERROR]: Cannot update reputation points: This is not a valid activity! \n'
             return False

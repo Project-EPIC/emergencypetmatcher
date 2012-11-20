@@ -58,6 +58,11 @@ def vote_PetMatch(request):
             # If the user is voting for the 1st time, add reputation points
             if pm.UserProfile_has_voted(userprofile) is False:
                 userprofile.update_reputation(ACTIVITY_PETMATCH_UPVOTE)
+                pm.proposed_by.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE)
+
+            # Also, add reputation points to the user whose proposed petmatch is being upvoted
+            if pm.UserProfile_has_voted(userprofile) == DOWNVOTE:
+                pm.proposed_by.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE)
             
             pm.up_votes.add(userprofile)
             pm.down_votes.remove(userprofile)
@@ -67,6 +72,11 @@ def vote_PetMatch(request):
             # If the user is voting for the 1st time, add reputation points
             if pm.UserProfile_has_voted(userprofile) is False:
                 userprofile.update_reputation(ACTIVITY_PETMATCH_DOWNVOTE)
+                pm.proposed_by.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_DOWNVOTE)
+
+            # Also, subtract reputation points to the user whose proposed petmatch is being downvoted
+            if pm.UserProfile_has_voted(userprofile) == UPVOTE:
+                pm.proposed_by.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_DOWNVOTE)
             
             pm.down_votes.add(userprofile)
             pm.up_votes.remove(userprofile)
