@@ -1471,21 +1471,17 @@ class LoggingTesting (unittest.TestCase):
 		performance_report(iteration_time)	
 
 '''===================================================================================
-RepuationPointsTesting: Testing for EPM User Reputation Points
+ReputationTesting: Testing for EPM User Reputation Points
 ==================================================================================='''
-class RepuationPointsTesting(unittest.TestCase):
+class ReputationTesting(unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
 		delete_all()
-		# User.objects.all().delete()
-		# UserProfile.objects.all().delete()
 
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
 		delete_all()
-		# User.objects.all().delete()
-		# UserProfile.objects.all().delete()
 
 	def test_reputation_points_for_upvoting_PetMatch (self):
 		print_testing_name("test_reputation_points_for_upvoting_PetMatch")
@@ -1498,19 +1494,14 @@ class RepuationPointsTesting(unittest.TestCase):
 			start_time = time.clock()
 
 			#objects
-			user, password = random.choice(users)
+			user, password = random.choice(users) 
+			old_reputation = user.userprofile.reputation
 			client = random.choice(clients)
 			petmatch = random.choice(petmatches)
-			
-			""" r_user is for using a fresh user object from the db for checking reputation
-			points purposes rather than using a stale "user" object that gives old results. """
-			r_user = User.objects.get(pk=user.id)
-			old_reputation = r_user.get_profile().reputation
 
-			""" checking reputation points for the user who proposed a petmatch"""
+			#checking reputation points for the user who proposed a petmatch
 			pm_proposed_by_user = PetMatch.objects.get(pk=petmatch.id).proposed_by
 			p_old_reputation = pm_proposed_by_user.reputation
-
 			voted = False
 
 			#Log in First.
@@ -1519,57 +1510,57 @@ class RepuationPointsTesting(unittest.TestCase):
 			print "[INFO]:%s logs onto %s to enter the PMDP..." % (user, client)
 
 			pmdp_url = URL_PMDP + str(petmatch.id) + "/"
-			print pmdp_url
 			response = client.get(pmdp_url)
 			
-			print "[INFO]: Reputation points for %s BEFORE upvoting: %s" %(user, old_reputation)
+			print "[INFO]: Reputation points for %s BEFORE upvoting: %s" % (user, old_reputation)
 			print "[INFO]: Reputation points for %s (who proposed this PetMatch) BEFORE upvoting: %s" %(pm_proposed_by_user, p_old_reputation)
-			print "[INFO] Voted or not for this petmatch before: %s" %petmatch.UserProfile_has_voted(user.get_profile())
+			print "[INFO] Voted or not for this petmatch before: %s" % petmatch.UserProfile_has_voted(user.get_profile())
 			
 			# check if the user has voted before or not and set the 'voted' flag accordingly
 			if petmatch.UserProfile_has_voted(user.get_profile()) is False:
 				voted = False
 				print "[INFO]: *** User has NEVER voted for this petmatch ***"
-			elif petmatch.UserProfile_has_voted(user.get_profile()) is not False:
+			else:
 				voted = petmatch.UserProfile_has_voted(user.get_profile())
 				print "[INFO]: *** User has Voted for this petmatch before ***"
-			else:
-				print "[ERROR]: Something is wrong!"
 
 			vote_url = URL_VOTE_MATCH
 			post =  {"vote":"upvote", "match_id":petmatch.id, "user_id":user.id}
 			response = client.post(vote_url, post, follow=True)
 
-			# reset r_user with a new fresh copy from the db
-			r_user = User.objects.get(pk=user.id)
-			print "[INFO]: Reputation points for %s AFTER upvoting: %s" %(user, r_user.get_profile().reputation)
+			# Reset user with a new fresh copy from the DB.
+			# Then stick the updated (user,password) combo back into the users list for easy referencing later.
+			user = User.objects.get(pk=user.id)
+			user_index = [u[0] for u in users].index(user)
+			users[user_index] = (user, password)
+
+			print "[INFO]: Reputation points for %s AFTER upvoting: %s" %(user, user.get_profile().reputation)
 			pm_proposed_by_user = PetMatch.objects.get(pk=petmatch.id).proposed_by
 			print "[INFO]: Reputation points for %s (who proposed this PetMatch) AFTER upvoting: %s" %(pm_proposed_by_user, pm_proposed_by_user.reputation)
-
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], vote_url)
 			self.assertTrue(petmatch.UserProfile_has_voted(user.get_profile()) == UPVOTE)
-			self.assertEquals(petmatch.up_votes.get(pk = user.id), user.get_profile())
+			self.assertEquals(petmatch.up_votes.get(pk=user.id), user.get_profile())
 
 			if (voted == False) and (user.get_profile().id != pm_proposed_by_user.id):
-				self.assertEquals(r_user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE)
+				self.assertEquals(user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE)
 				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_USER_PROPOSED_PETMATCH_VOTE)
 			
 			elif (voted == UPVOTE) and (user.get_profile().id != pm_proposed_by_user.id):
-				self.assertEquals(r_user.get_profile().reputation, old_reputation)
+				self.assertEquals(user.get_profile().reputation, old_reputation)
 				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation)
 
 			elif (voted == DOWNVOTE) and (user.get_profile().id != pm_proposed_by_user.id):
-				self.assertEquals(r_user.get_profile().reputation, old_reputation)
+				self.assertEquals(user.get_profile().reputation, old_reputation)
 				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_USER_PROPOSED_PETMATCH_VOTE)
 			
 			elif (voted == False) and (user.get_profile().id == pm_proposed_by_user.id):
-				self.assertEquals(r_user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE + REWARD_USER_PROPOSED_PETMATCH_VOTE)
+				self.assertEquals(user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE + REWARD_USER_PROPOSED_PETMATCH_VOTE)
 				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_PETMATCH_VOTE + REWARD_USER_PROPOSED_PETMATCH_VOTE)
 			else:
-				print "[ERROR]: Assert FAILED! Something is wrong!"
+				print "[ERROR]: Unexpected case..."
 
 			output_update(i + 1)
 			print '\n'

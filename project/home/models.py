@@ -293,8 +293,8 @@ class PetMatch(models.Model):
             return UPVOTE
         elif (downvote != None):
             return DOWNVOTE
+        return False  
 
-        return False      
     def PetMatch_has_reached_threshold(self):
         '''Difference[D] is calculated as the difference between number of upvotes and number of downvotes. 
         For a PetMatch to be successful, it should satisfy certain constraints. D should exceed a threshold value,
