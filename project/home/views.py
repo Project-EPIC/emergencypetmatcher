@@ -27,7 +27,8 @@ from django.utils import simplejson
 from home.models import *
 from constants import *
 from logging import *
-from registration import *
+from registration.models import RegistrationProfile
+from registration.views import activate
 from utils import *
 from datetime import datetime
 import oauth2 as oauth, random, urllib
@@ -67,7 +68,7 @@ def get_activities_json(request):
 
         if request.user.is_authenticated() == True:
 
-            print "[INFO]: get_activities_json(): Authenticated User -- recent activities..."
+            print "[INFO]: get_activities_json(): Authenticated User - recent activities..."
             current_userprofile = request.user.get_profile()      
 
             # Get all activities from this UserProfile's log file that show who has followed this UserProfile 
@@ -83,14 +84,17 @@ def get_activities_json(request):
                     since_date=current_userprofile.last_logout) 
 
         else:
-            print "[INFO]: get_activities_json(): Anonymous User -- random sample of activities..."
+            print "[INFO]: get_activities_json(): Anonymous User - random sample of activities..."
             # Get random activities for the anonymous user           
             for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:ACTIVITY_FEED_LENGTH]:
                 activities += get_recent_activites_from_log(userprofile=userprof, num_activities=1)
 
+            #print "[INFO]: Activities are: %s" % activities
+
         #If there are no activities, let the user know!
         if len(activities) == 0:
             activities.append("<h3 style='text-align:center; color:gray;'> No Activities Yet.</h3>")
+
         else:
             # Sort the activity feed list according the log date
             activities.sort() 
@@ -120,6 +124,7 @@ def get_activities_json(request):
 
 def login_User(request):
     if request.method == "POST":
+        
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
@@ -157,7 +162,6 @@ def login_User(request):
 
 @login_required
 def logout_User(request):
-
     print "[INFO]: Logging out UserProfile {%s}" % request.user.get_profile()
 
     # Update to last_logout date field
@@ -169,7 +173,21 @@ def logout_User(request):
     messages.success(request, "You have successfully logged out.")
     logout(request)
     return redirect(URL_HOME)
-    
+
+
+def registration_activate (request, activation_key=None, backend=None):
+    print "[INFO]: Activation Key: %s" % activation_key
+
+    #Does the activation key exist within a RegistrationProfile? (i.e. is somebody actually trying to activate an account or resurrect an old activation link?)
+    try:
+        rp = RegistrationProfile.objects.get(activation_key=activation_key)
+
+    except RegistrationProfile.DoesNotExist:
+        messages.error(request, "This account has already been activated!")
+        return redirect(URL_HOME)
+
+    #Specify the django-registration default backend for activating this account. 
+    return activate(request, backend=backend, activation_key=activation_key)
 
 def registration_activation_complete (request):
     print request
@@ -332,11 +350,13 @@ def editUserProfile_page(request):
 
     if request.method == 'POST':
         user = request.user        
+
         '''SaveProfile workflow will be executed if the user clicks on "save" after editing
         first_name, last_name, email or username'''
         if request.POST["action"] == 'saveProfile':         
             user_changed = False
             edit_userprofile_form = UserProfileForm(request.POST,request.FILES)
+
             if edit_userprofile_form.is_valid():
                 ''' If the user enters a blank/ invalid email, it would be caught by this condition'''
                 if not email_re.match(request.POST["email"]):
@@ -345,6 +365,7 @@ def editUserProfile_page(request):
                     json = simplejson.dumps ({"message":message})
                     print "JSON: " + str(json)
                     return HttpResponse(json, mimetype="application/json")
+
                 if request.POST["username"] != user.username:
                     user.username = request.POST["username"]
                     try:
@@ -384,14 +405,14 @@ def editUserProfile_page(request):
                         edit_userprofile = EditUserProfile.objects.get(user=user)
                         edit_userprofile.activation_key = activation_key
                     except EditUserProfile.DoesNotExist:
-                        edit_userprofile = EditUserProfile.objects.create(user=user,activation_key=activation_key)
+                        edit_userprofile = EditUserProfile.objects.create(user=user, activation_key=activation_key)
                     edit_userprofile.new_email = request.POST["email"]
                     edit_userprofile.date_of_change = datetime_now()
                     edit_userprofile.save()
 
                     #Grab the Site object for the context
                     site = Site.objects.get(pk=1)
-                    ctx = {"site":site, "activation_key":activation_key,"expiration_days":settings.ACCOUNT_ACTIVATION_DAYS}
+                    ctx = {"site":site, "activation_key":activation_key, "expiration_days":settings.ACCOUNT_ACTIVATION_DAYS}
                     message = render_to_string(TEXTFILE_EMAIL_CHANGE_VERICATION, ctx)
                     user.email = request.POST["email"]
                     user.email_user(subject, message, from_email = None)

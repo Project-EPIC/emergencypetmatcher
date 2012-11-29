@@ -25,19 +25,14 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = create_test_view_setup(create_petreports=False)
+		(users, clients) = create_test_view_setup(create_petreports=False)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -50,7 +45,6 @@ class ReportingTesting (unittest.TestCase):
 			self.assertTrue(response.request ['PATH_INFO'] == URL_SUBMIT_PETREPORT)
 			#We should have the base.html -> index.html -> petreport_form.html
 			self.assertTrue(len(response.templates) == 3)
-
 			client.logout()
 
 			output_update(i + 1)
@@ -67,19 +61,14 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = create_test_view_setup(create_petreports=False)
+		(users, clients) = create_test_view_setup(create_petreports=False)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -90,7 +79,7 @@ class ReportingTesting (unittest.TestCase):
 			response = client.get(URL_SUBMIT_PETREPORT)
 
 			#Create and submit a Pet Report object as form content
-			pr = create_random_PetReport(users [user_i])
+			pr = create_random_PetReport(user=user)
 
 			#Note here that we convert the PetReport attributes into a dictionary in order to pass it into the POST request object.
 			pr_dict = model_to_dict(pr) 
@@ -128,19 +117,14 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients) = create_test_view_setup(create_petreports=False)
+		(users, clients) = create_test_view_setup()
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -151,7 +135,7 @@ class ReportingTesting (unittest.TestCase):
 			response = client.get(URL_SUBMIT_PETREPORT)
 
 			#Create and submit a Pet Report object as form content
-			pr = create_random_PetReport(users [user_i])
+			pr = create_random_PetReport(user=user)
 			#Note here that we convert the PetReport attributes into a dictionary in order to pass it into the POST request object.
 			pr_dict = model_to_dict(pr)
 
@@ -205,21 +189,18 @@ class ReportingTesting (unittest.TestCase):
 		saved_images = []
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+
+		#We need this because PostgreSQL doesn't start IDs at 0 if running previous tests.
+		petreport_lower_bound_index = petreports[0].id
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -246,7 +227,8 @@ class ReportingTesting (unittest.TestCase):
 			image_file.close()
 
 			#Get the new PetReport created with new image file path.
-			new_petreport_index = (NUMBER_OF_TESTS + 1) + i
+			new_petreport_index = (petreport_lower_bound_index + NUMBER_OF_TESTS + i)
+			print "[INFO]: New PetReport index [%s]" % str(new_petreport_index)
 			new_petreport = PetReport.objects.get(pk=new_petreport_index)
 			#Just grab the name of the file, nothing else.
 			img_name = new_petreport.img_path.name.split("/")[2]
@@ -284,21 +266,15 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords and petreports 
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
 
 			#Test without logging in First.
@@ -327,7 +303,7 @@ class ReportingTesting (unittest.TestCase):
 			print "[OK]:Navigation to all workers' user profiles is successful"
 
 			expected_status_code = 200
-			all_pet_reports = PetReport.objects.all().exclude(pk=petreport_i)
+			all_pet_reports = PetReport.objects.all().exclude(pk=petreport.id)
     		filtered_pet_reports = all_pet_reports.exclude(status = petreport.status).filter(pet_type = petreport.pet_type)
 	        if len(filtered_pet_reports) == 0:
 	        	expected_status_code = 302	
@@ -339,9 +315,7 @@ class ReportingTesting (unittest.TestCase):
 			self.assertTrue(response.request ['PATH_INFO'] == matching_url)
 			print "[OK]:Navigation to the matching interface is successful"
 
-			#test navigation to the PMDP
 			client.logout()
-
 			output_update(i + 1)
 			print "\n"
 			end_time = time.clock()
@@ -355,21 +329,15 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate bookmarking of PetReport objects.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -413,21 +381,15 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate bookmarking of PetReport objects.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
@@ -498,22 +460,16 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate retrieving the bookmarks page for a user.
-		(users, passwords, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
-			#indexes
-			user_i = random.randrange(0, NUMBER_OF_TESTS)
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petreport_i = random.randrange(0, NUMBER_OF_TESTS)
-
 			#objects
-			user = users [user_i]
-			password = passwords [user_i]
-			client = clients [client_i]
-			petreport = petreports [petreport_i]
-
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
+			
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			

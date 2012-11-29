@@ -170,100 +170,115 @@ def get_recent_activites_from_log(userprofile, current_userprofile=None, since_d
 
     # userprofile: the userprofile whose log file is read to get recent activiy feeds
     # current_userprofile: the authenticated user who gets the activity feeds
-    # since_date: used to get all log activities that happend before that date 
+    # since_date: used to get all log activities that happened before that date 
     # num_activities: used to get a number of activites not more than this number
     # activity: used to decide about one type of activity and ignore the other 
 
     assert isinstance(userprofile, UserProfile)
-    if current_userprofile !=None:
+
+    if current_userprofile != None:
         assert isinstance(current_userprofile, UserProfile)
 
     # Define the user filename and logger.
     user = userprofile.user
+
     if userprofile.is_test == True:
         user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
     else:
         user_log_filename = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
-    print user_log_filename
-    recent_log = None
 
     # Initialize the activity list
     activities = [] 
+    recent_log = None
 
-    with open(user_log_filename, 'r') as logger:
+    #Catch the unlikely error that the log file does not exist.
+    try:
+        with open(user_log_filename, 'r') as logger:
 
-        reversed_activities = iter(reversed(logger.readlines()))
-        petreport = None
-        petmatch = None
-        userprofile2 = None
-        num_log = 0
- 
-        if since_date == None:
-            since_date = datetime.strptime("1/1/1900", '%m/%d/%Y')
-        else: 
-            since_date = datetime.strptime(str(since_date)[:19], '%Y-%m-%d %H:%M:%S')     
-        # Reference: http://docs.python.org/library/time.html#time.strptime
-        # http://agiliq.com/blog/2009/02/understanding-datetime-tzinfo-timedelta-amp-timezo/
- 
-        # Iterate through the log file.
-        for line in reversed_activities:
+            reversed_activities = iter(reversed(logger.readlines()))
+            petreport = None
+            petmatch = None
+            userprofile2 = None
+            num_log = 0
+     
+            if since_date == None:
+                since_date = datetime.strptime("1/1/1900", '%m/%d/%Y')
+            else: 
+                since_date = datetime.strptime(str(since_date)[:19], '%Y-%m-%d %H:%M:%S')     
+            # Reference: http://docs.python.org/library/time.html#time.strptime
+            # http://agiliq.com/blog/2009/02/understanding-datetime-tzinfo-timedelta-amp-timezo/
+     
+            # Iterate through the log file.
+            for line in reversed_activities:
 
-            # Before we do any work, check if the activity does not exist in this line.
-            if (activity != None) and (activity not in line):
-                continue  
+                # Before we do any work, check if the activity does not exist in this line.
+                if (activity != None) and (activity not in line):
+                    continue  
 
-            # Get the log date from each line in the log file
-            log_date = datetime.strptime(line[:24], '%a %b %d %H:%M:%S %Y')
-  
-            # If the log date is older than since_date, or 
-            # If the number of retrieved log is greater than num_activities 
-            # Break the loop and close the log file
-            if (log_date < since_date) or (num_log >= num_activities):
-                break
-  
-            # Every line has an ID to denote what is being identified (PetMatchc, UserProfile, etc).
-            identifier = line.split("ID")[1].replace('}','').replace('{','')   
+                # Get the log date from each line in the log file
+                log_date = datetime.strptime(line[:24], '%a %b %d %H:%M:%S %Y')
+      
+                # If the log date is older than since_date, or 
+                # If the number of retrieved log is greater than num_activities 
+                # Break the loop and close the log file
+                if (log_date < since_date) or (num_log >= num_activities):
+                    break
+      
+                # Every line has an ID to denote what is being identified (PetMatch, UserProfile, etc).
+                identifier = line.split("ID")[1].replace('}','').replace('{','')   
 
-            if ACTIVITY_ACCOUNT_CREATED in line:
-                recent_log = line
-                # print "recent_log: %s" % recent_log
-            elif ACTIVITY_PETREPORT_SUBMITTED in line:
-                petreport = PetReport.objects.get(pk=int(identifier))
-                recent_log = line     
-                # print "recent_log: %s" % recent_log
-            elif ACTIVITY_PETREPORT_ADD_BOOKMARK in line:
-                petreport = PetReport.objects.get(pk=int(identifier))
-                recent_log = line                    
-                # print "recent_log: %s" % recent_log
-            elif ACTIVITY_PETMATCH_PROPOSED in line:
-                petmatch = PetMatch.objects.get(pk=int(identifier))
-                recent_log = line                    
-                # print "recent_log: %s" % recent_log
-            elif ACTIVITY_PETMATCH_UPVOTE in line:
-                petmatch = PetMatch.objects.get(pk=int(identifier))
-                recent_log = line                    
-                # print "recent_log: %s" % recent_log
-            elif ACTIVITY_PETMATCH_DOWNVOTE in line:
-                petmatch = PetMatch.objects.get(pk=int(identifier))
-                recent_log = line  
-                # print "recent_log: %s" % recent_log
-            elif ACTIVITY_FOLLOWING in line:
-                userprofile2 = UserProfile.objects.get(pk=int(identifier))
-                recent_log = line 
-                # print "recent_log: %s" % recent_log
-            elif ACTIVITY_FOLLOWER in line:
-                userprofile2 = UserProfile.objects.get(pk=int(identifier))
-                recent_log = line 
-                # print "recent_log: %s" % recent_log
-            else:
-                continue
+                #Capture unexpected objects that don't exist in a try-except block.
+                try:
 
-            num_log = num_log + 1
+                    if ACTIVITY_ACCOUNT_CREATED in line:
+                        recent_log = line
+                        # print "recent_log: %s" % recent_log
+                    elif ACTIVITY_PETREPORT_SUBMITTED in line:
+                        petreport = PetReport.objects.get(pk=int(identifier))
+                        recent_log = line     
+                        # print "recent_log: %s" % recent_log
+                    elif ACTIVITY_PETREPORT_ADD_BOOKMARK in line:
+                        petreport = PetReport.objects.get(pk=int(identifier))
+                        recent_log = line                    
+                        # print "recent_log: %s" % recent_log
+                    elif ACTIVITY_PETMATCH_PROPOSED in line:
+                        petmatch = PetMatch.objects.get(pk=int(identifier))
+                        recent_log = line                    
+                        # print "recent_log: %s" % recent_log
+                    elif ACTIVITY_PETMATCH_UPVOTE in line:
+                        petmatch = PetMatch.objects.get(pk=int(identifier))
+                        recent_log = line                    
+                        # print "recent_log: %s" % recent_log
+                    elif ACTIVITY_PETMATCH_DOWNVOTE in line:
+                        petmatch = PetMatch.objects.get(pk=int(identifier))
+                        recent_log = line  
+                        # print "recent_log: %s" % recent_log
+                    elif ACTIVITY_FOLLOWING in line:
+                        userprofile2 = UserProfile.objects.get(pk=int(identifier))
+                        recent_log = line 
+                        # print "recent_log: %s" % recent_log
+                    elif ACTIVITY_FOLLOWER in line:
+                        userprofile2 = UserProfile.objects.get(pk=int(identifier))
+                        recent_log = line 
+                        # print "recent_log: %s" % recent_log
+                    else:
+                        continue
 
-            if recent_log != None:   
-                feed = get_activity_HTML(recent_log, userprofile, userprofile2=userprofile2, petreport=petreport, petmatch=petmatch, current_userprofile=current_userprofile)
-                if feed not in activities and feed!="":
-                    activities.append([str(log_date),feed])
+                    num_log = num_log + 1
+
+                except Exception as e:
+                    print "[ERROR]: Problem in get_recent_activites_from_log(): {%s}" % e
+                    num_log = num_log + 1
+                    continue
+
+                if recent_log != None:   
+                    feed = get_activity_HTML(recent_log, userprofile, userprofile2=userprofile2, petreport=petreport, petmatch=petmatch, current_userprofile=current_userprofile)
+                    if feed not in activities and feed != "":
+                        activities.append([str(log_date),feed])
+
+    except IOError as i:
+        print "[ERROR]: Problem in get_recent_activites_from_log(): {%s}" % i
+        return activities
 
     logger.close()
     return activities

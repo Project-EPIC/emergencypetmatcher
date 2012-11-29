@@ -110,6 +110,7 @@
             <li><b>Contact:</b>  <a href="{% url 'get_UserProfile_page' petmatch.lost_pet.proposed_by.id %}">{{ petmatch.lost_pet.proposed_by.user.username }}</a></li>
             <li><b>Date {{ petmatch.lost_pet.status }} : </b>{{ petmatch.lost_pet.date_lost_or_found }}</li>
             <li><b>Location: </b>{{ petmatch.lost_pet.location }}</li>
+	    <li><b>Spayed or Neutered: </b>{{ petmatch.lost_pet.spayed_or_neutered }}</li>
             <li><b>Age:</b> {{ petmatch.lost_pet.age }} </li>
             <li><b>Sex:</b>  {{ petmatch.lost_pet.get_sex_display }}</li>
             <li><b>Breed:</b> {{ petmatch.lost_pet.breed }}</li>
@@ -141,6 +142,7 @@
             <li><b>Contact:</b> <a href="{% url 'get_UserProfile_page' petmatch.found_pet.proposed_by.id %}">{{ petmatch.found_pet.proposed_by.user.username }}</a></li>
             <li><b>Date {{ petmatch.found_pet.status }} : </b>{{ petmatch.found_pet.date_lost_or_found }}</li>
             <li><b>Location: </b>{{ petmatch.found_pet.location }}</li>
+	    <li><b>Spayed or Neutered: </b>{{ petmatch.found_pet.spayed_or_neutered }}</li>
             <li><b>Age:</b> {{ petmatch.found_pet.age }} </li>
             <li><b>Sex:</b>  {{ petmatch.found_pet.get_sex_display }}</li>
             <li><b>Breed:</b> {{ petmatch.found_pet.breed }}</li>

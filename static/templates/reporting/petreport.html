@@ -99,6 +99,7 @@
             <b>Contact:</b> <a href= "{% url 'get_UserProfile_page' pet_report.proposed_by.id %}"> {{ pet_report.proposed_by.user.username }}</a><br/>             
             <b>Date {{ pet_report.status }}: </b>{{ pet_report.date_lost_or_found }}<br/>
             <b>Location:</b> {{ pet_report.location }}<br/>
+            <b>Spayed/Neutered:</b> {{ pet_report.spayed_or_neutered }}<br/>
             <b>Age:</b> {{ pet_report.age }}<br/> 
             <b>Sex:</b>  {{ pet_report.get_sex_display }}<br/>
             <b>Breed:</b> {{ pet_report.breed }} <br/> 
