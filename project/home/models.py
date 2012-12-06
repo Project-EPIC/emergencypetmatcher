@@ -90,8 +90,17 @@ class UserProfile (models.Model):
         elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE:
             self.reputation += REWARD_USER_PROPOSED_PETMATCH_VOTE
 
-        elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_DOWNVOTE:
-            self.reputation -= REWARD_USER_PROPOSED_PETMATCH_VOTE
+        elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL:
+            self.reputation += REWARD_USER_PROPOSED_PETMATCH_SUCCESSFUL
+
+        elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE:
+            self.reputation += REWARD_USER_PROPOSED_PETMATCH_FAILURE
+
+        elif activity == ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL:
+            self.reputation += REWARD_USER_VERIFY_PETMATCH_SUCCESSFUL
+
+        elif activity == ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL:
+            self.reputation += REWARD_PETMATCH_UPVOTE_SUCCESSFUL
 
         else:
             print '[ERROR]: Cannot update reputation points: This is not a valid activity! \n'
@@ -356,12 +365,16 @@ class PetMatch(models.Model):
                 print '[INFO]: Email to pet match owner: '+email_body
 
     def close_PetMatch(self):
+        petmatch_owner = self.proposed_by
+        lost_pet_contact = self.lost_pet.proposed_by
+        found_pet_contact = self.found_pet.proposed_by
         if '0' not in self.verification_votes:
             self.closed_date = datetime_now()         
             '''If the PetMatch is successful, all related PetMatches will be closed 
             and is_successful is set to True'''
             if self.verification_votes == '11':
                 self.is_successful = True
+
                 for petmatch in self.lost_pet.lost_pet_related.all(): 
                     petmatch.is_open = False
                     petmatch.closed_date = datetime_now()
@@ -370,6 +383,45 @@ class PetMatch(models.Model):
                     petmatch.is_open = False
                     petmatch.closed_date = datetime_now()
                     petmatch.save()
+                # --------Reputation points--------
+                # update reputation points for the following users:
+                # petmatch_owner, lost_pet_contact, and found_pet_contact
+                print "[INFO]: PetMatch Verification was a SUCCESS!"
+                # Must to update reputation points twice since if updating petmatch_owner and lost_pet_contact
+                # separately for the same user doesn't work
+                if petmatch_owner.id == lost_pet_contact.id:
+                    petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL)
+                    petmatch_owner.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+                    found_pet_contact.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+                # Must to update reputation points twice since if updating petmatch_owner and found_pet_contact
+                # separately for the same user doesn't work
+                elif petmatch_owner.id == found_pet_contact.id:
+                    petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL)
+                    petmatch_owner.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+                    lost_pet_contact.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+                else:
+                    petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL)
+                    lost_pet_contact.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+                    found_pet_contact.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+                 # update reputation points for upvoters
+                for upvoters in self.up_votes.all():
+                    upvoters.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
+                # Must update reputation manually for petmatch_owner if found in the up_votes list because
+                # the user is not updated in the previous for loop
+                if petmatch_owner in self.up_votes.all():
+                    petmatch_owner.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
+                # Must update reputation manually for lost_pet_contact if found in the up_votes list because
+                # the user is not updated in the previous for loop
+                elif lost_pet_contact in self.up_votes.all():
+                    lost_pet_contact.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
+                # Must update reputation manually for ound_pet_contact if found in the up_votes list because
+                # the user is not updated in the previous for loop
+                elif found_pet_contact in self.up_votes.all():
+                    found_pet_contact.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
+            else: 
+                # if self.verification_votes == '22' or self.verification_votes == '12' or self.verification_votes == '21':
+                    print "[INFO]: PetMatch Verification was NOT a success!"
+                    petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE)
             self.save()    
             print '[INFO]: PetMatch %s has been closed' % (self)
     
