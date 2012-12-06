@@ -80,7 +80,7 @@ class PetReport(models.Model):
     location = models.CharField(max_length=PETREPORT_LOCATION_LENGTH, null=False, default='unknown')
 
     #ForeignKey: Many-to-one relationship with User
-    proposed_by = models.ForeignKey('UserProfile', null=False, default=None)
+    proposed_by = models.ForeignKey('UserProfile', null=False, default=None, related_name='proposed_related')
 
     '''Non-Required Fields'''
     img_path = models.ImageField(upload_to='images/petreport_images', null=True)

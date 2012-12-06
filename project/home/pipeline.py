@@ -3,8 +3,11 @@ from django.contrib import messages
 
 
 def redirect_to_form(*args, **kwargs):
-    if not kwargs['request'].session.get('saved_username') and kwargs.get('user') is None:
+    
+    if (not kwargs['request'].session.get('saved_username')) and (kwargs.get('user') is None):
         return HttpResponseRedirect('/get_social_details/')
+    else: 
+        print "PROBLEM at redirect_to_form pipline function!"
 
 def username(request, *args, **kwargs):
     if kwargs.get('user'):
