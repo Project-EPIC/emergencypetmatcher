@@ -191,13 +191,33 @@ def create_random_bookmark_list (userprofile, num_bookmark=None):
 
 #Create Random Object for: PetReport
 def create_random_PetReport(user=None, status=None, pet_type=None):
+
+	#Bias the distribution towards (in order): [Dog, Cat, Bird, Horse, Rabbit, Snake, Turtle]
 	if pet_type == None:
-		pet_type = random.choice(PET_TYPE_CHOICES)[0]
+		random_var = random.random()
+		if random_var < 0.80:
+			pet_type = PETREPORT_PET_TYPE_DOG
+		elif random_var >= 0.80 and random_var < 0.93:
+			pet_type = PETREPORT_PET_TYPE_CAT
+		elif random_var >= 0.93 and random_var < 0.95:
+			pet_type = PETREPORT_PET_TYPE_BIRD
+		elif random_var >= 0.95 and random_var < 0.97:
+			pet_type = PETREPORT_PET_TYPE_HORSE
+		elif random_var >= 0.97 and random_var < 0.98:
+			pet_type = PETREPORT_PET_TYPE_RABBIT
+		elif random_var >= 0.98 and random_var < 0.99:
+			pet_type = PETREPORT_PET_TYPE_SNAKE
+		elif random_var >= 0.99 and random_var < 0.995:
+			pet_type = PETREPORT_PET_TYPE_TURTLE
+		else:
+			pet_type = PETREPORT_PET_TYPE_OTHER
+
 	if status == None:
 		status = random.choice(STATUS_CHOICES)[0]
 	if user == None:
 		user = random.choice(User.objects.all())
 
+	#Populate the PetReport with the required fields.
 	pr = PetReport (pet_type = pet_type, status = status, proposed_by = user.get_profile())
 	pr.date_lost_or_found = generate_random_date(DATE_LOWER_BOUND, DATE_UPPER_BOUND, "%Y-%m-%d", random.random())
 	pr.sex = random.choice(SEX_CHOICES)[0]
@@ -226,21 +246,44 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 	pr.save()
 	pr.workers = create_random_Userlist()
 
-	#Need to handle Image defaults...
-	if pr.pet_type == "Dog":
-		pr.img_path.name = "images/defaults/dog_silhouette.jpg"
-	elif pr.pet_type == "Cat":
-		pr.img_path.name = "images/defaults/cat_silhouette.jpg"
-	elif pr.pet_type == "Horse":
-		pr.img_path.name = "images/defaults/horse_silhouette.jpg"
-	elif pr.pet_type == "Rabbit":
-		pr.img_path.name = "images/defaults/rabbit_silhouette.jpg"
-	elif pr.pet_type == "Snake":
-		pr.img_path.name = "images/defaults/snake_silhouette.jpg"
-	elif pr.pet_type == "Turtle":
-		pr.img_path.name = "images/defaults/turtle_silhouette.jpg"
+	#Need to handle the cases where the contact might/might not have a photo for this PetReport!
+	if random.random() <= 0.95:
+		load_PetReport_sample_images()
+
+		if pr.pet_type == PETREPORT_PET_TYPE_DOG:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_DOG_IMAGES)
+		elif pr.pet_type == PETREPORT_PET_TYPE_CAT:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_CAT_IMAGES)
+		elif pr.pet_type == PETREPORT_PET_TYPE_BIRD:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_BIRD_IMAGES)
+		elif pr.pet_type == PETREPORT_PET_TYPE_HORSE:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_HORSE_IMAGES)			
+		elif pr.pet_type == PETREPORT_PET_TYPE_RABBIT:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_RABBIT_IMAGES)
+		elif pr.pet_type == PETREPORT_PET_TYPE_SNAKE:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_SNAKE_IMAGES)
+		elif pr.pet_type == PETREPORT_PET_TYPE_TURTLE:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_TURTLE_IMAGES)
+		else:
+			pr.img_path.name = "images/defaults/other_silhouette.jpg"
+
 	else:
-		pr.img_path.name = "images/defaults/other_silhouette.jpg"
+		if pr.pet_type == PETREPORT_PET_TYPE_DOG:
+			pr.img_path.name = "images/defaults/dog_silhouette.jpg"
+		elif pr.pet_type == PETREPORT_PET_TYPE_CAT:
+			pr.img_path.name = "images/defaults/cat_silhouette.jpg"
+		elif pr.pet_type == PETREPORT_PET_TYPE_BIRD:
+			pr.img_path.name = "images/defaults/bird_silhouette.jpg"
+		elif pr.pet_type == PETREPORT_PET_TYPE_HORSE:
+			pr.img_path.name = "images/defaults/horse_silhouette.jpg"
+		elif pr.pet_type == PETREPORT_PET_TYPE_RABBIT:
+			pr.img_path.name = "images/defaults/rabbit_silhouette.jpg"
+		elif pr.pet_type == PETREPORT_PET_TYPE_SNAKE:
+			pr.img_path.name = "images/defaults/snake_silhouette.jpg"
+		elif pr.pet_type == PETREPORT_PET_TYPE_TURTLE:
+			pr.img_path.name = "images/defaults/turtle_silhouette.jpg"
+		else:
+			pr.img_path.name = "images/defaults/other_silhouette.jpg"
 
 	pr.save()
 	log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr, )

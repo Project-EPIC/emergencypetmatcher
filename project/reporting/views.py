@@ -42,17 +42,19 @@ def submit_PetReport(request):
             print "[INFO]: Pet Report Image Path: %s" % pr.img_path
             #If there was no image attached, let's take care of defaults.
             if pr.img_path == None:
-                if pr.pet_type == "Dog":
+                if pr.pet_type == PETREPORT_PET_TYPE_DOG:
                     pr.img_path.name = "images/defaults/dog_silhouette.jpg"
-                elif pr.pet_type == "Cat":
+                elif pr.pet_type == PETREPORT_PET_TYPE_CAT:
                     pr.img_path.name = "images/defaults/cat_silhouette.jpg"
-                elif pr.pet_type == "Horse":
+                elif pr.pet_type == PETREPORT_PET_TYPE_BIRD:
+                    pr.img_path.name = "images/defaults/bird_silhouette.jpg"                    
+                elif pr.pet_type == PETREPORT_PET_TYPE_HORSE:
                     pr.img_path.name = "images/defaults/horse_silhouette.jpg"
-                elif pr.pet_type == "Rabbit":
+                elif pr.pet_type == PETREPORT_PET_TYPE_RABBIT:
                     pr.img_path.name = "images/defaults/rabbit_silhouette.jpg"
-                elif pr.pet_type == "Snake":
+                elif pr.pet_type == PETREPORT_PET_TYPE_SNAKE:
                     pr.img_path.name = "images/defaults/snake_silhouette.jpg"                                       
-                elif pr.pet_type == "Turtle":
+                elif pr.pet_type == PETREPORT_PET_TYPE_TURTLE:
                     pr.img_path.name = "images/defaults/turtle_silhouette.jpg"
                 else:
                     pr.img_path.name = "images/defaults/other_silhouette.jpg"

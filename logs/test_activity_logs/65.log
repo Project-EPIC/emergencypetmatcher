@@ -1,0 +1,11 @@
+Sat Dec  8 22:56:16 2012 [ACCOUNT_CREATED]: A new UserProfile account was created for {Emily12} with ID{65}
+Sat Dec  8 22:56:21 2012 [_FOLLOWER]: Emily12 has been followed by {mbarrenecheajr} with ID{1}
+Sat Dec  8 22:56:21 2012 [_FOLLOWER]: Emily12 has been followed by {mario} with ID{52}
+Sat Dec  8 22:56:21 2012 [_FOLLOWER]: Emily12 has been followed by {Sahar9} with ID{62}
+Sat Dec  8 22:56:21 2012 [_FOLLOWING]: Emily12 has followed {mario} with ID{52}
+Sat Dec  8 22:56:21 2012 [_FOLLOWING]: Emily12 has followed {Daniel2} with ID{55}
+Sat Dec  8 22:56:21 2012 [_FOLLOWING]: Emily12 has followed {Andrew14} with ID{67}
+Sat Dec  8 22:56:21 2012 [_FOLLOWER]: Emily12 has been followed by {Andrew13} with ID{66}
+Sat Dec  8 22:56:21 2012 [_FOLLOWER]: Emily12 has been followed by {Mark15} with ID{68}
+Sat Dec  8 22:56:22 2012 [_FOLLOWER]: Emily12 has been followed by {Angela21} with ID{74}
+Sat Dec  8 22:56:22 2012 [_FOLLOWER]: Emily12 has been followed by {Chris22} with ID{75}
