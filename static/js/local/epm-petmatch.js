@@ -60,11 +60,11 @@ $(document).ready(function(){
 
     //Update the share buttons' click event.
     $("#facebook_share_pm").click(function(){
-      share_on_facebook(URL, IMAGE, TITLE, SUMMERY);
+      share_on_facebook(URL, IMAGE, TITLE, SUMMARY);
     });
 
     $("#twitter_share_pm").click(function(){
-      share_on_twitter(URL, IMAGE, TITLE, SUMMERY);
+      share_on_twitter(URL, IMAGE, TITLE, SUMMARY);
     });
 
 });

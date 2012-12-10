@@ -45,9 +45,9 @@ def output_update (i):
 	sys.stdout.flush()
 
 #Helper function for cleaning up the modeldict passed in for simple displaying
-def simplify_model_dict(model_object):
-	assert isinstance (model_object, models.Model)
-	modeldict = model_to_dict(model_object)
+def simplify_PetReport_dict(petreport):
+	assert isinstance (petreport, PetReport)
+	modeldict = model_to_dict(petreport)
 
 	#iterate through all fields in the model_dict
 	for field in modeldict:
@@ -57,12 +57,16 @@ def simplify_model_dict(model_object):
 		elif isinstance(value, ImageFile):
 			modeldict[field] = value.name
 		elif field == "sex":
-			modeldict[field] = model_object.get_sex_display()
+			modeldict[field] = petreport.get_sex_display()
 		elif field == "size":
-			modeldict[field] = model_object.get_size_display()
+			modeldict[field] = petreport.get_size_display()
+		elif field == "geo_location_lat" and str(value).strip() == "":
+			modeldict[field] = None
+		elif field == "geo_location_long" and str(value).strip() == "":
+			modeldict[field] = None
 
 	#Just add a couple of nice attributes.
-	modeldict ["proposed_by_username"] = model_object.proposed_by.user.username		
+	modeldict ["proposed_by_username"] = petreport.proposed_by.user.username		
 	return modeldict
 
 '''===================================================================================
@@ -235,6 +239,9 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 			pr.breed = generate_string(PETREPORT_BREED_LENGTH) 
 		if random.random() > 0.3:
 			pr.age = str(random.randint(0, 15))
+		if random.random() > 0.25:
+			pr.geo_location_long = random.randrange(-180.0, 180.0)
+			pr.geo_location_lat = random.randrange(-90.0, 90.0)
 
 	#The Pet Owner knows his/her own pet.
 	else:

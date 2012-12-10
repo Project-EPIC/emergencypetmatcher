@@ -30,10 +30,14 @@ import datetime, re
 
 @login_required
 def submit_PetReport(request):
-
     if request.method == "POST":
+        #Let's make some adjustments to non-textual form fields before converting to a PetReportForm.
+        if request.POST ['geo_location_lat'] == 'None' or request.POST ['geo_location_long'] == 'None':
+            request.POST ['geo_location_lat'] = None
+            request.POST ['geo_location_long'] = None
+
         form = PetReportForm(request.POST, request.FILES)
-        print request.FILES
+        print request.POST, request.FILES
 
         if form.is_valid() == True:
             pr = form.save(commit=False)
@@ -167,7 +171,7 @@ def get_PetReport_json(request, petreport_id):
         print "Retrieved the PetReport: %s" % prdp
 
         #Need this for easy displaying on the Matching Interface workspace detail table.
-        prdp_dict = simplify_model_dict(prdp) 
+        prdp_dict = simplify_PetReport_dict(prdp) 
         print prdp_dict
 
         json = simplejson.dumps(prdp_dict)
