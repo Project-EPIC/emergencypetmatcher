@@ -10,6 +10,12 @@ from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD
 from project.settings import TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD
 from project.settings import TEST_DOMAIN
 import unittest, string, random, sys, time, urlparse
+'''===================================================================================
+home.tests.py: Testing for Home App Functionality:
+
+Test classes: home.ModelTesting home.LoginTesting home.LoggingTesting home.UserProfileTesting 
+home.EditUserProfileTesting home.FollowingTesting home.SocialAuthTesting
+==================================================================================='''
 
 '''===================================================================================
 ModelTesting: Testing for EPM Models

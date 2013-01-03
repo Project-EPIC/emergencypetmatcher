@@ -5,6 +5,7 @@ from home.models import *
 #from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth import views as auth_views
 
+
 urlpatterns = patterns('home.views',
 
 	url(r'^$', 'home', name='home'),
@@ -32,7 +33,6 @@ urlpatterns = patterns('home.views',
 	url(r'^register/closed/$', "registration_disallowed", name='registration_disallowed'),
 	#email verification URL
 	url(r'^email_verification_complete/(?P<activation_key>\w+)/$', "email_verification_complete", name='email_verification_complete'),
-	
 	
 )
 

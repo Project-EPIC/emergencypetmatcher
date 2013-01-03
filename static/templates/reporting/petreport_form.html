@@ -14,7 +14,7 @@
 
 {% block content %}
 
-	<div id = "pr_form_instructions" style ="margin-bottom:20px; font-size: 14px; font-weight:bold;">
+	<div id = "pr_form_instructions">
 		To create a pet report, please fill in the following fields to the best of your ability. Once you have finished, review the pet report to determine its quality. Review with consideration:
 
 		 <ul>
@@ -22,29 +22,31 @@
 		 	<li> The quality of information (is the picture relevant and helpful? Is the description free of general 'fluff' and to the point? </li>
 		 	<li> And general correctness (is everything spelled correctly?)</li>
 		 </ul>
-		 If the pet report meets these criteria, click the 'Submit' button at the end of the form.
+		 If the pet report meets these criteria, click the 'Submit' button at the end of the form. The fields marked with * are required.
 	</div>
 
-	<div id="detail" style="width:600px; height:100%; overflow:auto; margin-bottom: 50px; padding:5px; border:1px dotted;">
+	<div id="pr_form_container">
 
 		{% if form.errors %} <strong> {{ form.errors }} </strong> {% endif %}
 
 		<form enctype="multipart/form-data" method="POST" action="{% url 'submit_PetReport' %}">
 			{% csrf_token %}
-			<table>
+			<ul style="list-style-type:none; padding: 0px 0px 0px 20px;">
 				{% for field in form %}
-					<tr>
-						<td><strong> {{ field.label }} </strong></td>
-						{% ifequal field.label "Date Lost/Found" %}
-							<td>
-								<input name="date_lost_or_found" id="id_date_lost_or_found" onfocus="showCalendarControl(this)" type="text"/>
-							</td>
-						{% else %}
-					    	<td>{{ field }}</td>
-					    {% endifequal %}	
-					</tr>
+					<li> <strong> {{ field.label }} </strong></li>
+					{% if field.help_text %}
+						<li style="margin-bottom:5px;"> {{ field.help_text }} </li>
+					{% endif %}
+					{% if "Date Lost/Found" in field.label %}
+						<li>
+							<input name="date_lost_or_found" id="id_date_lost_or_found" onfocus="showCalendarControl(this)" type="text"/>
+						</li><br/>
+					{% else %}
+				    	<li>{{ field }}</li><br/>
+				    {% endif %}	
+					</li>
 				{% endfor %}
-			</table><br/>
+			</ul><br/>
 			<input type="submit" value="Submit" style= "margin: 10px 0px 10px 0px; width:150px; height:50px; font-size:13pt;float:right;"/>
 		</form>
 	</div>
