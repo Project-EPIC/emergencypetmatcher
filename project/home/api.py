@@ -95,8 +95,13 @@ class PetReportResource(MultipartResource, ModelResource):
                 log_activity(ACTIVITY_PETREPORT_SUBMITTED, request.user.get_profile(), petreport=pr)
                 print "[SUCCESS]: Pet Report submitted successfully" 
                 bundle.obj = pr
+            else:
+                print "[ERROR]: Problem in obj_create()"
+                return BadRequest("Problem with PetReport fields.")
+                
 
         except Exception as e:
+            print e
             raise BadRequest(e)
 
         return bundle

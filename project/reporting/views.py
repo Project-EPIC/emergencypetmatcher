@@ -94,7 +94,7 @@ def disp_PetReport(request, petreport_id):
     else:
         matches = PetMatch.objects.all().filter(found_pet = pet_report)
     
-    if request.user.is_authenticated():
+    if request.user.is_authenticated() == True:
         user = request.user.get_profile()
         if(pet_report.UserProfile_has_bookmarked(user)):
             user_has_bookmarked = "true"
