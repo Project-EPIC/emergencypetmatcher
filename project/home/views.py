@@ -27,7 +27,8 @@ from django.utils import simplejson
 from home.models import *
 from constants import *
 from logging import *
-from registration import *
+from registration.models import RegistrationProfile
+from registration.views import activate
 from utils import *
 from datetime import datetime
 # from pytz import timezone
@@ -69,7 +70,7 @@ def get_activities_json(request):
 
         if request.user.is_authenticated() == True:
 
-            print "[INFO]: get_activities_json(): Authenticated User -- recent activities..."
+            print "[INFO]: get_activities_json(): Authenticated User - recent activities..."
             current_userprofile = request.user.get_profile()      
 
             # Get all activities from this UserProfile's log file that show who has followed this UserProfile 
@@ -85,14 +86,17 @@ def get_activities_json(request):
                     since_date=current_userprofile.last_logout) 
 
         else:
-            print "[INFO]: get_activities_json(): Anonymous User -- random sample of activities..."
+            print "[INFO]: get_activities_json(): Anonymous User - random sample of activities..."
             # Get random activities for the anonymous user           
             for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:ACTIVITY_FEED_LENGTH]:
                 activities += get_recent_activites_from_log(userprofile=userprof, num_activities=1)
 
+            #print "[INFO]: Activities are: %s" % activities
+
         #If there are no activities, let the user know!
         if len(activities) == 0:
             activities.append("<h3 style='text-align:center; color:gray;'> No Activities Yet.</h3>")
+
         else:
             # Sort the activity feed list according the log date
             activities.sort() 
@@ -160,7 +164,6 @@ def login_User(request):
 
 @login_required
 def logout_User(request):
-
     print "[INFO]: Logging out UserProfile {%s}" % request.user.get_profile()
 
     # Update to last_logout date field
@@ -172,7 +175,21 @@ def logout_User(request):
     messages.success(request, "You have successfully logged out.")
     logout(request)
     return redirect(URL_HOME)
-    
+
+
+def registration_activate (request, activation_key=None, backend=None):
+    print "[INFO]: Activation Key: %s" % activation_key
+
+    #Does the activation key exist within a RegistrationProfile? (i.e. is somebody actually trying to activate an account or resurrect an old activation link?)
+    try:
+        rp = RegistrationProfile.objects.get(activation_key=activation_key)
+
+    except RegistrationProfile.DoesNotExist:
+        messages.error(request, "This account has already been activated!")
+        return redirect(URL_HOME)
+
+    #Specify the django-registration default backend for activating this account. 
+    return activate(request, backend=backend, activation_key=activation_key)
 
 def registration_activation_complete (request):
     print request

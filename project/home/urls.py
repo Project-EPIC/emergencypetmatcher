@@ -5,6 +5,7 @@ from home.models import *
 #from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth import views as auth_views
 
+
 urlpatterns = patterns('home.views',
 
 	url(r'^$', 'home', name='home'),
@@ -20,13 +21,18 @@ urlpatterns = patterns('home.views',
 	url(r'^', include('social_auth.urls')),
 	url(r'^edituserprofile', 'editUserProfile_page', name='editUserProfile_page'),
 	url (r'^accounts/', include('registration.backends.default.urls')),
+
 	#registration-related URLs that have been customized.
 	url(r'^activate/complete/$', "registration_activation_complete", name='registration_activation_complete'),
+	# Activation keys get matched by \w+ instead of the more specific
+	# [a-fA-F0-9]{40} because a bad activation key should still get to the view;
+	# that way it can return a sensible "invalid key" message instead of a
+	# confusing 404.
+	url(r'^activate/(?P<activation_key>\w+)/$', "registration_activate", {'backend':'registration.backends.default.DefaultBackend'}, name='registration_activate'),
 	url(r'^register/complete/$', "registration_complete", name='registration_complete'),
 	url(r'^register/closed/$', "registration_disallowed", name='registration_disallowed'),
 	#email verification URL
 	url(r'^email_verification_complete/(?P<activation_key>\w+)/$', "email_verification_complete", name='email_verification_complete'),
-	
 	
 )
 

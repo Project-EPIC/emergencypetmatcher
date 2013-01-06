@@ -45,9 +45,9 @@ def output_update (i):
 	sys.stdout.flush()
 
 #Helper function for cleaning up the modeldict passed in for simple displaying
-def simplify_model_dict(model_object):
-	assert isinstance (model_object, models.Model)
-	modeldict = model_to_dict(model_object)
+def simplify_PetReport_dict(petreport):
+	assert isinstance (petreport, PetReport)
+	modeldict = model_to_dict(petreport)
 
 	#iterate through all fields in the model_dict
 	for field in modeldict:
@@ -57,12 +57,16 @@ def simplify_model_dict(model_object):
 		elif isinstance(value, ImageFile):
 			modeldict[field] = value.name
 		elif field == "sex":
-			modeldict[field] = model_object.get_sex_display()
+			modeldict[field] = petreport.get_sex_display()
 		elif field == "size":
-			modeldict[field] = model_object.get_size_display()
+			modeldict[field] = petreport.get_size_display()
+		elif field == "geo_location_lat" and str(value).strip() == "":
+			modeldict[field] = None
+		elif field == "geo_location_long" and str(value).strip() == "":
+			modeldict[field] = None
 
 	#Just add a couple of nice attributes.
-	modeldict ["proposed_by_username"] = model_object.proposed_by.user.username		
+	modeldict ["proposed_by_username"] = petreport.proposed_by.user.username		
 	return modeldict
 
 '''===================================================================================
@@ -172,6 +176,8 @@ def create_random_following_list (userprofile, num_following=None):
 
 	for followed in following_list:
 		userprofile.following.add(followed)
+		log_activity(ACTIVITY_FOLLOWING, userprofile, userprofile2=followed)
+
 	return userprofile
 
 #creates a list of PetReports being bookmarked by the input UserProfile
@@ -189,13 +195,33 @@ def create_random_bookmark_list (userprofile, num_bookmark=None):
 
 #Create Random Object for: PetReport
 def create_random_PetReport(user=None, status=None, pet_type=None):
+
+	#Bias the distribution towards (in order): [Dog, Cat, Bird, Horse, Rabbit, Snake, Turtle]
 	if pet_type == None:
-		pet_type = random.choice(PET_TYPE_CHOICES)[0]
+		random_var = random.random()
+		if random_var < 0.80:
+			pet_type = PETREPORT_PET_TYPE_DOG
+		elif random_var >= 0.80 and random_var < 0.93:
+			pet_type = PETREPORT_PET_TYPE_CAT
+		elif random_var >= 0.93 and random_var < 0.95:
+			pet_type = PETREPORT_PET_TYPE_BIRD
+		elif random_var >= 0.95 and random_var < 0.97:
+			pet_type = PETREPORT_PET_TYPE_HORSE
+		elif random_var >= 0.97 and random_var < 0.98:
+			pet_type = PETREPORT_PET_TYPE_RABBIT
+		elif random_var >= 0.98 and random_var < 0.99:
+			pet_type = PETREPORT_PET_TYPE_SNAKE
+		elif random_var >= 0.99 and random_var < 0.995:
+			pet_type = PETREPORT_PET_TYPE_TURTLE
+		else:
+			pet_type = PETREPORT_PET_TYPE_OTHER
+
 	if status == None:
 		status = random.choice(STATUS_CHOICES)[0]
 	if user == None:
 		user = random.choice(User.objects.all())
 
+	#Populate the PetReport with the required fields.
 	pr = PetReport (pet_type = pet_type, status = status, proposed_by = user.get_profile())
 	pr.date_lost_or_found = generate_random_date(DATE_LOWER_BOUND, DATE_UPPER_BOUND, "%Y-%m-%d", random.random())
 	pr.sex = random.choice(SEX_CHOICES)[0]
@@ -213,6 +239,9 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 			pr.breed = generate_string(PETREPORT_BREED_LENGTH) 
 		if random.random() > 0.3:
 			pr.age = str(random.randint(0, 15))
+		if random.random() > 0.25:
+			pr.geo_location_long = random.randrange(-180.0, 180.0)
+			pr.geo_location_lat = random.randrange(-90.0, 90.0)
 
 	#The Pet Owner knows his/her own pet.
 	else:
@@ -224,21 +253,44 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 	pr.save()
 	pr.workers = create_random_Userlist()
 
-	#Need to handle Image defaults...
-	if pr.pet_type == "Dog":
-		pr.img_path.name = "images/defaults/dog_silhouette.jpg"
-	elif pr.pet_type == "Cat":
-		pr.img_path.name = "images/defaults/cat_silhouette.jpg"
-	elif pr.pet_type == "Horse":
-		pr.img_path.name = "images/defaults/horse_silhouette.jpg"
-	elif pr.pet_type == "Rabbit":
-		pr.img_path.name = "images/defaults/rabbit_silhouette.jpg"
-	elif pr.pet_type == "Snake":
-		pr.img_path.name = "images/defaults/snake_silhouette.jpg"
-	elif pr.pet_type == "Turtle":
-		pr.img_path.name = "images/defaults/turtle_silhouette.jpg"
+	#Need to handle the cases where the contact might/might not have a photo for this PetReport!
+	if random.random() <= 0.95:
+		load_PetReport_sample_images()
+
+		if pr.pet_type == PETREPORT_PET_TYPE_DOG:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_DOG_IMAGES)
+		elif pr.pet_type == PETREPORT_PET_TYPE_CAT:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_CAT_IMAGES)
+		elif pr.pet_type == PETREPORT_PET_TYPE_BIRD:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_BIRD_IMAGES)
+		elif pr.pet_type == PETREPORT_PET_TYPE_HORSE:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_HORSE_IMAGES)			
+		elif pr.pet_type == PETREPORT_PET_TYPE_RABBIT:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_RABBIT_IMAGES)
+		elif pr.pet_type == PETREPORT_PET_TYPE_SNAKE:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_SNAKE_IMAGES)
+		elif pr.pet_type == PETREPORT_PET_TYPE_TURTLE:
+			pr.img_path.name = random.choice(PETREPORT_SAMPLE_TURTLE_IMAGES)
+		else:
+			pr.img_path.name = "images/defaults/other_silhouette.jpg"
+
 	else:
-		pr.img_path.name = "images/defaults/other_silhouette.jpg"
+		if pr.pet_type == PETREPORT_PET_TYPE_DOG:
+			pr.img_path.name = "images/defaults/dog_silhouette.jpg"
+		elif pr.pet_type == PETREPORT_PET_TYPE_CAT:
+			pr.img_path.name = "images/defaults/cat_silhouette.jpg"
+		elif pr.pet_type == PETREPORT_PET_TYPE_BIRD:
+			pr.img_path.name = "images/defaults/bird_silhouette.jpg"
+		elif pr.pet_type == PETREPORT_PET_TYPE_HORSE:
+			pr.img_path.name = "images/defaults/horse_silhouette.jpg"
+		elif pr.pet_type == PETREPORT_PET_TYPE_RABBIT:
+			pr.img_path.name = "images/defaults/rabbit_silhouette.jpg"
+		elif pr.pet_type == PETREPORT_PET_TYPE_SNAKE:
+			pr.img_path.name = "images/defaults/snake_silhouette.jpg"
+		elif pr.pet_type == PETREPORT_PET_TYPE_TURTLE:
+			pr.img_path.name = "images/defaults/turtle_silhouette.jpg"
+		else:
+			pr.img_path.name = "images/defaults/other_silhouette.jpg"
 
 	pr.save()
 	log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr, )
@@ -350,6 +402,7 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 				existing_petmatch.up_votes.remove(user.get_profile())
 				log_activity(ACTIVITY_PETMATCH_DOWNVOTE, user.get_profile(), petmatch=existing_petmatch, )				
 			
+	print "\n"
 	#Return the (possibly None) PetMatch
 	return petmatch
 

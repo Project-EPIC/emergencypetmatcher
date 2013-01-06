@@ -21,12 +21,12 @@ from django.conf import settings
 ==================================================================================='''
 
 '''Enums for Various Model Choice Fields'''
-PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Turtle', 'Turtle'), ('Snake', 'Snake'), ('Horse', 'Horse'),('Rabbit', 'Rabbit'), ('Other', 'Other')]
+PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Bird', 'Bird'), ('Horse', 'Horse'), ('Rabbit', 'Rabbit'), ('Snake', 'Snake'), ('Turtle', 'Turtle'), ('Other', 'Other')]
 STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
 SEX_CHOICES=[('M','Male'),('F','Female')]
 SIZE_CHOICES = [('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)')]
 BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador')]
-SPAYED_OR_NEUTERED_CHOICES = [('Spayed', 'Spayed'), ('Neutered', 'Neutered'), ("Don't Know", "Don't Know")]
+SPAYED_OR_NEUTERED_CHOICES = [('Spayed', 'Spayed'), ('Neutered', 'Neutered'), ("unknown", "unknown")]
 
 #The User Profile Model containing a 1-1 association with the 
 #django.contrib.auth.models.User object, among other attributes.
@@ -124,28 +124,52 @@ class UserProfile (models.Model):
 class PetReport(models.Model):
 
     '''Required Fields'''
+    #Type of Pet
     pet_type = models.CharField(max_length=PETREPORT_PET_TYPE_LENGTH, choices = PET_TYPE_CHOICES, null=False, default=None)
+    #Status of Pet (Lost/Found)
     status = models.CharField(max_length = PETREPORT_STATUS_LENGTH, choices = STATUS_CHOICES, null=False, default=None)
+    #Date Lost/Found
     date_lost_or_found = models.DateField(null=False)
-    sex = models.CharField(max_length=PETREPORT_SEX_LENGTH, choices=SEX_CHOICES, null=False)
-    size = models.CharField(max_length=PETREPORT_SIZE_LENGTH, choices = SIZE_CHOICES, null=False)
-    location = models.CharField(max_length=PETREPORT_LOCATION_LENGTH, null=False, default='unknown')
-
-    #ForeignKey: Many-to-one relationship with User
-    proposed_by = models.ForeignKey('UserProfile', null=False, default=None)
+    #The UserProfile who is submitting this PetReport (ForeignKey: Many-to-one relationship with User)
+    proposed_by = models.ForeignKey('UserProfile', null=False, default=None, related_name='proposed_related')
 
     '''Non-Required Fields'''
+    #Sex of the Pet
+    sex = models.CharField(max_length=PETREPORT_SEX_LENGTH, choices=SEX_CHOICES, null=True)
+    #Size of the Pet, in ranges
+    size = models.CharField(max_length=PETREPORT_SIZE_LENGTH, choices=SIZE_CHOICES, null=True)
+    #Location where found
+    location = models.CharField(max_length=PETREPORT_LOCATION_LENGTH, null=True)
+    #Lat/Long Geo-coordinates of Location
+    geo_location_lat = models.DecimalField(max_digits=8, decimal_places=5, null=True)
+    geo_location_long = models.DecimalField(max_digits=8, decimal_places=5, null=True)
+    #Microchip ID of Pet
+    microchip_id = models.CharField(max_length=PETREPORT_MICROCHIP_ID_LENGTH, null=True)
+    #Pet Tag Information (if available)
+    tag_info = models.CharField(max_length=PETREPORT_TAG_INFO_LENGTH, null=True)
+    #Contact Name of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
+    contact_name = models.CharField(max_length=PETREPORT_CONTACT_NAME_LENGTH, null=True)
+    #Contact Phone Number of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
+    contact_number = models.CharField(max_length=PETREPORT_CONTACT_NUMBER_LENGTH, null=True)    
+    #Img of Pet
     img_path = models.ImageField(upload_to='images/petreport_images', null=True)
-    spayed_or_neutered = models.CharField(max_length=PETREPORT_SPAYED_OR_NEUTERED_LENGTH, choices=SPAYED_OR_NEUTERED_CHOICES, null=True, default="Don't Know")
+    #Spayed or Neutered?
+    spayed_or_neutered = models.CharField(max_length=PETREPORT_SPAYED_OR_NEUTERED_LENGTH, choices=SPAYED_OR_NEUTERED_CHOICES, null=True, default="unknown")
+    #Pet Name (if available)
     pet_name = models.CharField(max_length=PETREPORT_PET_NAME_LENGTH, null=True, default='unknown') 
+    #Pet Age (if known/available)
     age = models.CharField(max_length=PETREPORT_AGE_LENGTH, null=True, default= 'unknown')
+    #Color(s) of Pet
     color = models.CharField(max_length=PETREPORT_COLOR_LENGTH, null=True,default='unknown')
+    #Breed of Pet
     breed = models.CharField(max_length=PETREPORT_BREED_LENGTH, null=True,default='unknown')
-    revision_number = models.IntegerField(null=True) #update revision using view
+    #Description of Pet
     description   = models.CharField(max_length=PETREPORT_DESCRIPTION_LENGTH, null=True, default="")
-    #Many-to-Many relationship with User
+    #The UserProfiles who are working on this PetReport (Many-to-Many relationship with User)
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
+    #The UserProfiles who have bookmarked this PetReport
     bookmarked_by = models.ManyToManyField('UserProfile', null=True, related_name='bookmarks_related')
+    revision_number = models.IntegerField(null=True) #update revision using view
 
     #Override the save method for this model
     def save(self, *args, **kwargs):
@@ -330,20 +354,26 @@ class PetMatch(models.Model):
 
             #Grab the Site object for the context variables
             site = Site.objects.get(pk=1)
+
             if petmatch_owner.username == lost_pet_contact.username or petmatch_owner.username == found_pet_contact.username: 
                 Optionally_discuss_with_digital_volunteer = ""
+
             else:
                 Optionally_discuss_with_digital_volunteer = "You may also discuss this pet match with %s, the digital volunteer who proposed this pet match. You can reach %s at %s" % (self.proposed_by.user.username,self.proposed_by.user.username,self.proposed_by.user.email)
+
             '''An email is sent to the lost pet owner'''
             if email_re.match(lost_pet_contact.email):
                 ctx = {"site":site, 'pet_type':'your lost pet','opposite_pet_type_contact':found_pet_contact,'pet_status':"found",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer,"petmatch_id":self.id}
                 email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH,ctx)
                 email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
+                
                 if not lost_pet_contact.get_profile().is_test:
                     lost_pet_contact.email_user(email_subject,email_body,from_email=None)
-                print '[INFO]: Email to lost pet owner: '+email_body
+                #print '[INFO]: Email to lost pet owner: '+email_body
+
             else:
                 print '[ERROR] User %s does not have a valid email address' %(str(lost_pet_contact.get_profile()))
+
             ''' An email is sent to the found pet owner '''
             if email_re.match(found_pet_contact.email):
                 ctx = {"site":site, 'pet_type':'the pet you found','opposite_pet_type_contact':lost_pet_contact,'pet_status':"lost",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer,"petmatch_id":self.id}
@@ -351,18 +381,21 @@ class PetMatch(models.Model):
                 email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
                 if not found_pet_contact.get_profile().is_test:
                     found_pet_contact.email_user(email_subject,email_body,from_email=None)
-                print '[INFO]: Email to found pet owner: '+email_body
+                #print '[INFO]: Email to found pet owner: '+email_body
+
             else:
                 print '[ERROR] User %s does not have a valid email address' %(str(found_pet_contact.get_profile()))           
+
             '''If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact,
             an email will be sent to this person '''
             if Optionally_discuss_with_digital_volunteer != "":
                 ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
                 email_body = render_to_string(TEXTFILE_EMAIL_PETMATCH_PROPOSER,ctx)
                 email_subject =  EMAIL_SUBJECT_PETMATCH_PROPOSER  
+
                 if not petmatch_owner.get_profile().is_test:
                     petmatch_owner.email_user(email_subject,email_body,from_email=None)
-                print '[INFO]: Email to pet match owner: '+email_body
+                #print '[INFO]: Email to pet match owner: '+email_body
 
     def close_PetMatch(self):
         petmatch_owner = self.proposed_by
@@ -453,31 +486,36 @@ class ChatLine (models.Model):
         return 'ChatLine {text:%s}' % (self.text)
 
 
-
 ''' ============================ [FORM MODELS] ==================================== '''
 ''' These Models nicely organize the model-related data into Django Form objects that 
     have built-in validation functionality and can be passed around via POST requests. 
     Order of Fields matter.                                                         '''
 
-
 #The PetReport ModelForm
 class PetReportForm (ModelForm):
+
     '''Required Fields'''
-    pet_type = forms.ChoiceField(label = 'Pet Type', choices = PET_TYPE_CHOICES, required = True)
-    status = forms.ChoiceField(label = "Status (Lost/Found)", choices = STATUS_CHOICES, required = True)
-    date_lost_or_found = forms.DateField(label = "Date Lost/Found", required = True)
-    sex = forms.ChoiceField(label = "Sex", choices = SEX_CHOICES, required = True)
-    size = forms.ChoiceField(label = "Size of Pet", choices = SIZE_CHOICES, required = True)
-    location = forms.CharField(label = "Location", max_length = PETREPORT_LOCATION_LENGTH , required = True)
+    pet_type = forms.ChoiceField(label = '* Pet Type', choices = PET_TYPE_CHOICES, required = True)
+    status = forms.ChoiceField(label = "* Pet Status", help_text="(Lost/Found)", choices = STATUS_CHOICES, required = True)
+    date_lost_or_found = forms.DateField(label = "* Date Lost/Found", widget = forms.DateInput, required = True)
 
     '''Non-Required Fields'''
-    spayed_or_neutered = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False)
-    img_path = forms.ImageField(label = "Upload an Image (*.jpg, *.png, *.bmp, *.tif)", required = False)
+    sex = forms.ChoiceField(label = "Sex", choices = SEX_CHOICES, required = False)
+    size = forms.ChoiceField(label = "Size of Pet", choices = SIZE_CHOICES, required = False)
+    location = forms.CharField(label = "Current Location", help_text="(Found: Pet is being sheltered) or (Lost: Pet owner's location)", max_length = PETREPORT_LOCATION_LENGTH , required = False)
+    geo_location_lat = forms.DecimalField(label = "Geo Location Lat", help_text="(Lattitude coordinate)", max_digits=8, decimal_places=5, widget=forms.TextInput(attrs={'size':'10'}), initial=None, required=False)
+    geo_location_long = forms.DecimalField(label = "Geo Location Long", help_text="(Longitude coordinate)", max_digits=8, decimal_places=5, widget=forms.TextInput(attrs={'size':'10'}),  initial=None, required=False)
+    microchip_id = forms.CharField(label = "Microchip ID", help_text="(if available)", max_length = PETREPORT_MICROCHIP_ID_LENGTH, required=False)
+    tag_info = forms.CharField(label = "Tag Information", help_text="(if available)", max_length = PETREPORT_TAG_INFO_LENGTH, required=False, widget=forms.Textarea)
+    contact_name = forms.CharField(label = "Contact Name", help_text="(if different than that of the person submitting this PetReport)", max_length=PETREPORT_CONTACT_NAME_LENGTH, required=False)
+    contact_number = forms.CharField(label = "Contact Phone Number", help_text="(if different than that of the person submitting this PetReport)", max_length=PETREPORT_CONTACT_NUMBER_LENGTH, required=False)
+    img_path = forms.ImageField(label = "Upload an Image", help_text="(*.jpg, *.png, *.bmp, *.tif)", widget = forms.ClearableFileInput, required = False)
+    spayed_or_neutered = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False)    
     pet_name = forms.CharField(label = "Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False) 
     age = forms.CharField(label = "Age", max_length = PETREPORT_AGE_LENGTH, required = False)
     breed = forms.CharField(label = "Breed", max_length = PETREPORT_BREED_LENGTH, required = False)
     color = forms.CharField(label = "Coat Color(s)", max_length = PETREPORT_COLOR_LENGTH, required = False)
-    description  = forms.CharField(label = "Description", max_length = PETREPORT_DESCRIPTION_LENGTH, required = False, widget = forms.Textarea)
+    description  = forms.CharField(label = "Pet Description", help_text="(Please describe the pet as accurately as possible)", max_length = PETREPORT_DESCRIPTION_LENGTH, widget = forms.Textarea, required = False)
 
     class Meta:
         model = PetReport

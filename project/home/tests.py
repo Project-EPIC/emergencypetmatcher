@@ -10,6 +10,12 @@ from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD
 from project.settings import TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD
 from project.settings import TEST_DOMAIN
 import unittest, string, random, sys, time, urlparse
+'''===================================================================================
+home.tests.py: Testing for Home App Functionality:
+
+Test classes: home.ModelTesting home.LoginTesting home.LoggingTesting home.UserProfileTesting 
+home.EditUserProfileTesting home.FollowingTesting home.SocialAuthTesting
+==================================================================================='''
 
 '''===================================================================================
 ModelTesting: Testing for EPM Models
@@ -917,6 +923,50 @@ class LoggingTesting (unittest.TestCase):
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)	
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)				
+
+
+	def test_delete_objects_and_check_log (self):
+		print_testing_name("test_delete_objects_and_check_log")
+		iteration_time = 0.00
+
+		(users, clients, petreports, petmatches) = create_test_view_setup(create_following_lists=True, create_petreports=True, create_petmatches=True)
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+			user, password = users.pop()
+			client = random.choice(clients)
+			petreport = petreports.pop()
+			petmatch = None
+
+			#Delete the objects.
+			if len(petmatches) != 0:
+				petmatch = petmatches.pop() 
+				petmatch.delete()
+
+			petreport.delete()
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "[INFO]:%s logs onto %s..." % (user, client)
+
+			#We expect the system not to throw errors but to catch them.
+			activities = get_recent_activites_from_log(userprofile=user.userprofile)
+			activities += get_bookmark_activities(userprofile=user.userprofile)
+			print "[INFO]: %s has an activity feed list of size [%d]" % (user, len(activities))
+			self.assertTrue(log_exists(user.userprofile))
+
+			#Now, delete the user.
+			user.delete()
+			self.assertFalse(log_exists(user.userprofile))
+
+			output_update(i + 1)
+			print '\n'
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		print ''
+		performance_report(iteration_time)
+
 
 	def test_log_account_creations(self):
 		print_testing_name("test_log_account_creations")
