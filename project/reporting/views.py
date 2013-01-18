@@ -64,6 +64,8 @@ def submit_PetReport(request):
                     pr.img_path.name = "images/defaults/other_silhouette.jpg"
     
             pr.save() #Now save the Pet Report.
+            # add reputation points for submitting a pet report
+            request.user.get_profile().update_reputation(ACTIVITY_PETREPORT_SUBMITTED)
             if pr.status == 'Lost':
                 messages.success (request, 'Thank you for your submission! Your contribution will go a long way towards helping people find your lost pet.')
             else:
@@ -92,7 +94,7 @@ def disp_PetReport(request, petreport_id):
     else:
         matches = PetMatch.objects.all().filter(found_pet = pet_report)
     
-    if request.user.is_authenticated():
+    if request.user.is_authenticated() == True:
         user = request.user.get_profile()
         if(pet_report.UserProfile_has_bookmarked(user)):
             user_has_bookmarked = "true"
@@ -136,6 +138,7 @@ def bookmark_PetReport(request):
         if ((petreport.UserProfile_has_bookmarked(user)) and (action == "Remove Bookmark")) :
             petreport.bookmarked_by.remove(user)
             petreport.save()
+            user.update_reputation(ACTIVITY_PETREPORT_REMOVE_BOOKMARK)
             message = "You have successfully removed the bookmark for this Pet Report." 
             text = "Bookmark this Pet"
 
@@ -145,6 +148,7 @@ def bookmark_PetReport(request):
         elif ((not petreport.UserProfile_has_bookmarked(user)) and (action == "Bookmark this Pet")):
             petreport.bookmarked_by.add(user)
             petreport.save()
+            user.update_reputation(ACTIVITY_PETREPORT_ADD_BOOKMARK)
             print 'Bookmarked pet report #'+str(petreport_id)+" for user #"+str(user.id)
             message = "You have successfully bookmarked this Pet Report!" 
             text = "Remove Bookmark"

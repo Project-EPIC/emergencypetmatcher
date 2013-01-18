@@ -31,6 +31,8 @@ from registration.models import RegistrationProfile
 from registration.views import activate
 from utils import *
 from datetime import datetime
+# from pytz import timezone
+import utils
 import oauth2 as oauth, random, urllib
 import hashlib, random, re
 
@@ -307,14 +309,15 @@ def follow_UserProfile(request):
 
             else:
                 userprofile.following.add(target_userprofile)
+                # add points to the user who is being followed (i.e. the target_userprofile) 
+                target_userprofile.update_reputation(ACTIVITY_USER_BEING_FOLLOWED)
                 messages.success(request, "You are now following " + str(target_userprofile.user.username) + ".")     
 
                 # Log the following activity for this UserProfile
                 log_activity(ACTIVITY_FOLLOWING, userprofile, target_userprofile)
 
             return redirect (URL_USERPROFILE + str(target_userprofile.id))
-        else:
-            raise Http404
+
     else:
         raise Http404
 
@@ -331,8 +334,9 @@ def unfollow_UserProfile(request):
             #If this UserProfile is actually following the target UserProfile...
             if target_userprofile in userprofile.following.all():
                 userprofile.following.remove(target_userprofile)
+                # remove points to the use who has been unfollowed (i.e. the target_userprofile)
+                target_userprofile.update_reputation(ACTIVITY_USER_BEING_UNFOLLOWED)
                 messages.success(request, "You are no longer following " + str(target_userprofile.user.username) + ".") 
-
                 # Log the unfollowing activity for this UserProfile
                 log_activity(ACTIVITY_UNFOLLOWING, userprofile, target_userprofile)
                 return redirect(URL_USERPROFILE + str(target_userprofile.id))

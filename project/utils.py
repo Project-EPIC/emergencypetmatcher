@@ -458,3 +458,5 @@ def create_test_view_setup(create_clients=True, create_following_lists=False, cr
 		return (users, clients, petreports)
 	#just return the simple ones, geez!		
 	return (users, clients)
+
+
