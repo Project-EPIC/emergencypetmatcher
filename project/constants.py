@@ -22,6 +22,10 @@ PETREPORT_SEX_LENGTH = 6
 PETREPORT_SIZE_LENGTH = 30
 PETREPORT_LOCATION_LENGTH = 25
 PETREPORT_PET_NAME_LENGTH = 15 
+PETREPORT_MICROCHIP_ID_LENGTH = 40
+PETREPORT_TAG_INFO_LENGTH = 150
+PETREPORT_CONTACT_NAME_LENGTH = 20
+PETREPORT_CONTACT_NUMBER_LENGTH = 15
 PETREPORT_AGE_LENGTH = 10
 PETREPORT_COLOR_LENGTH =30
 PETREPORT_BREED_LENGTH = 30
@@ -40,12 +44,43 @@ PETREPORT_NAMES = ['Sparky', 'Nugget', 'Sydney', 'Missy', 'Marley', 'Fousey', 'D
 #Identifiers
 UPVOTE = "upvote"
 DOWNVOTE = "downvote"
+PETREPORT_PET_TYPE_DOG = "Dog"
+PETREPORT_PET_TYPE_CAT = "Cat"
+PETREPORT_PET_TYPE_BIRD = "Bird"
+PETREPORT_PET_TYPE_HORSE = "Horse"
+PETREPORT_PET_TYPE_RABBIT = "Rabbit"
+PETREPORT_PET_TYPE_SNAKE = "Snake"
+PETREPORT_PET_TYPE_TURTLE = "Turtle"
+PETREPORT_PET_TYPE_OTHER = "Other"
 
 #File Path Constants
 ACTIVITY_LOG_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/logs/activity_logs/"
 TEST_ACTIVITY_LOG_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/logs/test_activity_logs/"
 PETREPORT_IMAGES_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/static/images/petreport_images/"
+PETREPORT_SAMPLE_IMAGES_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/static/images/petreport_sample_images/"
+PETREPORT_SAMPLE_DOG_IMAGES_DIRECTORY = PETREPORT_SAMPLE_IMAGES_DIRECTORY + "dog/"
+PETREPORT_SAMPLE_CAT_IMAGES_DIRECTORY = PETREPORT_SAMPLE_IMAGES_DIRECTORY + "cat/"
+PETREPORT_SAMPLE_BIRD_IMAGES_DIRECTORY = PETREPORT_SAMPLE_IMAGES_DIRECTORY + "bird/"
+PETREPORT_SAMPLE_HORSE_IMAGES_DIRECTORY = PETREPORT_SAMPLE_IMAGES_DIRECTORY + "horse/"
+PETREPORT_SAMPLE_RABBIT_IMAGES_DIRECTORY = PETREPORT_SAMPLE_IMAGES_DIRECTORY + "rabbit/"
+PETREPORT_SAMPLE_SNAKE_IMAGES_DIRECTORY = PETREPORT_SAMPLE_IMAGES_DIRECTORY + "snake/"
+PETREPORT_SAMPLE_TURTLE_IMAGES_DIRECTORY = PETREPORT_SAMPLE_IMAGES_DIRECTORY + "turtle/"
 USERPROFILE_IMAGES_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/static/images/profile_images/"
+
+#List of sample PetReport Dog images
+PETREPORT_SAMPLE_DOG_IMAGES = []
+#List of sample PetReport Cat images
+PETREPORT_SAMPLE_CAT_IMAGES = []
+#List of sample PetReport Bird images
+PETREPORT_SAMPLE_BIRD_IMAGES = []
+#List of sample PetReport Horse images
+PETREPORT_SAMPLE_HORSE_IMAGES = []
+#List of sample PetReport Rabbit images
+PETREPORT_SAMPLE_RABBIT_IMAGES = []
+#List of sample PetReport Snake images
+PETREPORT_SAMPLE_SNAKE_IMAGES = []
+#List of sample PetReport Turtle images
+PETREPORT_SAMPLE_TURTLE_IMAGES = []
 
 #Activity Enum Values
 ACTIVITY_ACCOUNT_CREATED = "ACCOUNT_CREATED"
@@ -56,6 +91,7 @@ ACTIVITY_PETREPORT_ADD_BOOKMARK = "PETREPORT_ADD_BOOKMARK"
 ACTIVITY_PETREPORT_REMOVE_BOOKMARK = "PETREPORT_REMOVE_BOOKMARK"
 ACTIVITY_PETMATCH_PROPOSED = "PETMATCH_PROPOSED"
 ACTIVITY_PETMATCH_UPVOTE = "PETMATCH_UPVOTE"
+ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL = "PETMATCH_UPVOTE_SUCCESSFUL"
 ACTIVITY_PETMATCH_DOWNVOTE= "PETMATCH_DOWNVOTE"
 ACTIVITY_FOLLOWING = "_FOLLOWING"
 ACTIVITY_UNFOLLOWING = "UNFOLLOWING"
@@ -66,16 +102,28 @@ ACTIVITY_PETMATCH_PROPOSED_FOUND_BOOKMARKED_PETREPORT = "PETMATCH_FOUND_BOOKMARK
 ACTIVITY_USER_CHANGED_USERNAME = "USER_CHANGED_USERNAME"
 ACTIVITY_USER_BEING_FOLLOWED = "USER_BEING_FOLLOWED"
 ACTIVITY_USER_BEING_UNFOLLOWED = "USER_BEING_UNFOLLOWED"
+ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE = "USER_PROPOSED_PETMATCH_UPVOTE"
+ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL = "USER_PROPOSED_PETMATCH_SUCCESSFUL"
+ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE = "USER_PROPOSED_PETMATCH_FAILURE"
+ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL = "USER_VERIFY_PETMATCH_SUCCESSFUL"
 
 #Reputation reward points
 REWARD_PETMATCH_VOTE = 2
-REWARD_PETREPORT_SUBMIT = 5
+REWARD_PETMATCH_UPVOTE_SUCCESSFUL = 10
 REWARD_PETMATCH_PROPOSE = 5
+REWARD_PETREPORT_SUBMIT = 5
+REWARD_PETREPORT_BOOKMARK = 1
 REWARD_USER_FOLLOWED = 2
+#Reward this user for his/her proposed petmatch being voted
+REWARD_USER_PROPOSED_PETMATCH_VOTE = 5 
+REWARD_USER_PROPOSED_PETMATCH_SUCCESSFUL = 25
+REWARD_USER_PROPOSED_PETMATCH_FAILURE = 15
+REWARD_USER_VERIFY_PETMATCH_SUCCESSFUL = 15
+REWARD_NEW_ACCOUNT = 10
+
 
 #Represents how many activities to fetch per request.
 ACTIVITY_FEED_LENGTH = 10
-
 
 #URLS - use for redirect calls
 URL_HOME = '/'
@@ -119,5 +167,29 @@ TEXTFILE_EMAIL_PETMATCH_PROPOSER = "matching/verification_email_to_digital_volun
 
 EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH="Emergency Pet Matcher: We have found a potential match for your pet!"
 EMAIL_SUBJECT_PETMATCH_PROPOSER='Your pet match is close to being successful!'
-
 TEST_EMAIL="emergencypetmatchertest@gmail.com"
+
+#Place sample petreport image lists in memory as global variables. Used for generating random PetReports with sample images.
+def load_PetReport_sample_images():
+	for img in os.listdir(PETREPORT_SAMPLE_DOG_IMAGES_DIRECTORY):
+		if img != ".DS_Store" and img != ".anchor":
+			PETREPORT_SAMPLE_DOG_IMAGES.append("images/petreport_sample_images/dog/" + img)
+	for img in os.listdir(PETREPORT_SAMPLE_CAT_IMAGES_DIRECTORY):
+		if img != ".DS_Store" and img != ".anchor":
+			PETREPORT_SAMPLE_CAT_IMAGES.append("images/petreport_sample_images/cat/" + img)
+	for img in os.listdir(PETREPORT_SAMPLE_BIRD_IMAGES_DIRECTORY):
+		if img != ".DS_Store" and img != ".anchor":
+			PETREPORT_SAMPLE_BIRD_IMAGES.append("images/petreport_sample_images/bird/" + img)
+	for img in os.listdir(PETREPORT_SAMPLE_HORSE_IMAGES_DIRECTORY):
+		if img != ".DS_Store" and img != ".anchor":
+			PETREPORT_SAMPLE_HORSE_IMAGES.append("images/petreport_sample_images/horse/" + img)
+	for img in os.listdir(PETREPORT_SAMPLE_RABBIT_IMAGES_DIRECTORY):
+		if img != ".DS_Store" and img != ".anchor":
+			PETREPORT_SAMPLE_RABBIT_IMAGES.append("images/petreport_sample_images/rabbit/" + img)
+	for img in os.listdir(PETREPORT_SAMPLE_SNAKE_IMAGES_DIRECTORY):
+		if img != ".DS_Store" and img != ".anchor":
+			PETREPORT_SAMPLE_SNAKE_IMAGES.append("images/petreport_sample_images/snake/" + img)
+	for img in os.listdir(PETREPORT_SAMPLE_TURTLE_IMAGES_DIRECTORY):
+		if img != ".DS_Store" and img != ".anchor":
+			PETREPORT_SAMPLE_TURTLE_IMAGES.append("images/petreport_sample_images/turtle/" + img)
+

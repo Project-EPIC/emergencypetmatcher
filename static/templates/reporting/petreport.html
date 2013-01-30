@@ -48,25 +48,20 @@
       var petreport_id = "{{ pet_report.id }}"
       var URL_LOGIN  = "{% url 'login_User' %}"
       var URL_BOOKMARK_PETREPORT = "{% url 'bookmark_PetReport' %}"
-    </script>
-    <script src = "{{ STATIC_URL }}/js/local/epm-petreport.js" type = 'text/javascript'></script>
 
-    <!-- Setting up parameters for sharing on facebook and twitter -->
-    <script type="text/javascript">
+      //Setting up parameters for sharing on facebook and twitter
       var URL = 'http://www.emergencypetmatcher.com/reporting/PetReport/{{ pet_report.id }}';
       var IMAGE = 'http://www.emergencypetmatcher.com/{{ STATIC_URL }}{{ pet_report.img_path }}';
       var TITLE = 'A Pet Report at EPM';
-      var SUMMERY = 'A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
+      var SUMMARY = 'A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';      
     </script>
-
+    <script src = "{{ STATIC_URL }}/js/local/epm-petreport.js" type = 'text/javascript'></script>
     {% endblock js %} 
 
   </head>
   <body>
 
-    {%  block petreportcontent %}
-
-      
+    {% block petreportcontent %}
       <div id="prdp_back"> 
            
           <!-- Share Buttons -->

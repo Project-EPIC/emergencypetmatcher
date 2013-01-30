@@ -53,20 +53,13 @@
       var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
       var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";      
 
-    </script>
-
-    <!-- Setting up parameters for sharing on facebook and twitter -->
-    <script type="text/javascript">
+      //Setting up parameters for sharing on facebook and twitter
       var URL = 'http://www.emergencypetmatcher.com/matching/PetMatch/{{  petmatch.id }}';
       var IMAGE = 'http://www.emergencypetmatcher.com/{{ STATIC_URL }}{{ petmatch.lost_pet.img_path }}';
       var TITLE = 'A Pet Report Matching at EPM';
-      var SUMMERY = 'A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
+      var SUMMARY = 'A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
     </script>
-
     {% endblock js %}
-
-
-
   </head>
 
   <body>
@@ -116,7 +109,7 @@
             <li><b>Breed:</b> {{ petmatch.lost_pet.breed }}</li>
             <li><b>Color:</b> {{ petmatch.lost_pet.color }}</li>
             <li><b>Size:</b> {{ petmatch.lost_pet.get_size_display }} </li>
-            <li><b>Description:</b> <div class = "pr_desc" style="padding:2px; border:1px dotted black;"> {{ petmatch.lost_pet.description }}</div> </li>
+            <li><b>Description:</b> <div class = "pr_desc" style="max-height:45px; padding:2px; border:1px dotted black;"> {{ petmatch.lost_pet.description }}</div> </li>
           </ul>
 
         </div> 
@@ -148,7 +141,7 @@
             <li><b>Breed:</b> {{ petmatch.found_pet.breed }}</li>
             <li><b>Color:</b> {{ petmatch.found_pet.color }}</li>
             <li><b>Size:</b> {{ petmatch.found_pet.get_size_display }}</li>
-            <li><b>Description:</b> <div class = "pr_desc" style="padding:2px; border:1px dotted black;"> {{ petmatch.found_pet.description }}</div> </li>
+            <li><b>Description:</b> <div class = "pr_desc" style="max-height:45px; padding:2px; border:1px dotted black;"> {{ petmatch.found_pet.description }}</div> </li>
           </ul>
 
         </div>
@@ -193,7 +186,7 @@
                   {% else %}
                     <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" alt = "{{ worker.user.username }}"/>
                   {% endif %} 
-                  <!-- Put this in once reputation points are ready: <strong style="padding:10px 0px 0px 10px;"> {{ worker.reputation }} </strong> -->
+                  <strong style="padding:10px 0px 0px 10px;"> {{ worker.reputation }} </strong>
                 </a>
               </div>
             {% endfor %}
