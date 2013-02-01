@@ -100,7 +100,7 @@ def match_PetReport(request, petreport_id):
     all_pet_reports = PetReport.objects.all().exclude(pk=petreport_id)
 
     #Place more PetReport filters here
-    filtered_pet_reports = all_pet_reports.exclude(status = target_petreport.status).filter(pet_type = target_petreport.pet_type)
+    filtered_pet_reports = all_pet_reports.exclude(status = target_petreport.status).filter(pet_type = target_petreport.pet_type, closed = False)
 
     #Add the UserProfile to the PetReport's workers list.
     target_petreport.workers.add(request.user.get_profile())

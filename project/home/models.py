@@ -169,6 +169,8 @@ class PetReport(models.Model):
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
     #The UserProfiles who have bookmarked this PetReport
     bookmarked_by = models.ManyToManyField('UserProfile', null=True, related_name='bookmarks_related')
+    #A pet report is closed once it has been successfully matched
+    closed = models.BooleanField(default=False)
     revision_number = models.IntegerField(null=True) #update revision using view
 
     #Override the save method for this model
@@ -416,6 +418,11 @@ class PetMatch(models.Model):
                     petmatch.is_open = False
                     petmatch.closed_date = datetime_now()
                     petmatch.save()
+                '''the lost and found pet reports for the pet match are closed'''
+                petmatch.lost_pet.closed = True
+                petmatch.lost_pet.save()
+                petmatch.found_pet.closed = True
+                petmatch.found_pet.save()
                 # --------Reputation points--------
                 # update reputation points for the following users:
                 # petmatch_owner, lost_pet_contact, and found_pet_contact

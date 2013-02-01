@@ -40,8 +40,9 @@ import hashlib, random, re
 #Home view, displays login mechanism
 def home (request):
     #Get Pet Report objects and organize them into a Paginator Object.
-    pet_reports = PetReport.objects.order_by("id").reverse()
-    paginator = Paginator(pet_reports, 50)
+    #pet_reports = PetReport.objects.order_by("id").reverse()
+    pet_reports = PetReport.objects.filter(closed = False).order_by("id").reverse()
+    paginator = Paginator(pet_reports, NUM_PETREPORTS_HOMEPAGE)
     page = request.GET.get('page')
     
     try:
@@ -497,5 +498,5 @@ def email_verification_complete (request,activation_key):
 
 
 def about (request):
-    petreports = PetReport.objects.order_by("?")[:4]
+    petreports = PetReport.objects.filter(closed = False).order_by("?")[:4]
     return render_to_response(HTML_ABOUT, {'petreports':petreports}, RequestContext(request))

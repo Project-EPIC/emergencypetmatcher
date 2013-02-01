@@ -5,11 +5,14 @@ import os
 ==================================================================================='''
 
 #Number of Tests
-NUMBER_OF_TESTS = 20
+NUMBER_OF_TESTS = 100
 
 #Lower and Upper bounds for Lost and Found Dates
 DATE_LOWER_BOUND = "2012-01-01"
 DATE_UPPER_BOUND = "2012-08-16"
+
+#number of pet reports on the home page
+NUM_PETREPORTS_HOMEPAGE = 50
 
 #max_length for Model Fields
 USER_USERNAME_LENGTH = 30
