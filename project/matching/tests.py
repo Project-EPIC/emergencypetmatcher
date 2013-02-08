@@ -504,9 +504,7 @@ class VerificationTesting (unittest.TestCase):
 			if response.status_code == 302:
 				if petmatch.PetMatch_has_reached_threshold():
 					self.assertFalse(( userprofile == petmatch.lost_pet.proposed_by) or (userprofile == petmatch.found_pet.proposed_by))
-				else:
-					self.assertFalse(petmatch.PetMatch_has_reached_threshold())	
-
+				
 			#Looking for other users and their passwords in the users list.
 			proposers = [petmatch.lost_pet.proposed_by.user, petmatch.found_pet.proposed_by.user]
 			proposer = random.choice(proposers)
@@ -525,7 +523,6 @@ class VerificationTesting (unittest.TestCase):
 
 			if petmatch.PetMatch_has_reached_threshold() == True:
 				self.assertEquals(response.status_code, 200)
-				self.assertTrue(petmatch.PetMatch_has_reached_threshold())
 				self.assertTrue((userprofile == petmatch.lost_pet.proposed_by) or (userprofile == petmatch.found_pet.proposed_by))
 
 			output_update(i + 1)
@@ -546,7 +543,7 @@ class VerificationTesting (unittest.TestCase):
 			#objects
 			client = random.choice(clients)
 			petmatch = random.choice(petmatches)
-
+			petmatch_i = petmatches.index(petmatch)
 			if petmatch.PetMatch_has_reached_threshold() == False:
 				continue
 
@@ -571,6 +568,7 @@ class VerificationTesting (unittest.TestCase):
 				userprofile = user.get_profile()
 
 				self.assertEquals(response.status_code,200)
+				#user responds with a random message: either yes or no
 				message = random.choice(['yes','no'])
 				post = {'message':message}
 				old_lost_pet_vote = petmatch.verification_votes[0]
@@ -579,11 +577,14 @@ class VerificationTesting (unittest.TestCase):
 				petmatch = PetMatch.objects.get(pk=petmatch.id)
 				new_lost_pet_vote  = petmatch.verification_votes[0]
 				if old_lost_pet_vote == '0':
+					#sent_vote is 1 if message is yes and 2 if message is no
 					sent_vote = '1' if (message == 'yes') else '2'if (message == 'no') else '0'
 					self.assertEquals(sent_vote,new_lost_pet_vote)
 				else:
 					self.assertEquals(old_lost_pet_vote,new_lost_pet_vote)
-
+				'''if the petmatch object is changed then the new version of the petmatch 
+				object replaces the existing one in the petmatches list'''
+				petmatches[petmatch_i] = petmatch
 			output_update(i + 1)
 			print '\n'
 			end_time = time.clock()
