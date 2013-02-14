@@ -7,7 +7,6 @@ from django.db.models.signals import post_save, pre_save, pre_delete, post_delet
 from django.dispatch import receiver
 from django.core.validators import email_re
 from django.core.files.storage import FileSystemStorage
-import PIL, os, time
 from django import forms
 from constants import *
 from django.template.loader import render_to_string
@@ -15,6 +14,9 @@ from django.utils import timezone
 from django.utils.timezone import now as datetime_now
 from datetime import timedelta
 from django.conf import settings
+from utils import *
+import PIL, os, time, simplejson
+from django.core import serializers
 
 '''===================================================================================
 [models.py]: Models for the EPM system
@@ -152,6 +154,11 @@ class PetReport(models.Model):
     def convert_date_to_string(self):
         string = str(self.date_lost_or_found)
         return str
+
+    def toJSON(self):
+        json = simplejson.dumps(simplify_model_dict(self))
+        print "toJSON: " + str(json)
+        return json
 
 
 #The Pet Match Object Model

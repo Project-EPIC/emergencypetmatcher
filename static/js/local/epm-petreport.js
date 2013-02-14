@@ -4,7 +4,7 @@ $(document).ready(function(){
     var bookmark_button = $("#prdp_bookmark");
 
     //user is authenticated and has bookmarked this pet 
-    if (bookmarked == "true"){
+    if (BOOKMARKED == "true"){
       bookmark_button.text("Remove Bookmark");
       bookmark_button.attr("title","Remove Bookmark");
     }
@@ -24,13 +24,16 @@ $(document).ready(function(){
 
     //Update the share buttons' click event.
     $("#facebook_share_pr").click(function(){
-      share_on_facebook(URL, IMAGE, TITLE, SUMMERY);
+      //share_on_facebook(URL, IMAGE, TITLE, SUMMARY);
+      publishToFeed(URL, IMAGE, TITLE, CAPTION, SUMMARY);
     });
 
     $("#twitter_share_pr").click(function(){
-      share_on_twitter(URL, IMAGE, TITLE, SUMMERY);
+      share_on_twitter(URL, IMAGE, TITLE, SUMMARY);
     });
 
+    //Retrieve and display the current pet report fields using json data   
+    display_PetReport_fields(PETREPORT_JSON, $(".prdpfields"));
 });
 
 function bookmark(){
@@ -38,7 +41,7 @@ function bookmark(){
   var bookmark_button = $("#prdp_bookmark");
     
   
-  if (user_id == "None"){
+  if (USER_ID == "None"){
     login_link = "Log in <a href="+URL_LOGIN+"?next={% firstof request.path '/' %} > here.</a>";
     $(".prdp_messages").html("<li class='error'> You cannot bookmark this Pet Report because you are not logged in! "+login_link+ "</li>");
     return false;
@@ -50,7 +53,7 @@ function bookmark(){
 
     type:"POST",
     url:URL_BOOKMARK_PETREPORT,
-    data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":petreport_id, "action":bookmark_button.text()},
+    data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":PETREPORT_ID, "action":bookmark_button.text()},
       success: function(data){
         bookmark_button.text(data.text);
         bookmark_button.attr("title",data.text);
@@ -64,3 +67,4 @@ function bookmark(){
   });
   return true;
 }
+

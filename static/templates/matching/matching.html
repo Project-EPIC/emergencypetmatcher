@@ -2,9 +2,11 @@
 {% load url from future %}
 
 {% block js %}
+    <script src = "{{ STATIC_URL }}/js/epm.js" type = 'text/javascript'></script>    
 	<script src = "{{ STATIC_URL }}js/local/epm-matching.js" type = 'text/javascript'></script>
 	<script type='text/javascript'>
 		var TARGET_PETREPORT_ID = "{{ target_petreport.id }}";
+		var TARGET_PETREPORT_JSON = convert_to_javascript_obj("{{ target_petreport.toJSON }}");
 	</script>
 {% endblock js %}
 
@@ -40,20 +42,7 @@
 			<div class = "matching_img"></div>
 
 			<!-- PetReport info -->
-			<ul>
-				<li class = "matching_petname"/>
-				<li class = "matching_lost_found"/>
-				<li class = "matching_contact"/>
-				<li class = "matching_date"/>
-				<li class = "matching_location"/>
-				<li class = "matching_spayed_or_neutered"/>
-				<li class = "matching_age"/>
-				<li class = "matching_sex"/>
-				<li class = "matching_breed"/>
-				<li class = "matching_color"/>
-				<li class = "matching_size"/>
-				<li class = "matching_desc"/>
-			</ul><p/>
+			<ul class = "prdpfields"> </ul>
 
 			<!-- Buttons -->
 	   		<button id= "button_propose_match"> Propose Match </button>
@@ -68,7 +57,9 @@
 				{% if pet_reports_list %}
 					{% for pet_report in pet_reports_list %}
 						<li class="item" >
-							<input id="petreport_id" type="hidden" value="{{ pet_report.id }}"/>
+							<script> 
+								var CANDIDATE_PETREPORT_JSON = convert_to_javascript_obj("{{ pet_report.toJSON }}");
+							</script>
 							<div id = "prdpdialog">
 								<a href= "{% url 'disp_PetReport' pet_report.id %}" name="{{ pet_report.pet_name }}">
 									<strong>{{ pet_report.pet_name }}</strong><br/>

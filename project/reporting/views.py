@@ -170,11 +170,11 @@ def get_PetReport_json(request, petreport_id):
 
         json = simplejson.dumps(prdp_dict)
         print "JSON: " + str(json)
+
         return HttpResponse(json, mimetype="application/json")
 
     print "Oops,something went wrong"
     messages.failure(request, "Oops, something went wrong.")
     return matching.match_petreport(request, petreport_id)
-
-
+     
 

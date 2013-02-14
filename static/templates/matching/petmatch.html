@@ -8,7 +8,7 @@
   <!--[if gt IE 8]> <html class="no-js" lang="en"> <![endif]-->
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>{% block head_title %}Pet Match Detailed Page{% endblock head_title %}</title>
+    <title>{% block head_title %}Pet Match Detailed Page-- Hello{% endblock head_title %}</title>
     <meta name="keywords" content="" />
     <meta name="description" content="" />
 
@@ -40,32 +40,33 @@
 
     <!-- General, inheritable JS goes here -->
     <script src = "{{ STATIC_URL }}js/epm.js" type = 'text/javascript'></script>
+    <script src = "{{ STATIC_URL }}js/local/epm-petmatch.js" type = 'text/javascript'></script>
+
     <!-- Page-specific JS goes in this block -->
     {% block js %}
-    <script src = "{{ STATIC_URL }}js/local/epm-petmatch.js" type = 'text/javascript'></script>
-    <script type="text/javascript">
 
+    <script type="text/javascript">
       //Must have these django-rendered variables as global javascript variables in order to refer to them!
       var STATIC_URL = "{{ STATIC_URL }}";
       var VOTED = "{{ user_has_voted }}";
       var USER_ID = "{{ user.id }}";
       var PETMATCH_ID = "{{ petmatch.id }}";
+      var LOST_PETREPORT_JSON = convert_to_javascript_obj("{{ petmatch.lost_pet.toJSON }}");
+      var FOUND_PETREPORT_JSON = convert_to_javascript_obj("{{ petmatch.found_pet.toJSON }}");
       var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
-      var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";      
-
+      var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";    
     </script>
 
     <!-- Setting up parameters for sharing on facebook and twitter -->
     <script type="text/javascript">
-      var URL = 'http://www.emergencypetmatcher.com/matching/PetMatch/{{  petmatch.id }}';
-      var IMAGE = 'http://www.emergencypetmatcher.com/{{ STATIC_URL }}{{ petmatch.lost_pet.img_path }}';
+      var URL = 'http://epm.cs.colorado.edu/matching/PetMatch/{{  petmatch.id }}';
+      var IMAGE = 'http://epm.cs.colorado.edu{{ STATIC_URL }}{{ petmatch.lost_pet.img_path }}';
       var TITLE = 'A Pet Report Matching at EPM';
-      var SUMMERY = 'A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
+      var CAPTION ='EmergencyPetMatcher';
+      var SUMMARY = 'A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
     </script>
 
     {% endblock js %}
-
-
 
   </head>
 
@@ -103,21 +104,7 @@
           <img src="{{ STATIC_URL }}{{ petmatch.lost_pet.img_path }}"/>
 
           <!-- Lost PetReport Info -->
-          <ul>
-            <li><b>Pet Name:</b> {{ petmatch.lost_pet.pet_name }}</li>
-            <li><b>Pet Type:</b> {{ petmatch.lost_pet.pet_type }}</li>
-            <li><b>Lost/Found:</b> {{ petmatch.lost_pet.status }}</li>
-            <li><b>Contact:</b>  <a href="{% url 'get_UserProfile_page' petmatch.lost_pet.proposed_by.id %}">{{ petmatch.lost_pet.proposed_by.user.username }}</a></li>
-            <li><b>Date {{ petmatch.lost_pet.status }} : </b>{{ petmatch.lost_pet.date_lost_or_found }}</li>
-            <li><b>Location: </b>{{ petmatch.lost_pet.location }}</li>
-	    <li><b>Spayed or Neutered: </b>{{ petmatch.lost_pet.spayed_or_neutered }}</li>
-            <li><b>Age:</b> {{ petmatch.lost_pet.age }} </li>
-            <li><b>Sex:</b>  {{ petmatch.lost_pet.get_sex_display }}</li>
-            <li><b>Breed:</b> {{ petmatch.lost_pet.breed }}</li>
-            <li><b>Color:</b> {{ petmatch.lost_pet.color }}</li>
-            <li><b>Size:</b> {{ petmatch.lost_pet.get_size_display }} </li>
-            <li><b>Description:</b> <div class = "pr_desc" style="padding:2px; border:1px dotted black;"> {{ petmatch.lost_pet.description }}</div> </li>
-          </ul>
+          <ul class="lost_pmdpfields"></ul>
 
         </div> 
         <!-- End Lost PetReport -->
@@ -135,21 +122,7 @@
           <img src="{{ STATIC_URL }}{{ petmatch.found_pet.img_path }}"/>
 
           <!-- Found PetReport Info -->
-          <ul>
-            <li><b>Pet Name:</b> {{ petmatch.found_pet.pet_name }}</li>
-            <li><b>Pet Type:</b> {{ petmatch.found_pet.pet_type }}</li>
-            <li><b>Lost/Found:</b> {{ petmatch.found_pet.status }}</li>
-            <li><b>Contact:</b> <a href="{% url 'get_UserProfile_page' petmatch.found_pet.proposed_by.id %}">{{ petmatch.found_pet.proposed_by.user.username }}</a></li>
-            <li><b>Date {{ petmatch.found_pet.status }} : </b>{{ petmatch.found_pet.date_lost_or_found }}</li>
-            <li><b>Location: </b>{{ petmatch.found_pet.location }}</li>
-	    <li><b>Spayed or Neutered: </b>{{ petmatch.found_pet.spayed_or_neutered }}</li>
-            <li><b>Age:</b> {{ petmatch.found_pet.age }} </li>
-            <li><b>Sex:</b>  {{ petmatch.found_pet.get_sex_display }}</li>
-            <li><b>Breed:</b> {{ petmatch.found_pet.breed }}</li>
-            <li><b>Color:</b> {{ petmatch.found_pet.color }}</li>
-            <li><b>Size:</b> {{ petmatch.found_pet.get_size_display }}</li>
-            <li><b>Description:</b> <div class = "pr_desc" style="padding:2px; border:1px dotted black;"> {{ petmatch.found_pet.description }}</div> </li>
-          </ul>
+          <ul class="found_pmdpfields"></ul>
 
         </div>
         <!-- End Found PetReport -->
