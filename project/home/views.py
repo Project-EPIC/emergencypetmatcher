@@ -52,6 +52,20 @@ def home (request):
     except EmptyPage:
         pet_reports_list = paginator.page(paginator.num_pages)
 
+
+    from django.forms.models import model_to_dict
+    prdp = get_object_or_404(PetReport, pk=1)
+    print "Retrieved the PetReport: %s" % prdp
+    modeldict = model_to_dict(prdp)
+    print "............."
+    print modeldict
+    print "............."
+    #Need this for easy displaying on the Matching Interface workspace detail table.
+    prdp_dict = simplify_model_dict(prdp) 
+    print prdp_dict
+    print "............."
+
+
     if request.user.is_authenticated() == True:
         return render_to_response(HTML_HOME, {'pet_reports_list': pet_reports_list, 'last_login': request.session.get('social_auth_last_login_backend'), 'version':version}, RequestContext(request))
 
@@ -118,6 +132,7 @@ def get_activities_json(request):
         print "======= END [AJAX]: get_activities_json =========\n"
         #Zip it up in JSON and ship it out as an HTTP Response.
         json = simplejson.dumps ({"activities":activities})
+        print json
         return HttpResponse(json, mimetype="application/json")     
 
     else:

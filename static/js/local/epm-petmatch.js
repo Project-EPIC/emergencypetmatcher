@@ -67,6 +67,13 @@ $(document).ready(function(){
       share_on_twitter(URL, IMAGE, TITLE, SUMMARY);
     });
 
+
+    //Retrieve and display the lost pet report fields using json data
+    display_PetReport_fields(LOST_PETREPORT_JSON, $(".lost_pmdpfields"));
+
+    //Retrieve and display the found pet report fields using json data
+    display_PetReport_fields(FOUND_PETREPORT_JSON, $(".found_pmdpfields"));
+
 });
 
 //The voting AJAX POST call. Requires a string with either "up" or "down".
@@ -99,5 +106,3 @@ function vote (user_vote){
   });                  
   return true;
 }
-
-

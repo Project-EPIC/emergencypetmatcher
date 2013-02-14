@@ -13,7 +13,6 @@ URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
 URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport/"
 
 
-
 //GLOBAL JS Functions
 function load_dialog(link, title, width, height){
 
@@ -83,7 +82,68 @@ function share_on_facebook(url, image, title, summary){
 	return false;
 }	
 
+function write_callback_data(str) {
+    document.getElementById('fb-ui-return-data').innerHTML=str;
+}
+
+function publishToFeed(url, image, title, caption, summary) {
+ 
+        var obj = {
+            method: 'feed',
+            redirect_uri: url,
+            link: url,
+            picture: image,
+            name: title,
+            caption: caption,
+            description: summary           
+        };
+ 
+        function callback(response) {
+            //alert('callback');
+            if (response && response.post_id){
+                document.getElementById('fb-ui-return-data').innerHTML = "Post ID: " + response.post_id;
+                //write_callback_data("<br><b>Callback returns succeeded!</b>");
+                alert('response');
+            }
+            else{
+                alert("You clicked Cancel button, don't you want to share?");
+            }
+        }
+        FB.ui(obj, callback);
+        return false;
+}
+
+
 function share_on_twitter(url, image, title, summary){
 	window.open('http://twitter.com/share?url=' + url + '&text=' + title + ': ' + summary, 'newWindow', 'width=700, height=430');
 }
+
+
+function convert_to_javascript_obj(json_str){
+    return JSON.parse(json_str.replace(/&quot;/ig, '"'));
+ }
+
+function display_PetReport_fields(petreport, prdplist){
+
+    // Assert that prdplist is an <ul> html tag element
+    
+    prdplist.html("");
+    prdplist.append("<li><b>Pet Name:</b> " + petreport.pet_name + "</li>");
+    prdplist.append("<li><b>Pet Type:</b> " + petreport.pet_type + "</li>");
+    prdplist.append("<li><b>Lost/Found:</b> " + petreport.status + "</li>");
+    prdplist.append("<li><b>Contact:</b> <a href= '" + URL_USERPROFILE + petreport.proposed_by + "/' >" + petreport.proposed_by_username + "</a></li>");
+    prdplist.append("<li><b>Date " + petreport.status + ":</b> " + petreport.date_lost_or_found + "</li>");
+    prdplist.append("<li><b>Location:</b> " + petreport.location + "</li>");
+    prdplist.append("<li><b>Spayed/Neutered:</b> " + petreport.spayed_or_neutered + "</li>");
+    prdplist.append("<li><b>Age:</b> " + petreport.age + "</li>");
+    prdplist.append("<li><b>Sex:</b> " + petreport.sex + "</li>");
+    prdplist.append("<li><b>Breed:</b> " + petreport.breed + "</li>");
+    prdplist.append("<li><b>Color:</b> " + petreport.color + "</li>");
+    prdplist.append("<li><b>Size:</b> " + petreport.size + "</li>");
+    prdplist.append("<li><b>Description:</b> " + petreport.description + "</li>");
+
+}
+
+
+
 
