@@ -33,14 +33,13 @@ $(document).ready(function(){
     });
 
     //Retrieve and display the current pet report fields using json data   
-    display_PetReport_fields(PETREPORT_JSON, $(".prdpfields"));
+    display_PetReport_fields(PETREPORT, $(".prdpfields"));
 });
 
 function bookmark(){
 
   var bookmark_button = $("#prdp_bookmark");
     
-  
   if (USER_ID == "None"){
     login_link = "Log in <a href="+URL_LOGIN+"?next={% firstof request.path '/' %} > here.</a>";
     $(".prdp_messages").html("<li class='error'> You cannot bookmark this Pet Report because you are not logged in! "+login_link+ "</li>");

@@ -53,7 +53,7 @@ $(document).ready(function(){
 
 			//Grab the Image from the candidate petreport and copy it in the Workspace Detail Div.
 			var img = $(this).find("img");
-			move_petreport_to_workspace_match_detail(CANDIDATE_PETREPORT_JSON, img);
+			move_petreport_to_workspace_match_detail(CANDIDATE_PETREPORT, img);
 			
 		}
 	});	
@@ -63,14 +63,14 @@ $(document).ready(function(){
 
 		//Grab the Image from the target petreport and copy it in the Workspace Detail Div.
 		var img = $(this);
-		move_petreport_to_workspace_match_detail(TARGET_PETREPORT_JSON, img);
+		move_petreport_to_workspace_match_detail(TARGET_PETREPORT, img);
 
 	});	
 
 
 	$("#button_propose_match").click(function(){
 
-		var link = URL_PROPOSE_MATCH + TARGET_PETREPORT_JSON.id + "/" + CANDIDATE_PETREPORT_JSON.id + "/";
+		var link = URL_PROPOSE_MATCH + TARGET_PETREPORT.id + "/" + CANDIDATE_PETREPORT.id + "/";
 		return load_dialog(link, "Propose Match", 900, "auto");
 
 	});
@@ -144,7 +144,7 @@ function moveImage(item, container) {
 	$(container).html(petreport_img);
 
 	//Show the details of a candidate petreport after dropping its image to the droppable container
-	move_petreport_to_workspace_match_detail(CANDIDATE_PETREPORT_JSON, petreport_img);
+	move_petreport_to_workspace_match_detail(CANDIDATE_PETREPORT, petreport_img);
 
 }
 

@@ -7,28 +7,28 @@ from django.db.models.signals import post_save, pre_save, pre_delete, post_delet
 from django.dispatch import receiver
 from django.core.validators import email_re
 from django.core.files.storage import FileSystemStorage
-from django import forms
 from constants import *
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.timezone import now as datetime_now
-from datetime import timedelta
+# from datetime import timedelta
 from django.conf import settings
-from utils import *
-import PIL, os, time, simplejson
-from django.core import serializers
+from django.core.files.images import ImageFile
+from django.forms.models import model_to_dict
+import PIL, os, time, datetime as DATETIME
+import simplejson 
 
 '''===================================================================================
 [models.py]: Models for the EPM system
 ==================================================================================='''
 
 '''Enums for Various Model Choice Fields'''
-PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Turtle', 'Turtle'), ('Snake', 'Snake'), ('Horse', 'Horse'),('Rabbit', 'Rabbit'), ('Other', 'Other')]
+PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Bird', 'Bird'), ('Horse', 'Horse'), ('Rabbit', 'Rabbit'), ('Snake', 'Snake'), ('Turtle', 'Turtle'), ('Other', 'Other')]
 STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
 SEX_CHOICES=[('M','Male'),('F','Female')]
 SIZE_CHOICES = [('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)')]
 BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador')]
-SPAYED_OR_NEUTERED_CHOICES = [('Spayed', 'Spayed'), ('Neutered', 'Neutered'), ("Don't Know", "Don't Know")]
+SPAYED_OR_NEUTERED_CHOICES = [('Spayed', 'Spayed'), ('Neutered', 'Neutered'), ("unknown", "unknown")]
 
 #The User Profile Model containing a 1-1 association with the 
 #django.contrib.auth.models.User object, among other attributes.
@@ -60,6 +60,58 @@ class UserProfile (models.Model):
         self.save()
         log_activity(ACTIVITY_ACCOUNT_CREATED, self)
 
+    ''' Update the current user's reputation points based on an activity '''
+    def update_reputation(self, activity):
+        if activity == ACTIVITY_PETMATCH_UPVOTE:
+            self.reputation += REWARD_PETMATCH_VOTE
+
+        elif activity == ACTIVITY_PETMATCH_DOWNVOTE:
+            self.reputation += REWARD_PETMATCH_VOTE
+
+        elif activity == ACTIVITY_PETREPORT_SUBMITTED:
+            self.reputation += REWARD_PETREPORT_SUBMIT
+
+        elif activity == ACTIVITY_PETMATCH_PROPOSED:
+            self.reputation += REWARD_PETMATCH_PROPOSE
+
+        elif activity == ACTIVITY_USER_BEING_FOLLOWED:
+            self.reputation += REWARD_USER_FOLLOWED
+
+        elif activity == ACTIVITY_USER_BEING_UNFOLLOWED:
+            self.reputation -= REWARD_USER_FOLLOWED
+
+        elif activity == ACTIVITY_PETREPORT_ADD_BOOKMARK:
+            self.reputation += REWARD_PETREPORT_BOOKMARK
+
+        elif activity == ACTIVITY_PETREPORT_REMOVE_BOOKMARK:
+            self.reputation -= REWARD_PETREPORT_BOOKMARK
+
+        elif activity == ACTIVITY_ACCOUNT_CREATED:
+            self.reputation += REWARD_NEW_ACCOUNT
+
+        elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE:
+            self.reputation += REWARD_USER_PROPOSED_PETMATCH_VOTE
+
+        elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL:
+            self.reputation += REWARD_USER_PROPOSED_PETMATCH_SUCCESSFUL
+
+        elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE:
+            self.reputation += REWARD_USER_PROPOSED_PETMATCH_FAILURE
+
+        elif activity == ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL:
+            self.reputation += REWARD_USER_VERIFY_PETMATCH_SUCCESSFUL
+
+        elif activity == ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL:
+            self.reputation += REWARD_PETMATCH_UPVOTE_SUCCESSFUL
+
+        else:
+            print '[ERROR]: Cannot update reputation points: This is not a valid activity! \n'
+            return False
+
+        #Save the UserProfile and return True
+        self.save()
+        return True
+
     #check if username exists in the database
     @staticmethod
     def username_exists(username):
@@ -74,28 +126,54 @@ class UserProfile (models.Model):
 class PetReport(models.Model):
 
     '''Required Fields'''
+    #Type of Pet
     pet_type = models.CharField(max_length=PETREPORT_PET_TYPE_LENGTH, choices = PET_TYPE_CHOICES, null=False, default=None)
+    #Status of Pet (Lost/Found)
     status = models.CharField(max_length = PETREPORT_STATUS_LENGTH, choices = STATUS_CHOICES, null=False, default=None)
+    #Date Lost/Found
     date_lost_or_found = models.DateField(null=False)
-    sex = models.CharField(max_length=PETREPORT_SEX_LENGTH, choices=SEX_CHOICES, null=False)
-    size = models.CharField(max_length=PETREPORT_SIZE_LENGTH, choices = SIZE_CHOICES, null=False)
-    location = models.CharField(max_length=PETREPORT_LOCATION_LENGTH, null=False, default='unknown')
-
-    #ForeignKey: Many-to-one relationship with User
+    #The UserProfile who is submitting this PetReport (ForeignKey: Many-to-one relationship with User)
     proposed_by = models.ForeignKey('UserProfile', null=False, default=None, related_name='proposed_related')
 
     '''Non-Required Fields'''
+    #Sex of the Pet
+    sex = models.CharField(max_length=PETREPORT_SEX_LENGTH, choices=SEX_CHOICES, null=True)
+    #Size of the Pet, in ranges
+    size = models.CharField(max_length=PETREPORT_SIZE_LENGTH, choices=SIZE_CHOICES, null=True)
+    #Location where found
+    location = models.CharField(max_length=PETREPORT_LOCATION_LENGTH, null=True)
+    #Lat/Long Geo-coordinates of Location
+    geo_location_lat = models.DecimalField(max_digits=8, decimal_places=5, null=True)
+    geo_location_long = models.DecimalField(max_digits=8, decimal_places=5, null=True)
+    #Microchip ID of Pet
+    microchip_id = models.CharField(max_length=PETREPORT_MICROCHIP_ID_LENGTH, null=True)
+    #Pet Tag Information (if available)
+    tag_info = models.CharField(max_length=PETREPORT_TAG_INFO_LENGTH, null=True)
+    #Contact Name of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
+    contact_name = models.CharField(max_length=PETREPORT_CONTACT_NAME_LENGTH, null=True)
+    #Contact Phone Number of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
+    contact_number = models.CharField(max_length=PETREPORT_CONTACT_NUMBER_LENGTH, null=True)    
+    #Img of Pet
     img_path = models.ImageField(upload_to='images/petreport_images', null=True)
-    spayed_or_neutered = models.CharField(max_length=PETREPORT_SPAYED_OR_NEUTERED_LENGTH, choices=SPAYED_OR_NEUTERED_CHOICES, null=True, default="Don't Know")
+    #Spayed or Neutered?
+    spayed_or_neutered = models.CharField(max_length=PETREPORT_SPAYED_OR_NEUTERED_LENGTH, choices=SPAYED_OR_NEUTERED_CHOICES, null=True, default="unknown")
+    #Pet Name (if available)
     pet_name = models.CharField(max_length=PETREPORT_PET_NAME_LENGTH, null=True, default='unknown') 
+    #Pet Age (if known/available)
     age = models.CharField(max_length=PETREPORT_AGE_LENGTH, null=True, default= 'unknown')
+    #Color(s) of Pet
     color = models.CharField(max_length=PETREPORT_COLOR_LENGTH, null=True,default='unknown')
+    #Breed of Pet
     breed = models.CharField(max_length=PETREPORT_BREED_LENGTH, null=True,default='unknown')
-    revision_number = models.IntegerField(null=True) #update revision using view
+    #Description of Pet
     description   = models.CharField(max_length=PETREPORT_DESCRIPTION_LENGTH, null=True, default="")
-    #Many-to-Many relationship with User
+    #The UserProfiles who are working on this PetReport (Many-to-Many relationship with User)
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
+    #The UserProfiles who have bookmarked this PetReport
     bookmarked_by = models.ManyToManyField('UserProfile', null=True, related_name='bookmarks_related')
+    #A pet report is closed once it has been successfully matched
+    closed = models.BooleanField(default=False)
+    revision_number = models.IntegerField(null=True) #update revision using view
 
     #Override the save method for this model
     def save(self, *args, **kwargs):
@@ -155,8 +233,32 @@ class PetReport(models.Model):
         string = str(self.date_lost_or_found)
         return str
 
+    def toDICT(self):
+        #A customized version of django model function "model_to_dict"
+        #to convert a PetReport model object to a dictionary object
+        modeldict = model_to_dict(self)
+        #Iterate through all fields in the model_dict
+        for field in modeldict:
+            value = modeldict[field]
+            if isinstance(value, DATETIME.datetime) or isinstance(value, DATETIME.date):
+                modeldict[field] = value.strftime("%B %d, %Y")
+            elif isinstance(value, ImageFile):
+                modeldict[field] = value.name
+            elif field == "sex":
+                modeldict[field] = self.get_sex_display()
+            elif field == "size":
+                modeldict[field] = self.get_size_display()
+            elif field == "geo_location_lat" and str(value).strip() == "":
+                modeldict[field] = None
+            elif field == "geo_location_long" and str(value).strip() == "":
+                modeldict[field] = None
+        #Just add a couple of nice attributes.
+        modeldict ["proposed_by_username"] = self.proposed_by.user.username       
+        return modeldict
+
     def toJSON(self):
-        json = simplejson.dumps(simplify_model_dict(self))
+        #Convert a PetReport model object to a json object
+        json = simplejson.dumps(self.toDICT())
         print "toJSON: " + str(json)
         return json
 
@@ -257,8 +359,7 @@ class PetMatch(models.Model):
             return UPVOTE
         elif (downvote != None):
             return DOWNVOTE
-
-        return False      
+        return False  
 
     def PetMatch_has_reached_threshold(self):
         '''Difference[D] is calculated as the difference between number of upvotes and number of downvotes. 
@@ -330,12 +431,16 @@ class PetMatch(models.Model):
                 #print '[INFO]: Email to pet match owner: '+email_body
 
     def close_PetMatch(self):
+        petmatch_owner = self.proposed_by
+        lost_pet_contact = self.lost_pet.proposed_by
+        found_pet_contact = self.found_pet.proposed_by
         if '0' not in self.verification_votes:
             self.closed_date = datetime_now()         
             '''If the PetMatch is successful, all related PetMatches will be closed 
             and is_successful is set to True'''
             if self.verification_votes == '11':
                 self.is_successful = True
+
                 for petmatch in self.lost_pet.lost_pet_related.all(): 
                     petmatch.is_open = False
                     petmatch.closed_date = datetime_now()
@@ -344,6 +449,50 @@ class PetMatch(models.Model):
                     petmatch.is_open = False
                     petmatch.closed_date = datetime_now()
                     petmatch.save()
+                '''the lost and found pet reports for the pet match are closed'''
+                petmatch.lost_pet.closed = True
+                petmatch.lost_pet.save()
+                petmatch.found_pet.closed = True
+                petmatch.found_pet.save()
+                # --------Reputation points--------
+                # update reputation points for the following users:
+                # petmatch_owner, lost_pet_contact, and found_pet_contact
+                print "[INFO]: PetMatch Verification was a SUCCESS!"
+                # Must to update reputation points twice since if updating petmatch_owner and lost_pet_contact
+                # separately for the same user doesn't work
+                if petmatch_owner.id == lost_pet_contact.id:
+                    petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL)
+                    petmatch_owner.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+                    found_pet_contact.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+                # Must to update reputation points twice since if updating petmatch_owner and found_pet_contact
+                # separately for the same user doesn't work
+                elif petmatch_owner.id == found_pet_contact.id:
+                    petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL)
+                    petmatch_owner.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+                    lost_pet_contact.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+                else:
+                    petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL)
+                    lost_pet_contact.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+                    found_pet_contact.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+                 # update reputation points for upvoters
+                for upvoters in self.up_votes.all():
+                    upvoters.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
+                # Must update reputation manually for petmatch_owner if found in the up_votes list because
+                # the user is not updated in the previous for loop
+                if petmatch_owner in self.up_votes.all():
+                    petmatch_owner.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
+                # Must update reputation manually for lost_pet_contact if found in the up_votes list because
+                # the user is not updated in the previous for loop
+                elif lost_pet_contact in self.up_votes.all():
+                    lost_pet_contact.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
+                # Must update reputation manually for ound_pet_contact if found in the up_votes list because
+                # the user is not updated in the previous for loop
+                elif found_pet_contact in self.up_votes.all():
+                    found_pet_contact.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
+            else: 
+                # if self.verification_votes == '22' or self.verification_votes == '12' or self.verification_votes == '21':
+                    print "[INFO]: PetMatch Verification was NOT a success!"
+                    petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE)
             self.save()    
             print '[INFO]: PetMatch %s has been closed' % (self)
     
@@ -375,31 +524,36 @@ class ChatLine (models.Model):
         return 'ChatLine {text:%s}' % (self.text)
 
 
-
 ''' ============================ [FORM MODELS] ==================================== '''
 ''' These Models nicely organize the model-related data into Django Form objects that 
     have built-in validation functionality and can be passed around via POST requests. 
     Order of Fields matter.                                                         '''
 
-
 #The PetReport ModelForm
 class PetReportForm (ModelForm):
+
     '''Required Fields'''
-    pet_type = forms.ChoiceField(label = 'Pet Type', choices = PET_TYPE_CHOICES, required = True)
-    status = forms.ChoiceField(label = "Status (Lost/Found)", choices = STATUS_CHOICES, required = True)
-    date_lost_or_found = forms.DateField(label = "Date Lost/Found", required = True)
-    sex = forms.ChoiceField(label = "Sex", choices = SEX_CHOICES, required = True)
-    size = forms.ChoiceField(label = "Size of Pet", choices = SIZE_CHOICES, required = True)
-    location = forms.CharField(label = "Location", max_length = PETREPORT_LOCATION_LENGTH , required = True)
+    pet_type = forms.ChoiceField(label = '* Pet Type', choices = PET_TYPE_CHOICES, required = True)
+    status = forms.ChoiceField(label = "* Pet Status", help_text="(Lost/Found)", choices = STATUS_CHOICES, required = True)
+    date_lost_or_found = forms.DateField(label = "* Date Lost/Found", widget = forms.DateInput, required = True)
 
     '''Non-Required Fields'''
-    spayed_or_neutered = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False)
-    img_path = forms.ImageField(label = "Upload an Image (*.jpg, *.png, *.bmp, *.tif)", required = False)
+    sex = forms.ChoiceField(label = "Sex", choices = SEX_CHOICES, required = False)
+    size = forms.ChoiceField(label = "Size of Pet", choices = SIZE_CHOICES, required = False)
+    location = forms.CharField(label = "Current Location", help_text="(Found: Pet is being sheltered) or (Lost: Pet owner's location)", max_length = PETREPORT_LOCATION_LENGTH , required = False)
+    geo_location_lat = forms.DecimalField(label = "Geo Location Lat", help_text="(Lattitude coordinate)", max_digits=8, decimal_places=5, widget=forms.TextInput(attrs={'size':'10'}), initial=None, required=False)
+    geo_location_long = forms.DecimalField(label = "Geo Location Long", help_text="(Longitude coordinate)", max_digits=8, decimal_places=5, widget=forms.TextInput(attrs={'size':'10'}),  initial=None, required=False)
+    microchip_id = forms.CharField(label = "Microchip ID", help_text="(if available)", max_length = PETREPORT_MICROCHIP_ID_LENGTH, required=False)
+    tag_info = forms.CharField(label = "Tag Information", help_text="(if available)", max_length = PETREPORT_TAG_INFO_LENGTH, required=False, widget=forms.Textarea)
+    contact_name = forms.CharField(label = "Contact Name", help_text="(if different than that of the person submitting this PetReport)", max_length=PETREPORT_CONTACT_NAME_LENGTH, required=False)
+    contact_number = forms.CharField(label = "Contact Phone Number", help_text="(if different than that of the person submitting this PetReport)", max_length=PETREPORT_CONTACT_NUMBER_LENGTH, required=False)
+    img_path = forms.ImageField(label = "Upload an Image", help_text="(*.jpg, *.png, *.bmp, *.tif)", widget = forms.ClearableFileInput, required = False)
+    spayed_or_neutered = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False)    
     pet_name = forms.CharField(label = "Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False) 
     age = forms.CharField(label = "Age", max_length = PETREPORT_AGE_LENGTH, required = False)
     breed = forms.CharField(label = "Breed", max_length = PETREPORT_BREED_LENGTH, required = False)
     color = forms.CharField(label = "Coat Color(s)", max_length = PETREPORT_COLOR_LENGTH, required = False)
-    description  = forms.CharField(label = "Description", max_length = PETREPORT_DESCRIPTION_LENGTH, required = False, widget = forms.Textarea)
+    description  = forms.CharField(label = "Pet Description", help_text="(Please describe the pet as accurately as possible)", max_length = PETREPORT_DESCRIPTION_LENGTH, widget = forms.Textarea, required = False)
 
     class Meta:
         model = PetReport
@@ -472,7 +626,8 @@ def delete_UserProfile(sender, instance=None, **kwargs):
 def setup_UserProfile(sender, instance, created, **kwargs):
     if created == True:
         #Create a UserProfile object.
-        UserProfile.objects.create(user=instance)
+        userprofile = UserProfile.objects.create(user=instance)
+        userprofile.update_reputation(ACTIVITY_ACCOUNT_CREATED)
     elif instance.is_active:
         if log_exists(instance.get_profile()) == False:
             log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())

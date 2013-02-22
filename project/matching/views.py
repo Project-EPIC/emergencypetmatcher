@@ -21,6 +21,7 @@ from home.models import *
 from constants import *
 from logging import *
 import datetime, re
+from utils import *
 
 
 ''' Display the PetMatch object '''
@@ -54,11 +55,24 @@ def vote_PetMatch(request):
         print "#DOWNVOTES: %d" % len(pm.down_votes.all())
 
         if vote == "upvote":
+            # If the user is voting for the 1st time, add reputation points
+            if pm.UserProfile_has_voted(userprofile) is False:
+                userprofile.update_reputation(ACTIVITY_PETMATCH_UPVOTE)
+                pm.proposed_by.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE)
+
+            # Also, add reputation points to the user whose proposed petmatch is being upvoted
+            if pm.UserProfile_has_voted(userprofile) == DOWNVOTE:
+                pm.proposed_by.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE)
+            
             pm.up_votes.add(userprofile)
             pm.down_votes.remove(userprofile)
             log_activity(ACTIVITY_PETMATCH_UPVOTE, userprofile, petmatch=pm)
             message = "You have successfully upvoted this PetMatch!"
         elif vote == "downvote":
+            # If the user is voting for the 1st time, add reputation points
+            if pm.UserProfile_has_voted(userprofile) is False:
+                userprofile.update_reputation(ACTIVITY_PETMATCH_DOWNVOTE)
+                
             pm.down_votes.add(userprofile)
             pm.up_votes.remove(userprofile)
             log_activity(ACTIVITY_PETMATCH_DOWNVOTE, userprofile, petmatch=pm)
@@ -86,7 +100,7 @@ def match_PetReport(request, petreport_id):
     all_pet_reports = PetReport.objects.all().exclude(pk=petreport_id)
 
     #Place more PetReport filters here
-    filtered_pet_reports = all_pet_reports.exclude(status = target_petreport.status).filter(pet_type = target_petreport.pet_type)
+    filtered_pet_reports = all_pet_reports.exclude(status = target_petreport.status).filter(pet_type = target_petreport.pet_type, closed = False)
 
     #Add the UserProfile to the PetReport's workers list.
     target_petreport.workers.add(request.user.get_profile())
@@ -148,6 +162,11 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                     messages.error(request, "This Pet Match has already been proposed, and you have already voted for it already!")
                     return redirect(URL_MATCHING + target_petreport_id + "/")
 
+                # add voting reputation points if the user didn't vote before for this duplicate petmatch
+                # if (proposed_by not in result.up_votes.all()) and (proposed_by not in result.down_votes.all()):
+                if pm.UserProfile_has_voted(userprofile) is False:
+                    proposed_by.update_reputation(ACTIVITY_PETMATCH_UPVOTE)
+
                 result.up_votes.add(proposed_by)
                 result.save()
                 messages.success(request, "Nice job! Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
@@ -155,7 +174,8 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
 
             elif outcome == "NEW PETMATCH":
                 messages.success(request, "Congratulations - The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
-                log_activity(ACTIVITY_PETMATCH_PROPOSED, proposed_by, petmatch=pm)
+                # add reputation points for proposing a new petmatch
+                proposed_by.update_reputation(ACTIVITY_PETMATCH_PROPOSED)
 
         else:
             if outcome == "DUPLICATE PETMATCH":
@@ -166,6 +186,10 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                 if user_has_voted == "UPVOTE" or user_has_voted == "DOWNVOTE":
                     messages.error(request, "This Pet Match has already been proposed, and you have already voted for it already!")
                     return redirect(URL_MATCHING + target_petreport_id + "/")
+
+                # add voting reputation points if the user didn't vote before for this duplicate petmatch
+                if user_has_voted == False:
+                    proposed_by.update_reputation(ACTIVITY_PETMATCH_UPVOTE)
 
                 result.up_votes.add(proposed_by)
                 result.save()          

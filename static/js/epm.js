@@ -5,7 +5,6 @@ URL_LOGIN = '/login'
 URL_SUBMIT_PETREPORT ='/reporting/submit_PetReport'
 URL_USERPROFILE = '/UserProfile/'
 URL_PRDP = '/reporting/PetReport/'
-URL_PETREPORT_JSON = "/reporting/get_PetReport_json/"
 URL_PMDP = '/matching/PetMatch/'
 URL_VOTE_MATCH = '/matching/vote_PetMatch'
 URL_MATCHING = "/matching/match_PetReport/"
@@ -39,22 +38,6 @@ function load_dialog(link, title, width, height){
 
 }
 
-function get_PetReport_json (petreport_id){
-
-	$.ajax({
-
-		type:"GET",
-		url:"/reporting/get_PetReport_json/" + petreport_id + "/",
-		success: function(data){
-			var petreport = data;
-			return petreport;
-		},
-		error: function(data){
-			alert("An unexpected error occurred when trying to retrieve this Pet Report's attributes. Please try again."); 
-			return false;
-		}
-	});
-}
 
 /*function that sends out a synchronous post request by creating an invisible form*/
 
@@ -120,7 +103,11 @@ function share_on_twitter(url, image, title, summary){
 
 
 function convert_to_javascript_obj(json_str){
-    return JSON.parse(json_str.replace(/&quot;/ig, '"'));
+    var obj = JSON.parse(json_str.replace(/&quot;/ig, '"'));
+    //var obj = jQuery.parseJSON(json_str.replace(/&quot;/ig, '"') );
+    //var obj = $.parseJSON(json_str.replace(/&quot;/ig, '"') );
+    //All the above functions give the same result, but after replacing the extra quots 
+    return obj
  }
 
 function display_PetReport_fields(petreport, prdplist){

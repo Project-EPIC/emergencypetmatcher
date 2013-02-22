@@ -682,6 +682,31 @@ img.bookmark_x{
 }
 
 
+/* The PetReport form CSS */
+#pr_form_instructions {
+
+	margin-bottom: 20px;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+#pr_form_container {
+
+	margin: 0 auto;
+	width: 700px;
+	height: 100%;
+	overflow: auto;
+	margin-bottom: 50px;
+	padding: 5px;
+	border: 1px dotted;
+}
+
+.helpertext {
+
+	font-weight: none;
+}
+
+
 /* The Matching Interface Workspace div */
 #workspace {
 

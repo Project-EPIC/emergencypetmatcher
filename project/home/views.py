@@ -31,6 +31,7 @@ from registration.models import RegistrationProfile
 from registration.views import activate
 from utils import *
 from datetime import datetime
+# from pytz import timezone
 import oauth2 as oauth, random, urllib
 import hashlib, random, re
 
@@ -38,8 +39,9 @@ import hashlib, random, re
 #Home view, displays login mechanism
 def home (request):
     #Get Pet Report objects and organize them into a Paginator Object.
-    pet_reports = PetReport.objects.order_by("id").reverse()
-    paginator = Paginator(pet_reports, 50)
+    #pet_reports = PetReport.objects.order_by("id").reverse()
+    pet_reports = PetReport.objects.filter(closed = False).order_by("id").reverse()
+    paginator = Paginator(pet_reports, NUM_PETREPORTS_HOMEPAGE)
     page = request.GET.get('page')
     
     try:
@@ -48,20 +50,6 @@ def home (request):
         pet_reports_list = paginator.page(1)
     except EmptyPage:
         pet_reports_list = paginator.page(paginator.num_pages)
-
-
-    from django.forms.models import model_to_dict
-    prdp = get_object_or_404(PetReport, pk=1)
-    print "Retrieved the PetReport: %s" % prdp
-    modeldict = model_to_dict(prdp)
-    print "............."
-    print modeldict
-    print "............."
-    #Need this for easy displaying on the Matching Interface workspace detail table.
-    prdp_dict = simplify_model_dict(prdp) 
-    print prdp_dict
-    print "............."
-
 
     if request.user.is_authenticated() == True:
         return render_to_response(HTML_HOME, {'pet_reports_list': pet_reports_list, 'last_login': request.session.get('social_auth_last_login_backend'), 'version':version}, RequestContext(request))
@@ -322,14 +310,15 @@ def follow_UserProfile(request):
 
             else:
                 userprofile.following.add(target_userprofile)
+                # add points to the user who is being followed (i.e. the target_userprofile) 
+                target_userprofile.update_reputation(ACTIVITY_USER_BEING_FOLLOWED)
                 messages.success(request, "You are now following " + str(target_userprofile.user.username) + ".")     
 
                 # Log the following activity for this UserProfile
                 log_activity(ACTIVITY_FOLLOWING, userprofile, target_userprofile)
 
             return redirect (URL_USERPROFILE + str(target_userprofile.id))
-        else:
-            raise Http404
+
     else:
         raise Http404
 
@@ -346,8 +335,9 @@ def unfollow_UserProfile(request):
             #If this UserProfile is actually following the target UserProfile...
             if target_userprofile in userprofile.following.all():
                 userprofile.following.remove(target_userprofile)
+                # remove points to the use who has been unfollowed (i.e. the target_userprofile)
+                target_userprofile.update_reputation(ACTIVITY_USER_BEING_UNFOLLOWED)
                 messages.success(request, "You are no longer following " + str(target_userprofile.user.username) + ".") 
-
                 # Log the unfollowing activity for this UserProfile
                 log_activity(ACTIVITY_UNFOLLOWING, userprofile, target_userprofile)
                 return redirect(URL_USERPROFILE + str(target_userprofile.id))
@@ -508,5 +498,12 @@ def email_verification_complete (request,activation_key):
 
 
 def about (request):
-    petreports = PetReport.objects.order_by("?")[:4]
+    petreports = PetReport.objects.filter(closed = False).order_by("?")[:4]
     return render_to_response(HTML_ABOUT, {'petreports':petreports}, RequestContext(request))
+
+class RemoteUserMiddleware(object):
+    def process_response(self, request, response):
+        if request.user.is_authenticated():
+            response['X-Remote-User-Name'] = request.user.username
+            response['X-Remote-User-Id'] = request.user.id
+        return response

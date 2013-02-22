@@ -50,9 +50,9 @@
       var STATIC_URL = "{{ STATIC_URL }}";
       var VOTED = "{{ user_has_voted }}";
       var USER_ID = "{{ user.id }}";
-      var PETMATCH_ID = "{{ petmatch.id }}";
-      var LOST_PETREPORT_JSON = convert_to_javascript_obj("{{ petmatch.lost_pet.toJSON }}");
-      var FOUND_PETREPORT_JSON = convert_to_javascript_obj("{{ petmatch.found_pet.toJSON }}");
+      //Define those django-rendered petreport variables as global javascript variables
+      var LOST_PETREPORT = convert_to_javascript_obj("{{ petmatch.lost_pet.toJSON }}");
+      var FOUND_PETREPORT = convert_to_javascript_obj("{{ petmatch.found_pet.toJSON }}");
       var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
       var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";    
     </script>
@@ -65,7 +65,6 @@
       var CAPTION ='EmergencyPetMatcher';
       var SUMMARY = 'A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
     </script>
-
     {% endblock js %}
 
   </head>
@@ -166,7 +165,7 @@
                   {% else %}
                     <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" alt = "{{ worker.user.username }}"/>
                   {% endif %} 
-                  <!-- Put this in once reputation points are ready: <strong style="padding:10px 0px 0px 10px;"> {{ worker.reputation }} </strong> -->
+                  <strong style="padding:10px 0px 0px 10px;"> {{ worker.reputation }} </strong>
                 </a>
               </div>
             {% endfor %}
