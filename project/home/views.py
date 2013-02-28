@@ -60,7 +60,7 @@ def home (request):
     print modeldict
     print "............."
     #Need this for easy displaying on the Matching Interface workspace detail table.
-    prdp_dict = simplify_model_dict(prdp) 
+    prdp_dict = simplify_PetReport_dict(prdp) 
     print prdp_dict
     print "............."
 

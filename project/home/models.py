@@ -20,6 +20,7 @@ import PIL, os, time, datetime as DATETIME
 import simplejson 
 
 
+
 '''===================================================================================
 [models.py]: Models for the EPM system
 ==================================================================================='''
@@ -43,11 +44,24 @@ class UserProfile (models.Model):
     last_logout = models.DateTimeField(null=True, auto_now_add=True)
     following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
     chats = models.ManyToManyField('Chat', null=True)
+    is_test = models.BooleanField(default=False)
     reputation = models.FloatField(default=0, null=True)
     # facebook_cred = models.CharField(max_length=100, null=True)
     # twitter_cred = models.CharField(max_length=100, null=True)
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
+
+    #Create the activity log for this user
+    def set_activity_log(self, is_test=False):
+        if is_test == True:
+            self.is_test = True
+            print "[OK]: A new UserProfile TEST log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id)                        
+        else:
+            self.is_test = False
+            print "[OK]: A new UserProfile log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id)                        
+
+        self.save()
+        log_activity(ACTIVITY_ACCOUNT_CREATED, self)    
 
     ''' Update the current user's reputation points based on an activity '''
     def update_reputation(self, activity):
@@ -598,7 +612,7 @@ def delete_UserProfile(sender, instance=None, **kwargs):
 
     else:    
         #Delete the UserProfile log file.
-        logger.log_activity(ACTIVITY_ACCOUNT_DELETED, instance)
+        delete_log(instance)
         #Instead of deleting the User (which might break foreign-key relationships),
         #set the active flag to False (INACTIVE)
         instance.user.is_active = False
@@ -610,11 +624,10 @@ def setup_UserProfile(sender, instance, created, **kwargs):
     if created == True:
         #Create a UserProfile object.
         userprofile = UserProfile.objects.create(user=instance)
-        # userprofile.update_reputation(ACTIVITY_ACCOUNT_CREATED)
-        
+        userprofile.update_reputation(ACTIVITY_ACCOUNT_CREATED)
     elif instance.is_active:
-        if logger.log_exists(instance.get_profile()) == False:
-            logger.log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
+        if log_exists(instance.get_profile()) == False:
+            log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
 
 #Post Add Signal function to check if a PetMatch has reached threshold
 @receiver(m2m_changed, sender=PetMatch.up_votes.through)
@@ -629,4 +642,7 @@ def trigger_PetMatch_verification(sender, instance, action,**kwargs):
             instance.save()
 
 ''' Import statements placed at the bottom of the page to prevent circular import dependence '''
-import logging as logger
+from logging import *
+
+
+

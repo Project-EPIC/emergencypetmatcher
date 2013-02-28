@@ -33,11 +33,7 @@ $(document).ready(function(){
     });
 
     //Retrieve and display the current pet report fields using json data   
-<<<<<<< HEAD
-    display_PetReport_fields(PETREPORT_JSON, $(".prdpfields"));
-=======
     display_PetReport_fields(PETREPORT, $(".prdpfields"));
->>>>>>> 062ce03bea8eb98784dfa92ee555d8c120164fa3
 });
 
 function bookmark(){
