@@ -147,19 +147,19 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
 
         #Try saving the PetMatch object.
         # We will expect the following output:
-        # None --> PetMatch was not inserted properly OR Duplicate PetMatch
+        # None --> PetMatch was not inserted properly OR DUPLICATE PETMATCH
         # PetMatch Object --> Existing PetMatch (UPDATE) OR Brand new PetMatch.
         # "Existing" means the PetMatch to be saved is the same PetMatch found, "Duplicate" means
         # another PetMatch with the same Lost+Found Pets were found.
         (result, outcome) = pm.save()
 
         if result != None:
-            if outcome == "SQL UPDATE": 
+            if outcome == PETMATCH_OUTCOME_UPDATE: 
                 #Has the user voted for this PetMatch before?
                 user_has_voted = result.UserProfile_has_voted(proposed_by)
 
-                if user_has_voted == "UPVOTE" or user_has_voted == "DOWNVOTE":
-                    messages.error(request, "This Pet Match has already been proposed, and you have already voted for it already!")
+                if user_has_voted == UPVOTE or user_has_voted == DOWNVOTE:
+                    messages.error(request, "This Pet Match has already been proposed, and you have voted for it already!")
                     return redirect(URL_MATCHING + target_petreport_id + "/")
 
                 # add voting reputation points if the user didn't vote before for this duplicate petmatch
@@ -172,18 +172,18 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                 messages.success(request, "Nice job! Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
                 log_activity(ACTIVITY_PETMATCH_UPVOTE, proposed_by, petmatch=result)
 
-            elif outcome == "NEW PETMATCH":
+            elif outcome == PETMATCH_OUTCOME_NEW_PETMATCH:
                 messages.success(request, "Congratulations - The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
                 # add reputation points for proposing a new petmatch
                 proposed_by.update_reputation(ACTIVITY_PETMATCH_PROPOSED)
 
         else:
-            if outcome == "DUPLICATE PETMATCH":
+            if outcome == PETMATCH_OUTCOME_DUPLICATE_PETMATCH:
                 result = PetMatch.get_PetMatch(target, candidate)
                 #Has the user voted for this PetMatch before?
                 user_has_voted = result.UserProfile_has_voted(proposed_by)
 
-                if user_has_voted == "UPVOTE" or user_has_voted == "DOWNVOTE":
+                if user_has_voted == UPVOTE or user_has_voted == DOWNVOTE:
                     messages.error(request, "This Pet Match has already been proposed, and you have voted for it already!")
                     return redirect(URL_MATCHING + target_petreport_id + "/")
 
