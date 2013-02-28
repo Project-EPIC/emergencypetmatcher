@@ -56,6 +56,12 @@ PETREPORT_PET_TYPE_SNAKE = "Snake"
 PETREPORT_PET_TYPE_TURTLE = "Turtle"
 PETREPORT_PET_TYPE_OTHER = "Other"
 
+#PetMatch Constants
+PETMATCH_OUTCOME_NEW_PETMATCH = "NEW PETMATCH"
+PETMATCH_OUTCOME_DUPLICATE_PETMATCH = "DUPCLIATE PETMATCH"
+PETMATCH_OUTCOME_UPDATE = "SQL UPDATE"
+PETMATCH_OUTCOME_INSERTED_IMPROPERLY = "INSERTED IMPROPERLY"
+
 #File Path Constants
 ACTIVITY_LOG_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/logs/activity_logs/"
 TEST_ACTIVITY_LOG_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/logs/test_activity_logs/"

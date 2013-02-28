@@ -28,7 +28,7 @@ STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
 SEX_CHOICES=[('M','Male'),('F','Female')]
 SIZE_CHOICES = [('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)')]
 BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador')]
-SPAYED_OR_NEUTERED_CHOICES = [('Spayed', 'Spayed'), ('Neutered', 'Neutered'), ("unknown", "unknown")]
+SPAYED_OR_NEUTERED_CHOICES = [('Spayed', 'Spayed'), ('Neutered', 'Neutered'), ("Neither", "Neither"), ("Not Known", "Not Known")]
 
 #The User Profile Model containing a 1-1 association with the 
 #django.contrib.auth.models.User object, among other attributes.
@@ -305,7 +305,7 @@ class PetMatch(models.Model):
         #PetMatch inserted improperly
         if (lost_pet.status != "Lost") or (found_pet.status != "Found"):
             print "[ERROR]: The PetMatch was not saved because it was inserted improperly. Check to make sure that the PetMatch consists of one lost and found pet and that they are being assigned to the lost and found fields, respectively."
-            return (None, "INSERTED IMPROPERLY")
+            return (None, PETMATCH_OUTCOME_INSERTED_IMPROPERLY)
 
         existing_match = PetMatch.get_PetMatch(self.lost_pet, self.found_pet)            
 
@@ -314,15 +314,15 @@ class PetMatch(models.Model):
             if existing_match.id == self.id:
                 super(PetMatch, self).save(args, kwargs)
                 print "[SQL UPDATE]: %s" % self
-                return (self, "SQL UPDATE")
+                return (self, PETMATCH_OUTCOME_UPDATE)
             else:
                 print "[DUPLICATE PETMATCH]: %s VS. %s" % (self, existing_match)
-                return (None, "DUPLICATE PETMATCH") #Duplicate PetMatch!
+                return (None, PETMATCH_OUTCOME_DUPLICATE_PETMATCH) #Duplicate PetMatch!
 
         #Good to go: Save the PetMatch Object.
         super(PetMatch, self).save(*args, **kwargs)
         print "[OK]: PetMatch %s was saved!" % self
-        return (self, "NEW PETMATCH")
+        return (self, PETMATCH_OUTCOME_NEW_PETMATCH)
 
 
     ''' Determine if a PetMatch exists between pr1 and pr2, and if so, return it. Otherwise, return None. '''
@@ -365,7 +365,7 @@ class PetMatch(models.Model):
         '''Difference[D] is calculated as the difference between number of upvotes and number of downvotes. 
         For a PetMatch to be successful, it should satisfy certain constraints. D should exceed a threshold value,
         which is half the number of active users on the system. '''
-        active_users = 10 
+        active_users = len(UserProfile.objects.all())/2 
         '''10 will be replaced by a function that returns the number of active users in the system'''
         threshold = active_users/2 
         difference = self.up_votes.count() - self.down_votes.count()
