@@ -1,6 +1,6 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
-  
+
     var bookmark_button = $("#prdp_bookmark");
 
     //user is authenticated and has bookmarked this pet 
@@ -24,7 +24,8 @@ $(document).ready(function(){
 
     //Update the share buttons' click event.
     $("#facebook_share_pr").click(function(){
-      share_on_facebook(URL, IMAGE, TITLE, SUMMARY);
+      //share_on_facebook(URL, IMAGE, TITLE, SUMMARY);
+      publishToFeed(URL, IMAGE, TITLE, CAPTION, SUMMARY);
     });
 
     $("#twitter_share_pr").click(function(){
@@ -32,13 +33,16 @@ $(document).ready(function(){
     });
 
     //Retrieve and display the current pet report fields using json data   
+<<<<<<< HEAD
     display_PetReport_fields(PETREPORT_JSON, $(".prdpfields"));
+=======
+    display_PetReport_fields(PETREPORT, $(".prdpfields"));
+>>>>>>> 062ce03bea8eb98784dfa92ee555d8c120164fa3
 });
 
 function bookmark(){
 
   var bookmark_button = $("#prdp_bookmark");
-    
   
   if (USER_ID == "None"){
     login_link = "Log in <a href="+URL_LOGIN+"?next={% firstof request.path '/' %} > here.</a>";

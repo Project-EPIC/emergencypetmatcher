@@ -5,13 +5,12 @@ URL_LOGIN = '/login'
 URL_SUBMIT_PETREPORT ='/reporting/submit_PetReport'
 URL_USERPROFILE = '/UserProfile/'
 URL_PRDP = '/reporting/PetReport/'
-URL_PETREPORT_JSON = "/reporting/get_PetReport_json/"
 URL_PMDP = '/matching/PetMatch/'
 URL_VOTE_MATCH = '/matching/vote_PetMatch'
 URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
 URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport/"
-
+URL_SHARE_PETREPORT = "/sharing/share_PetReport"
 
 //GLOBAL JS Functions
 function load_dialog(link, title, width, height){
@@ -39,22 +38,6 @@ function load_dialog(link, title, width, height){
 
 }
 
-function get_PetReport_json (petreport_id){
-
-	$.ajax({
-
-		type:"GET",
-		url:"/reporting/get_PetReport_json/" + petreport_id + "/",
-		success: function(data){
-			var petreport = data;
-			return petreport;
-		},
-		error: function(data){
-			alert("An unexpected error occurred when trying to retrieve this Pet Report's attributes. Please try again."); 
-			return false;
-		}
-	});
-}
 
 /*function that sends out a synchronous post request by creating an invisible form*/
 

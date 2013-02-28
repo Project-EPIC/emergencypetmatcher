@@ -166,25 +166,27 @@ def bookmark_PetReport(request):
     else:
         raise Http404
     
-'''AJAX Request to retrieve a PetReport object in JSON format'''
-def get_PetReport_json(request, petreport_id):
+# '''AJAX Request to retrieve a PetReport object in JSON format'''
+# def get_PetReport_json(request, petreport_id):
 
-    if request.is_ajax() == True:
-        print "============== AJAX REQUEST ======================= "
-        prdp = get_object_or_404(PetReport, pk=petreport_id)
-        print "Retrieved the PetReport: %s" % prdp
+#     if request.is_ajax() == True:
+#         print "============== AJAX REQUEST ======================= "
+#         prdp = get_object_or_404(PetReport, pk=petreport_id)
+#         print "Retrieved the PetReport: %s" % prdp
 
-        #Need this for easy displaying on the Matching Interface workspace detail table.
-        prdp_dict = simplify_PetReport_dict(prdp) 
-        print prdp_dict
+#         #Need this for easy displaying on the Matching Interface workspace detail table.
+#         prdp_dict = simplify_PetReport_dict(prdp) 
+#         print prdp_dict
+#         json = simplejson.dumps(prdp_dict)
+#         print "JSON: " + str(json)
 
-        json = simplejson.dumps(prdp_dict)
-        print "JSON: " + str(json)
+#         return HttpResponse(json, mimetype="application/json")
 
-        return HttpResponse(json, mimetype="application/json")
+#     print "Oops,something went wrong"
+#     messages.failure(request, "Oops, something went wrong.")
+#     return matching.match_petreport(request, petreport_id)
+    
 
-    print "Oops,something went wrong"
-    messages.failure(request, "Oops, something went wrong.")
-    return matching.match_petreport(request, petreport_id)
-     
+
+
 

@@ -184,7 +184,7 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                 user_has_voted = result.UserProfile_has_voted(proposed_by)
 
                 if user_has_voted == UPVOTE or user_has_voted == DOWNVOTE:
-                    messages.error(request, "This Pet Match has already been proposed, and you have already voted for it already!")
+                    messages.error(request, "This Pet Match has already been proposed, and you have voted for it already!")
                     return redirect(URL_MATCHING + target_petreport_id + "/")
 
                 # add voting reputation points if the user didn't vote before for this duplicate petmatch

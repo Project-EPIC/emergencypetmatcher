@@ -52,12 +52,12 @@
       var STATIC_URL = "{{ STATIC_URL }}";
       var USER_ID = "{{ user.id }}";
       var URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
-      var PETMATCH_ID = "{{ petmatch.id }}";
       var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
       var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";   
       var USER_HAS_VERIFIED = {{ user_has_verified }}
-      var LOST_PETREPORT_JSON = convert_to_javascript_obj("{{ petmatch.lost_pet.toJSON }}");
-      var FOUND_PETREPORT_JSON = convert_to_javascript_obj("{{ petmatch.found_pet.toJSON }}");
+      //Define those django-rendered petreport variables as global javascript variables
+      var LOST_PETREPORT = convert_to_javascript_obj("{{ petmatch.lost_pet.toJSON }}");
+      var FOUND_PETREPORT = convert_to_javascript_obj("{{ petmatch.found_pet.toJSON }}");
     </script>
     {% endblock js %}
 

@@ -32,7 +32,6 @@ from registration.views import activate
 from utils import *
 from datetime import datetime
 # from pytz import timezone
-import utils
 import oauth2 as oauth, random, urllib
 import hashlib, random, re
 
@@ -68,7 +67,6 @@ def home (request):
 
     if request.user.is_authenticated() == True:
         return render_to_response(HTML_HOME, {'pet_reports_list': pet_reports_list, 'last_login': request.session.get('social_auth_last_login_backend'), 'version':version}, RequestContext(request))
-
     else:
         return render_to_response(HTML_HOME, {'pet_reports_list': pet_reports_list, 'version': version}, RequestContext(request))
 
