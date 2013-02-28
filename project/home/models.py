@@ -7,14 +7,15 @@ from django.db.models.signals import post_save, pre_save, pre_delete, post_delet
 from django.dispatch import receiver
 from django.core.validators import email_re
 from django.core.files.storage import FileSystemStorage
-import PIL, os, time
 from django import forms
+import PIL, os, time
 from constants import *
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.timezone import now as datetime_now
 from datetime import timedelta
 from django.conf import settings
+
 
 '''===================================================================================
 [models.py]: Models for the EPM system
@@ -38,7 +39,6 @@ class UserProfile (models.Model):
     photo = models.ImageField(upload_to='images/profile_images', null=True)
     last_logout = models.DateTimeField(null=True, auto_now_add=True)
     following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
-    is_test = models.BooleanField(default=False)
     chats = models.ManyToManyField('Chat', null=True)
     reputation = models.FloatField(default=0, null=True)
     # facebook_cred = models.CharField(max_length=100, null=True)
@@ -46,62 +46,36 @@ class UserProfile (models.Model):
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
 
-    #Create the activity log for this user
-    def set_activity_log(self, is_test=False):
-        if is_test == True:
-            self.is_test = True
-            print "[OK]: A new UserProfile TEST log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id)                        
-        else:
-            self.is_test = False
-            print "[OK]: A new UserProfile log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id)                        
-
-        self.save()
-        log_activity(ACTIVITY_ACCOUNT_CREATED, self)
-
     ''' Update the current user's reputation points based on an activity '''
     def update_reputation(self, activity):
         if activity == ACTIVITY_PETMATCH_UPVOTE:
             self.reputation += REWARD_PETMATCH_VOTE
-
         elif activity == ACTIVITY_PETMATCH_DOWNVOTE:
             self.reputation += REWARD_PETMATCH_VOTE
-
         elif activity == ACTIVITY_PETREPORT_SUBMITTED:
             self.reputation += REWARD_PETREPORT_SUBMIT
-
         elif activity == ACTIVITY_PETMATCH_PROPOSED:
             self.reputation += REWARD_PETMATCH_PROPOSE
-
         elif activity == ACTIVITY_USER_BEING_FOLLOWED:
             self.reputation += REWARD_USER_FOLLOWED
-
         elif activity == ACTIVITY_USER_BEING_UNFOLLOWED:
             self.reputation -= REWARD_USER_FOLLOWED
-
         elif activity == ACTIVITY_PETREPORT_ADD_BOOKMARK:
             self.reputation += REWARD_PETREPORT_BOOKMARK
-
         elif activity == ACTIVITY_PETREPORT_REMOVE_BOOKMARK:
             self.reputation -= REWARD_PETREPORT_BOOKMARK
-
         elif activity == ACTIVITY_ACCOUNT_CREATED:
             self.reputation += REWARD_NEW_ACCOUNT
-
         elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE:
             self.reputation += REWARD_USER_PROPOSED_PETMATCH_VOTE
-
         elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL:
             self.reputation += REWARD_USER_PROPOSED_PETMATCH_SUCCESSFUL
-
         elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE:
             self.reputation += REWARD_USER_PROPOSED_PETMATCH_FAILURE
-
         elif activity == ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL:
             self.reputation += REWARD_USER_VERIFY_PETMATCH_SUCCESSFUL
-
         elif activity == ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL:
             self.reputation += REWARD_PETMATCH_UPVOTE_SUCCESSFUL
-
         else:
             print '[ERROR]: Cannot update reputation points: This is not a valid activity! \n'
             return False
@@ -236,33 +210,37 @@ class PetReport(models.Model):
 class PetMatch(models.Model):
 
     '''Required Fields'''
+    #Lost Pet
     lost_pet = models.ForeignKey('PetReport', null=False, default=None, related_name='lost_pet_related')
+    #Found Pet
     found_pet = models.ForeignKey('PetReport', null=False, default=None, related_name='found_pet_related')
+    #UserProfile who proposed the PetMatch object.
     proposed_by = models.ForeignKey('UserProfile', null=False, related_name='proposed_by_related')
+    #Date when PetMatch was proposed (created).
     proposed_date = models.DateTimeField(null=False, auto_now_add=True)
+    #Description of PetMatch.
     description = models.CharField(max_length=PETMATCH_DESCRIPTION_LENGTH, null=False, default=None)
     '''Non-Required Fields'''
-    '''is_open will be set to False once it is triggered for verification i.e., it will not be available
-    to the crowd for viewing/voting after this petmatch triggers the verification workflow or if it is 
-    declared as a Failed PetMatch when a successful PetMatch is found for either of the PetReports associated with
-    the current Petmatch instance'''
+    #is_open will be set to False once it is triggered for verification i.e., it will not be available
+    #to the crowd for viewing/voting after this petmatch triggers the verification workflow or if it is 
+    #declared as a Failed PetMatch when a successful PetMatch is found for either of the PetReports associated with
+    #the current Petmatch instance.
     is_open = models.BooleanField(default=True)
     is_successful = models.BooleanField(default=False)
-    '''verification_triggered will be set to true if and when a PetMatch reaches the 
-    threshold for verification'''
+    #verification_triggered will be set to true if and when a PetMatch reaches the threshold for verification
     verification_triggered = models.BooleanField(default=False)
     score = models.IntegerField(default=0)
     #closed_by = models.ForeignKey('UserProfile', null=True, related_name='closed_by_related')
-    '''closed_date is the date when the PetMatch is closed for good (after verification)'''
+    #closed_date is the date when the PetMatch is closed for good (after verification)
     closed_date = models.DateTimeField(null=True)
     up_votes = models.ManyToManyField('UserProfile', null=True, related_name='up_votes_related')
     down_votes = models.ManyToManyField('UserProfile', null=True, related_name='down_votes_related')
-    '''verification_votes represents user responses sent via the verify_petmatch webpage.
-    the first bit holds the Lost Contact's response and the second bit holds the 
-    Found Contact's response. 
-    0 - No response was recorded
-    1 - user clicked on Yes
-    2 - User clicked on No'''
+    #verification_votes represents user responses sent via the verify_petmatch webpage.
+    #the first bit holds the Lost Contact's response and the second bit holds the 
+    #Found Contact's response. 
+    #0 - No response was recorded
+    #1 - user clicked on Yes
+    #2 - User clicked on No
     verification_votes = models.CharField(max_length=PETMATCH_VERIFICATION_VOTES_LENGTH,default='00')
 
     '''Because of the Uniqueness constraint that the PetMatch must uphold, we override the save method'''
@@ -399,10 +377,12 @@ class PetMatch(models.Model):
                     petmatch_owner.email_user(email_subject,email_body,from_email=None)
                 #print '[INFO]: Email to pet match owner: '+email_body
 
+
     def close_PetMatch(self):
         petmatch_owner = self.proposed_by
         lost_pet_contact = self.lost_pet.proposed_by
         found_pet_contact = self.found_pet.proposed_by
+
         if '0' not in self.verification_votes:
             self.closed_date = datetime_now()         
             '''If the PetMatch is successful, all related PetMatches will be closed 
@@ -418,11 +398,13 @@ class PetMatch(models.Model):
                     petmatch.is_open = False
                     petmatch.closed_date = datetime_now()
                     petmatch.save()
-                '''the lost and found pet reports for the pet match are closed'''
+
+                #the lost and found pet reports for the pet match are closed
                 petmatch.lost_pet.closed = True
                 petmatch.lost_pet.save()
                 petmatch.found_pet.closed = True
                 petmatch.found_pet.save()
+                
                 # --------Reputation points--------
                 # update reputation points for the following users:
                 # petmatch_owner, lost_pet_contact, and found_pet_contact
@@ -584,7 +566,7 @@ def delete_UserProfile(sender, instance=None, **kwargs):
 
     else:    
         #Delete the UserProfile log file.
-        delete_log(instance)
+        logger.log_activity(ACTIVITY_ACCOUNT_DELETED, instance)
         #Instead of deleting the User (which might break foreign-key relationships),
         #set the active flag to False (INACTIVE)
         instance.user.is_active = False
@@ -596,10 +578,11 @@ def setup_UserProfile(sender, instance, created, **kwargs):
     if created == True:
         #Create a UserProfile object.
         userprofile = UserProfile.objects.create(user=instance)
-        userprofile.update_reputation(ACTIVITY_ACCOUNT_CREATED)
+        # userprofile.update_reputation(ACTIVITY_ACCOUNT_CREATED)
+        
     elif instance.is_active:
-        if log_exists(instance.get_profile()) == False:
-            log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
+        if logger.log_exists(instance.get_profile()) == False:
+            logger.log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
 
 #Post Add Signal function to check if a PetMatch has reached threshold
 @receiver(m2m_changed, sender=PetMatch.up_votes.through)
@@ -614,4 +597,4 @@ def trigger_PetMatch_verification(sender, instance, action,**kwargs):
             instance.save()
 
 ''' Import statements placed at the bottom of the page to prevent circular import dependence '''
-from logging import *
+import logging as logger

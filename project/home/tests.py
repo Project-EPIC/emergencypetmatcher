@@ -680,7 +680,7 @@ class EditUserProfileTesting (unittest.TestCase):
 			start_time = time.clock()
 
 			#objects
-			(user,password) = create_random_User(i,pretty_name=True)
+			(user,password) = create_random_User(i)
 			client = Client (enforce_csrf_checks=False)
 			user_i = user.id
 			#Log in First.
@@ -742,7 +742,7 @@ class EditUserProfileTesting (unittest.TestCase):
 			start_time = time.clock()
 
 			#objects
-			(user,password) = create_random_User(i,pretty_name=True)
+			(user,password) = create_random_User(i)
 			client = Client (enforce_csrf_checks=False)
 			user_i = user.id
 			#Log in First.
@@ -974,7 +974,7 @@ class LoggingTesting (unittest.TestCase):
 
 		for i in range(NUMBER_OF_TESTS):
 			start_time = time.clock()
-			(user, password) = create_random_User(i, pretty_name=True)
+			(user, password) = create_random_User(i)
 			user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 
 			with open(user_log_filename, 'r') as logger:
@@ -2282,6 +2282,8 @@ class HomePageTesting (unittest.TestCase):
 			response = client.get(URL_HOME)
 			self.assertEquals(response.status_code,200)
 			#Testing if the list of pets in the home page are ordered in reverse chronological fashion
+			print response.context
 			pet_reports_list = response.context['pet_reports_list']
 			pet_reports = PetReport.objects.filter(closed = False).order_by("id").reverse()
 			self.assertEquals(str(pet_reports_list.object_list.all()),str(pet_reports))
+

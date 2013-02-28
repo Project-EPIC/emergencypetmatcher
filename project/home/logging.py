@@ -1,94 +1,122 @@
-from constants import *
-from home.models import UserProfile, PetReport, PetMatch
-import os, sys, time
 from django.utils import timezone 
 from django.utils.dateparse import parse_datetime
 from datetime import datetime
+from constants import *
+from home.models import *
+import os, sys, time, documenter
 
 '''===================================================================================
 [logging.py]: Logging Functionality for the EPM system
 ==================================================================================='''
 
-'''Method for logging activities given an input UserProfile, Activity Enum, and (optionally) PetReport and PetMatch objects.'''
+'''
+log_activity(): Given an activity and UserProfile object, log the activity as a document
+in the docuemnt store.
+'''
 def log_activity(activity, userprofile, userprofile2=None, petreport=None, petmatch=None):
-    assert isinstance(userprofile, UserProfile)
-    #Define the user filename and logger.
+    assert isinstance (userprofile, UserProfile)
     user = userprofile.user
-
-    if userprofile.is_test == True:
-        user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
-    else:
-        user_log_filename = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
+    #Which collection should we use?
+    collection = None
+    #empty log at first
+    log = {} 
+    log [DOCUMENT_USERPROFILE_ID] = userprofile.id
 
     try:
-        logger = open(user_log_filename, "a")
         if activity == ACTIVITY_ACCOUNT_CREATED:
-            log = "A new UserProfile account was created for {%s} with ID{%d}\n" % (user.username, userprofile.id)
+            log [DOCUMENT_LOG] = "A new UserProfile account was created for %s" % user.username
+            collection = COLLECTION_USERPROFILE_ACTIVITIES
 
         elif activity == ACTIVITY_LOGIN:
-            log = "%s with ID{%d} logged in to the system\n" % (user.username, userprofile.id)           
+            log [DOCUMENT_LOG] = "%s logged in to the system" % user.username        
+            collection = COLLECTION_USERPROFILE_ACTIVITIES
 
         elif activity == ACTIVITY_LOGOUT:
-            log = "%s with ID{%d} logged out of the system\n" % (user.username, userprofile.id)            
+            log [DOCUMENT_LOG] = "%s logged out of the system" % user.username
+            collection = COLLECTION_USERPROFILE_ACTIVITIES
 
         elif activity == ACTIVITY_USER_CHANGED_USERNAME:
-            log = "%s with ID{%d} renamed his/her username\n" % (user.username, userprofile.id)            
+            log [DOCUMENT_LOG] = "%s renamed his/her username" % user.username   
+            collection = COLLECTION_USERPROFILE_ACTIVITIES
 
         elif activity == ACTIVITY_PETREPORT_SUBMITTED:
             assert isinstance(petreport, PetReport)
-            log = "%s submitted the PetReport for {%s} with ID{%d}\n" % (user.username, petreport.pet_name, petreport.id)
+            log [DOCUMENT_LOG] = "%s submitted the PetReport for %s" % (user.username, petreport.pet_name)
+            log [DOCUMENT_PETREPORT_ID] = petreport.id
+            collection = COLLECTION_PETREPORT_ACTIVITIES
 
         elif activity == ACTIVITY_PETREPORT_ADD_BOOKMARK:
             assert isinstance(petreport, PetReport)
-            log = "%s has added a PetReport bookmark for {%s} with ID{%d}\n" % (user.username, petreport.pet_name, petreport.id)
+            log [DOCUMENT_LOG] = "%s has started following a PetReport for %s" % (user.username, petreport.pet_name)
+            log [DOCUMENT_PETREPORT_ID] = petreport.id
+            collection = COLLECTION_PETREPORT_ACTIVITIES
 
         elif activity == ACTIVITY_PETREPORT_REMOVE_BOOKMARK:
             assert isinstance(petreport, PetReport)
-            log = "%s has removed a PetReport bookmark for {%s} with ID{%d}\n" % (user.username, petreport.pet_name, petreport.id)
+            log [DOCUMENT_LOG] = "%s has stopped following a PetReport for %s" % (user.username, petreport.pet_name)
+            log [DOCUMENT_PETREPORT_ID] = petreport.id
+            collection = COLLECTION_PETREPORT_ACTIVITIES
 
         elif activity == ACTIVITY_PETMATCH_PROPOSED:
             assert isinstance(petmatch, PetMatch)
-            log = "%s proposed the PetMatch object with ID{%d}\n" % (user.username, petmatch.id)
+            log [DOCUMENT_LOG] = "%s proposed the PetMatch matching %s and %s" % (user.username, petmatch.lost_pet, petmatch.found_pet)
+            log [DOCUMENT_PETMATCH_ID] = petmatch.id
+            collection = COLLECTION_PETMATCH_ACTIVITIES
 
         elif activity == ACTIVITY_PETMATCH_UPVOTE:
             assert isinstance(petmatch, PetMatch)
-            log = "%s upvoted the PetMatch object with ID{%d}\n" % (user.username, petmatch.id)
+            log [DOCUMENT_LOG] = "%s upvoted the PetMatch matching %s and %s" % (user.username, petmatch.lost_pet, petmatch.found_pet)
+            log [DOCUMENT_PETMATCH_ID] = petmatch.id
+            collection = COLLECTION_PETMATCH_ACTIVITIES
 
         elif activity == ACTIVITY_PETMATCH_DOWNVOTE:
             assert isinstance(petmatch, PetMatch)
-            log = "%s downvoted the PetMatch object with ID{%d}\n" % (user.username, petmatch.id)  
- 
-        elif activity == ACTIVITY_FOLLOWING:
+            log [DOCUMENT_LOG] = "%s downvoted the PetMatch matching %s and %s" % (user.username, petmatch.lost_pet, petmatch.found_pet)
+            log [DOCUMENT_PETMATCH_ID] = petmatch.id
+            collection = COLLECTION_PETMATCH_ACTIVITIES
+
+        elif activity == ACTIVITY_UFOLLOWING:
             assert isinstance(userprofile2, UserProfile)
-            log = "%s has followed {%s} with ID{%d}\n" % (user.username, userprofile2.user.username, userprofile2.id)                 
+            log [DOCUMENT_LOG] = "%s has started following %s" % (user.username, userprofile2.user.username)
+            log [DOCUMENT_FOLLOWING_ID] = userprofile2.id
+            collection = COLLECTION_USERPROFILE_ACTIVITIES
 
             # Write the same following info into the follower's log file
             log_activity(ACTIVITY_FOLLOWER, userprofile=userprofile2, userprofile2=userprofile)
 
         elif activity == ACTIVITY_UNFOLLOWING:
             assert isinstance(userprofile2, UserProfile)
-            log = "%s has unfollowed {%s} with ID{%d}\n" % (user.username, userprofile2.user.username, userprofile2.id)                 
+            log [DOCUMENT_LOG] = "%s has stopped following %s" % (user.username, userprofile2.user.username)
+            log [DOCUMENT_UNFOLLOWING_ID] = userprofile2.id
+            collection = COLLECTION_USERPROFILE_ACTIVITIES
 
             # Write the same unfollowing info into the unfollower's log file
             log_activity(ACTIVITY_UNFOLLOWER, userprofile=userprofile2, userprofile2=userprofile)
-  
+
         elif activity == ACTIVITY_FOLLOWER:
             assert isinstance(userprofile2, UserProfile)
-            log = "%s has been followed by {%s} with ID{%d}\n" % (user.username, userprofile2.user.username, userprofile2.id)                           
+            log [DOCUMENT_LOG] = "%s has been followed by %s" % (user.username, userprofile2.user.username)
+            log [DOCUMENT_FOLLOWER_ID] = userprofile2.id         
+            collection = COLLECTION_USERPROFILE_ACTIVITIES   
 
         elif activity == ACTIVITY_UNFOLLOWER:
             assert isinstance(userprofile2, UserProfile)
-            log = "%s has been unfollowed by {%s} with ID{%d}\n" % (user.username, userprofile2.user.username, userprofile2.id)                           
+            log [DOCUMENT_LOG] = "%s has been unfollowed by %s" % (user.username, userprofile2.user.username)
+            log [DOCUMENT_UNFOLLOWER_ID] = userprofile2.id
+            collection = COLLECTION_USERPROFILE_ACTIVITIES
 
         else:
             raise IOError
-      
-        log = (time.asctime() + " [%s]: " + log) % activity
-        logger.write(log)
-        logger.close()
-
+  
     except Exception as e:
-        print "[ERROR]: problem in log_activity(%s)." % e
+        print "[ERROR]: Logging.py {%s}" % e
+
+    #Record the time.
+    log [DOCUMENT_TIMESTAMP] = time.asctime()
+    #Record the activity.
+    log [DOCUMENT_ACTIVITY] = activity
+    #Finally, insert the new log into the specified collection.
+    documenter.insert(collection, log, is_test=userprofile.is_test)
         
 
 ''' Helper function for returning an HTML representation for an input activity '''
@@ -165,6 +193,16 @@ def get_activity_HTML(log, userprofile, userprofile2=None, petreport=None, petma
     return html
 
 
+def get_recent_activities (userprofile, activity=None, since_date=None, num_activities=100):
+    assert isinstance (userprofile, UserProfile)
+    #Initialize the activity list.
+    activities = []
+
+    if since_date != None:
+        since_date = datetime.strptime(str(since_date)[:19], '%Y-%m-%d %H:%M:%S')
+
+
+
 '''Helper function to get the most recent activity from an input UserProfile and (optionally) activity type.'''
 def get_recent_activites_from_log(userprofile, current_userprofile=None, since_date=None, num_activities=100, activity=None):
 
@@ -173,7 +211,6 @@ def get_recent_activites_from_log(userprofile, current_userprofile=None, since_d
     # since_date: used to get all log activities that happened before that date 
     # num_activities: used to get a number of activites not more than this number
     # activity: used to decide about one type of activity and ignore the other 
-
     assert isinstance(userprofile, UserProfile)
 
     if current_userprofile != None:

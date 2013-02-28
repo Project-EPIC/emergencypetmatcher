@@ -11,6 +11,7 @@ URL_VOTE_MATCH = '/matching/vote_PetMatch'
 URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
 URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport/"
+URL_SHARE_PETREPORT = "/sharing/share_PetReport"
 
 
 

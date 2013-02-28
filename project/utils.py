@@ -3,7 +3,7 @@ from django.forms.models import model_to_dict
 from django.test.client import Client
 from home.models import *
 from constants import *
-import random, string, sys, time, datetime, lipsum, traceback
+import documenter, random, string, sys, time, datetime, lipsum, traceback
 
 '''===================================================================================
 epm_utils.py: Utility Functions for EPM Utility and Testing
@@ -91,21 +91,44 @@ def performance_report(total_time):
 	print '\tTotal Time: %s sec' % (total_time)
 	print '\tAVG Time Taken for a Single Test: %s sec' % (total_time/NUMBER_OF_TESTS)
 
-#Delete all model data
-def delete_all(leave_users = False, only_test_users=True):
-	PetMatch.objects.all().delete()
-	PetReport.objects.all().delete()
-	Chat.objects.all().delete()
-	ChatLine.objects.all().delete()
-	#Delete Users if you want to.
-	if leave_users == False:
-		if only_test_users == True:
-			#Get the users whose userprofile.is_test attribute is set to TRUE
-			test_users = User.objects.filter(userprofile__is_test=True)
-			test_users.all().delete()
+'''
+delete_all(): Wipes out relational and non-relational data.
+The best way to think about this function is to focus on the data modes.
 
-		else:
-			User.objects.all().delete()
+"Test Mode": You are performing test cases, which use a test relational DB and the mongo epm_db_test DB.
+
+"Real/Live Mode": You are launching the web app for real interactions. No scripting or fixturing is involved. 
+You are using the real relational DB and the mongo epm_db DB.
+
+"Play Mode": You are neither testing or (completely) in live mode; you are running scripts/fixtures to generate data and
+test relationships of that data. You are using the real relational DB and the mongo epm_db DB.
+
+This function accepts the following formal parameters:
+
+delete_real_data: Delete ALL (relational+non-relational) data from the real data sources (real relational DB and mongo epm_db DB).
+delete_test_data: Delete JUST non-relational data from the test data source (mongo epm_db_test DB).
+
+If we defined a relation between these parameters "p1 <= p2", which means that p1 is *weaker* in that it deletes at most as much data as p2, then:
+
+	delete_test_data <= delete_real_data
+
+The function carries out the deletion of data based upon the parameters. By default, both kwargs are set to False. Therefore, if none are set to True, this
+function does nothing. This is to keep the data secure should there be any mis-handling of this function call. 
+'''
+def delete_all(delete_real_data=False, delete_test_data=False):
+	if delete_real_data == True:
+		PetMatch.objects.all().delete()
+		PetReport.objects.all().delete()
+		User.objects.all().delete()
+
+		#Delete noSQL real database.
+		documenter.empty_collections(is_test=False)
+
+	elif delete_test_data == True:
+		#Delete noSQL test database.
+		documenter.empty_collections(is_test=True)
+	else:
+		print "[INFO]: delete_all() did nothing - no data has been deleted."
 
 #Deletes all PetReport images in the static/images/petreport_images folder
 def delete_PetReport_images(from_list=None):
@@ -129,30 +152,22 @@ def delete_PetReport_images(from_list=None):
 	else:
 		print "[OK]: All Files in '%s' are now deleted." % PETREPORT_IMAGES_DIRECTORY
 
-
 #Create Random Object for: User
-def create_random_User(i, pretty_name=True, test_user=True):
-	if pretty_name == True:
-		username = random.choice(USERNAMES) + str(i)
-	else:
-		username = generate_string(10) + str(i)
+def create_random_User(i):
+	username = random.choice(USERNAMES) + str(i)
 
 	#To prevent duplicate usernames
 	while(UserProfile.username_exists(username)):
-		if pretty_name == True:
-			username = random.choice(USERNAMES) + str(i)
-		else:
-			username = generate_string(10) + str(i)
-
+		username = random.choice(USERNAMES) + str(i)
+		
 	password = generate_string(10)
 	email = generate_string(6) + '@' + 'test.com'
 	try:
 		user = User.objects.create_user(username = username, email = email, password = password)
 	except IntegrityError, e:
-		print '[ERROR]: '+str(e.message)
+		print '[ERROR]: ' + str(e.message)
 
-	userprofile = user.get_profile()
-	userprofile.set_activity_log(is_test=test_user)
+	#return user and password tuple.
 	return (user, password)
 
 #returns a random list of UserProfiles
@@ -411,7 +426,7 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 def create_test_view_setup(create_clients=True, create_following_lists=False, create_petreports=False, create_petmatches=False):
 
 	#Firstly, delete everything existing.
-	delete_all(only_test_users=True)
+	delete_all(delete_real_data=True, delete_test_data=True)
 	
 	#Need to setup the object lists. The users list encapsulates tuples of <user, password>
 	users = [ (None, None) for i in range (NUMBER_OF_TESTS) ]
@@ -421,7 +436,7 @@ def create_test_view_setup(create_clients=True, create_following_lists=False, cr
 
 	#First, create random Users
 	for i in range (NUMBER_OF_TESTS):
-		(user, password) = create_random_User(i, pretty_name=True)
+		(user, password) = create_random_User(i)
 		users [i] = (user, password)
 
 	#Then, create the Users' following lists (if specified)
