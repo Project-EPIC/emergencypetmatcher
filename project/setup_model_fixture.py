@@ -101,7 +101,7 @@ elif sys.argv[1] == 'setup':
 			userprofile=create_random_bookmark_list(userprofile)
 
 		for i in range (NUM_PETMATCHES):
-			create_random_PetMatch(None,None,None)
+			create_random_PetMatch(lost_pet=None,found_pet=None,user=None, pet_type=None)
 
 		print '[OK]: (n <= %s) = %d Pet Matches created (Some PetMatch objects could not be created due to uniqueness constraints)' % (NUM_PETMATCHES, len(PetMatch.objects.all()))	
 	print 'usernames with passwords are:'

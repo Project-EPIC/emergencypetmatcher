@@ -336,7 +336,7 @@ def get_potential_PetMatch_PetReport_pairs(pet_type=None):
 
 
 #Create Random Object for: PetMatch
-def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None, threshold_bias = True):
+def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None, threshold_bias=False):
 	#If the lost or found pet (or both) wasn't supplied, then search for potential PetMatch PetReport pairs
 	if lost_pet == None or found_pet == None:
 
@@ -374,12 +374,12 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 			if the random integer is 2, the petmatch might not exceed the threshold'''
 			if threshold_bias == True and random.randint(1,2) == 1 and user_count >=5:
 				up_votes = create_random_Userlist(num_users=random.randint(5, user_count))
-				down_votes = create_random_Userlist(num_users=random.randint(0, len(up_votes)-5 ))
+				down_votes = create_random_Userlist(num_users=random.randint(0, len(up_votes) - 5 ))
 				petmatch.up_votes = set(up_votes)
 				petmatch.down_votes = set(down_votes) - set(up_votes)
 			else:
-				up_votes = create_random_Userlist(num_users=random.randint(0, user_count))
-				down_votes = create_random_Userlist(num_users=random.randint(0, user_count))
+				up_votes = create_random_Userlist(num_users=random.randint(0, user_count/4))
+				down_votes = create_random_Userlist(num_users=random.randint(0, user_count/4))
 				petmatch.up_votes = set(up_votes) - set(down_votes)
 				petmatch.down_votes = set(down_votes) - set(up_votes) 
 
