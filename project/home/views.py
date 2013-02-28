@@ -32,7 +32,6 @@ from registration.views import activate
 from utils import *
 from datetime import datetime
 # from pytz import timezone
-import utils
 import oauth2 as oauth, random, urllib
 import hashlib, random, re
 
@@ -117,6 +116,7 @@ def get_activities_json(request):
         print "======= END [AJAX]: get_activities_json =========\n"
         #Zip it up in JSON and ship it out as an HTTP Response.
         json = simplejson.dumps ({"activities":activities})
+        print json
         return HttpResponse(json, mimetype="application/json")     
 
     else:

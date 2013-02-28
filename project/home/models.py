@@ -8,13 +8,16 @@ from django.dispatch import receiver
 from django.core.validators import email_re
 from django.core.files.storage import FileSystemStorage
 from django import forms
-import PIL, os, time
 from constants import *
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.timezone import now as datetime_now
-from datetime import timedelta
+# from datetime import timedelta
 from django.conf import settings
+from django.core.files.images import ImageFile
+from django.forms.models import model_to_dict
+import PIL, os, time, datetime as DATETIME
+import simplejson 
 
 
 '''===================================================================================
@@ -204,6 +207,35 @@ class PetReport(models.Model):
     def convert_date_to_string(self):
         string = str(self.date_lost_or_found)
         return str
+
+    def toDICT(self):
+        #A customized version of django model function "model_to_dict"
+        #to convert a PetReport model object to a dictionary object
+        modeldict = model_to_dict(self)
+        #Iterate through all fields in the model_dict
+        for field in modeldict:
+            value = modeldict[field]
+            if isinstance(value, DATETIME.datetime) or isinstance(value, DATETIME.date):
+                modeldict[field] = value.strftime("%B %d, %Y")
+            elif isinstance(value, ImageFile):
+                modeldict[field] = value.name
+            elif field == "sex":
+                modeldict[field] = self.get_sex_display()
+            elif field == "size":
+                modeldict[field] = self.get_size_display()
+            elif field == "geo_location_lat" and str(value).strip() == "":
+                modeldict[field] = None
+            elif field == "geo_location_long" and str(value).strip() == "":
+                modeldict[field] = None
+        #Just add a couple of nice attributes.
+        modeldict ["proposed_by_username"] = self.proposed_by.user.username       
+        return modeldict
+
+    def toJSON(self):
+        #Convert a PetReport model object to a json object
+        json = simplejson.dumps(self.toDICT())
+        print "toJSON: " + str(json)
+        return json
 
 
 #The Pet Match Object Model

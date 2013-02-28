@@ -60,12 +60,20 @@ $(document).ready(function(){
 
     //Update the share buttons' click event.
     $("#facebook_share_pm").click(function(){
-      share_on_facebook(URL, IMAGE, TITLE, SUMMARY);
+      //share_on_facebook(URL, IMAGE, TITLE, SUMMARY);
+      publishToFeed(URL, IMAGE, TITLE, CAPTION, SUMMARY);
     });
 
     $("#twitter_share_pm").click(function(){
       share_on_twitter(URL, IMAGE, TITLE, SUMMARY);
     });
+
+
+    //Retrieve and display the lost pet report fields
+    display_PetReport_fields(LOST_PETREPORT, $(".lost_pmdpfields"));
+
+    //Retrieve and display the found pet report fields
+    display_PetReport_fields(FOUND_PETREPORT, $(".found_pmdpfields"));
 
 });
 
@@ -99,5 +107,3 @@ function vote (user_vote){
   });                  
   return true;
 }
-
-

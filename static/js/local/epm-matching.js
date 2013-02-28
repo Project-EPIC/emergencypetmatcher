@@ -1,9 +1,6 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
 
-    //Keep dibs on the latest candidate petreport looked at.
-    CANDIDATE_PETREPORT_ID = null;
-
 	$('#tiles').imagesLoaded(function(){
 
 		// Prepare layout options.
@@ -56,9 +53,7 @@ $(document).ready(function(){
 
 			//Grab the Image from the candidate petreport and copy it in the Workspace Detail Div.
 			var img = $(this).find("img");
-			var petreport_id_element = $(this).find("#petreport_id");
-			var petreport_id = $(petreport_id_element).attr("value");
-			var success = get_PetReport_object(petreport_id, img);
+			move_petreport_to_workspace_match_detail(CANDIDATE_PETREPORT, img);
 			
 		}
 	});	
@@ -68,14 +63,14 @@ $(document).ready(function(){
 
 		//Grab the Image from the target petreport and copy it in the Workspace Detail Div.
 		var img = $(this);
-		var success = get_PetReport_object(TARGET_PETREPORT_ID, img);
+		move_petreport_to_workspace_match_detail(TARGET_PETREPORT, img);
 
 	});	
 
 
 	$("#button_propose_match").click(function(){
 
-		var link = URL_PROPOSE_MATCH + TARGET_PETREPORT_ID + "/" + CANDIDATE_PETREPORT_ID + "/";
+		var link = URL_PROPOSE_MATCH + TARGET_PETREPORT.id + "/" + CANDIDATE_PETREPORT.id + "/";
 		return load_dialog(link, "Propose Match", 900, "auto");
 
 	});
@@ -116,9 +111,6 @@ function move_petreport_to_workspace_match_detail (petreport, img){
 
 		img.parent().css("border-color", "yellow");
 
-		//Update the candidate petreport id.
-		CANDIDATE_PETREPORT_ID = petreport.id;
-
 		//Show both the "Propose Match" and "Bookmark Pet" Buttons.
 		$("#button_propose_match").show();
 		$("#button_bookmark_pet").show();				
@@ -134,18 +126,8 @@ function move_petreport_to_workspace_match_detail (petreport, img){
 		$("#button_bookmark_pet").hide();
 	}
 
-	//TODO: Fill up the list.
-	$(".matching_petname").html("<b>Pet Name:</b> " + petreport.pet_name);
-	$(".matching_lost_found").html("<b>Lost/Found:</b> " + petreport.status);
-	$(".matching_contact").html("<b>Contact:</b> <a href= '" + URL_USERPROFILE + petreport.proposed_by + "/' >" + petreport.proposed_by_username + "</a>");
-	$(".matching_date").html("<b>Date Lost/Found:</b> " + petreport.date_lost_or_found);
-	$(".matching_location").html("<b>Location:</b> " + petreport.location);
-	$(".matching_age").html("<b>Age:</b> " + petreport.age);
-	$(".matching_sex").html("<b>Sex:</b> " + petreport.sex);
-	$(".matching_breed").html("<b>Breed:</b> " + petreport.breed);
-	$(".matching_color").html("<b>Color:</b> " + petreport.color);
-	$(".matching_size").html("<b>Size:</b> " + petreport.size);
-	$(".matching_desc").html("<b>Description:</b> <div class = 'pr_desc' style='border: 1px dotted'>" + petreport.description + "</div>");
+	//Fill up the field list.
+	display_PetReport_fields(petreport, $(".prdpfields"));
 
 	//Turn on the Workspace detail div.
 	workspace_match_detail.show(); 
@@ -154,39 +136,17 @@ function move_petreport_to_workspace_match_detail (petreport, img){
 function moveImage(item, container) {
 
 	var petreport_img = $(item).find("img").clone();
-	var petreport_id_element = $(item).find("#petreport_id").clone();
-	var petreport_id = petreport_id_element.attr("value");
 
-	//get the PetReport object via AJAX call.
-	var success = get_PetReport_object(petreport_id, petreport_img);
-	
 	//Animate the drop!
 	var w = container.width();
 	var h = container.height();
 	petreport_img.animate({height: h, width: w});
 	$(container).html(petreport_img);
 
-	//Safeguard the ID Hidden Input element tag inside of the Droppable div.
-	$(container).prepend(petreport_id_element);
+	//Show the details of a candidate petreport after dropping its image to the droppable container
+	move_petreport_to_workspace_match_detail(CANDIDATE_PETREPORT, petreport_img);
+
 }
-
-function get_PetReport_object (petreport_id, img){
-
-	$.ajax({
-
-		type:"GET",
-		url: URL_PETREPORT_JSON + petreport_id + "/",
-		success: function(data){
-			var petreport = data;
-			move_petreport_to_workspace_match_detail(petreport, img);
-		},
-		error: function(data){
-			alert("An unexpected error occurred when trying to retrieve this Pet Report's attributes. Please try again."); 
-			return false;
-		}
-	});
-}
-
 
 function show_prdp_dialog (link){
 
