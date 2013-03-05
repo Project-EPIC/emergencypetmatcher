@@ -554,7 +554,7 @@ class PetReportForm (ModelForm):
 
     class Meta:
         model = PetReport
-        exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by')
+        exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by','closed')
 
 #The UserProfile Form - used for editing the user profile
 #edit initial value of each field either in the view or in the template
