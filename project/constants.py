@@ -5,11 +5,14 @@ import os
 ==================================================================================='''
 
 #Number of Tests
-NUMBER_OF_TESTS = 20
+NUMBER_OF_TESTS = 100
 
 #Lower and Upper bounds for Lost and Found Dates
 DATE_LOWER_BOUND = "2012-01-01"
 DATE_UPPER_BOUND = "2012-08-16"
+
+#number of pet reports on the home page
+NUM_PETREPORTS_HOMEPAGE = 50
 
 #max_length for Model Fields
 USER_USERNAME_LENGTH = 30
@@ -52,6 +55,12 @@ PETREPORT_PET_TYPE_RABBIT = "Rabbit"
 PETREPORT_PET_TYPE_SNAKE = "Snake"
 PETREPORT_PET_TYPE_TURTLE = "Turtle"
 PETREPORT_PET_TYPE_OTHER = "Other"
+
+#PetMatch Constants
+PETMATCH_OUTCOME_NEW_PETMATCH = "NEW PETMATCH"
+PETMATCH_OUTCOME_DUPLICATE_PETMATCH = "DUPCLIATE PETMATCH"
+PETMATCH_OUTCOME_UPDATE = "SQL UPDATE"
+PETMATCH_OUTCOME_INSERTED_IMPROPERLY = "INSERTED IMPROPERLY"
 
 #File Path Constants
 ACTIVITY_LOG_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/logs/activity_logs/"

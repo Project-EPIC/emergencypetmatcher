@@ -624,7 +624,15 @@ h1.found {
 	max-height:275px;
 	overflow-y:visible;
 	overflow-x:hidden;
+
 }
+
+.prdp_info ul {
+
+	padding: 2px;
+	list-style-type: none;
+}
+
 
 /** Use this if you want to display the PetReport description **/
 .pr_desc {

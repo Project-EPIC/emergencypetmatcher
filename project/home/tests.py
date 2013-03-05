@@ -680,7 +680,7 @@ class EditUserProfileTesting (unittest.TestCase):
 			start_time = time.clock()
 
 			#objects
-			(user,password) = create_random_User(i,pretty_name=True)
+			(user,password) = create_random_User(i)
 			client = Client (enforce_csrf_checks=False)
 			user_i = user.id
 			#Log in First.
@@ -742,7 +742,7 @@ class EditUserProfileTesting (unittest.TestCase):
 			start_time = time.clock()
 
 			#objects
-			(user,password) = create_random_User(i,pretty_name=True)
+			(user,password) = create_random_User(i)
 			client = Client (enforce_csrf_checks=False)
 			user_i = user.id
 			#Log in First.
@@ -974,7 +974,7 @@ class LoggingTesting (unittest.TestCase):
 
 		for i in range(NUMBER_OF_TESTS):
 			start_time = time.clock()
-			(user, password) = create_random_User(i, pretty_name=True)
+			(user, password) = create_random_User(i)
 			user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 
 			with open(user_log_filename, 'r') as logger:
@@ -2252,4 +2252,38 @@ class ReputationTesting(unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
-	
+'''===================================================================================
+HomePageTesting: Testing for the EPM Home Page
+==================================================================================='''
+class HomePageTesting (unittest.TestCase):
+
+	#Get rid of all objects in the QuerySet.
+	def setUp(self):
+		delete_all()
+
+	#Get rid of all objects in the QuerySet.
+	def tearDown(self):
+		delete_all()	
+
+	def test_homepage_newlyadded(self):
+		print_testing_name("test_homepage_newlyadded")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#objects
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
+
+			response = client.get(URL_HOME)
+			self.assertEquals(response.status_code,200)
+			#Testing if the list of pets in the home page are ordered in reverse chronological fashion
+			print response.context
+			pet_reports_list = response.context['pet_reports_list']
+			pet_reports = PetReport.objects.filter(closed = False).order_by("id").reverse()
+			self.assertEquals(str(pet_reports_list.object_list.all()),str(pet_reports))
+

@@ -1,0 +1,320 @@
+
+/**
+ * Grid container
+ */
+#tiles {
+list-style-type: none;
+position: relative; /** Needed to ensure items are laid out relative to this container **/
+margin: 0;
+}
+
+/**
+ * Grid items
+ */
+#tiles li.item {
+width: 200px;
+background-color: #ffffff;
+border: 1px solid #dedede;
+-moz-border-radius: 2px;
+-webkit-border-radius: 2px;
+border-radius: 2px;
+display: none; /** Hide items initially to avoid a flicker effect **/
+  cursor: pointer;
+padding: 4px;
+}
+
+#tiles li img {
+display: block;
+max-width: 200px;
+}
+
+/**
+ * Grid item text
+ */
+#tiles li p {
+color: #666;
+font-size: 12px;
+margin: 7px 0 0 7px;
+}
+
+#tiles li h1 {
+color: #000000;
+font-size: 13px;
+margin: 1px 0 2px 0;
+}
+
+h1.lost {
+background: #ECF0EC url(../images/gradient4.png) repeat;
+}
+
+h1.found {
+background: #ECF0EC url(../images/gradient5.png) repeat;
+}
+
+#feedlist {
+list-style-type: none;
+}
+
+#feedlist li {
+background-color: #ffffff;
+color: #000000;
+}
+
+#feedlist li.alternate {
+background-color: #e9e9e9;
+}
+
+/**
+ * Some extra styles to randomize heights of grid items.
+ */
+#tiles ali:nth-child(3n) {
+height: 175px;
+}
+
+#tiles ali:nth-child(4n-3) {
+padding-bottom: 30px;
+}
+
+#tiles ali:nth-child(5n) {
+height: 250px;
+}
+
+/** General page styling **/
+  
+html {
+/*background-color: #e9e9e9;*/
+
+}
+
+body {
+background: #ECF0EC url(../images/img01.gif) repeat;
+font: 13px Arial, Helvetica, sans-serif;
+color: #787878;
+}
+
+#main {
+padding: 20px 0 30px 0;
+width: 98%;
+margin-left: auto;
+margin-right: auto;
+}
+
+header h1 {
+text-align: center;
+font-size: 24px;
+font-weight: normal;
+margin: 30px 0 3px 0;
+}
+
+header p {
+text-align: center;
+font-size: 13px;
+color: #777;
+margin: 0;
+}
+
+/* Logo */
+
+#logo {
+	float: left;
+	padding: 10px 0 0 20px;
+}
+
+#logo h1 {
+	margin: 0;
+	height: 130px;
+	padding: 20px 0 0 0px;
+	text-transform: lowercase;
+	letter-spacing: -2px;
+	font-size: 2em;
+	font-weight: normal;
+	color: #000000;
+}
+
+#logo h1 a {
+	display: block;
+	text-decoration: none;
+	color: #000000;
+}
+
+#logo p {
+	margin: -103px 0 0 2px;
+	text-transform: uppercase;
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 11px;
+}
+
+#logo a {
+	display: block;
+	text-decoration: none;
+	color: #000000;
+}
+
+/* Menu */
+
+#menu {
+	float: right;
+	margin-right: 20px;
+}
+
+#menu ul {
+	margin: 0px;
+	padding: 35px 0px 0px 0px;
+	list-style: none;
+}
+
+#menu li {
+	display: inline;
+}
+
+#menu a {
+	display: block;
+	float: left;
+	margin-left: 5px;
+	padding: 5px 20px;
+	/*background: #F3F1E9;*/
+	text-decoration: none;
+	text-transform: uppercase;
+	border-top: 2px solid #F2EFA2;
+	font-family: Arial, Helvetica, sans-serif; 
+	font-weight: bold;
+	font-size: 11px;
+	color: #182C33;
+}
+
+#menu a:hover, .active a {
+	
+}
+
+/* nav */
+
+#nav {
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+	padding-bottom: 2px;
+}
+
+#nav ul {
+	list-style: none;
+}
+
+#nav li {
+	display: inline;
+}
+
+#nav a {
+	/*display: block;
+	float: left;*/
+	padding: 5px 10px;
+	text-decoration: none;
+	text-transform: lowercase;
+	border-bottom: 2px solid #F2EFA2;
+	color: #182C33;	
+}
+
+#nav a:hover, .active a {
+	background: #F2EFA2;
+}
+
+#prdp_title{
+
+	margin: 0;
+	height: 60px;
+	padding: 20px 0 0 0px;
+	letter-spacing: -1px;
+	font-size: 2em;
+	font-weight: normal;
+	color: #000000;
+	padding-top:20px
+}
+
+#prdpback {
+
+background: #ECF0EC url(../images/prdp_background.png) no-repeat;
+width: 900px;
+height: 1100px;
+background-size: 100%;
+padding-top:10px;
+padding-left:20px;
+padding-right:20px;
+padding-bottom:20px;
+}
+
+#prdp_picwrapper {
+
+	background: none;
+	width: 500px;
+	height: 600px;
+	border: 1px solid #ffffff;
+
+}
+
+#prdp_picwrapper img{
+
+	background: none;
+	width: auto;
+	height: auto;
+	border: 1px solid #ffffff;
+
+}
+
+/* Footer */
+
+#wrapper2 {
+	background: #422C21;
+}
+
+#footer {
+	width: 98%;
+	margin: 0 auto;
+	padding-bottom: 20px;
+	text-transform: uppercase;
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+	color: #FFFFFF;
+}
+
+#footer a {
+	text-decoration: none;
+	font-size: 10px;
+	color: #FFFFFF;
+}
+
+#legal {
+	clear: both;
+	margin: 0;
+	padding: 10px 0;
+	text-align: center;
+	font-size: 10px;
+	color: C;
+	background: black;
+}
+
+#legal a {
+	border-bottom: 1px dotted #939393;
+	text-decoration: none;
+	color: #939393;
+}
+
+/* container */
+
+#container {
+
+}
+
+.pets li{
+
+	margin-left: 0px;
+
+}
+
+#filters {
+	float:left;
+	background-color: "yellow";
+	border-radius: 2px;
+	border-color: "black";
+	width: 75px;
+	height:500px;
+}

@@ -691,7 +691,8 @@ class VerificationTesting (unittest.TestCase):
 
 					if new_pet_vote == '11':
 						self.assertTrue(petmatch.is_successful)
-
+						self.assertTrue(petmatch.lost_pet.closed)
+						self.assertTrue(petmatch.found_pet.closed)
 						for pm in petmatch.lost_pet.lost_pet_related.all(): 
 							self.assertFalse(pm.is_open)
 							self.assertTrue(pm.closed_date != None)
