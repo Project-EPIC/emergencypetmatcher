@@ -53,7 +53,9 @@ def simplify_PetReport_dict(petreport):
 	for field in modeldict:
 		value = modeldict[field]
 		if isinstance(value, datetime.datetime) or isinstance(value, datetime.date):
-			modeldict[field] = value.isoformat()
+			# modeldict[field] = value.isoformat()
+			# modeldict[field] = value.strftime("%A %d. %B %Y")
+			modeldict[field] = value.strftime("%B %d, %Y")
 		elif isinstance(value, ImageFile):
 			modeldict[field] = value.name
 		elif field == "sex":

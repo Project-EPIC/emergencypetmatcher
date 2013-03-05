@@ -11,13 +11,30 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        # 'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'epm_db',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
+}
+
+#NoSQL Databases being used.
+NOSQL_DATABASES = {
+    'mongodb': {
+        'NAME':'epm_db',
+        "HOST":"localhost",
+        'PORT':27017,
+        'MAX_POOL_SIZE':10
+    },
+    'mongodb_test': {
+        'NAME':'epm_db_test',
+        "HOST":"localhost",
+        'PORT':27017,
+        'MAX_POOL_SIZE':10
+    }    
 }
 
 # Local time zone for this installation. Choices can be found here:
@@ -176,7 +193,9 @@ AUTHENTICATION_BACKENDS = (
 SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter', 'facebook',)
 
 
-DOMAIN_URL = 'http://www.emergencypetmatcher.com/'
+#DOMAIN_URL = 'http://www.emergencypetmatcher.com/'
+DOMAIN_URL = 'http://epm.cs.colorado.edu/'
+
 
 try:
     from social_auth_settings import *
