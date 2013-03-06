@@ -117,6 +117,13 @@ function display_PetReport_fields(petreport, prdplist){
     prdplist.append("<li><b>Contact:</b> <a href= '" + URL_USERPROFILE + petreport.proposed_by + "/' >" + petreport.proposed_by_username + "</a></li>");
     prdplist.append("<li><b>Date " + petreport.status + ":</b> " + petreport.date_lost_or_found + "</li>");
     prdplist.append("<li><b>Location:</b> " + petreport.location + "</li>");
+
+    //Treat the microchip ID specially.
+    if (petreport.microchip_id != "")
+        prdplist.append("<li><b>Microchipped: </b>Yes</li>");
+    else
+        prdplist.append("<li><b>Microchipped: </b>No</li>");
+
     prdplist.append("<li><b>Spayed/Neutered:</b> " + petreport.spayed_or_neutered + "</li>");
     prdplist.append("<li><b>Age:</b> " + petreport.age + "</li>");
     prdplist.append("<li><b>Sex:</b> " + petreport.sex + "</li>");
