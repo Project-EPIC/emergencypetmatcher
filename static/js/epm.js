@@ -116,7 +116,7 @@ function display_PetReport_fields(petreport, prdplist){
     prdplist.append("<li><b>Lost/Found:</b> " + petreport.status + "</li>");
     prdplist.append("<li><b>Contact:</b> <a href= '" + URL_USERPROFILE + petreport.proposed_by + "/' >" + petreport.proposed_by_username + "</a></li>");
     prdplist.append("<li><b>Date " + petreport.status + ":</b> " + petreport.date_lost_or_found + "</li>");
-    prdplist.append("<li><b>Location:</b> " + petreport.location + "</li>");
+    prdplist.append("<li style='word-wrap:break-word;'><b>Location:</b> " + petreport.location + "</li>");
 
     //Treat the microchip ID specially.
     if (petreport.microchip_id != "")
@@ -130,7 +130,7 @@ function display_PetReport_fields(petreport, prdplist){
     prdplist.append("<li><b>Breed:</b> " + petreport.breed + "</li>");
     prdplist.append("<li><b>Color:</b> " + petreport.color + "</li>");
     prdplist.append("<li><b>Size:</b> " + petreport.size + "</li>");
-    prdplist.append("<li><b>Description:</b> " + petreport.description + "</li>");
+    prdplist.append("<li style='overflow:scroll;'><b>Description:</b> " + petreport.description + "</li>");
 
 }
 

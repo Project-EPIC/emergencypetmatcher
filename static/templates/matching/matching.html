@@ -60,12 +60,8 @@
 					{% for pet_report in pet_reports_list %}
 						<li class="item" >
 							<script> 
-<<<<<<< HEAD
-								var CANDIDATE_PETREPORT_JSON = convert_to_javascript_obj("{{ pet_report.toJSON }}");
-=======
 							    //Define this django-rendered petreport variable as a global javascript variable
 								var CANDIDATE_PETREPORT = convert_to_javascript_obj("{{ pet_report.toJSON }}");
->>>>>>> 062ce03bea8eb98784dfa92ee555d8c120164fa3
 							</script>
 							<div id = "prdpdialog">
 								<a href= "{% url 'disp_PetReport' pet_report.id %}" name="{{ pet_report.pet_name }}">

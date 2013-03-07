@@ -547,7 +547,7 @@ class PetReportForm (ModelForm):
     contact_name = forms.CharField(label = "Contact Name", max_length=PETREPORT_CONTACT_NAME_LENGTH, required=False)
     contact_number = forms.CharField(label = "Contact Phone Number", max_length=PETREPORT_CONTACT_NUMBER_LENGTH, required=False)
     contact_email = forms.CharField(label = "Contact Email Address", max_length=PETREPORT_CONTACT_EMAIL_LENGTH, required=False)
-    img_path = forms.ImageField(label = "Upload an Image", help_text="(*.jpg, *.png, *.bmp)", widget = forms.ClearableFileInput, required = False)
+    img_path = forms.ImageField(label = "Upload an Image", help_text="(*.jpg, *.png, *.bmp), 3MB maximum", widget = forms.ClearableFileInput, required = False)
     spayed_or_neutered = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False)    
     pet_name = forms.CharField(label = "Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False) 
     age = forms.CharField(label = "Age", max_length = PETREPORT_AGE_LENGTH, required = False)
