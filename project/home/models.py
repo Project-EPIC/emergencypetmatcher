@@ -361,9 +361,16 @@ class PetMatch(models.Model):
         For a PetMatch to be successful, it should satisfy certain constraints. D should exceed a threshold value,
         which is half the number of active users on the system. '''
         active_users = len(UserProfile.objects.all())/2 
-        '''10 will be replaced by a function that returns the number of active users in the system'''
-        threshold = active_users/2 
+        '''10 will be replaced by a function that returns the number of active users in the system'''        
+        threshold = 1
         difference = self.up_votes.count() - self.down_votes.count()
+        '''Temporary Fix: If the pet match proposer (also the one who reported  either the lost/found pet
+        on the pet match) votes on the pet match and his vote is the only vote for the pet match then 
+        verification is triggered'''
+        if self.proposed_by == self.up_votes.all()[0] and self.up_votes.count() == 1 and \
+        (self.proposed_by==self.lost_pet.proposed_by or self.proposed_by==self.found_pet.proposed_by):
+            return True
+
         if difference >= threshold:
             return True
         else:
