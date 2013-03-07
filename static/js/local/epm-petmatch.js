@@ -67,13 +67,11 @@ $(document).ready(function(){
       share_on_twitter(PETMATCH_URL, PETMATCH_IMAGE, PETMATCH_TITLE, PETMATCH_SUMMARY);
     });
 
-
     //Retrieve and display the lost pet report fields
     display_PetReport_fields(LOST_PETREPORT, $(".lost_pmdpfields"));
 
     //Retrieve and display the found pet report fields
     display_PetReport_fields(FOUND_PETREPORT, $(".found_pmdpfields"));
-
 });
 
 //The voting AJAX POST call. Requires a string with either "up" or "down".

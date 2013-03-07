@@ -1,6 +1,6 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
-  
+
     var bookmark_button = $("#prdp_bookmark");
 
     //user is authenticated and has bookmarked this pet 
@@ -38,7 +38,7 @@ $(document).ready(function(){
 function bookmark(){
 
   var bookmark_button = $("#prdp_bookmark");
-    
+  
   if (USER_ID == "None"){
     login_link = "Log in <a href="+URL_LOGIN+"?next={% firstof request.path '/' %} > here.</a>";
     $(".prdp_messages").html("<li class='error'> You cannot bookmark this Pet Report because you are not logged in! "+login_link+ "</li>");

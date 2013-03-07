@@ -39,26 +39,21 @@
     <!-- Include the wookmark plug-in -->
     <script src="{{ STATIC_URL }}js/jquery-wookmark.js" type="text/javascript"></script>
 
-    <!-- General, inheritable JS goes here -->
-    <script src = "{{ STATIC_URL }}js/epm.js" type = 'text/javascript'></script>
+    {% block js %}
+    <!-- Page-specific JS goes in this block -->
     <script src = "{{ STATIC_URL }}js/local/epm-verify_petmatch.js" type="text/javascript"></script>
 
-    <!-- Page-specific JS goes in this block -->
-    {% block js %}
-    <!--<script src = "{{ STATIC_URL }}js/local/epm-petmatch.js" type = 'text/javascript'></script>-->
     <script type="text/javascript">
-
-      //Must have these django-rendered variables as global javascript variables in order to refer to them!
-      var STATIC_URL = "{{ STATIC_URL }}";
-      var USER_ID = "{{ user.id }}";
-      var PETMATCH_ID = "{{ petmatch.id }}"
-      var URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
-      var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
-      var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";   
-      var USER_HAS_VERIFIED = {{ user_has_verified }}
-      //Define those django-rendered petreport variables as global javascript variables
-      var LOST_PETREPORT = convert_to_javascript_obj("{{ petmatch.lost_pet.toJSON }}");
-      var FOUND_PETREPORT = convert_to_javascript_obj("{{ petmatch.found_pet.toJSON }}");
+        //Must have these django-rendered variables as global javascript variables in order to refer to them!
+        var STATIC_URL = "{{ STATIC_URL }}";
+        var USER_ID = "{{ user.id }}";
+        var PETMATCH_ID = "{{ petmatch.id }}"
+        var URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
+        var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
+        var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";   
+        var USER_HAS_VERIFIED = {{ user_has_verified }}
+        var LOST_PETREPORT = convert_to_javascript_obj("{{ petmatch.lost_pet.toJSON }}");
+        var FOUND_PETREPORT = convert_to_javascript_obj("{{ petmatch.found_pet.toJSON }}");
     </script>
     {% endblock js %}
 

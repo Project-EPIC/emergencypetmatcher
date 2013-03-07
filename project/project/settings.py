@@ -21,6 +21,22 @@ DATABASES = {
     }
 }
 
+#NoSQL Databases being used.
+NOSQL_DATABASES = {
+    'mongodb': {
+        'NAME':'epm_db',
+        "HOST":"localhost",
+        'PORT':27017,
+        'MAX_POOL_SIZE':10
+    },
+    'mongodb_test': {
+        'NAME':'epm_db_test',
+        "HOST":"localhost",
+        'PORT':27017,
+        'MAX_POOL_SIZE':10
+    }    
+}
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -142,7 +158,6 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
-    'serializers',
     
 )
 

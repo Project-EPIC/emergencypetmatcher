@@ -26,15 +26,15 @@ from home.models import *
 from utils import *
 from constants import *
 from logging import *
-import datetime, re
+import datetime, re, Image
 
 @login_required
 def submit_PetReport(request):
     if request.method == "POST":
         #Let's make some adjustments to non-textual form fields before converting to a PetReportForm.
-        if request.POST ['geo_location_lat'] == 'None' or request.POST ['geo_location_long'] == 'None':
-            request.POST ['geo_location_lat'] = None
-            request.POST ['geo_location_long'] = None
+        #if request.POST ['geo_location_lat'] == 'None' or request.POST ['geo_location_long'] == 'None':
+        #    request.POST ['geo_location_lat'] = None
+        #    request.POST ['geo_location_long'] = None
 
         form = PetReportForm(request.POST, request.FILES)
         print request.POST, request.FILES
@@ -177,7 +177,6 @@ def bookmark_PetReport(request):
 #         #Need this for easy displaying on the Matching Interface workspace detail table.
 #         prdp_dict = simplify_PetReport_dict(prdp) 
 #         print prdp_dict
-
 #         json = simplejson.dumps(prdp_dict)
 #         print "JSON: " + str(json)
 
@@ -186,5 +185,8 @@ def bookmark_PetReport(request):
 #     print "Oops,something went wrong"
 #     messages.failure(request, "Oops, something went wrong.")
 #     return matching.match_petreport(request, petreport_id)
-     
+    
+
+
+
 

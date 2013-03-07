@@ -18,6 +18,5 @@ $(document).ready(function(){
 
     //Retrieve and display the found pet report fields
     display_PetReport_fields(FOUND_PETREPORT, $(".found_pmdpfields"));
-
 });
 

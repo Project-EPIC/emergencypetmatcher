@@ -45,31 +45,31 @@ def output_update (i):
 	sys.stdout.flush()
 
 #Helper function for cleaning up the modeldict passed in for simple displaying
-# def simplify_PetReport_dict(petreport):
-# 	assert isinstance (petreport, PetReport)
-# 	modeldict = model_to_dict(petreport)
+def simplify_PetReport_dict(petreport):
+	assert isinstance (petreport, PetReport)
+	modeldict = model_to_dict(petreport)
 
-# 	#iterate through all fields in the model_dict
-# 	for field in modeldict:
-# 		value = modeldict[field]
-# 		if isinstance(value, datetime.datetime) or isinstance(value, datetime.date):
-# 			# modeldict[field] = value.isoformat()
-# 			# modeldict[field] = value.strftime("%A %d. %B %Y")
-# 			modeldict[field] = value.strftime("%B %d, %Y")
-# 		elif isinstance(value, ImageFile):
-# 			modeldict[field] = value.name
-# 		elif field == "sex":
-# 			modeldict[field] = petreport.get_sex_display()
-# 		elif field == "size":
-# 			modeldict[field] = petreport.get_size_display()
-# 		elif field == "geo_location_lat" and str(value).strip() == "":
-# 			modeldict[field] = None
-# 		elif field == "geo_location_long" and str(value).strip() == "":
-# 			modeldict[field] = None
+	#iterate through all fields in the model_dict
+	for field in modeldict:
+		value = modeldict[field]
+		if isinstance(value, datetime.datetime) or isinstance(value, datetime.date):
+			# modeldict[field] = value.isoformat()
+			# modeldict[field] = value.strftime("%A %d. %B %Y")
+			modeldict[field] = value.strftime("%B %d, %Y")
+		elif isinstance(value, ImageFile):
+			modeldict[field] = value.name
+		elif field == "sex":
+			modeldict[field] = petreport.get_sex_display()
+		elif field == "size":
+			modeldict[field] = petreport.get_size_display()
+		elif field == "geo_location_lat" and str(value).strip() == "":
+			modeldict[field] = None
+		elif field == "geo_location_long" and str(value).strip() == "":
+			modeldict[field] = None
 
-# 	#Just add a couple of nice attributes.
-# 	modeldict ["proposed_by_username"] = petreport.proposed_by.user.username		
-# 	return modeldict
+	#Just add a couple of nice attributes.
+	modeldict ["proposed_by_username"] = petreport.proposed_by.user.username		
+	return modeldict
 
 '''===================================================================================
 generate_random_date():

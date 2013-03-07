@@ -6,5 +6,5 @@ $(document).ready(function(){
 
     //Retrieve and display the found pet report fields
     display_PetReport_fields(CANDIDATE_PETREPORT, $(".candidate_petreport_fields"));
-
+   
 });

@@ -2,8 +2,9 @@
 {% load url from future %}
 
 {% block js %}
-    <script src = "{{ STATIC_URL }}/js/epm.js" type = 'text/javascript'></script>    
+    <!-- Page-specific JS goes in this block -->
 	<script src = "{{ STATIC_URL }}js/local/epm-matching.js" type = 'text/javascript'></script>
+
 	<script type='text/javascript'>
 	    //Define this django-rendered petreport variable as a global javascript variable
 		var TARGET_PETREPORT = convert_to_javascript_obj("{{ target_petreport.toJSON }}");
@@ -16,7 +17,9 @@
 {% block content %}
 <div id="matching_body" style="min-height:800px;">
 	<div id = "mi_instructions" style ="margin 0 auto; font-size: 14px; font-weight:bold;">
-		<p> The matching interface allows you to click and drag potential pet reports to the workspace, which contains empty squares to put potential matches onto. To begin, survey the pet reports on the right that have been analyzed and ranked by the system to resemble a match and place them onto the workspace. When you feel that a potential match can be made, click on the "Propose Pet Match" button in the workspace. Good luck matching!</p>
+		<p> The matching interface allows you to click and drag potential pet reports to the workspace (left-hand side), which contains the pet that you are trying to match, as well as an empty square to put candidate pets onto. </p>
+		<p>To begin, survey the pet reports on the right that have been analyzed and ranked by the system to resemble a match and place them onto the workspace. When you feel that a potential match can be made, click on the "Propose Pet Match" button in the workspace. Good luck matching!</p>
+		<br/>
 	</div>
 
 	<div id="nav">

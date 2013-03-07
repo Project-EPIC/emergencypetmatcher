@@ -10,7 +10,7 @@ URL_VOTE_MATCH = '/matching/vote_PetMatch'
 URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
 URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport/"
-
+URL_SHARE_PETREPORT = "/sharing/share_PetReport"
 
 //GLOBAL JS Functions
 function load_dialog(link, title, width, height){
@@ -96,11 +96,7 @@ function share_on_twitter(url, image, title, summary){
 
 
 function convert_to_javascript_obj(json_str){
-    var obj = JSON.parse(json_str.replace(/&quot;/ig, '"'));
-    //var obj = jQuery.parseJSON(json_str.replace(/&quot;/ig, '"') );
-    //var obj = $.parseJSON(json_str.replace(/&quot;/ig, '"') );
-    //All the above functions give the same result, but after replacing the extra quots 
-    return obj
+    return JSON.parse(json_str.replace(/&quot;/ig, '"'));
  }
 
 function display_PetReport_fields(petreport, prdplist){
@@ -112,14 +108,21 @@ function display_PetReport_fields(petreport, prdplist){
     prdplist.append("<li><b>Lost/Found:</b> " + petreport.status + "</li>");
     prdplist.append("<li><b>Contact:</b> <a href= '" + URL_USERPROFILE + petreport.proposed_by + "/' >" + petreport.proposed_by_username + "</a></li>");
     prdplist.append("<li><b>Date " + petreport.status + ":</b> " + petreport.date_lost_or_found + "</li>");
-    prdplist.append("<li><b>Location:</b> " + petreport.location + "</li>");
+    prdplist.append("<li style='word-wrap:break-word;'><b>Location:</b> " + petreport.location + "</li>");
+
+    //Treat the microchip ID specially.
+    if (petreport.microchip_id != "")
+        prdplist.append("<li><b>Microchipped: </b>Yes</li>");
+    else
+        prdplist.append("<li><b>Microchipped: </b>No</li>");
+
     prdplist.append("<li><b>Spayed/Neutered:</b> " + petreport.spayed_or_neutered + "</li>");
     prdplist.append("<li><b>Age:</b> " + petreport.age + "</li>");
     prdplist.append("<li><b>Sex:</b> " + petreport.sex + "</li>");
     prdplist.append("<li><b>Breed:</b> " + petreport.breed + "</li>");
     prdplist.append("<li><b>Color:</b> " + petreport.color + "</li>");
     prdplist.append("<li><b>Size:</b> " + petreport.size + "</li>");
-    prdplist.append("<li><b>Description:</b> " + petreport.description + "</li>");
+    prdplist.append("<li style='overflow:scroll;'><b>Description:</b> " + petreport.description + "</li>");
 
 }
 
