@@ -43,12 +43,11 @@ $(document).ready(function(){
 
 	//Update the share buttons on click.
 	$("#facebook_share_epm").click(function(){
-		//share_on_facebook(URL, IMAGE, TITLE, SUMMARY);
-		publishToFeed(URL, IMAGE, TITLE, SUMMARY);
+		share_on_facebook(HOME_URL, HOME_IMAGE, HOME_TITLE, HOME_CAPTION, HOME_SUMMARY);
 	});
 
 	$("#twitter_share_epm").click(function(){
-		share_on_twitter(URL, IMAGE, TITLE, SUMMARY);
+		share_on_twitter(HOME_URL, HOME_IMAGE, HOME_TITLE, HOME_SUMMARY);
 	});
 
 

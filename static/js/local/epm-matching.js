@@ -48,31 +48,24 @@ $(document).ready(function(){
 
 	//Click Event handler for any candidate (Droppable) Petreport in the Workspace.
 	$(".droppable").click(function(){
-
 		if ($(this).has("img").length > 0){
-
 			//Grab the Image from the candidate petreport and copy it in the Workspace Detail Div.
 			var img = $(this).find("img");
 			move_petreport_to_workspace_match_detail(CANDIDATE_PETREPORT, img);
-			
 		}
 	});	
 
 	//Click Event handler for the target petreport in the Workspace.
 	$("#prtarget .target").click(function(){
-
 		//Grab the Image from the target petreport and copy it in the Workspace Detail Div.
 		var img = $(this);
 		move_petreport_to_workspace_match_detail(TARGET_PETREPORT, img);
-
 	});	
 
 
 	$("#button_propose_match").click(function(){
-
 		var link = URL_PROPOSE_MATCH + TARGET_PETREPORT.id + "/" + CANDIDATE_PETREPORT.id + "/";
 		return load_dialog(link, "Propose Match", 900, "auto");
-
 	});
 
 
@@ -127,7 +120,7 @@ function move_petreport_to_workspace_match_detail (petreport, img){
 	}
 
 	//Fill up the field list.
-	display_PetReport_fields(petreport, $(".prdpfields"));
+	display_PetReport_fields(petreport, $(".matching_prdpfields"));
 
 	//Turn on the Workspace detail div.
 	workspace_match_detail.show(); 

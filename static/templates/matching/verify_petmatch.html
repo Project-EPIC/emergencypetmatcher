@@ -51,6 +51,7 @@
       //Must have these django-rendered variables as global javascript variables in order to refer to them!
       var STATIC_URL = "{{ STATIC_URL }}";
       var USER_ID = "{{ user.id }}";
+      var PETMATCH_ID = "{{ petmatch.id }}"
       var URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
       var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
       var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";   

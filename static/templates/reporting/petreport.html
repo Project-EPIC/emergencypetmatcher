@@ -55,11 +55,11 @@
 
     <!-- Setting up parameters for sharing on facebook and twitter -->
     <script type="text/javascript">
-      var URL = 'http://epm.cs.colorado.edu/reporting/PetReport/{{ pet_report.id }}';
-      var IMAGE = 'http://epm.cs.colorado.edu{{ STATIC_URL }}{{ pet_report.img_path }}';
-      var TITLE = 'A Pet Report at EPM';
-      var CAPTION ='EmergencyPetMatcher';
-      var SUMMARY = 'A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
+      var PETREPORT_URL = 'http://epm.cs.colorado.edu/reporting/PetReport/{{ pet_report.id }}';
+      var PETREPORT_IMAGE = 'http://epm.cs.colorado.edu{{ STATIC_URL }}{{ pet_report.img_path }}';
+      var PETREPORT_TITLE = 'A Pet Report at EPM';
+      var PETREPORT_CAPTION ='EmergencyPetMatcher';
+      var PETREPORT_SUMMARY = 'A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
     </script>
     {% endblock js %} 
 

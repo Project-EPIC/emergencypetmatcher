@@ -50,6 +50,7 @@
       var STATIC_URL = "{{ STATIC_URL }}";
       var VOTED = "{{ user_has_voted }}";
       var USER_ID = "{{ user.id }}";
+      var PETMATCH_ID = "{{ petmatch.id }}"
       //Define those django-rendered petreport variables as global javascript variables
       var LOST_PETREPORT = convert_to_javascript_obj("{{ petmatch.lost_pet.toJSON }}");
       var FOUND_PETREPORT = convert_to_javascript_obj("{{ petmatch.found_pet.toJSON }}");
@@ -59,11 +60,11 @@
 
     <!-- Setting up parameters for sharing on facebook and twitter -->
     <script type="text/javascript">
-      var URL = 'http://epm.cs.colorado.edu/matching/PetMatch/{{  petmatch.id }}';
-      var IMAGE = 'http://epm.cs.colorado.edu{{ STATIC_URL }}{{ petmatch.lost_pet.img_path }}';
-      var TITLE = 'A Pet Report Matching at EPM';
-      var CAPTION ='EmergencyPetMatcher';
-      var SUMMARY = 'A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
+      var PETMATCH_URL = 'http://epm.cs.colorado.edu/matching/PetMatch/{{  petmatch.id }}';
+      var PETMATCH_IMAGE = 'http://epm.cs.colorado.edu{{ STATIC_URL }}{{ petmatch.lost_pet.img_path }}';
+      var PETMATCH_TITLE = 'A Pet Report Matching at EPM';
+      var PETMATCH_CAPTION ='EmergencyPetMatcher';
+      var PETMATCH_SUMMARY = 'A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
     </script>
     {% endblock js %}
 

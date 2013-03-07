@@ -60,12 +60,11 @@ $(document).ready(function(){
 
     //Update the share buttons' click event.
     $("#facebook_share_pm").click(function(){
-      //share_on_facebook(URL, IMAGE, TITLE, SUMMARY);
-      publishToFeed(URL, IMAGE, TITLE, CAPTION, SUMMARY);
+      share_on_facebook(PETMATCH_URL, PETMATCH_IMAGE, PETMATCH_TITLE, PETMATCH_CAPTION, PETMATCH_SUMMARY);
     });
 
     $("#twitter_share_pm").click(function(){
-      share_on_twitter(URL, IMAGE, TITLE, SUMMARY);
+      share_on_twitter(PETMATCH_URL, PETMATCH_IMAGE, PETMATCH_TITLE, PETMATCH_SUMMARY);
     });
 
 
