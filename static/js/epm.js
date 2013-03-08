@@ -60,16 +60,12 @@ function postIt(url, data){
     $('#jQueryPostItForm').submit();
 }
 
-function share_on_facebook(url, image, title, summary){
+function share_on_facebook_old(url, image, title, summary){
 	window.open('http://www.facebook.com/sharer.php?s=100&p[url]=' + url + '&p[images][0]=' + image + '&p[title]=' + title + '&p[summary]=' + summary,'newWindow', 'width=700, height=430');
 	return false;
 }	
 
-function write_callback_data(str) {
-    document.getElementById('fb-ui-return-data').innerHTML=str;
-}
-
-function publishToFeed(url, image, title, caption, summary) {
+function share_on_facebook(url, image, title, caption, summary) {
  
         var obj = {
             method: 'feed',
@@ -82,14 +78,11 @@ function publishToFeed(url, image, title, caption, summary) {
         };
  
         function callback(response) {
-            //alert('callback');
             if (response && response.post_id){
-                document.getElementById('fb-ui-return-data').innerHTML = "Post ID: " + response.post_id;
-                //write_callback_data("<br><b>Callback returns succeeded!</b>");
-                alert('response');
+                alert('The callback function returned a response!');
             }
             else{
-                alert("You clicked Cancel button, don't you want to share?");
+                alert("You clicked Cancel button!");
             }
         }
         FB.ui(obj, callback);
@@ -109,7 +102,6 @@ function convert_to_javascript_obj(json_str){
 function display_PetReport_fields(petreport, prdplist){
 
     // Assert that prdplist is an <ul> html tag element
-    
     prdplist.html("");
     prdplist.append("<li><b>Pet Name:</b> " + petreport.pet_name + "</li>");
     prdplist.append("<li><b>Pet Type:</b> " + petreport.pet_type + "</li>");

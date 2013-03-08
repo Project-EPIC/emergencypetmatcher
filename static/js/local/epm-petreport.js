@@ -24,12 +24,11 @@ $(document).ready(function(){
 
     //Update the share buttons' click event.
     $("#facebook_share_pr").click(function(){
-      //share_on_facebook(URL, IMAGE, TITLE, SUMMARY);
-      publishToFeed(URL, IMAGE, TITLE, CAPTION, SUMMARY);
+      share_on_facebook(PETREPORT_URL, PETREPORT_IMAGE, PETREPORT_TITLE, PETREPORT_CAPTION, PETREPORT_SUMMARY);
     });
 
     $("#twitter_share_pr").click(function(){
-      share_on_twitter(URL, IMAGE, TITLE, SUMMARY);
+      share_on_twitter(PETREPORT_URL, PETREPORT_IMAGE, PETREPORT_TITLE, PETREPORT_SUMMARY);
     });
 
     //Retrieve and display the current pet report fields using json data   

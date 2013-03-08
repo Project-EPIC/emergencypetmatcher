@@ -19,7 +19,7 @@ from registration.forms import RegistrationForm
 from random import choice, uniform
 from django.contrib import messages
 from django.utils import simplejson
-from django.core import serializers
+# from django.core import serializers
 from matching.views import *
 from django.forms.models import model_to_dict
 from home.models import *

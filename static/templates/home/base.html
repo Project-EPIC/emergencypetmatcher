@@ -42,16 +42,18 @@
 
 		<!-- Global, inheritable JS goes here -->
 		<script src = "{{ STATIC_URL }}js/epm.js" type='text/javascript'></script>
+
+		{% block js %}		
 		<!-- Page-specific JS goes in this block -->
-		{% block js %}
 		<script src = "{{ STATIC_URL }}js/local/epm-base.js" type='text/javascript'></script>
-		<!-- setting up parameters for sharing on facebook and twitter -->
+		
 		<script type="text/javascript">
-			var URL = "http://epm.cs.colorado.edu/";
-			var IMAGE = "http://epm.cs.colorado.edu{{ STATIC_URL }}images/epm.jpg";
-			var TITLE = 'EmergencyPetMatcher';
-			var CAPTION ='EmergencyPetMatcher';
-			var SUMMARY = 'EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.';
+			//Setting up parameters for sharing on facebook and twitter
+			var HOME_URL = "http://epm.cs.colorado.edu/";
+			var HOME_IMAGE = "http://epm.cs.colorado.edu{{ STATIC_URL }}images/epm.jpg";
+			var HOME_TITLE = 'EmergencyPetMatcher';
+			var HOME_CAPTION ='EmergencyPetMatcher';
+			var HOME_SUMMARY = 'EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.';
 	    </script>
 		{% endblock js %}
 
@@ -76,7 +78,6 @@
         }); 
 	};
 </script>	
-<div id="fb-ui-return-data"></div>
 
 		<!-- container for main divs: 1) header, 2) body, 3) footer-->
 		<div id = "container">
