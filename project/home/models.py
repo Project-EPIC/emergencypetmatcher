@@ -12,7 +12,7 @@ from constants import *
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.timezone import now as datetime_now
-# from datetime import timedelta
+from datetime import timedelta
 from django.conf import settings
 from django.core.files.images import ImageFile
 from django.forms.models import model_to_dict

@@ -146,3 +146,22 @@ function show_prdp_dialog (link){
 	//load_dialog(link, title, width, height)
 	return load_dialog(link.attr("href"), link.attr("name"), 700, "auto")
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
