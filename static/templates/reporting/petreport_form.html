@@ -37,20 +37,25 @@
 					<!-- Geo Location Field set -->
 					{% if "Geo Location Lat" in field.label %}
 						<li> <strong> Geolocation </strong> </li>
-						<div id = "petreport_form_geo">
-							Do you have geographical coordinates for the pet? <input id="petreport_form_geo_check" type="checkbox"/>
-							<li id="petreport_form_geo_lat_field" style="padding:5px;"></li>
-							<li id="petreport_form_geo_long_field" style="padding:5px;"></li>
+						<div id="petreport_form_geo" style="padding-bottom:15px;">
+							Do you have geographical coordinates for the pet? <input id="petreport_form_geo_check" type="checkbox"/><br/>
+							<li id="petreport_form_geo_fields" style="display:none;">
+								<strong>Lattitude (Lat) Coordinate: </strong><input id='id_geo_location_lat' name='geo_location_lat' type='text'/><br/>
+								<strong>Longitude (Long) Coordinate: </strong><input id='id_geo_location_long' name='geo_location_long' type='text'/><br/>
+							</li>
 						</div>
 					{% elif "Geo Location Long" in field.label %} <!-- Do nothing -->
+
 					<!-- Contact Field set -->
 					{% elif "Contact Name" in field.label %}
 						<li> <strong> Pet Contact Preference </strong></li>
-						<div id = "petreport_form_contact">
-							Do you have a contact person for this pet (if other than yourself)? <input id="petreport_form_contact_check" type="checkbox"/>
-							<li id="petreport_form_contact_name_field" style="padding:5px;"></li>
-							<li id="petreport_form_contact_number_field" style="padding:5px;"></li>
-							<li id="petreport_form_contact_email_field" style="padding:5px;"></li>
+						<div id = "petreport_form_contact" style="padding-bottom:15px;">
+							Do you have a contact person for this pet (if other than yourself)? <input id="petreport_form_contact_check" type="checkbox"/><br/>
+							<li id="petreport_form_contact_fields" style="display:none;">
+								<strong>Contact Name: </strong><input id='id_contact_name' name='contact_name' type='text'/><br/>
+								<strong>Contact Phone Number: </strong><input id='id_contact_number' name='contact_number' type='text'/><br/>
+								<strong>Contact Email Address: </strong><input id='id_contact_email' name='contact_email' type='text'/><br/>
+							</li>
 						</div>
 					{% elif "Contact Phone Number" in field.label %} <!-- Do nothing -->
 					{% elif "Contact Email Address" in field.label %} <!-- Do nothing -->
@@ -67,9 +72,11 @@
 								<input name="date_lost_or_found" id="id_date_lost_or_found" onfocus="showCalendarControl(this)" type="text"/>
 							</li><br/>
 						{% elif "Microchip ID" in field.label %}
-							<div id="petreport_form_microchip">
-								Is the pet microchipped? <input id="petreport_form_microchip_check" type="checkbox"/>
-								<li id="petreport_form_microchip_field"></li>
+							<div id="petreport_form_microchip" style="padding-bottom:15px;">
+								Is the pet microchipped? <input id="petreport_form_microchip_check" type="checkbox"/><br/>
+								<li id="petreport_form_microchip_field" style="display:none;">
+									<input id='id_microchip_field' name='microchip_id' type='text'/><br/>
+								</li>
 							</div><br/>						
 
 						<!-- Otherwise, just print the field -->
