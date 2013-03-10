@@ -336,7 +336,7 @@ def get_potential_PetMatch_PetReport_pairs(pet_type=None):
 
 
 #Create Random Object for: PetMatch
-def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None, threshold_bias = True):
+def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None, threshold_bias = False):
 	#If the lost or found pet (or both) wasn't supplied, then search for potential PetMatch PetReport pairs
 	if lost_pet == None or found_pet == None:
 
