@@ -51,7 +51,7 @@ function bookmark(){
 
     type:"POST",
     url:URL_BOOKMARK_PETREPORT,
-    data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":PETREPORT_ID, "action":bookmark_button.text()},
+    data: {"csrfmiddlewaretoken":csrf_value, "petreport_id": PETREPORT_ID, "action":bookmark_button.text()},
       success: function(data){
         bookmark_button.text(data.text);
         bookmark_button.attr("title",data.text);
@@ -65,4 +65,3 @@ function bookmark(){
   });
   return true;
 }
-
