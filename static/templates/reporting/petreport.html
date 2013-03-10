@@ -45,11 +45,11 @@
       <script type = 'text/javascript'> 
         var BOOKMARKED = "{{ user_has_bookmarked }}";
         var USER_ID = "{{ user.id }}";
+        var PETREPORT_ID =  "{{ pet_report.id }}"
         //Define this django-rendered petreport variable as a global javascript variable
         var PETREPORT = convert_to_javascript_obj("{{ pet_report.toJSON }}");
         var URL_LOGIN  = "{% url 'login_User' %}"
         var URL_BOOKMARK_PETREPORT = "{% url 'bookmark_PetReport' %}"
-        var PETREPORT_ID =  "{{ pet_report.id }}"
         var URL = 'http://epm.cs.colorado.edu/reporting/PetReport/{{ pet_report.id }}';
         var IMAGE = 'http://epm.cs.colorado.edu{{ STATIC_URL }}{{ pet_report.img_path }}';
         var TITLE = 'A Pet Report at EPM';
