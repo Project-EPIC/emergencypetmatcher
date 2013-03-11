@@ -502,7 +502,8 @@ def about (request):
 
 class RemoteUserMiddleware(object):
     def process_response(self, request, response):
-        if request.user.is_authenticated():
-            response['X-Remote-User-Name'] = request.user.username
-            response['X-Remote-User-Id'] = request.user.id
+        if hasattr(request, 'user'):
+            if request.user.is_authenticated():
+                response['X-Remote-User-Name'] = request.user.username
+                response['X-Remote-User-Id'] = request.user.id
         return response
