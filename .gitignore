@@ -1,0 +1,5 @@
+static/images/petreport_images/
+*.pyc
+static/images/profile_images/
+project/epm_db
+logs/
