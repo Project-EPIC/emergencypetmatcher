@@ -15,21 +15,14 @@
 
 {% block content %}
 	<div id = "pr_form_instructions">
-		To create a pet report, please fill in the following fields to the best of your ability. Once you have finished, review the pet report to determine its quality. Review with consideration:
-
-		 <ul>
-		 	<li> The quantity of information (are all the fields filled in?) </li>
-		 	<li> The quality of information (is the picture relevant and helpful? Is the description free of general 'fluff' and to the point? </li>
-		 	<li> And general correctness (is everything spelled correctly?)</li>
-		 </ul>
-		 If the pet report meets these criteria, click the 'Submit' button at the end of the form. The fields marked with * are required.
+		To create a pet report, please fill in the following fields to the best of your ability. Once you have finished, click the 'Submit' button at the end of the form. The fields marked with * are required.
 	</div>
 
 	<div id="pr_form_container">
 
 		{% if form.errors %} <strong> {{ form.errors }} </strong> {% endif %}
 
-		<form enctype="multipart/form-data" method="POST" action="{% url 'submit_PetReport' %}">
+		<form enctype="multipart/form-data" name="petreport_form" method="POST" action="{% url 'submit_PetReport' %}">
 			{% csrf_token %}
 			<ul style="list-style-type:none; padding: 0px 0px 0px 20px;">
 				{% for field in form %}
@@ -78,6 +71,16 @@
 									<input id='id_microchip_field' name='microchip_id' type='text'/><br/>
 								</li>
 							</div><br/>						
+						{% elif "Tag and Collar Information" in field.label %}	
+							<li><span id="id_counter_taginfo"></span></li>
+							<li>
+								<textarea rows="10" cols="40" name="tag_info" id="id_tag_info" onfocus="countChars('id_tag_info','id_counter_taginfo',PETREPORT_TAG_INFO_LENGTH)" onkeyup="countChars('id_tag_info','id_counter_taginfo',PETREPORT_TAG_INFO_LENGTH)" onkeydown="countChars('id_tag_info','id_counter_taginfo',PETREPORT_TAG_INFO_LENGTH)" ></textarea>	
+							</li><br/>		
+						{% elif "Pet Description" in field.label %}	
+							<li><span id="id_counter_desc"></span></li>
+							<li>
+								<textarea rows="10" cols="40" name="pet_desc" id="id_description" onfocus="countChars('id_description','id_counter_desc',PETREPORT_DESCRIPTION_LENGTH)" onkeyup="countChars('id_description','id_counter_desc',PETREPORT_DESCRIPTION_LENGTH)" onkeydown="countChars('id_description','id_counter_desc',PETREPORT_DESCRIPTION_LENGTH)" ></textarea>	
+							</li><br/>
 
 						<!-- Otherwise, just print the field -->
 						{% else %}
@@ -86,7 +89,7 @@
 					{% endif %}
 				{% endfor %}
 			</ul><br/>
-			<input type="submit" value="Submit" style= "margin: 10px 0px 10px 0px; width:150px; height:50px; font-size:13pt;float:right;"/>
+			<input id = "id_submit" type="button" value="Submit" style= "margin: 10px 0px 10px 0px; width:150px; height:50px; font-size:13pt;float:right;"/>
 		</form>
 	</div>
 
