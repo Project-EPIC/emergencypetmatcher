@@ -29,9 +29,9 @@ import simplejson
 PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Bird', 'Bird'), ('Horse', 'Horse'), ('Rabbit', 'Rabbit'), ('Snake', 'Snake'), ('Turtle', 'Turtle'), ('Other', 'Other')]
 STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
 SEX_CHOICES=[('M','Male'),('F','Female')]
-SIZE_CHOICES = [('L', 'Large (100+ lbs.)'), ('M', 'Medium (10 - 100 lbs.)'), ('S', 'Small (0 - 10 lbs.)')]
+SIZE_CHOICES = [('L', 'Large'), ('M', 'Medium'), ('S', 'Small')]
 BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador')]
-SPAYED_OR_NEUTERED_CHOICES = [('Spayed', 'Spayed'), ('Neutered', 'Neutered'), ("Neither", "Neither"), ("Not Known", "Not Known")]
+SPAYED_OR_NEUTERED_CHOICES = [("Not Known", "Not Known"),('Spayed', 'Spayed'), ('Neutered', 'Neutered'), ("Neither", "Neither")]
 
 #The User Profile Model containing a 1-1 association with the 
 #django.contrib.auth.models.User object, among other attributes.

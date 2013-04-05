@@ -122,7 +122,8 @@ function display_PetReport_fields(petreport, prdplist){
     prdplist.append("<li><b>Breed:</b> " + petreport.breed + "</li>");
     prdplist.append("<li><b>Color:</b> " + petreport.color + "</li>");
     prdplist.append("<li><b>Size:</b> " + petreport.size + "</li>");
-    prdplist.append("<li style='overflow:scroll;'><b>Description:</b> " + petreport.description + "</li>");
+    prdplist.append("<li class = \"pr_desc\"'><b>Tag and Collar Information:</b> " + petreport.tag_info + "</li>");
+    prdplist.append("<li class = \"pr_desc\"'><b>Description:</b> " + petreport.description + "</li>");
 
 }
 

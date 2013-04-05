@@ -94,6 +94,16 @@
             <ul class="prdpfields" style="list-style-type:none;"></ul>
         </div> 
 
+        <!-- Buttons -->
+        <div id ="prdp_buttons">
+          <a class = "prdp_eachbutton" id="prdp_bookmark"  title="bookmark this pet" style="float:left;cursor:pointer;" onclick="bookmark();">
+            {% csrf_token %}
+            <!-- Bookmark this Pet -->
+          </a>
+          <a class = "prdp_eachbutton" href="{% url 'match_PetReport' pet_report.id %}" style="float:right;" >Match this Pet</a>
+        </div>
+
+
         <!-- Proposed Pet Matches -->
         <div class="prdp_ppm_wk">
           <div class="prdp_subtitle"> Proposed Matches </div>
@@ -140,15 +150,6 @@
             <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
           {% endfor %}
         </ul>   
-
-         <!-- Buttons -->
-        <div id ="prdp_buttons">
-          <a class = "prdp_eachbutton" id="prdp_bookmark"  title="bookmark this pet" style="float:left;cursor:pointer;" onclick="bookmark();">
-            {% csrf_token %}
-            <!-- Bookmark this Pet -->
-          </a>
-          <a class = "prdp_eachbutton" href="{% url 'match_PetReport' pet_report.id %}" style="float:right;" >Work on this Pet</a>
-        </div>
 
       </div>
     {%  endblock petreportcontent %}
