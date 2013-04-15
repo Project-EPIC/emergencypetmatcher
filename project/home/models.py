@@ -29,7 +29,7 @@ import simplejson
 PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Bird', 'Bird'), ('Horse', 'Horse'), ('Rabbit', 'Rabbit'), ('Snake', 'Snake'), ('Turtle', 'Turtle'), ('Other', 'Other')]
 STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
 SEX_CHOICES=[('M','Male'),('F','Female')]
-SIZE_CHOICES = [('L', 'Large'), ('M', 'Medium'), ('S', 'Small')]
+SIZE_CHOICES = [('XL', 'Extra Large'),('L', 'Large'), ('M', 'Medium'), ('S', 'Small')]
 BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador')]
 SPAYED_OR_NEUTERED_CHOICES = [("Not Known", "Not Known"),('Spayed', 'Spayed'), ('Neutered', 'Neutered'), ("Neither", "Neither")]
 
@@ -547,7 +547,7 @@ class PetReportForm (ModelForm):
     '''Non-Required Fields'''
     sex = forms.ChoiceField(label = "Sex", choices = SEX_CHOICES, required = False)
     size = forms.ChoiceField(label = "Size of Pet", choices = SIZE_CHOICES, required = False)
-    location = forms.CharField(label = "Location", help_text="(Found: Location found) or (Lost: Location lost)", max_length = PETREPORT_LOCATION_LENGTH , required = False)
+    location = forms.CharField(label = "Location", max_length = PETREPORT_LOCATION_LENGTH , required = False)
     geo_location_lat = forms.DecimalField(label = "Geo Location Lat", help_text="(Lattitude coordinate)", max_digits=8, decimal_places=5, widget=forms.TextInput(attrs={'size':'10'}), initial=None, required=False)
     geo_location_long = forms.DecimalField(label = "Geo Location Long", help_text="(Longitude coordinate)", max_digits=8, decimal_places=5, widget=forms.TextInput(attrs={'size':'10'}),  initial=None, required=False)
     microchip_id = forms.CharField(label = "Microchip ID", max_length = PETREPORT_MICROCHIP_ID_LENGTH, required=False)

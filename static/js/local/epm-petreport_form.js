@@ -14,6 +14,10 @@
 
 $(document).ready(function(){
 
+	$("#id_status").bind('change', function() { 
+		document.getElementsByClassName("id_pet_report_location")[0]
+			.innerHTML="<strong>Location "+$("#id_status").attr("value")+"</strong>";
+	});
 
 	$("#petreport_form_microchip_check").click(function(){
 
@@ -46,7 +50,6 @@ $(document).ready(function(){
             if (img_size > 3.0) 
             	alert("Image size exceeds 3MB, please upload an image that is within 3MB");
     });
-
 
 	$("#id_submit").click(function(){
 

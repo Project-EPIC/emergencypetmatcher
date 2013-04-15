@@ -55,10 +55,13 @@
 
 					<!-- Regular Fields -->
 					{% else %}
-						<!-- Field Label and help text -->
-						<li> <strong> {{ field.label }} </strong></li>
-						{% if field.help_text %} <li style="margin-bottom:5px;"> {{ field.help_text }} </li> {% endif %}
-
+						{% if "Location" in field.label %}
+							<li class="id_pet_report_location"> <strong>Location Lost </strong> </li>
+							<!-- Field Label and help text -->
+						{% else %}
+							<li> <strong> {{ field.label }} </strong></li>
+							{% if field.help_text %} <li style="margin-bottom:5px;"> {{ field.help_text }} </li> {% endif %}
+						{% endif %}	
 						<!-- Special cases for these fields -->
 						{% if "Date Lost/Found" in field.label %}
 							<li>

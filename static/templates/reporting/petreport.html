@@ -108,19 +108,23 @@
         <div class="prdp_ppm_wk">
           <div class="prdp_subtitle"> Proposed Matches </div>
           <div class = "prdp_overflow"> 
-          {% for petmatch in matches %}
-            <div class = "prdp_pmdp_dialog"> 
-              <a href="{% url 'display_PetMatch' petmatch.id %}">
+          {% if matches %}  
+            {% for petmatch in matches %}
+              <div class = "prdp_pmdp_dialog"> 
+                <a href="{% url 'display_PetMatch' petmatch.id %}">
 
-                {% ifequal pet_report.status 'Lost' %}
-                  <img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ petmatch.found_pet.img_path }}" />  
-                {% else %}
-                  <img src="{{ STATIC_URL}}{{ petmatch.lost_pet.img_path }}" />
-                {% endifequal %}  
+                  {% ifequal pet_report.status 'Lost' %}
+                    <img class = "prdp_petmatch_img" src="{{ STATIC_URL}}{{ petmatch.found_pet.img_path }}" />  
+                  {% else %}
+                    <img src="{{ STATIC_URL}}{{ petmatch.lost_pet.img_path }}" />
+                  {% endifequal %}  
 
-              </a>
-            </div> 
-          {% endfor %}
+                </a>
+              </div> 
+            {% endfor %}
+          {% else %}
+          There are no current matches available for this pet. You can create one by clicking on the <i>Match this Pet</i> button.
+          {% endif %}
           </div>
         </div>
 
@@ -129,18 +133,22 @@
           <div class="prdp_subtitle"> People working on this pet </div>
 
           <div class = "prdp_overflow"> 
-            {% for worker in pet_report.workers.all  %}
-              <div id = "prdp_user_box">
-                <a href= "{% url 'get_UserProfile_page' worker.id %}" title = "{{ worker.user.username }}" >
+            {% if pet_report.workers.all %}
+              {% for worker in pet_report.workers.all  %}
+                <div id = "prdp_user_box">
+                  <a href= "{% url 'get_UserProfile_page' worker.id %}" title = "{{ worker.user.username }}" >
 
-                  {% if worker.photo %}    
-                    <img src="{{ STATIC_URL }}{{ worker.photo }}" alt = "{{ worker.user.username }}" class = "prdp_worker_img" />   
-                  {% else %}
-                    <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" alt = "{{ worker.user.username }}"  class = "prdp_worker_img" />
-                  {% endif %}
-                </a>
-              </div> 
-            {% endfor %}
+                    {% if worker.photo %}    
+                      <img src="{{ STATIC_URL }}{{ worker.photo }}" alt = "{{ worker.user.username }}" class = "prdp_worker_img" />   
+                    {% else %}
+                      <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" alt = "{{ worker.user.username }}"  class = "prdp_worker_img" />
+                    {% endif %}
+                  </a>
+                </div> 
+              {% endfor %}
+            {% else %}
+            Noone has worked on this pet yet, you could be the first! Click on the <i>Match this Pet</i> button to get started.
+            {% endif %}
         </div>
         </div> 
 
