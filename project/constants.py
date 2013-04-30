@@ -116,6 +116,7 @@ ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE = "USER_PROPOSED_PETMATCH_UPVOTE"
 ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL = "USER_PROPOSED_PETMATCH_SUCCESSFUL"
 ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE = "USER_PROPOSED_PETMATCH_FAILURE"
 ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL = "USER_VERIFY_PETMATCH_SUCCESSFUL"
+ACTIVITY_USER_SEND_MESSAGE_TO_USERPROFILE = "ACTIVITY_USER_SEND_MESSAGE_TO_USER "
 
 #Reputation reward points
 REWARD_PETMATCH_VOTE = 2
@@ -155,6 +156,7 @@ URL_UNFOLLOW = "/unfollow"
 URL_EDITUSERPROFILE = "/edituserprofile"
 URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/" 
 URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
+URL_SEND_MESSAGE_TO_USERPROFILE = "/UserProfile/message_UserProfile"
 
 
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
@@ -178,10 +180,13 @@ TEXTFILE_EMAIL_ACTIVATION_SUBJECT="registration/activation_email_subject.txt"
 TEXTFILE_EMAIL_CHANGE_VERICATION="home/email_change_verification.txt"
 TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH = "matching/verification_email_to_pet_owner.txt"
 TEXTFILE_EMAIL_PETMATCH_PROPOSER = "matching/verification_email_to_digital_volunteer.txt"
+TEXTFILE_EMAIL_USERPROFILE_MESSAGE = "home/email_message_user.txt"
 
+#E-mail Constants
 EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH="Emergency Pet Matcher: We have found a potential match for your pet!"
-EMAIL_SUBJECT_PETMATCH_PROPOSER='Your pet match is close to being successful!'
+EMAIL_SUBJECT_PETMATCH_PROPOSER='EmergencyPetMatcher: Your pet match is close to being successful!'
 TEST_EMAIL="emergencypetmatchertest@gmail.com"
+
 
 #Place sample petreport image lists in memory as global variables. Used for generating random PetReports with sample images.
 def load_PetReport_sample_images():

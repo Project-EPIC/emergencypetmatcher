@@ -9,6 +9,7 @@ from django.contrib.messages.api import get_messages
 from social_auth import __version__ as version
 from social_auth.utils import setting
 from social_auth.views import auth
+from django.core.mail import EmailMessage
 from django.db import IntegrityError
 from django.http import Http404
 from django.core import mail
@@ -31,9 +32,7 @@ from registration.models import RegistrationProfile
 from registration.views import activate
 from utils import *
 from datetime import datetime
-# from pytz import timezone
-import oauth2 as oauth, random, urllib
-import hashlib, random, re
+import oauth2 as oauth, random, urllib, hashlib, random, re, project.settings
 
 
 from registration.views import register
@@ -366,6 +365,27 @@ def unfollow_UserProfile(request):
     else:
         raise Http404
 
+@login_required
+def message_UserProfile(request):
+    if request.method == "POST":
+        #Collect Text of Message
+        message = request.POST ["message"]
+        target_userprofile_id = request.POST ["target_userprofile_id"]
+        target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
+        from_userprofile = request.user.get_profile()
+
+        print_info_msg ("Sending an email message from %s to %s" % (from_userprofile.user.username, target_userprofile.user.username))
+
+        #Send message to UserProfile
+        completed = from_userprofile.send_email_message_to_UserProfile(target_userprofile, message, test_email=False)
+
+        if completed == True:
+            messages.success(request, "You have successfully sent your message to %s" % target_userprofile.user.username + ".") 
+        else:
+            messages.failure(request, "Sorry, your message could not be sent because this user's email address is invalid.")
+
+        return redirect(URL_USERPROFILE + str(target_userprofile_id))
+    
 
 @login_required
 def editUserProfile_page(request):

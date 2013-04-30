@@ -19,4 +19,19 @@ $(document).ready(function(){
 
     });	
 
+    $("#userprof_msg_user").click(function(){
+
+    	//If the form is not shown, show it.
+    	if ($("#message_user_form").css("display") == "none"){
+    		$("#message_user_form").css("display", "inline");
+            $("#message_user_form_helptext").css("display", "inline");
+    		$("#userprof_msg_user").prop("textContent", "Cancel");
+    	}
+    	else {
+            $("#message_user_form_helptext").css("display", "none");
+    		$("#message_user_form").css("display", "none");
+    		$("#userprof_msg_user").prop("textContent", "Send a Message");
+    	}
+    });
+
 });

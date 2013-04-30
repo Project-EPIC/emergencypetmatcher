@@ -26,6 +26,12 @@ def print_testing_name(test_name, single_test=False):
 	else:
 		print "\n[TEST]: Testing {%s} for %s iterations\n" % (test_name, NUMBER_OF_TESTS)
 
+def print_info_msg (string):
+	print "[INFO]: %s" % string
+
+def print_error_msg (string):
+	print "[ERROR]: %s" % string
+
 #Generate a random alpha-numeric string.
 def generate_string (size, chars = string.ascii_uppercase + string.digits):
 	return ''.join(random.choice(chars) for i in range(size))
