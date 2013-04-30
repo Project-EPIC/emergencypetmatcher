@@ -2,13 +2,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.forms import ModelForm
-from django import forms
 from django.db.models.signals import post_save, pre_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
 from django.core.validators import email_re
 from django.core.files.storage import FileSystemStorage
 from django import forms
-from constants import *
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.timezone import now as datetime_now
@@ -16,10 +14,8 @@ from datetime import timedelta
 from django.conf import settings
 from django.core.files.images import ImageFile
 from django.forms.models import model_to_dict
-import PIL, os, time, datetime as DATETIME
-import simplejson 
-
-
+from constants import *
+import PIL, os, time, datetime as DATETIME, simplejson, project.settings
 
 '''===================================================================================
 [models.py]: Models for the EPM system
@@ -62,6 +58,23 @@ class UserProfile (models.Model):
 
         self.save()
         log_activity(ACTIVITY_ACCOUNT_CREATED, self)    
+
+    def send_email_message_to_UserProfile (self, target_userprofile, message, test_email=True):
+        
+        if email_re.match(target_userprofile.user.email):
+            site = Site.objects.get(pk=1)
+            ctx = {"site":site, "message":message, "from_user":self.user, "from_user_profile_URL": URL_USERPROFILE + str(self.id)}
+            email_body = render_to_string(TEXTFILE_EMAIL_USERPROFILE_MESSAGE, ctx)
+            email_subject = "EmergencyPetMatcher: You have a new message from %s" % self.user.username
+
+            #If test_email, just return email properties - no need to email.
+            if test_email == True:
+                return {"subject": email_subject, "body":email_body, "from_username": self.user.username, "to_username": target_userprofile.user.username}
+
+            #Go ahead and email now.
+            target_userprofile.user.email_user(email_subject,email_body,from_email=None)
+            return True
+        return False        
 
     ''' Update the current user's reputation points based on an activity '''
     def update_reputation(self, activity):

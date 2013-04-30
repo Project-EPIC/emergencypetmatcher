@@ -42,21 +42,33 @@
 			</tr>
 			</table>
 
-			<!-- Follow link -->
+			<!-- Follow and Message links -->
 			{% if show_profile.user.username != user.username %}
-				{% if not show_profile in user.userprofile.following.all %}
-					<form action = "{% url 'follow_UserProfile' %}" method="post">
-						{% csrf_token %}
-						<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
-						<input style="margin: 15px; 5px; 5px; 5px; width:auto; height:auto;" class="prdp_eachbutton" type="Submit" value="Follow"/>
-					</form>
-				{% else %}
-					<form action = "{% url 'unfollow_UserProfile' %}" method="post">
-						{% csrf_token %}
-						<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>						
-						<input style="margin: 15px; 5px; 5px; 5px; width:auto; height:auto;" class="prdp_eachbutton" type="Submit" value="Unfollow"/>
-					</form>
-				{% endif %}
+				<div style "margin:auto;">
+					{% if not show_profile in user.userprofile.following.all %}
+						<form action = "{% url 'follow_UserProfile' %}" method="post">
+							{% csrf_token %}
+							<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
+							<input style="margin: 15px; 5px; 5px; 5px; width:auto; height:auto;" class="prdp_eachbutton" type="Submit" value="Follow"/>
+						</form>
+					{% else %}
+						<form action = "{% url 'unfollow_UserProfile' %}" method="post">
+							{% csrf_token %}
+							<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>						
+							<input style="margin: 15px; 5px; 5px; 5px; width:auto; height:auto;" class="prdp_eachbutton" type="Submit" value="Unfollow"/>
+						</form>
+					{% endif %}
+					<button id="userprof_msg_user" class="prdp_eachbutton"> Send a Message </button>
+					<div id="message_user_form" style="display:none;">
+						<strong id="message_user_form_helptext" style="display:none;"> Messaging will send an email to this user while keeping email addresses private. </strong>
+						<form style = "padding: 2px; border: 1px gray dotted;" action="{% url 'message_UserProfile' %}" method="post">
+							{% csrf_token %}
+							<textarea name="message" style="height:150px; width:500px;"></textarea>
+							<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
+							<input type="submit" class="prdp_eachbutton" style="width:70px; height:40px;" value="Send"/> 
+						</form>
+					</div>
+				</div>
 			{% endif %}
 			
 			<!-- User Data -->

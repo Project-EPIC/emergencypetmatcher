@@ -1,15 +1,16 @@
 from django.contrib.auth import authenticate
 from django.test.client import Client
-from utils import *
+from django.contrib.sites.models import Site
 from constants import *
 from home.models import *
 from logging import *
+from utils import *
 from time import sleep
 from selenium import webdriver
-from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD
-from project.settings import TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD
-from project.settings import TEST_DOMAIN
-import unittest, string, random, sys, time, urlparse
+from django.template.loader import render_to_string
+from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD, TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD, TEST_DOMAIN, EMAIL_FILE_PATH, EMAIL_BACKEND
+import unittest, string, random, sys, time, urlparse, project.settings
+
 '''===================================================================================
 home.tests.py: Testing for Home App Functionality:
 
@@ -609,9 +610,7 @@ class SocialAuthTesting(TestCase):
         except:
         	print "  Unable to authenticate the testing user with Facebook."
         	
-        end_time = time.clock()
-        print '\n\tTotal Time: %s sec' % (end_time - start_time)
- 
+        performance_report(end_time - start_time)
 
 '''===================================================================================
 UserProfileTesting: Testing for EPM User Profile Page
@@ -638,8 +637,7 @@ class UserProfileTesting (unittest.TestCase):
 
 			user, password = random.choice(users)
 			client = random.choice(clients)
-
-			print "[INFO]:%s logs onto %s to render the profile page..." % (user, client)
+			print_info_msg("%s logs onto %s to render the profile page..." % (user, client))
 
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
@@ -659,6 +657,60 @@ class UserProfileTesting (unittest.TestCase):
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)
+
+
+	def test_send_message_to_UserProfile(self):
+		print_testing_name ("test_send_message_to_UserProfile")
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords.
+		(users, clients) = create_test_view_setup()
+
+		#We assume that the subject's email address is formatted properly and is a real email address.
+		#For testing purposes, we dump email messages to file and assert that their contents are correct.
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+			user_one, password_one = random.choice(users)
+			user_two, password_two = random.choice(users)
+			userprofile_one = user_one.get_profile()
+			userprofile_two = user_two.get_profile()
+			client = random.choice(clients)
+
+			if user_one.id == user_two.id:
+				continue
+
+			#Log onto the first user.
+			loggedin = client.login(username = userprofile_one.user.username, password = password_one)
+			self.assertTrue(loggedin == True)			
+			print_info_msg ("%s logs onto %s to send a message to %s." % (userprofile_one.user.username, client, userprofile_two.user.username))
+
+			# Go to the second user's profile page
+			response = client.get(URL_USERPROFILE + str(userprofile_two.id) + "/")
+			self.assertEquals(response.status_code, 200)
+			#We should have the base.html -> index.html -> userprofile.html
+			self.assertTrue(len(response.templates) == 3)
+
+			#Email properties. We want the email body and subject so that we can check if they are what's actually written to the email.
+			site = Site.objects.get(pk=1)
+			message = generate_string(100)
+			ctx = {"site":site, "message":message, "from_user":userprofile_one.user, "from_user_profile_URL": URL_USERPROFILE + str(userprofile_one.id)}
+			email_body = render_to_string(TEXTFILE_EMAIL_USERPROFILE_MESSAGE, ctx)
+			email_subject = "EmergencyPetMatcher: You have a new message from %s" % userprofile_one.user.username
+
+			#Psuedo-send the email message.
+			email = userprofile_one.send_email_message_to_UserProfile(userprofile_two, message, test_email=True)
+
+			#Check for email properties.
+			self.assertEquals (email ["subject"], email_subject)
+			self.assertEquals (email ["body"], email_body)
+			self.assertEquals (email ["from_username"], userprofile_one.user.username)
+			self.assertEquals (email ["to_username"], userprofile_two.user.username)
+
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+		performance_report(iteration_time)
+
+
 
 '''===================================================================================
 EditUserProfileTesting: Testing for EPM Edit User Profile Page

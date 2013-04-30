@@ -67,6 +67,9 @@ USE_TZ = False
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = '/srv/epm/static/'
 
+#Absolute filesystem path to the project directory. Use for creating relative paths.
+PROJECT_ROOT = "/srv/epm/project"
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
@@ -175,11 +178,18 @@ ACCOUNT_ACTIVATION_DAYS = 1 # One-week activation window; you may, of course, us
 
 '''Email Settings'''
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#Swap with the filebased email backend when testing.
+# "django.core.mail.backends.filebased.EmailBackend"
+
+#Email File Path - Used for testing email messages.
+EMAIL_FILE_PATH =  PROJECT_ROOT + "email-test.txt"
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
 EMAIL_HOST_PASSWORD = '3m3rgEncY'
+
+
 
 
 AUTHENTICATION_BACKENDS = (
