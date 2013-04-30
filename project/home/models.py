@@ -50,6 +50,7 @@ class UserProfile (models.Model):
     # twitter_cred = models.CharField(max_length=100, null=True)
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
+    # terms = models.BooleanField(default=False, NullBooleanField=True)
 
     #Create the activity log for this user
     def set_activity_log(self, is_test=False):
@@ -580,6 +581,7 @@ class UserProfileForm (forms.Form):
     new_password = forms.CharField(label="New Password",max_length=30,widget = forms.PasswordInput,required=False) 
     confirm_password = forms.CharField(label="Confirm Password",max_length=30,widget = forms.PasswordInput,required=False) 
     photo = forms.ImageField(label="Profile Picture", required=False)
+
 
 class EditUserProfile(models.Model):
     user = models.OneToOneField(User,null=False,default=None)

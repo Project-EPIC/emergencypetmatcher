@@ -87,7 +87,7 @@ def submit_PetReport(request):
         form = PetReportForm() #Unbound Form
 
     return render_to_response(HTML_SUBMIT_PETREPORT, {'form':form}, RequestContext(request))
-
+    
 def disp_PetReport(request, petreport_id):
 
     pet_report = get_object_or_404(PetReport, pk = petreport_id)

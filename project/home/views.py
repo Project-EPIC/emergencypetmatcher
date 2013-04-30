@@ -36,8 +36,13 @@ import oauth2 as oauth, random, urllib
 import hashlib, random, re
 
 
+from registration.views import register
+
+
+
 #Home view, displays login mechanism
 def home (request):
+
     #Get Pet Report objects and organize them into a Paginator Object.
     #pet_reports = PetReport.objects.order_by("id").reverse()
     pet_reports = PetReport.objects.filter(closed = False).order_by("id").reverse()
@@ -176,7 +181,6 @@ def logout_User(request):
     logout(request)
     return redirect(URL_HOME)
 
-
 def registration_activate (request, activation_key=None, backend=None):
     print "[INFO]: Activation Key: %s" % activation_key
 
@@ -194,14 +198,28 @@ def registration_activate (request, activation_key=None, backend=None):
 def registration_activation_complete (request):
     print request
     messages.success (request, "Alright, you are all set registering! You may now login to the system.")
-    return redirect (URL_LOGIN)
+    return redirect (URL_LOGIN)     
+
+def disp_TC(request):
+    # request.session['agreed'] = False
+    return render_to_response(HTML_TC, {}, RequestContext(request))
+
+def disp_TC_18(request):
+    # request.session['agreed'] = False
+    return render_to_response(HTML_TC_18, {}, RequestContext(request))
 
 def registration_complete (request):
     messages.success (request, "Thanks for registering for EPM. Look for an account verification email and click on the link to finish registering.")
+    print request
     return home(request)
 
 def registration_disallowed (request):
-    messages.error (request, "Sorry, we are not accepting registrations at this time. Please try again later.")
+    # messages.error (request, "Sorry, we are not accepting registrations at this time. Please try again later.")
+    messages.error (request, "Sorry, we can not accept your registration. Please try again later.")
+    return home(request)
+
+def social_auth_disallowed (request):
+    messages.error (request, "Sorry, we can not accept your social registration. Please try again later.")
     return home(request)
 
 def social_auth_login(request, backend):

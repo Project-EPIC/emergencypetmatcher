@@ -2,6 +2,7 @@
 {% load url from future %}
 
 {% block js %}
+  <script src = "{{ STATIC_URL }}js/local/epm-registration_form.js" type = 'text/javascript'></script> 
 {% endblock js %}
 
 {% block head_title %} EPM - Fill out Social Account {% endblock head_title %}
@@ -41,11 +42,28 @@
        			    <br/>
             </td>
        		</tr>
-       		<tr>
-       			<td></td><td><br/><input type="submit" id="submit" value="Submit" /></td>
-       		</tr>
 
-       	</table>
+          <tr>
+            <td>Date of Birth:</td>
+            <td><input id="id_date_born" type="text"/></td>
+          </tr>
+
+          <tr><td colspan=2>  
+            <div style="padding-bottom:15px; padding-top:15px; width:300px;">
+              <input id="id_tc_check" type="checkbox"/>
+              <a id="id_tc_link" name="Terms and Conditions" href= "#" > I accept the terms and conditions.</a> 
+            </div>
+          </td></tr>
+
+          <tr>
+            <td></td>
+            <td>
+              <input id="id_register_button" type="submit" value="Submit" disabled/>
+              <input id="id_cancel_button" type="submit" value="Cancel" onclick="{% url 'home' %}">
+            </td>
+          </tr> 
+        </table>
+        </br>
     </p>    
 </form>
 

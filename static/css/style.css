@@ -384,6 +384,46 @@ h1.found {
 
 }
 
+
+.tc_title {
+
+	margin: 10px 10px 10px 10px;
+	height: 60px;
+	width: 100%;
+	padding: 20px 0 0 0px;
+	letter-spacing: -1px;
+	font-size: 2em;
+	font-weight: bold;
+	color: red;
+	padding-top:20px;
+}
+
+.tc_text {
+	
+	margin: 10px 10px 10px 10px;
+	height: 300px;
+	width: 100%;
+	overflow-x: scroll;
+	overflow-y:visible;
+	overflow-x:hidden;
+	border:1px dotted;
+}
+
+.tc_buttons {
+	border: 1px solid #000000;
+	background-color: yellow;
+	height: 16px;
+	width: auto;
+	font-color: #000000;
+	padding-top:3px;
+	padding-left:3px;
+	padding-right:3px;
+	padding-bottom:3px;
+	text-decoration:none;
+	float:center;
+}
+
+
 /*CSS for the edit profile page*/
 #edit_profile_password{
 
