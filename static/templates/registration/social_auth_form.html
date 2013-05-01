@@ -59,7 +59,7 @@
             <td></td>
             <td>
               <input id="id_register_button" type="submit" value="Submit" disabled/>
-              <input id="id_cancel_button" type="submit" value="Cancel" onclick="{% url 'home' %}">
+              <input id="id_cancel_button" type="submit" formaction="{% url 'home' %}" value="Cancel">
             </td>
           </tr> 
         </table>

@@ -1,6 +1,6 @@
 
-var	PETREPORT_TAG_INFO_LENGTH = 100;
-var PETREPORT_DESCRIPTION_LENGTH = 100;
+var	PETREPORT_TAG_INFO_LENGTH = 1000;
+var PETREPORT_DESCRIPTION_LENGTH = 1000;
 
 
 function countChars(textbox, counter, max) {
@@ -15,7 +15,8 @@ function countChars(textbox, counter, max) {
 
 function checkLength(textbox, max) {
 	if (textbox.value.length >= max){ 
-		if (event.keyCode == 8 || event.keyCode == 46 ){  // (Del or backspace keys)
+		//if the maximum number of characters is reached, allow anly delete, backspace, tabs, enter and arrow keys)
+		if(event.keyCode == 8 || event.keyCode == 46 || event.keyCode == 32 || event.keyCode == 13 || (event.keyCode>32 && event.keyCode <41)){	
 			return true;
 		}
 		return false;
@@ -35,14 +36,12 @@ $(document).ready(function(){
 	var today = new Date();
 	document.getElementById("id_date_lost_or_found").value = today.getMonth()+1 + '/' + today.getDate() + '/' + today.getFullYear()
 
-	$("#id_date_lost_or_found").bind('change mouseleave', function() { 
+	$("#id_date_lost_or_found").bind('mouseleave', function() { 
 		if ($("#id_date_lost_or_found").attr("value")=="")
-			alert("Please fill in the 'Date Lost/Found' field.");
-        if(isDate($("#id_date_lost_or_found").attr("value")==false)
-            alert('Valid Date');
-		if ((new Date($("#id_date_lost_or_found").attr("value"))) > (new Date()) )
-			alert("Please fill in a valid Date for the 'Date Lost/Found' field.");
-		document.getElementById("id_date_lost_or_found").focus();			
+			alert("Date Lost/Found is a required field.");
+ 		if ((new Date($("#id_date_lost_or_found").attr("value"))) > (new Date()) )
+			alert("Date Lost/Found is invalid.");
+		this.focus();			
 	});
 
 	$("#petreport_form_microchip_check").click(function(){
@@ -63,7 +62,7 @@ $(document).ready(function(){
 	$("#id_tag_info").bind('mouseleave', function() { 
 		//alert(this.value.length)
 		if ( this.value.length> PETREPORT_TAG_INFO_LENGTH ){
-			alert("Please fill in the 'Tag and Collar Information' field with a " + PETREPORT_TAG_INFO_LENGTH + " characters as a maximum.")
+			alert("Tag and Collar Information is too long (maximum is " + PETREPORT_TAG_INFO_LENGTH  + " characters)");
 			this.focus();
 		}
 	});
@@ -81,62 +80,63 @@ $(document).ready(function(){
             if (img_size > 3.0) {
             	alert("Image size exceeds 3MB, please upload an image that is within 3MB.");
             	$('#id_img_path').attr("value","")
- 				document.getElementById("id_img_path").focus();
+ 				this.focus();
  			}          
     });
 
 	$("#id_description").bind('mouseleave', function() { 
 		//alert(this.value.length)
 		if ( this.value.length> PETREPORT_DESCRIPTION_LENGTH ){
-			alert("Please fill in the 'Pet Description' field with a " + PETREPORT_DESCRIPTION_LENGTH + " characters as a maximum.")
+			alert("Pet Description is too long (maximum is " + PETREPORT_DESCRIPTION_LENGTH  + " characters)");
 			this.focus();
 		}
 	});
 
+
 	$("#id_submit").click(function(){
 
-			// var conditions = true;
-			// var issues = "Please fix the following fields before submitting this form: \n";
-			// var num_issues = 0;
+			var conditions = true;
+			var issues = "Please fix the following fields before submitting this form: \n";
+			var num_issues = 0;
 
-			// if (img_size > 3.0)
-			// {
-			// 	conditions = false;				
-			// 	issues += (++num_issues)+". Image size should be less that 3MB\n";
-			// }	
+			/*check for date value = null and date value in future*/
+			if ($("#id_date_lost_or_found").attr("value")==""){
+				conditions = false;
+				issues += (++num_issues)+" . Please fill in the Date Lost/Found.\n";
+			}
+			else if ((new Date($("#id_date_lost_or_found").attr("value"))) > (new Date()) ){
+				conditions = false;
+				issues += (++num_issues)+" . Please fill in a valid Date Lost/Found.\n";
+			}
 
-			// var description = $("#id_description").attr("value").length;
-			// if ( description> PETREPORT_DESCRIPTION_LENGTH){
-			// 	conditions = false;
-			// 	var exceeds = description - PETREPORT_DESCRIPTION_LENGTH;
-			// 	issues += (++num_issues)+". Pet description should be within "+PETREPORT_DESCRIPTION_LENGTH+" characters, your description is "+exceeds+" characters over that limit.\n"
-			// }
+			if (img_size > 3.0)
+			{
+				conditions = false;				
+				issues += (++num_issues)+". Image size should be less that 3MB.\n";
+			}	
 
-			// var tag_info_length = $("#id_tag_info").attr("value").length;
-			// if ( tag_info_length> PETREPORT_TAG_INFO_LENGTH){
-			// 	conditions = false;
-			// 	var exceeds = tag_info_length - PETREPORT_TAG_INFO_LENGTH ;
-			// 	alert (exceeds);
-			// 	issues += (++num_issues)+". Tag and Collar information should be within "+PETREPORT_TAG_INFO_LENGTH+" characters, the content you entered is "+exceeds+" characters over that limit.\n"
-			// }
+			var tag_info_length = $("#id_tag_info").attr("value").length;
+			if ( tag_info_length> PETREPORT_TAG_INFO_LENGTH){
+				conditions = false;
+				var exceeds = tag_info_length - PETREPORT_TAG_INFO_LENGTH ;
+				issues += (++num_issues)+". Tag and Collar information should be within "+PETREPORT_TAG_INFO_LENGTH+" characters, the content you entered is "+exceeds+" characters over that limit.\n"
+			}
 
-			// /*check for date value = null and date value in future*/
-			// if ($("#id_date_lost_or_found").attr("value")==""){
-			// 	conditions = false;
-			// 	issues += (++num_issues)+" . Please fill in the Date field";
-			// }
-			// else if ((new Date($("#id_date_lost_or_found").attr("value"))) > (new Date()) ){
-			// 	conditions = false;
-			// 	issues += (++num_issues)+" . Please fill in a valid Date";
-			// }
+			var description = $("#id_description").attr("value").length;
+			if ( description> PETREPORT_DESCRIPTION_LENGTH){
+				conditions = false;
+				var exceeds = description - PETREPORT_DESCRIPTION_LENGTH;
+				issues += (++num_issues)+". Pet description should be within "+PETREPORT_DESCRIPTION_LENGTH+" characters, your description is "+exceeds+" characters over that limit.\n"
+			}
+			
 
-			// if(conditions){
+			if(conditions){
 				document.forms['petreport_form'].submit();
-			// }
-			// else{
-			// 	alert(issues);
+			}
+			else{
+				alert(issues);
 				
-			// }
+			}
 
 	});
 

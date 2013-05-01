@@ -46,7 +46,7 @@
 
 			<div style="padding-bottom:10px; padding-top:15px; width:300px;">
 	 		<input id="id_register_button" type="submit" formaction="{% url 'registration_register' %}" value="Register" disabled/>
-	 		<input id="id_cancel_button" type="button" value="Cancel" onclick="history.go(-1)">
+	 		<input id="id_cancel_button" type="submit" formaction="{% url 'home' %}" value="Cancel">
 	 		</div>
 		</form>
 
