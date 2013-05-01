@@ -6,6 +6,8 @@ from utils import *
 from constants import *
 import unittest, string, random, sys, time
 from django.contrib.messages import constants as messages
+from petcompare import *
+
 
 '''===================================================================================
 MatchingTesting: Testing for EPM Matching
@@ -19,6 +21,53 @@ class MatchingTesting (unittest.TestCase):
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
 		delete_all()
+
+	'''test if the list of candidate pet reports displayed on the matching interface 
+	is ordered according to the number of matching attributes'''
+	def test_get_ordered_candidate_matches(self):
+		print_testing_name("test_get_ordered_candidate_matches")
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+			
+			#objects
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print "[INFO]: %s logs onto %s to enter the matching interface..." % (user, client)
+
+			#From here, go to the matching interface
+			matching_url = URL_MATCHING + str(petreport.id) + "/"
+			response = client.get(matching_url)
+			if response.status_code == 200:
+				candidate_matches = response.context['candidate_matches']	
+				#Get Pet Report 
+				target_petreport = PetReport.objects.get(pk=petreport.id)
+				#form list of candidate pet reports
+				all_pet_reports = PetReport.objects.all().exclude(pk=petreport.id)
+			    #Place more PetReport filters here
+				filtered_pet_reports = all_pet_reports.exclude(status = target_petreport.status).filter(pet_type = target_petreport.pet_type, closed = False)   
+
+				pet_reports_list = []    
+			    
+				matches = {"match3":[],"match2":[],"match1":[],"match0":[]}
+				for candidate in filtered_pet_reports:
+					matches[compare_pets(target_petreport,candidate)].append(candidate)
+				for key in matches.keys():
+					pet_reports_list += matches[key]	
+
+			    #candidate_matches should be the same as pet_reports_list   
+				self.assertEquals(candidate_matches,pet_reports_list)
+
+
 
 	def test_get_matching_interface(self):
 		print_testing_name("test_get_matching_interface")

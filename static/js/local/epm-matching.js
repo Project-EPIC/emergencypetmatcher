@@ -1,6 +1,15 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
 
+	//propose match button is hidden until the user chooses a candidate pet report
+	$("#button_propose_match").show();
+	$("#button_propose_match").attr("disabled", "disabled");
+	$("#button_propose_match").css("background-color","#ECF0EC");
+
+	//display fields of the target pet report
+	display_PetReport_fields(TARGET_PETREPORT, $("ul.target_prdpfields"));
+	$("ul.target_prdpfields").show();
+
 	$('#tiles').imagesLoaded(function(){
 
 		// Prepare layout options.
@@ -81,6 +90,7 @@ $(document).ready(function(){
 
 	});
 
+
 }); //end of document.ready()
 
 
@@ -106,7 +116,9 @@ function move_petreport_to_workspace_match_detail (petreport, img){
 
 		//Show both the "Propose Match" and "Bookmark Pet" Buttons.
 		$("#button_propose_match").show();
-		$("#button_bookmark_pet").show();				
+		$("#button_propose_match").removeAttr("disabled"); 
+		$("#button_propose_match").css("background-color","#DDA706");
+
 	}
 
 	//We are showing the Target PetReport here.
@@ -124,6 +136,8 @@ function move_petreport_to_workspace_match_detail (petreport, img){
 
 	//Turn on the Workspace detail div.
 	workspace_match_detail.show(); 
+
+
 }
 
 function moveImage(item, container) {
@@ -146,22 +160,3 @@ function show_prdp_dialog (link){
 	//load_dialog(link, title, width, height)
 	return load_dialog(link.attr("href"), link.attr("name"), 700, "auto")
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

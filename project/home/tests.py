@@ -2334,7 +2334,7 @@ class HomePageTesting (unittest.TestCase):
 			response = client.get(URL_HOME)
 			self.assertEquals(response.status_code,200)
 			#Testing if the list of pets in the home page are ordered in reverse chronological fashion
-			print response.context
+			# print response.context
 			pet_reports_list = response.context['pet_reports_list']
 			pet_reports = PetReport.objects.filter(closed = False).order_by("id").reverse()
 			self.assertEquals(str(pet_reports_list.object_list.all()),str(pet_reports))

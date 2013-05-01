@@ -28,6 +28,7 @@ SEX_CHOICES=[('M','Male'),('F','Female')]
 SIZE_CHOICES = [('XL', 'Extra Large'),('L', 'Large'), ('M', 'Medium'), ('S', 'Small')]
 BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador')]
 SPAYED_OR_NEUTERED_CHOICES = [("Not Known", "Not Known"),('Spayed', 'Spayed'), ('Neutered', 'Neutered'), ("Neither", "Neither")]
+AGE_CHOICES = [('Baby','Baby'),('Young','Young'),('Adult','Adult'),('Senior','Senior'),("Not Known", "Not Known")]
 
 #The User Profile Model containing a 1-1 association with the 
 #django.contrib.auth.models.User object, among other attributes.
@@ -151,7 +152,7 @@ class PetReport(models.Model):
     #Microchip ID of Pet
     microchip_id = models.CharField(max_length=PETREPORT_MICROCHIP_ID_LENGTH, null=True)
     #Pet Tag Information (if available)
-    tag_info = models.CharField(max_length=PETREPORT_TAG_INFO_LENGTH, null=True)
+    tag_info = models.CharField(max_length=PETREPORT_TAG_INFO_LENGTH, null=True, default="")
     #Contact Name of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
     contact_name = models.CharField(max_length=PETREPORT_CONTACT_NAME_LENGTH, null=True)
     #Contact Phone Number of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
@@ -165,7 +166,7 @@ class PetReport(models.Model):
     #Pet Name (if available)
     pet_name = models.CharField(max_length=PETREPORT_PET_NAME_LENGTH, null=True, default='unknown') 
     #Pet Age (if known/available)
-    age = models.CharField(max_length=PETREPORT_AGE_LENGTH, null=True, default= 'unknown')
+    age = models.CharField(max_length=PETREPORT_AGE_LENGTH, null=True, choices=AGE_CHOICES,default="Not Known")
     #Color(s) of Pet
     color = models.CharField(max_length=PETREPORT_COLOR_LENGTH, null=True,default='unknown')
     #Breed of Pet
@@ -264,7 +265,7 @@ class PetReport(models.Model):
     def toJSON(self):
         #Convert a PetReport model object to a json object
         json = simplejson.dumps(self.toDICT())
-        print "toJSON: " + str(json)
+        #print "toJSON: " + str(json)
         return json
 
 
@@ -281,8 +282,8 @@ class PetMatch(models.Model):
     #Date when PetMatch was proposed (created).
     proposed_date = models.DateTimeField(null=False, auto_now_add=True)
     #Description of PetMatch.
-    description = models.CharField(max_length=PETMATCH_DESCRIPTION_LENGTH, null=False, default=None)
     '''Non-Required Fields'''
+    description = models.CharField(max_length=PETMATCH_DESCRIPTION_LENGTH, null=True, default="")
     #is_open will be set to False once it is triggered for verification i.e., it will not be available
     #to the crowd for viewing/voting after this petmatch triggers the verification workflow or if it is 
     #declared as a Failed PetMatch when a successful PetMatch is found for either of the PetReports associated with
@@ -572,7 +573,7 @@ class PetReportForm (ModelForm):
     img_path = forms.ImageField(label = "Upload an Image", help_text="(*.jpg, *.png, *.bmp), 3MB maximum", widget = forms.ClearableFileInput, required = False)
     spayed_or_neutered = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False)    
     pet_name = forms.CharField(label = "Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False) 
-    age = forms.CharField(label = "Age", max_length = PETREPORT_AGE_LENGTH, required = False)
+    age = forms.ChoiceField(label = "Age", choices=AGE_CHOICES,required = False)
     breed = forms.CharField(label = "Breed", max_length = PETREPORT_BREED_LENGTH, required = False)
     color = forms.CharField(label = "Coat Color(s)", max_length = PETREPORT_COLOR_LENGTH, required = False)
     description  = forms.CharField(label = "Pet Description", help_text="(Please describe the pet as accurately as possible)", max_length = PETREPORT_DESCRIPTION_LENGTH, widget = forms.Textarea, required = False)

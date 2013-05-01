@@ -67,7 +67,7 @@
         {% endif %}
 
         <div id = "match_instructions" style="margin:0 auto; font-weight:bold;">
-          <p> Examine the two pet reports carefully, comparing and contrasting the characteristics that you believe make these two pet reports link to the same pet. Are you sure this is match that you want to make? If so, please fill out a brief description of your rationale and click on the "Propose Match" button at the bottom of the dialog window.</p>
+          <p> Examine the two pet reports carefully, are you sure this is match that you want to make? If so, click on the "Propose Match" button at the bottom of the dialog window.</p>
         </div>
 
         <!-- First PetReport Match -->
@@ -111,7 +111,7 @@
           <form method="post" style="margin:5px;" action="{% url 'propose_PetMatch' target.id candidate.id %}" >
             {% csrf_token %}
             <textarea name='description' rows='5' cols ='100' style="display:block; margin: 0 auto;"> </textarea>
-            <input type="Submit" value="Submit" style="margin-top: 10px; width:100px; height:35px; float:right;"/>
+            <input type="Submit" value="Propose Match" style="margin-top: 10px; width:auto; height:35px; float:right;background-color:#DDA706"/>
           </form>
         </div>
 

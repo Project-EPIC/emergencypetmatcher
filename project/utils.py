@@ -236,6 +236,7 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 	pr.size = random.choice(SIZE_CHOICES)[0] 
 	pr.location = generate_string(PETREPORT_LOCATION_LENGTH) 
 	pr.color = generate_string(PETREPORT_COLOR_LENGTH)
+	pr.age = random.choice(AGE_CHOICES)[0]
 
 	#Randomly generate attributes, or not.
 	if status == "Found":
@@ -243,10 +244,9 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 			pr.pet_name = random.choice(PETREPORT_NAMES) 	
 		if random.random() > 0.3:
 			pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH) 
+			pr.tag_info = generate_string(PETREPORT_TAG_INFO_LENGTH)
 		if random.random() > 0.3:
 			pr.breed = generate_string(PETREPORT_BREED_LENGTH) 
-		if random.random() > 0.3:
-			pr.age = str(random.randint(0, 15))
 		if random.random() > 0.25:
 			pr.geo_location_long = random.randrange(-180.0, 180.0)
 			pr.geo_location_lat = random.randrange(-90.0, 90.0)
@@ -256,7 +256,7 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 		pr.pet_name = random.choice(PETREPORT_NAMES)
 		pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH)
 		pr.breed = generate_string(PETREPORT_BREED_LENGTH)
-		pr.age = str(random.randint(0, 15))
+		pr.tag_info = generate_string(PETREPORT_TAG_INFO_LENGTH)
 
 	pr.save()
 	pr.workers = create_random_Userlist()

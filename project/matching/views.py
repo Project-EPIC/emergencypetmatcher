@@ -1,3 +1,4 @@
+'''django imports'''
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect, get_object_or_404
@@ -12,17 +13,20 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import model_to_dict
+from django.utils import simplejson
+'''django project imports'''
+# from home.models import *
+# from constants import *
+from logging import *
+from utils import *
+from petcompare import *
+'''django plugin imports'''
 from social_auth import __version__ as version
 from social_auth.utils import setting
 from social_auth.views import auth
+'''python imports'''
 from random import choice, uniform
-from django.utils import simplejson
-from home.models import *
-from constants import *
-from logging import *
 import datetime, re
-from utils import *
-
 
 ''' Display the PetMatch object '''
 def display_PetMatch(request, petmatch_id):
@@ -94,32 +98,29 @@ def vote_PetMatch(request):
 @login_required
 def match_PetReport(request, petreport_id):
 
-	#Get Pet Report objects and organize them into a Paginator Object.
+    #Get Pet Report objects and organize them into a Paginator Object.
     target_petreport = get_object_or_404(PetReport, pk=petreport_id)
-
-    all_pet_reports = PetReport.objects.all().exclude(pk=petreport_id)
-
-    #Place more PetReport filters here
-    filtered_pet_reports = all_pet_reports.exclude(status = target_petreport.status).filter(pet_type = target_petreport.pet_type, closed = False)
 
     #Add the UserProfile to the PetReport's workers list.
     target_petreport.workers.add(request.user.get_profile())
 
+    all_pet_reports = PetReport.objects.all().exclude(pk=petreport_id)
+
+    #Place more PetReport filters here
+    filtered_pet_reports = all_pet_reports.exclude(status = target_petreport.status).filter(pet_type = target_petreport.pet_type, closed = False)   
+
     if len(filtered_pet_reports) == 0:
         messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added to this pet's working list for future reference.")
         return redirect(URL_HOME)
-
-    paginator = Paginator(filtered_pet_reports, 100)
-    page = request.GET.get('page')
-  
-    try:
-        pet_reports_list = paginator.page(page)
-    except PageNotAnInteger:
-        pet_reports_list = paginator.page(1)
-    except EmptyPage:
-        pet_reports_list = paginator.page(paginator.num_pages)
-
-    return render_to_response (HTML_MATCHING, {'target_petreport':target_petreport, 'pet_reports_list': pet_reports_list}, RequestContext(request))
+    
+    pet_reports_list = []    
+    matches = {"match5":[],"match4":[],"match3":[],"match2":[],"match1":[],"match0":[]}
+    for candidate in filtered_pet_reports:
+        matches[compare_pets(target_petreport,candidate)].append(candidate)
+    for key in matches.keys():
+        pet_reports_list += matches[key]
+    
+    return render_to_response (HTML_MATCHING, {'target_petreport':target_petreport, 'candidate_matches': pet_reports_list}, RequestContext(request))
 
 
 @login_required
@@ -134,9 +135,9 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
     if request.method == "POST":
         description = request.POST ["description"].strip()
 
-        if description == "":
-            messages.error (request, "Please fill out a description for this PetMatch proposal.")
-            return render_to_response(HTML_PROPOSE_MATCH, {'target':target, 'candidate':candidate}, RequestContext(request))
+        # if description == "":
+        #     messages.error (request, "Please fill out a description for this PetMatch proposal.")
+        #     return render_to_response(HTML_PROPOSE_MATCH, {'target':target, 'candidate':candidate}, RequestContext(request))
 
         proposed_by = request.user.get_profile()
 

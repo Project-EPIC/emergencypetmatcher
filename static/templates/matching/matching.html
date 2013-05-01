@@ -16,9 +16,7 @@
 {% block content %}
 <div id="matching_body" style="min-height:920px;">
 	<div id = "mi_instructions" style ="margin 0 auto; font-size: 14px; font-weight:bold;">
-		<p> The matching interface allows you to click and drag potential pet reports to the workspace (left-hand side), which contains the pet that you are trying to match.</p>
-		<p>Drag a potential match onto the workspace. When you feel that a potential match can be made, click on the "Propose Pet Match" button. Good luck matching!</p>
-		<br/>
+		 Drag a potential match onto the workspace.
 	</div>
 
 	<div id="nav">
@@ -31,6 +29,10 @@
 	<!-- Workspace for Placing Pet Report Candidate Matches-->
 	<div id="workspace">
 
+		<!-- Buttons -->
+	   	<button id= "button_propose_match" > Propose Match </button>
+
+	   		
 		<!-- PetReport Target and Candidates -->
 		<div id="prtarget"> 
 			<img class='target' src="{{ STATIC_URL }}{{ target_petreport.img_path }}">
@@ -38,26 +40,28 @@
 				<div style="text-align:center; padding:5%; margin:20%;">Drag a Pet Report Here</div>
 			</div>
 		</div>
-
+		
 		<div id="workspace_match_detail">
 
-			<div class = "matching_img"></div>
+<!-- 			<div class = "matching_img"></div>
+ -->		
+				<!-- Target PetReport info -->	
+				<ul class = "target_prdpfields"style="list-style-type:none;width:40%;float:left; padding-left:10px;" > </ul>
 
-			<!-- PetReport info -->
-			<ul class = "matching_prdpfields"> </ul>
-
-			<!-- Buttons -->
-	   		<button id= "button_propose_match"> Propose Match </button>
-
+				<!-- PetReport info -->
+				<ul class = "matching_prdpfields" style="list-style-type:none;width:40%;float:right; padding-left:10px;" > </ul>
+			
+		
 		</div>
+		
 	</div>
 
 	<!-- Container for ML-Ranked Pet Reports -->
 	<div id="matching_container">
 		<ul id="tiles">
 			{% block pet_reports_content %}
-				{% if pet_reports_list %}
-					{% for pet_report in pet_reports_list %}
+				{% if candidate_matches %}
+					{% for pet_report in candidate_matches %}
 						<li class="item" >
 							<script> 
 							    //Define this django-rendered petreport variable as a global javascript variable
@@ -77,23 +81,6 @@
 				    <p>No pet reports are available.</p>
 				{% endif %}
 			{% endblock pet_reports_content %}
-
-			<!-- Pagination -->
-			<div class="pagination" align="left">
-	   			<div class="step-links" id="footer" align="left">
-	        		{% if pet_reports_list.has_previous %}
-	           			<a href="?page={{ pet_reports_list.previous_page_number }}">previous</a>
-	        		{% endif %}
-	        	</div>	
-	       		<div class="current" id="footer" align="left">
-	            	Page {{ pet_reports_list.number }} of {{ pet_reports_list.paginator.num_pages }}.
-	        	</div>
-	        	<div class="step-links" id="footer" align="left">	
-	        		{% if pet_reports_list.has_next %}
-	            		<a href="?page={{ pet_reports_list.next_page_number }}">next</a>
-	        		{% endif %}
-	        	</div>		
-	    	</div>
 		</ul>	
 	</div>
 
