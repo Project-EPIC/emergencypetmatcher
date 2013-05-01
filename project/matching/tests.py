@@ -336,18 +336,18 @@ class MatchingTesting (unittest.TestCase):
 			print "[INFO]:%s has successfully requested page '%s'..." % (user, propose_match_url) 
 
 			#The description is empty, so this POST should fail.
-			description = "       "
-			post = {'description': description}
-			response = client.post(propose_match_url, post, follow=True)
-			client.logout()					
+			# description = "       "
+			# post = {'description': description}
+			# response = client.post(propose_match_url, post, follow=True)
+			# client.logout()					
 
 			#Make assertions
-			self.assertEquals(response.status_code, 200)
-			self.assertEquals(response.request ['PATH_INFO'], propose_match_url)
-			print "[INFO]:%s was NOT able to POST a successful match. That was to be expected!" % (user)
+			# self.assertEquals(response.status_code, 200)
+			# self.assertEquals(response.request ['PATH_INFO'], propose_match_url)
+			# print "[INFO]:%s was NOT able to POST a successful match. That was to be expected!" % (user)
 
 			#Some checks for the PetMatch objects stored
-			self.assertTrue(len(PetMatch.objects.all()) == 0)
+			# self.assertTrue(len(PetMatch.objects.all()) == 0)
 			output_update(i + 1)
 			print '\n'
 			end_time = time.clock()
