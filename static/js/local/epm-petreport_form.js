@@ -10,13 +10,13 @@ $(document).ready(function(){
 	var today = new Date();
 	document.getElementById("id_date_lost_or_found").value = today.getMonth()+1 + '/' + today.getDate() + '/' + today.getFullYear()
 
-	$("#id_date_lost_or_found").bind('mouseleave', function() { 
-		if ($("#id_date_lost_or_found").attr("value")=="")
-			alert("Date Lost/Found is a required field.");
- 		if ((new Date($("#id_date_lost_or_found").attr("value"))) > (new Date()) )
-			alert("Date Lost/Found is invalid.");
-		this.focus();			
-	});
+	// $("#id_date_lost_or_found").bind('mouseleave', function() { 
+	// 	if ($("#id_date_lost_or_found").attr("value")=="")
+	// 		alert("Date Lost/Found is a required field.");
+ // 		if ((new Date($("#id_date_lost_or_found").attr("value"))) > (new Date()) )
+	// 		alert("Date Lost/Found is invalid.");
+	// 	this.focus();			
+	// });
 
 	$("#id_tag_collar_info").keyup(function(){
 
@@ -84,7 +84,7 @@ $(document).ready(function(){
 
 			else if ((new Date($("#id_date_lost_or_found").attr("value"))) > (new Date()) ){
 				conditions = false;
-				issues += (++num_issues)+" . Please fill in a valid Date Lost/Found.\n";
+				issues += "Please fill in a valid Date Lost/Found.\n";
 			}
 
 			if (img_size > 3.0) {
