@@ -85,8 +85,8 @@ def submit_PetReport(request):
             print form.non_field_errors()
     else:
         form = PetReportForm() #Unbound Form
-
-    return render_to_response(HTML_SUBMIT_PETREPORT, {'form':form}, RequestContext(request))
+    return render_to_response(HTML_SUBMIT_PETREPORT, {'form':form, "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
+            "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH}, RequestContext(request))
     
 def disp_PetReport(request, petreport_id):
 

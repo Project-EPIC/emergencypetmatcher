@@ -8,6 +8,11 @@
 {% block js %}
 	<script src="{{ STATIC_URL }}js/CalendarControl.js" type='text/javascript'></script>
 	<script src="{{ STATIC_URL }}js/local/epm-petreport_form.js" type='text/javascript'></script>
+	<script type="text/javascript">
+		var PETREPORT_TAG_INFO_LENGTH = {{ PETREPORT_TAG_INFO_LENGTH }}
+		var PETREPORT_DESCRIPTION_LENGTH = {{ PETREPORT_DESCRIPTION_LENGTH }}
+	</script>
+
 {% endblock js %}
 
 {% block head_title %}EPM - Report a Lost/Found Pet{% endblock head_title %}
@@ -21,84 +26,69 @@
 	<div id="pr_form_container">
 
 		{% if form.errors %} <strong> {{ form.errors }} </strong> {% endif %}
-
 		<form enctype="multipart/form-data" name="petreport_form" method="POST" action="{% url 'submit_PetReport' %}">
 			{% csrf_token %}
 			<ul style="list-style-type:none; padding: 0px 0px 0px 20px;">
-				{% for field in form %}
+			{% for field in form %}
+				<!-- Geo Location Field set -->
+				{% if "Geo Location Lat" in field.label %}
+					<li> <strong> Geolocation </strong> </li>
+					<div id="petreport_form_geo" style="padding-bottom:15px;">
+						Do you have geographical coordinates for the pet? <input id="petreport_form_geo_check" type="checkbox"/><br/>
+						<li id="petreport_form_geo_fields" style="display:none;">
+							<strong>Lattitude (Lat) Coordinate: </strong><input id='id_geo_location_lat' name='geo_location_lat' type='text'/><br/>
+							<strong>Longitude (Long) Coordinate: </strong><input id='id_geo_location_long' name='geo_location_long' type='text'/><br/>
+						</li>
+					</div>
+				{% elif "Geo Location Long" in field.label %} <!-- Do nothing -->
 
-					<!-- Geo Location Field set -->
-					{% if "Geo Location Lat" in field.label %}
-						<li> <strong> Geolocation </strong> </li>
-						<div id="petreport_form_geo" style="padding-bottom:15px;">
-							Do you have geographical coordinates for the pet? <input id="petreport_form_geo_check" type="checkbox"/><br/>
-							<li id="petreport_form_geo_fields" style="display:none;">
-								<strong>Lattitude (Lat) Coordinate: </strong><input id='id_geo_location_lat' name='geo_location_lat' type='text'/><br/>
-								<strong>Longitude (Long) Coordinate: </strong><input id='id_geo_location_long' name='geo_location_long' type='text'/><br/>
-							</li>
-						</div>
-					{% elif "Geo Location Long" in field.label %} <!-- Do nothing -->
+				<!-- Contact Field set -->
+				{% elif "Contact Name" in field.label %}
+					<li> <strong> Pet Contact Preference </strong></li>
+					<div id = "petreport_form_contact" style="padding-bottom:15px;">
+						Do you have a contact person for this pet (if other than yourself)? <input id="petreport_form_contact_check" type="checkbox"/><br/>
+						<li id="petreport_form_contact_fields" style="display:none;">
+							<strong>Contact Name: </strong><input id='id_contact_name' name='contact_name' type='text'/><br/>
+							<strong>Contact Phone Number: </strong><input id='id_contact_number' name='contact_number' type='text'/><br/>
+							<strong>Contact Email Address: </strong><input id='id_contact_email' name='contact_email' type='text'/><br/>
+						</li>
+					</div>
+				{% elif "Contact Phone Number" in field.label %} <!-- Do nothing -->
+				{% elif "Contact Email Address" in field.label %} <!-- Do nothing -->
 
-					<!-- Contact Field set -->
-					{% elif "Contact Name" in field.label %}
-						<li> <strong> Pet Contact Preference </strong></li>
-						<div id = "petreport_form_contact" style="padding-bottom:15px;">
-							Do you have a contact person for this pet (if other than yourself)? <input id="petreport_form_contact_check" type="checkbox"/><br/>
-							<li id="petreport_form_contact_fields" style="display:none;">
-								<strong>Contact Name: </strong><input id='id_contact_name' name='contact_name' type='text'/><br/>
-								<strong>Contact Phone Number: </strong><input id='id_contact_number' name='contact_number' type='text'/><br/>
-								<strong>Contact Email Address: </strong><input id='id_contact_email' name='contact_email' type='text'/><br/>
-							</li>
-						</div>
-					{% elif "Contact Phone Number" in field.label %} <!-- Do nothing -->
-					{% elif "Contact Email Address" in field.label %} <!-- Do nothing -->
-
-					<!-- Regular Fields -->
+				<!-- Regular Fields -->
+				{% else %}
+					{% if "Location" in field.label %}
+						<li class="id_pet_report_location"> <strong>Location Lost </strong> </li>
+						<!-- Field Label and help text -->
 					{% else %}
-						{% if "Location" in field.label %}
-							<li class="id_pet_report_location"> <strong>Location Lost </strong> </li>
-							<!-- Field Label and help text -->
-						{% else %}
-							<li> <strong> {{ field.label }} </strong></li>
-							{% if field.help_text %} <li style="margin-bottom:5px;"> {{ field.help_text }} </li> {% endif %}
-						{% endif %}	
-						<!-- Special cases for these fields -->
-						{% if "Date Lost/Found" in field.label %}
-							<li>
-								<input name="date_lost_or_found" id="id_date_lost_or_found" onfocus="showCalendarControl(this)" type="text"/>
-							</li><br/>
-						{% elif "Microchip ID" in field.label %}
-							<div id="petreport_form_microchip" style="padding-bottom:15px;">
-								Is the pet microchipped? <input id="petreport_form_microchip_check" type="checkbox"/><br/>
-								<li id="petreport_form_microchip_field" style="display:none;">
-									<input id='id_microchip_field' name='microchip_id' type='text'/><br/>
-								</li>
-							</div><br/>						
-						{% elif "Tag and Collar Information" in field.label %}	
-							<li><span id="id_counter_taginfo"></span></li>
-							<li>
-								<textarea rows="10" cols="40" name="tag_info" id="id_tag_info" 
-								onkeydown="return checkLength(this, PETREPORT_TAG_INFO_LENGTH);"
-								onfocus="countChars('id_tag_info','id_counter_taginfo',PETREPORT_TAG_INFO_LENGTH)" 
-								onkeyup="countChars('id_tag_info','id_counter_taginfo',PETREPORT_TAG_INFO_LENGTH)" 
-								></textarea>					
-							</li><br/>		
-						{% elif "Pet Description" in field.label %}	
-							<li><span id="id_counter_desc"></span></li>
-							<li>
-								<textarea rows="10" cols="40" name="description" id="id_description"
-								onkeydown="return checkLength(this, PETREPORT_DESCRIPTION_LENGTH);" 
-								onfocus="countChars('id_description','id_counter_desc',PETREPORT_DESCRIPTION_LENGTH)" 
-								onkeyup="countChars('id_description','id_counter_desc',PETREPORT_DESCRIPTION_LENGTH)"
-								></textarea>	
-							</li><br/>
-
-						<!-- Otherwise, just print the field -->
-						{% else %}
-					    	<li>{{ field }}</li><br/>
-					    {% endif %}	
-					{% endif %}
-				{% endfor %}
+						<li> <strong> {{ field.label }} </strong></li>
+						{% if field.help_text %} <li style="margin-bottom:5px;"> {{ field.help_text }} </li> {% endif %}
+					{% endif %}	
+					
+					<!-- Special cases for these fields -->
+					{% if "Date Lost/Found" in field.label %}
+						<li>
+							<input name="date_lost_or_found" id="id_date_lost_or_found" onfocus="showCalendarControl(this)" type="text"/>
+						</li><br/>
+					{% elif "Microchip ID" in field.label %}
+						<div id="petreport_form_microchip" style="padding-bottom:15px;">
+							Is the pet microchipped? <input id="petreport_form_microchip_check" type="checkbox"/><br/>
+							<li id="petreport_form_microchip_field" style="display:none;">
+								<input id='id_microchip_field' name='microchip_id' type='text'/><br/>
+							</li>
+						</div><br/>						
+					{% elif "Tag and Collar Information" in field.label %}
+						<li><span id="id_tag_collar_info_count"/></span></li>
+						<li><textarea id="id_tag_collar_info" maxlength="{{ PETREPORT_TAG_INFO_LENGTH }}" rows="10" cols="30" name="tag_info"></textarea></li><br/>		
+					{% elif "Pet Description" in field.label %}	
+						<li><span id="id_description_count"/></span></li>
+						<li><textarea id="id_description" maxlength="{{ PETREPORT_DESCRIPTION_LENGTH }}" rows="10" cols="30" name="description"></textarea></li><br/>
+					{% else %}
+				    	<li>{{ field }}</li><br/> <!-- Otherwise, just print the field -->
+				    {% endif %}	
+				{% endif %}
+			{% endfor %}
 			</ul><br/>
 			<input id = "id_submit" type="button" value="Submit" style= "margin: 10px 0px 10px 0px; width:150px; height:50px; font-size:13pt;float:right;"/>
 		</form>

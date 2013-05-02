@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
-from django.forms import ModelForm
+from django.forms import ModelForm, Textarea
 from django.db.models.signals import post_save, pre_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
 from django.core.validators import email_re
@@ -566,7 +566,7 @@ class PetReportForm (ModelForm):
     geo_location_lat = forms.DecimalField(label = "Geo Location Lat", help_text="(Lattitude coordinate)", max_digits=8, decimal_places=5, widget=forms.TextInput(attrs={'size':'10'}), initial=None, required=False)
     geo_location_long = forms.DecimalField(label = "Geo Location Long", help_text="(Longitude coordinate)", max_digits=8, decimal_places=5, widget=forms.TextInput(attrs={'size':'10'}),  initial=None, required=False)
     microchip_id = forms.CharField(label = "Microchip ID", max_length = PETREPORT_MICROCHIP_ID_LENGTH, required=False)
-    tag_info = forms.CharField(label = "Tag and Collar Information", help_text="(if available)", max_length = PETREPORT_TAG_INFO_LENGTH, required=False, widget=forms.Textarea)
+    tag_info = forms.CharField(label = "Tag and Collar Information", help_text="(if available)", max_length = PETREPORT_TAG_INFO_LENGTH, required=False, widget=Textarea)
     contact_name = forms.CharField(label = "Contact Name", max_length=PETREPORT_CONTACT_NAME_LENGTH, required=False)
     contact_number = forms.CharField(label = "Contact Phone Number", max_length=PETREPORT_CONTACT_NUMBER_LENGTH, required=False)
     contact_email = forms.CharField(label = "Contact Email Address", max_length=PETREPORT_CONTACT_EMAIL_LENGTH, required=False)
