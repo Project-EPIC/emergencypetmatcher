@@ -58,7 +58,7 @@ class MatchingTesting (unittest.TestCase):
 
 				pet_reports_list = []    
 			    
-				matches = {"match3":[],"match2":[],"match1":[],"match0":[]}
+				matches = {"match6":[],"match5":[],"match4":[],"match3":[],"match2":[],"match1":[],"match0":[]}
 				for candidate in filtered_pet_reports:
 					matches[compare_pets(target_petreport,candidate)].append(candidate)
 				for key in matches.keys():
