@@ -114,9 +114,12 @@ def match_PetReport(request, petreport_id):
         return redirect(URL_HOME)
     
     pet_reports_list = []    
-    matches = {"match5":[],"match4":[],"match3":[],"match2":[],"match1":[],"match0":[]}
+    matches = {"match6":[], "match5":[],"match4":[],"match3":[],"match2":[],"match1":[],"match0":[]}
     for candidate in filtered_pet_reports:
-        matches[compare_pets(target_petreport,candidate)].append(candidate)
+        num_attributes_matched = target_petreport.compare(candidate)
+        #We use the num_attributes_matched to make our dictionary key.
+        matches["match" + str(num_attributes_matched)].append(candidate)
+
     for key in matches.keys():
         pet_reports_list += matches[key]
     

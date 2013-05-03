@@ -47,27 +47,20 @@ class MatchingTesting (unittest.TestCase):
 			#From here, go to the matching interface
 			matching_url = URL_MATCHING + str(petreport.id) + "/"
 			response = client.get(matching_url)
+
 			if response.status_code == 200:
-				candidate_matches = response.context['candidate_matches']	
+				candidate_matches = response.context['candidate_matches']
 				#Get Pet Report 
 				target_petreport = PetReport.objects.get(pk=petreport.id)
-				#form list of candidate pet reports
-				all_pet_reports = PetReport.objects.all().exclude(pk=petreport.id)
-			    #Place more PetReport filters here
-				filtered_pet_reports = all_pet_reports.exclude(status = target_petreport.status).filter(pet_type = target_petreport.pet_type, closed = False)   
 
-				pet_reports_list = []    
-			    
-				matches = {"match6":[],"match5":[],"match4":[],"match3":[],"match2":[],"match1":[],"match0":[]}
-				for candidate in filtered_pet_reports:
-					matches[compare_pets(target_petreport,candidate)].append(candidate)
-				for key in matches.keys():
-					pet_reports_list += matches[key]	
-
-			    #candidate_matches should be the same as pet_reports_list   
-				self.assertEquals(candidate_matches,pet_reports_list)
-
-
+				for k in range (NUMBER_OF_TESTS):
+					i = random.randint(0, len(candidate_matches) - 1)
+					j = random.randint(0, len(candidate_matches) - 1)
+					if (i > j):
+						self.assertTrue(target_petreport.compare (candidate_matches[i]) <= target_petreport.compare (candidate_matches[j]))
+					else:
+						self.assertTrue(target_petreport.compare (candidate_matches[i]) >= target_petreport.compare (candidate_matches[j]))
+				print_info_msg("Ordering on Attribute-matched candidate pets verified for this petreport!\n")
 
 	def test_get_matching_interface(self):
 		print_testing_name("test_get_matching_interface")
@@ -653,13 +646,17 @@ class VerificationTesting (unittest.TestCase):
 			client = random.choice(clients)
 			petmatch = random.choice(petmatches)
 
-			'''if PetMatch_has_reached_threshold() returns true, 
-			the PetMatch should satisfy the threshold condition'''
-			if petmatch.PetMatch_has_reached_threshold():
-				self.assertTrue(petmatch.up_votes.count() - petmatch.down_votes.count() >= 5)
+			#If PetMatch_has_reached_threshold() returns true, 
+			#the PetMatch should satisfy the threshold condition
+			difference = petmatch.up_votes.count() - petmatch.down_votes.count()
+
+
+			if petmatch.PetMatch_has_reached_threshold() == True:
+				self.assertTrue(petmatch.verification_triggered)
+				self.assertFalse(petmatch.is_open)
 			else:
-				self.assertTrue(petmatch.up_votes.count() - petmatch.down_votes.count() < 5)
-			print 'Pet Match %s passed the test: test_function_PetMatch_has_reached_threshold' % petmatch
+				self.assertFalse(petmatch.verification_triggered)
+				self.assertTrue(petmatch.is_open)			
 
 			output_update(i + 1)
 			print '\n'
@@ -681,17 +678,26 @@ class VerificationTesting (unittest.TestCase):
 			client = random.choice(clients)
 			petmatch = random.choice(petmatches)
 
-			print '[INFO]: PetMatch threshold reached: %s ' %(str(petmatch.PetMatch_has_reached_threshold()))
-			print '[INFO]: PetMatch is_open: %s verification_triggered: %s' % (str(petmatch.is_open),str(petmatch.verification_triggered))
+			print_info_msg (petmatch)
+			print_info_msg (petmatch.up_votes.all())
+			print_info_msg (petmatch.down_votes.all())
+			var = petmatch.PetMatch_has_reached_threshold()
+			print_info_msg ('PetMatch threshold reached: %s ' %(str(var)))
+			print_info_msg ('PetMatch is_open: %s verification_triggered: %s \n' % (str(petmatch.is_open),str(petmatch.verification_triggered)))
 
-			if petmatch.PetMatch_has_reached_threshold() == True:	
+			if var == True:
+				print_info_msg ("WE ARE HERE: %s" % str(var))
+				print_info_msg ("THIS PETMATCH: %s" % petmatch)
 				self.assertFalse(petmatch.is_open)
 				self.assertTrue(petmatch.verification_triggered)
+				
 	    	else:
+	    		print_info_msg ("WE ARE HERE: %s" % str(var))
+	    		print_info_msg ("THIS PETMATCH: %s" % petmatch)
 	    		self.assertFalse(petmatch.is_successful)
-	    		# self.assertFalse(petmatch.verification_triggered)
+	    		self.assertFalse(petmatch.verification_triggered)
 
-	    	print '[OK]: Pet Match has passed the test: test_function_verify_PetMatch'
+	    	print_success_msg("Pet Match has passed the test: test_function_verify_PetMatch\n")
 	    	output_update(i + 1)
 	    	print '\n'
 	    	end_time = time.clock()

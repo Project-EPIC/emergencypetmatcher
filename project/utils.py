@@ -29,6 +29,9 @@ def print_testing_name(test_name, single_test=False):
 def print_info_msg (string):
 	print "[INFO]: %s" % string
 
+def print_success_msg (string):
+	print "[OK]: %s" % string	
+
 def print_error_msg (string):
 	print "[ERROR]: %s" % string
 

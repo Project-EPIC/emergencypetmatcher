@@ -5,7 +5,7 @@ import os
 ==================================================================================='''
 
 #Number of Tests
-NUMBER_OF_TESTS = 20
+NUMBER_OF_TESTS = 5
 
 #Lower and Upper bounds for Lost and Found Dates
 DATE_LOWER_BOUND = "2012-01-01"
@@ -62,6 +62,7 @@ PETMATCH_OUTCOME_NEW_PETMATCH = "NEW PETMATCH"
 PETMATCH_OUTCOME_DUPLICATE_PETMATCH = "DUPCLIATE PETMATCH"
 PETMATCH_OUTCOME_UPDATE = "SQL UPDATE"
 PETMATCH_OUTCOME_INSERTED_IMPROPERLY = "INSERTED IMPROPERLY"
+PETMATCH_THRESHOLD = 1
 
 #File Path Constants
 ACTIVITY_LOG_DIRECTORY = os.path.dirname(os.path.dirname(__file__)) + "/logs/activity_logs/"

@@ -172,7 +172,7 @@ class PetReport(models.Model):
     #Breed of Pet
     breed = models.CharField(max_length=PETREPORT_BREED_LENGTH, null=True,default='unknown')
     #Description of Pet
-    description   = models.CharField(max_length=PETREPORT_DESCRIPTION_LENGTH, null=True, default="")
+    description   = models.CharField(max_length=PETREPORT_DESCRIPTION_LENGTH, null=True, default=" ")
     #The UserProfiles who are working on this PetReport (Many-to-Many relationship with User)
     workers = models.ManyToManyField('UserProfile', null=True, related_name='workers_related')
     #The UserProfiles who have bookmarked this PetReport
@@ -204,6 +204,27 @@ class PetReport(models.Model):
         else:
             return False
         return False
+
+    '''this function compares 6 attributes of both pets and returns the number of matching attributes.
+    the attributes compared are: age, sex, size,spayed_or_neutered,pet_name and breed'''
+    def compare(self, petreport):
+        assert isinstance (petreport, PetReport)
+        matching_attrs = 0
+
+        if self.sex == petreport.sex:
+            matching_attrs += 1
+        if self.size == petreport.size:
+            matching_attrs += 1
+        if self.spayed_or_neutered == petreport.spayed_or_neutered:
+            matching_attrs += 1
+        if self.pet_name.lower() == petreport.pet_name.lower():
+            matching_attrs += 1
+        if self.breed.lower() == petreport.breed.lower():
+            matching_attrs += 1
+        if self.age == petreport.age:
+            matching_attrs += 1
+
+        return matching_attrs        
 
     @staticmethod
     def get_PetReport(status, pet_type, pet_name=None, petreport_id=None):
@@ -374,20 +395,17 @@ class PetMatch(models.Model):
     def PetMatch_has_reached_threshold(self):
         '''Difference[D] is calculated as the difference between number of upvotes and number of downvotes. 
         For a PetMatch to be successful, it should satisfy certain constraints. D should exceed a threshold value,
-        which is half the number of active users on the system. '''
+        which is half the number of active users on the system. 10 will be replaced by a function that returns the number of active users in the system '''
         active_users = len(UserProfile.objects.all())/2 
-        '''10 will be replaced by a function that returns the number of active users in the system'''        
-        threshold = 1
         difference = self.up_votes.count() - self.down_votes.count()
         '''Temporary Fix: If the pet match proposer (also the one who reported  either the lost/found pet
         on the pet match) votes on the pet match and his vote is the only vote for the pet match then 
         verification is triggered'''
         if self.up_votes.count() == 1:    
-            if self.proposed_by == self.up_votes.all()[0] and \
-            (self.proposed_by==self.lost_pet.proposed_by or self.proposed_by==self.found_pet.proposed_by):
+            if self.proposed_by == self.up_votes.all()[0] and (self.proposed_by == self.lost_pet.proposed_by or self.proposed_by == self.found_pet.proposed_by):
                 return True
 
-        if difference >= threshold:
+        if difference >= PETMATCH_THRESHOLD:
             return True
         else:
             return False
