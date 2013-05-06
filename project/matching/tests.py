@@ -641,20 +641,15 @@ class VerificationTesting (unittest.TestCase):
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-
-			#objects
-			client = random.choice(clients)
 			petmatch = random.choice(petmatches)
-
-			#If PetMatch_has_reached_threshold() returns true, 
-			#the PetMatch should satisfy the threshold condition
 			difference = petmatch.up_votes.count() - petmatch.down_votes.count()
 
-
-			if petmatch.PetMatch_has_reached_threshold() == True:
+			if difference >= PETMATCH_THRESHOLD:
+				self.assertTrue(petmatch.PetMatch_has_reached_threshold())
 				self.assertTrue(petmatch.verification_triggered)
 				self.assertFalse(petmatch.is_open)
 			else:
+				self.assertFalse(petmatch.PetMatch_has_reached_threshold())
 				self.assertFalse(petmatch.verification_triggered)
 				self.assertTrue(petmatch.is_open)			
 
@@ -666,44 +661,26 @@ class VerificationTesting (unittest.TestCase):
 	def test_function_verify_PetMatch(self):
 		print_testing_name("test_function_verify_PetMatch")
 		iteration_time = 0.00
+
 		#Need to setup clients, users, and their passwords
 		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-			#indexes
-			client_i = random.randrange(0, NUMBER_OF_TESTS)
-			petmatch_i = random.randrange(0, NUMBER_OF_TESTS/2)	
-			#objects
-			client = random.choice(clients)
 			petmatch = random.choice(petmatches)
 
-			print_info_msg (petmatch)
-			print_info_msg (petmatch.up_votes.all())
-			print_info_msg (petmatch.down_votes.all())
-			var = petmatch.PetMatch_has_reached_threshold()
-			print_info_msg ('PetMatch threshold reached: %s ' %(str(var)))
-			print_info_msg ('PetMatch is_open: %s verification_triggered: %s \n' % (str(petmatch.is_open),str(petmatch.verification_triggered)))
-
-			if var == True:
-				print_info_msg ("WE ARE HERE: %s" % str(var))
-				print_info_msg ("THIS PETMATCH: %s" % petmatch)
-				self.assertFalse(petmatch.is_open)
+			if petmatch.PetMatch_has_reached_threshold() == True:
 				self.assertTrue(petmatch.verification_triggered)
-				
-	    	else:
-	    		print_info_msg ("WE ARE HERE: %s" % str(var))
-	    		print_info_msg ("THIS PETMATCH: %s" % petmatch)
-	    		self.assertFalse(petmatch.is_successful)
-	    		self.assertFalse(petmatch.verification_triggered)
+				self.assertFalse(petmatch.is_open)
+			else:
+				self.assertFalse(petmatch.verification_triggered)
+				self.assertTrue(petmatch.is_open)
 
-	    	print_success_msg("Pet Match has passed the test: test_function_verify_PetMatch\n")
-	    	output_update(i + 1)
-	    	print '\n'
-	    	end_time = time.clock()
-	    	iteration_time += (end_time - start_time)
-
-
+			print_success_msg("Pet Match has passed the test: test_function_verify_PetMatch\n")
+			output_update(i + 1)
+			print '\n'
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
 
 	def test_function_close_PetMatch(self):
 		print_testing_name("test_function_close_PetMatch")
@@ -713,10 +690,10 @@ class VerificationTesting (unittest.TestCase):
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-			
 			client = random.choice(clients)
 			petmatch = random.choice(petmatches)
 			verification_page_url = URL_VERIFY_PETMATCH + str(petmatch.id) + "/"
+			print_debug_msg (petmatch)
 
 			if petmatch.PetMatch_has_reached_threshold() == True:
 					self.assertTrue(petmatch.verification_triggered)
@@ -725,6 +702,11 @@ class VerificationTesting (unittest.TestCase):
 
 					#Looking for other users and their passwords in the users list.
 					proposers = [petmatch.lost_pet.proposed_by.user, petmatch.found_pet.proposed_by.user]
+
+					#Disallow the test from allowing the lost and found pet contacts to be the same person.
+					if proposers[0] == proposers[1]:
+						continue
+
 					lostpet_proposer_index = [user[0] for user in users].index(proposers[0])
 					foundpet_proposer_index = [user[0] for user in users].index(proposers[1])
 
@@ -732,16 +714,16 @@ class VerificationTesting (unittest.TestCase):
 						#Log in First
 						loggedin = client.login(username = user.username, password = password)
 						self.assertTrue(loggedin == True)			
-						print "[INFO]:%s logs onto %s to enter the verification page..." % (user, client)
+						print_test_msg ("%s logs onto %s to enter the verification page..." % (user, client))
 						user_response = random.randint(1,2)
 						message = random.choice(['yes','no'])
+						print_test_msg ("%s has responded with {%d, %s}" % (user, user_response, message))
 						post = {'message':message}
 						response = client.post(verification_page_url, post, follow = True)
 						self.assertEquals(response.status_code, 200)
-						petmatch = PetMatch.objects.get(pk=petmatch.id)
 
 					petmatch = PetMatch.objects.get(pk=petmatch.id)
-					new_pet_vote  = petmatch.verification_votes
+					new_pet_vote = petmatch.verification_votes
 					self.assertTrue(petmatch.closed_date != None)
 
 					if new_pet_vote == '11':
@@ -758,7 +740,7 @@ class VerificationTesting (unittest.TestCase):
 					else:
 						self.assertFalse(petmatch.is_successful)
 
-			print 'Pet Match has passed the test: test_function_verify_PetMatch'
+			print_success_msg("Pet Match has passed the test: test_function_verify_PetMatch")
 			output_update(i + 1)
 			print '\n'
 			end_time = time.clock()

@@ -28,10 +28,12 @@ def print_testing_name(test_name, single_test=False):
 
 def print_info_msg (string):
 	print "[INFO]: %s" % string
-
+def print_test_msg (string):
+	print "[TEST]: %s" % string	
+def print_debug_msg (string):
+	print "[DEBUG]: %s" % string	
 def print_success_msg (string):
 	print "[OK]: %s" % string	
-
 def print_error_msg (string):
 	print "[ERROR]: %s" % string
 
@@ -261,8 +263,8 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 		pr.breed = generate_string(PETREPORT_BREED_LENGTH)
 		pr.tag_info = generate_string(PETREPORT_TAG_INFO_LENGTH)
 
+	#Need to save.
 	pr.save()
-	pr.workers = create_random_Userlist()
 
 	#Need to handle the cases where the contact might/might not have a photo for this PetReport!
 	if random.random() <= 0.95:
@@ -303,7 +305,7 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 		else:
 			pr.img_path.name = "images/defaults/other_silhouette.jpg"
 
-	pr.save()
+	pr.workers = create_random_Userlist()
 	log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr, )
 	return pr
 
@@ -352,7 +354,7 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 		#Get some potential matches
 		potential_matches = get_potential_PetMatch_PetReport_pairs(pet_type=pet_type)
 		if len(potential_matches) == 0:
-			print "[ERROR]: Can't create random PetMatch: There isn't at least one lost and found %s." % pet_type
+			print_error_msg ("Can't create random PetMatch: There isn't at least one lost and found %s." % pet_type)
 			return None
 		
 		#Get a random match.	
@@ -375,7 +377,7 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 	if (petmatch != None):
 		if outcome == "NEW PETMATCH":
 			petmatch.score = random.randint(0, 10000)
-			petmatch.is_open = random.choice ([True, False])
+			#petmatch.is_open = random.choice ([True, False])
 			user_count = len(UserProfile.objects.all())
 
 			'''if threshold_bias = True, the petmatch has a chance of reaching the threshold.
@@ -383,17 +385,16 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 			if the random integer is 2, the petmatch might not exceed the threshold'''
 			if threshold_bias == True and random.randint(1,2) == 1 and user_count >=5:
 				up_votes = create_random_Userlist(num_users=random.randint(5, user_count))
-				down_votes = create_random_Userlist(num_users=random.randint(0, len(up_votes)-5 ))
-				petmatch.up_votes = set(up_votes)
+				down_votes = create_random_Userlist(num_users=random.randint(0, len(up_votes) - 5))
 				petmatch.down_votes = set(down_votes) - set(up_votes)
+				petmatch.up_votes = set(up_votes)
+				
 			else:
 				up_votes = create_random_Userlist(num_users=random.randint(0, user_count))
 				down_votes = create_random_Userlist(num_users=random.randint(0, user_count))
+				petmatch.down_votes = set(down_votes) - set(up_votes)
 				petmatch.up_votes = set(up_votes) - set(down_votes)
-				petmatch.down_votes = set(down_votes) - set(up_votes) 
 
-			#Save the PetMatch again after modifying its model relationship attributes
-			petmatch.save()
 			log_activity(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=petmatch, )
 		
 		elif outcome == "SQL UPDATE":

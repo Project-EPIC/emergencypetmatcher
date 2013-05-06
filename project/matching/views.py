@@ -233,7 +233,8 @@ def verify_PetMatch(request, petmatch_id):
                 action = request.POST['message']    
                 bit = 1 if (action == 'yes') else 2 if (action == 'no') else 0
                 pos = 0 if (user == pm.lost_pet.proposed_by) else 1
-                '''User cannot change his/her response once it has been submitted'''
+
+                #User cannot change his/her response once it has been submitted
                 if pm.verification_votes[pos] != '0':
                     messages.error(request, "You have already submitted a response for this PetMatch!")
                     return redirect(URL_HOME)
@@ -241,6 +242,7 @@ def verify_PetMatch(request, petmatch_id):
                     pm.verification_votes = str(bit)+pm.verification_votes[1]
                 else:
                     pm.verification_votes = pm.verification_votes[0]+str(bit)
+
                 pm.save() 
                 if '0' not in pm.verification_votes:
                     pm.close_PetMatch()

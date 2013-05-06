@@ -183,13 +183,8 @@ class PetReport(models.Model):
 
     #Override the save method for this model
     def save(self, *args, **kwargs):
-
-        if self.id == None:
-            print "%s has been saved!" % self
-        else:
-            print "%s has been updated!" % self
-
-        super(PetReport, self).save(args, kwargs)            
+        super(PetReport, self).save(args, kwargs) 
+        print_success_msg ("{%s} has been created by %s!" % (self, self.proposed_by))           
         return self
 
     ''' Determine if the input UserProfile (user) has bookmarked this PetReport already '''
@@ -335,7 +330,7 @@ class PetMatch(models.Model):
         
         #PetMatch inserted improperly
         if (lost_pet.status != "Lost") or (found_pet.status != "Found"):
-            print "[ERROR]: The PetMatch was not saved because it was inserted improperly. Check to make sure that the PetMatch consists of one lost and found pet and that they are being assigned to the lost and found fields, respectively."
+            print_error_msg ("The PetMatch was not saved because it was inserted improperly. Check to make sure that the PetMatch consists of one lost and found pet and that they are being assigned to the lost and found fields, respectively.")
             return (None, PETMATCH_OUTCOME_INSERTED_IMPROPERLY)
 
         existing_match = PetMatch.get_PetMatch(self.lost_pet, self.found_pet)            
@@ -344,15 +339,15 @@ class PetMatch(models.Model):
         if existing_match != None:
             if existing_match.id == self.id:
                 super(PetMatch, self).save(args, kwargs)
-                print "[SQL UPDATE]: %s" % self
+                print_info_msg ("[SQL UPDATE]: %s" % self)
                 return (self, PETMATCH_OUTCOME_UPDATE)
             else:
-                print "[DUPLICATE PETMATCH]: %s VS. %s" % (self, existing_match)
+                print_info_msg ("[DUPLICATE PETMATCH]: %s VS. %s" % (self, existing_match))
                 return (None, PETMATCH_OUTCOME_DUPLICATE_PETMATCH) #Duplicate PetMatch!
 
         #Good to go: Save the PetMatch Object.
         super(PetMatch, self).save(*args, **kwargs)
-        print "[OK]: PetMatch %s was saved!" % self
+        print_success_msg("PetMatch %s was saved!" % self)
         return (self, PETMATCH_OUTCOME_NEW_PETMATCH)
 
 
@@ -393,15 +388,12 @@ class PetMatch(models.Model):
         return False  
 
     def PetMatch_has_reached_threshold(self):
-        '''Difference[D] is calculated as the difference between number of upvotes and number of downvotes. 
-        For a PetMatch to be successful, it should satisfy certain constraints. D should exceed a threshold value,
-        which is half the number of active users on the system. 10 will be replaced by a function that returns the number of active users in the system '''
-        active_users = len(UserProfile.objects.all())/2 
+        #Difference (D) is calculated as the difference between number of upvotes and downvotes.
+        #For a PetMatch to be successful, it should satisfy certain constraints. D should exceed a threshold value.
         difference = self.up_votes.count() - self.down_votes.count()
-        '''Temporary Fix: If the pet match proposer (also the one who reported  either the lost/found pet
-        on the pet match) votes on the pet match and his vote is the only vote for the pet match then 
-        verification is triggered'''
-        if self.up_votes.count() == 1:    
+
+        #Temporary: If the PetMatch proposer votes on this, and his/her vote is the only vote for this, then verification is triggered.
+        if self.up_votes.count() == 1:
             if self.proposed_by == self.up_votes.all()[0] and (self.proposed_by == self.lost_pet.proposed_by or self.proposed_by == self.found_pet.proposed_by):
                 return True
 
@@ -416,7 +408,7 @@ class PetMatch(models.Model):
             self.is_open = False
             self.verification_triggered = True
             self.save()
-            print '[INFO]: PetMatch is now closed to the crowd, verification has been triggered'
+            print_info_msg("Verification Triggered: PetMatch is now closed to the crowd.")
             petmatch_owner = self.proposed_by.user
             lost_pet_contact = self.lost_pet.proposed_by.user
             found_pet_contact = self.found_pet.proposed_by.user
@@ -426,7 +418,6 @@ class PetMatch(models.Model):
 
             if petmatch_owner.username == lost_pet_contact.username or petmatch_owner.username == found_pet_contact.username: 
                 Optionally_discuss_with_digital_volunteer = ""
-
             else:
                 Optionally_discuss_with_digital_volunteer = "You may also discuss this pet match with %s, the digital volunteer who proposed this pet match. You can reach %s at %s" % (self.proposed_by.user.username,self.proposed_by.user.username,self.proposed_by.user.email)
 
@@ -465,6 +456,8 @@ class PetMatch(models.Model):
                 if not petmatch_owner.get_profile().is_test:
                     petmatch_owner.email_user(email_subject,email_body,from_email=None)
                 #print '[INFO]: Email to pet match owner: '+email_body
+        else:
+            print_error_msg("PetMatch.verification_triggered field is %s when it should be %s" % (self.verification_triggered, not self.verification_triggered))
 
 
     def close_PetMatch(self):
@@ -531,10 +524,11 @@ class PetMatch(models.Model):
                     found_pet_contact.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
             else: 
                 # if self.verification_votes == '22' or self.verification_votes == '12' or self.verification_votes == '21':
-                    print "[INFO]: PetMatch Verification was NOT a success!"
+                    print_info_msg ("PetMatch Verification was NOT a success!")
                     petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE)
+
             self.save()    
-            print '[INFO]: PetMatch %s has been closed' % (self)
+            print_info_msg ("PetMatch %s has been closed" % (self))
     
     def __unicode__ (self):
         return '{ID{%s} lost:%s, found:%s, proposed_by:%s}' % (self.id, self.lost_pet, self.found_pet, self.proposed_by)
@@ -653,8 +647,7 @@ class EditUserProfile(models.Model):
 @receiver (pre_delete, sender=UserProfile)
 def delete_UserProfile(sender, instance=None, **kwargs):
     if instance.user == None:
-        print "[ERROR]: User was deleted before UserProfile. Cannot delete log file."
-
+        print_error_msg("User was deleted before UserProfile. Cannot delete log file.")
     else:    
         #Delete the UserProfile log file.
         delete_log(instance)
@@ -677,17 +670,23 @@ def setup_UserProfile(sender, instance, created, **kwargs):
 #Post Add Signal function to check if a PetMatch has reached threshold
 @receiver(m2m_changed, sender=PetMatch.up_votes.through)
 def trigger_PetMatch_verification(sender, instance, action,**kwargs):
-    '''Checking condition that will return true once PetMatch reaches a threshold value,
-    if it returns true, pet match verification work flow is triggered'''
-    #print 'trigger_PetMatch_verification sign triggered'
+    #Checking condition that will return true once PetMatch reaches a threshold value,
+    #if it returns true, pet match verification work flow is triggered.
+    print_debug_msg("PetMatch Verification Signal (Upvotes) TRIGGERED: %s" % action)
     if action == 'post_add':
-        if instance.PetMatch_has_reached_threshold():
-            print '[INFO]: PetMatch has reached the threshold'
-            instance.verify_petmatch()   
-            instance.save()
+        if instance.PetMatch_has_reached_threshold() == True:
+            instance.verify_petmatch()
+
+
 
 ''' Import statements placed at the bottom of the page to prevent circular import dependence '''
 from logging import *
+from utils import print_info_msg, print_error_msg, print_debug_msg, print_success_msg
+
+
+
+
+
 
 
 
