@@ -695,8 +695,15 @@ class VerificationTesting (unittest.TestCase):
 			verification_page_url = URL_VERIFY_PETMATCH + str(petmatch.id) + "/"
 			print_debug_msg (petmatch)
 
+			petmatch = PetMatch.objects.get(pk=petmatch.id)
+
 			if petmatch.PetMatch_has_reached_threshold() == True:
 					self.assertTrue(petmatch.verification_triggered)
+
+					#if the pet match as already been closed, disallow the test from running for this pet match
+					if petmatch.is_open == False:
+						continue
+
 					self.assertFalse(petmatch.is_open)
 					old_pet_vote = petmatch.verification_votes
 
@@ -723,12 +730,13 @@ class VerificationTesting (unittest.TestCase):
 						self.assertEquals(response.status_code, 200)
 
 					petmatch = PetMatch.objects.get(pk=petmatch.id)
+					lost_pet = PetReport.objects.get(pk=petmatch.lost_pet.id)
 					new_pet_vote = petmatch.verification_votes
 					self.assertTrue(petmatch.closed_date != None)
 
 					if new_pet_vote == '11':
 						self.assertTrue(petmatch.is_successful)
-						self.assertTrue(petmatch.lost_pet.closed)
+						self.assertTrue(lost_pet.closed)
 						self.assertTrue(petmatch.found_pet.closed)
 						for pm in petmatch.lost_pet.lost_pet_related.all(): 
 							self.assertFalse(pm.is_open)
