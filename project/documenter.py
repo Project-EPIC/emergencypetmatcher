@@ -1,7 +1,7 @@
 from project.settings import NOSQL_DATABASES
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, OperationFailure
-from logging import *
+import logger
 from constants import *
 
 '''===================================================================================

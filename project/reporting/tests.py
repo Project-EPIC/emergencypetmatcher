@@ -277,7 +277,7 @@ class ReportingTesting (unittest.TestCase):
 			petreport = random.choice(petreports)
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
 
-			#Test without logging in First.
+			#Test without logger in First.
 			print "[INFO]:Getting PRDP from %s without being logged in" % (client)
 			response = client.get(prdp_url)
 			self.assertEquals(response.status_code, 200)
@@ -288,7 +288,7 @@ class ReportingTesting (unittest.TestCase):
 			self.assertTrue(loggedin == True)
 			print "[INFO]:%s logs onto %s to EPM" % (user, client)
 
-			#Test after Logging in.
+			#Test after logger in.
 			response = client.get(prdp_url)
 			self.assertEquals(response.status_code, 200)
 			self.assertTrue(response.request ['PATH_INFO'] == prdp_url)

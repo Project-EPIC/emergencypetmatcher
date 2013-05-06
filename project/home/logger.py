@@ -1,12 +1,12 @@
 from constants import *
 from home.models import UserProfile, PetReport, PetMatch
-import os, sys, time
 from django.utils import timezone 
 from django.utils.dateparse import parse_datetime
 from datetime import datetime
+import os, sys, time
 
 '''===================================================================================
-[logging.py]: Logging Functionality for the EPM system
+[logger.py]: Logging Functionality for the EPM system
 ==================================================================================='''
 
 '''Method for logging activities given an input UserProfile, Activity Enum, and (optionally) PetReport and PetMatch objects.'''
@@ -88,7 +88,7 @@ def log_activity(activity, userprofile, userprofile2=None, petreport=None, petma
         logger.close()
 
     except Exception as e:
-        print "[ERROR]: problem in log_activity(%s)." % e
+        print "[ERROR]: problem in logger.log_activity(%s)." % e
         
 
 ''' Helper function for returning an HTML representation for an input activity '''

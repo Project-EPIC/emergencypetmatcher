@@ -25,8 +25,7 @@ from django.forms.models import model_to_dict
 from home.models import *
 from utils import *
 from constants import *
-from logging import *
-import datetime, re, Image
+import datetime, re, Image, home.logger
 
 @login_required
 def submit_PetReport(request):
@@ -75,7 +74,7 @@ def submit_PetReport(request):
                 messages.success (request, 'Thank you for your submission! Your contribution will go a long way towards helping others match lost and found pets.')                
 
             #Log the PetReport submission for this UserProfile
-            log_activity(ACTIVITY_PETREPORT_SUBMITTED, request.user.get_profile(), petreport=pr)
+            logger.log_activity(ACTIVITY_PETREPORT_SUBMITTED, request.user.get_profile(), petreport=pr)
             print "[SUCCESS]: Pet Report submitted successfully" 
             return redirect(URL_HOME)
 
@@ -146,7 +145,7 @@ def bookmark_PetReport(request):
             text = "Bookmark this Pet"
 
             # Log removing the PetReport bookmark for this UserProfile
-            log_activity(ACTIVITY_PETREPORT_REMOVE_BOOKMARK, request.user.get_profile(), petreport=petreport)
+            logger.log_activity(ACTIVITY_PETREPORT_REMOVE_BOOKMARK, request.user.get_profile(), petreport=petreport)
 
         elif ((not petreport.UserProfile_has_bookmarked(user)) and (action == "Bookmark this Pet")):
             petreport.bookmarked_by.add(user)
@@ -157,7 +156,7 @@ def bookmark_PetReport(request):
             text = "Remove Bookmark"
 
             # Log adding the PetReport bookmark for this UserProfile
-            log_activity(ACTIVITY_PETREPORT_ADD_BOOKMARK, request.user.get_profile(), petreport=petreport)
+            logger.log_activity(ACTIVITY_PETREPORT_ADD_BOOKMARK, request.user.get_profile(), petreport=petreport)
 
         else:
             print "User has bookmarked the pet: "+str(petreport.UserProfile_has_bookmarked(user))

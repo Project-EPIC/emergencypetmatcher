@@ -12,7 +12,7 @@ from django.db import IntegrityError
 from datetime import datetime
 from django.core.exceptions import ValidationError
 from utils import *
-from logging import *
+import logger
 
 class UserResource(ModelResource):
     class Meta:
@@ -92,7 +92,7 @@ class PetReportResource(MultipartResource, ModelResource):
                     bundle.data ['message'] = 'Thank you for your submission! Your contribution will go a long way towards helping others match lost and found pets.'
 
                 #Log the PetReport submission for this UserProfile
-                log_activity(ACTIVITY_PETREPORT_SUBMITTED, request.user.get_profile(), petreport=pr)
+                logger.log_activity(ACTIVITY_PETREPORT_SUBMITTED, request.user.get_profile(), petreport=pr)
                 print "[SUCCESS]: Pet Report submitted successfully" 
                 bundle.obj = pr
             else:
@@ -167,7 +167,7 @@ class PetReportResource2(MultipartResource, ModelResource):
                     img_path=img_path, pet_name=pet_name, age=age, color=color, breed=breed, description=description)
                 bundle.obj = pr
                 bundle.obj.save()
-                log_activity(ACTIVITY_PETREPORT_SUBMITTED, proposed_by, petreport=pr)
+                logger.log_activity(ACTIVITY_PETREPORT_SUBMITTED, proposed_by, petreport=pr)
             except IntegrityError:
                 raise BadRequest('That petreport already exists\n')
         except Exception:

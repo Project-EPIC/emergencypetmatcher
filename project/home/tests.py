@@ -3,7 +3,7 @@ from django.test.client import Client
 from django.contrib.sites.models import Site
 from constants import *
 from home.models import *
-from logging import *
+import logger
 from utils import *
 from time import sleep
 from selenium import webdriver
@@ -14,7 +14,7 @@ import unittest, string, random, sys, time, urlparse, project.settings
 '''===================================================================================
 home.tests.py: Testing for Home App Functionality:
 
-Test classes: home.ModelTesting home.LoginTesting home.LoggingTesting home.UserProfileTesting 
+Test classes: home.ModelTesting home.LoginTesting home.loggerTesting home.UserProfileTesting 
 home.EditUserProfileTesting home.FollowingTesting home.SocialAuthTesting
 ==================================================================================='''
 
@@ -430,7 +430,7 @@ class ModelTesting (unittest.TestCase):
 
 
 '''===================================================================================
-LoginTesting: Testing for EPM Logging In/Out
+LoginTesting: Testing for EPM logger In/Out
 ==================================================================================='''
 class LoginTesting (unittest.TestCase):
 
@@ -555,7 +555,7 @@ class SocialAuthTesting(TestCase):
 	        # after successful authentication by Twitter 
             assert "EPM" in self.driver.title
             self.assertTrue(self.driver.find_element_by_id('logout'))
-            print "  Successfully logging in EPM home page with Twitter authentication."
+            print "  Successfully logger in EPM home page with Twitter authentication."
         except:
         	print "  Unable to authenticate the testing user with Twitter."
 
@@ -605,7 +605,7 @@ class SocialAuthTesting(TestCase):
             # after successful authentication by Facebook
             assert "EPM" in self.driver.title
             self.assertTrue(self.driver.find_element_by_id('logout'))
-            print "  Successfully logging in EPM home page with Facebook authentication."
+            print "  Successfully logger in EPM home page with Facebook authentication."
 
         except:
         	print "  Unable to authenticate the testing user with Facebook."
@@ -943,9 +943,9 @@ class FollowingTesting (unittest.TestCase):
 
 
 '''===================================================================================
-LoggingTesting: Testing for EPM Logging Activities
+LoggerTesting: Testing for EPM logger Activities
 ==================================================================================='''
-class LoggingTesting (unittest.TestCase):
+class LoggerTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
@@ -966,7 +966,7 @@ class LoggingTesting (unittest.TestCase):
 			userprofile.set_activity_log(is_test=True)
 
 			#Now check: Does the userprofile's log file exist where it should?
-			self.assertTrue(log_exists(userprofile) == True)
+			self.assertTrue(logger.log_exists(userprofile) == True)
 			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
@@ -1002,14 +1002,14 @@ class LoggingTesting (unittest.TestCase):
 			print "[INFO]:%s logs onto %s..." % (user, client)
 
 			#We expect the system not to throw errors but to catch them.
-			activities = get_recent_activites_from_log(userprofile=user.userprofile)
-			activities += get_bookmark_activities(userprofile=user.userprofile)
+			activities = logger.get_recent_activites_from_log(userprofile=user.userprofile)
+			activities += logger.get_bookmark_activities(userprofile=user.userprofile)
 			print "[INFO]: %s has an activity feed list of size [%d]" % (user, len(activities))
-			self.assertTrue(log_exists(user.userprofile))
+			self.assertTrue(logger.log_exists(user.userprofile))
 
 			#Now, delete the user.
 			user.delete()
-			self.assertFalse(log_exists(user.userprofile))
+			self.assertFalse(logger.log_exists(user.userprofile))
 
 			output_update(i + 1)
 			print '\n'
@@ -1029,14 +1029,14 @@ class LoggingTesting (unittest.TestCase):
 			(user, password) = create_random_User(i)
 			user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 
-			with open(user_log_filename, 'r') as logger:
+			with open(user_log_filename, 'r') as logging:
 
-				lines = list(iter(logger.readlines()))
+				lines = list(iter(logging.readlines()))
 				print lines
-				self.assertTrue(activity_has_been_logged(ACTIVITY_ACCOUNT_CREATED, user.get_profile()) == True)
+				self.assertTrue(logger.activity_has_been_logged(ACTIVITY_ACCOUNT_CREATED, user.get_profile()) == True)
 				self.assertEquals(len(lines), 1)
 
-			logger.close()
+			logging.close()
 			output_update(i + 1)
 			print '\n'
 			end_time = time.clock()
@@ -1095,7 +1095,7 @@ class LoggingTesting (unittest.TestCase):
 
 			#Now, check if the activity for submitting a PetReport appears in this user's log.
 			petreport = PetReport.objects.get(proposed_by = user, pet_name = user.username + str(i))
-			self.assertTrue(activity_has_been_logged(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=petreport) == True)	
+			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=petreport) == True)	
 
 			output_update(i + 1)
 			print "\n"
@@ -1126,7 +1126,7 @@ class LoggingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the matching interface..." % (user, client)			
+			print_test_msg ("%s logs onto %s to enter the matching interface..." % (user, client))			
 
 			#Go to the matching interface
 			matching_url = URL_MATCHING + str(petreport.id) + "/"
@@ -1135,17 +1135,17 @@ class LoggingTesting (unittest.TestCase):
 			filtered_pet_reports = PetReport.objects.all().exclude(pk=petreport.id).exclude(status = petreport.status).filter(pet_type = petreport.pet_type)
 			if len(filtered_pet_reports) == 0:
 				self.assertEquals(response.status_code, 302)
-				print "[INFO]: Oh! There are no PetReports to match this PetReport with - Back to the Home Page!"
+				print_test_msg ("Oh! There are no PetReports to match this PetReport with - Back to the Home Page!")
 				continue
 
 			self.assertEquals(response.status_code, 200)
-			print "[INFO]:%s has successfully requested page '%s'..." % (user, matching_url) 
+			print_test_msg ("%s has successfully requested page '%s'..." % (user, matching_url))
 			candidate_petreport = random.choice(filtered_pet_reports) 
 
 			#Go to the propose match dialog
 			propose_match_url = URL_PROPOSE_MATCH + str(petreport.id) + "/" + str(candidate_petreport.id) + "/"
 			response = client.get(propose_match_url)
-			print "[INFO]:%s has successfully requested page '%s'..." % (user, propose_match_url) 
+			print_test_msg ("%s has successfully requested page '%s'..." % (user, propose_match_url))
 
 			#Make the POST request Call		
 			description = generate_lipsum_paragraph(500)
@@ -1163,18 +1163,17 @@ class LoggingTesting (unittest.TestCase):
 			#Grab the PetMatch that has either been posted in the past or has been posted by this User.
 			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
 
-			#Either the User upvoting an already existing PetMatch...
+			#Either the User is upvoting an already existing PetMatch...
 			if match.UserProfile_has_voted(user.get_profile()) == UPVOTE:
-				print "[INFO]:A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user)
-				self.assertTrue(activity_has_been_logged(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=match) == True)
+				self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=match) == True)
+				print_test_msg ("A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user))
 
 			#...Or the User successfully proposed a NEW PetMatch.
 			else:
-				print "[INFO]:%s has successfully POSTED a new match!" % (user)
-				self.assertTrue(activity_has_been_logged(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=match) == True)					
+				self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=match) == True)					
+				print_test_msg ("%s has successfully POSTED a new match!" % (user))
 	
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)		
 
@@ -1215,11 +1214,11 @@ class LoggingTesting (unittest.TestCase):
 			client.logout()						
 
 			# Check if the activity for following a UserProfile appears in this userprofile_one's log.
-			self.assertTrue(activity_has_been_logged(ACTIVITY_FOLLOWING, userprofile=userprofile_one, userprofile2=userprofile_two) == True)		
+			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_FOLLOWING, userprofile=userprofile_one, userprofile2=userprofile_two) == True)		
 			print "[OK]:%s has followed %s" % (userprofile_one.user.username, userprofile_two.user.username)
 
 			# Check if the activity for following a UserProfile appears in this userprofile_two's log.
-			self.assertTrue(activity_has_been_logged(ACTIVITY_FOLLOWER, userprofile=userprofile_two, userprofile2=userprofile_one) == True)				
+			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_FOLLOWER, userprofile=userprofile_two, userprofile2=userprofile_one) == True)				
 			print "[OK]:%s has been followed by %s" % (userprofile_two.user.username, userprofile_one.user.username)
 	
 			output_update(i + 1)
@@ -1270,11 +1269,11 @@ class LoggingTesting (unittest.TestCase):
 			client.logout()						
 
 			# Check if the activity for unfollowing a UserProfile appears in this userprofile_one's log.
-			self.assertTrue(activity_has_been_logged(ACTIVITY_UNFOLLOWING, userprofile=userprofile_one, userprofile2=userprofile_two) == True)			
+			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_UNFOLLOWING, userprofile=userprofile_one, userprofile2=userprofile_two) == True)			
 			print "[OK]:%s has unfollowed %s" % (userprofile_one.user.username, userprofile_two.user.username)
 				
 			# Check if the activity for unfollowing a UserProfile appears in this userprofile_two's log.
-			self.assertTrue(activity_has_been_logged(ACTIVITY_UNFOLLOWER, userprofile=userprofile_two, userprofile2=userprofile_one) == True)			
+			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_UNFOLLOWER, userprofile=userprofile_two, userprofile2=userprofile_one) == True)			
 			print "[OK]:%s has been unfollowed by %s" % (userprofile_two.user.username, userprofile_one.user.username)
 				
 			output_update(i + 1)
@@ -1331,7 +1330,7 @@ class LoggingTesting (unittest.TestCase):
 
 			# Check if the activity for adding a PetReport bookmark appears in this user's log.
 			print "[INFO]: %s has added a bookmark for %s." % (user, petreport)
-			self.assertTrue(activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)
+			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)
 
 			output_update(i + 1)
 			print "\n"
@@ -1386,7 +1385,7 @@ class LoggingTesting (unittest.TestCase):
 
 			# Check if the activity for adding a PetReport bookmark appears in this user's log.
 			print "[INFO]: %s has removed a bookmark for %s." % (user, petreport)
-			self.assertTrue(activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)				
+			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)				
 
 			output_update(i + 1)
 			print "\n"
@@ -1427,7 +1426,7 @@ class LoggingTesting (unittest.TestCase):
 			activities = []
 			random_activity_range = random.randrange(0, len(UserProfile.objects.all()))
 			for following in user.get_profile().following.all().order_by("?")[:random_activity_range]:
-				log = get_recent_activites_from_log(following)
+				log = logger.get_recent_activites_from_log(following)
 				if log != None:
 					activities.append(log)
 
@@ -1475,7 +1474,7 @@ class LoggingTesting (unittest.TestCase):
 			activities = []
 			max_num_activities = ACTIVITY_FEED_LENGTH
 			for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:max_num_activities]:
-				activities += get_recent_activites_from_log(userprofile=userprof, num_activities=1)			
+				activities += logger.get_recent_activites_from_log(userprofile=userprof, num_activities=1)			
 			num_activities = len(activities)
 			print "=======[INFO]: The anonymous user got an activity feed list of size %d when the maximum length = %d" % (num_activities, max_num_activities)
 
@@ -1548,14 +1547,14 @@ class LoggingTesting (unittest.TestCase):
 			activities = []
 
 			# Get all activities from this UserProfile's log file that show who has followed this UserProfile 
-			activities += get_recent_activites_from_log(userprofile=user.get_profile(), current_userprofile=user.get_profile(), since_date=user.get_profile().last_logout, activity=ACTIVITY_FOLLOWER)
+			activities += logger.get_recent_activites_from_log(userprofile=user.get_profile(), current_userprofile=user.get_profile(), since_date=user.get_profile().last_logout, activity=ACTIVITY_FOLLOWER)
 
 			# Get all activities that associated to the PetReports I bookmarked
-			activities += get_bookmark_activities(userprofile=user.get_profile(), since_date=user.get_profile().last_logout)
+			activities += logger.get_bookmark_activities(userprofile=user.get_profile(), since_date=user.get_profile().last_logout)
 
             # Get all activities that are associated with the UserProfiles I follow
 			for following in user.get_profile().following.all():
-				activities += get_recent_activites_from_log(userprofile=following, current_userprofile=user.get_profile(), since_date=user.get_profile().last_logout)
+				activities += logger.get_recent_activites_from_log(userprofile=following, current_userprofile=user.get_profile(), since_date=user.get_profile().last_logout)
 
 			num_following = len(user.get_profile().following.all())
 			num_activities = len(activities)

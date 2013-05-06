@@ -59,7 +59,7 @@ class UserProfile (models.Model):
             print "[OK]: A new UserProfile log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id)                        
 
         self.save()
-        log_activity(ACTIVITY_ACCOUNT_CREATED, self)    
+        logger.log_activity(ACTIVITY_ACCOUNT_CREATED, self)    
 
     def send_email_message_to_UserProfile (self, target_userprofile, message, test_email=True):
         
@@ -650,7 +650,7 @@ def delete_UserProfile(sender, instance=None, **kwargs):
         print_error_msg("User was deleted before UserProfile. Cannot delete log file.")
     else:    
         #Delete the UserProfile log file.
-        delete_log(instance)
+        logger.delete_log(instance)
         #Instead of deleting the User (which might break foreign-key relationships),
         #set the active flag to False (INACTIVE)
         instance.user.is_active = False
@@ -664,8 +664,8 @@ def setup_UserProfile(sender, instance, created, **kwargs):
         userprofile = UserProfile.objects.create(user=instance)
         userprofile.update_reputation(ACTIVITY_ACCOUNT_CREATED)
     elif instance.is_active:
-        if log_exists(instance.get_profile()) == False:
-            log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
+        if logger.log_exists(instance.get_profile()) == False:
+            logger.log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
 
 #Post Add Signal function to check if a PetMatch has reached threshold
 @receiver(m2m_changed, sender=PetMatch.up_votes.through)
@@ -680,7 +680,7 @@ def trigger_PetMatch_verification(sender, instance, action,**kwargs):
 
 
 ''' Import statements placed at the bottom of the page to prevent circular import dependence '''
-from logging import *
+import logger
 from utils import print_info_msg, print_error_msg, print_debug_msg, print_success_msg
 
 

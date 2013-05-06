@@ -14,19 +14,15 @@ from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import model_to_dict
 from django.utils import simplejson
-'''django project imports'''
-# from home.models import *
-# from constants import *
-from logging import *
-from utils import *
-from petcompare import *
-'''django plugin imports'''
+#django project imports
+#django plugin imports
 from social_auth import __version__ as version
 from social_auth.utils import setting
 from social_auth.views import auth
-'''python imports'''
+#python imports
 from random import choice, uniform
-import datetime, re
+from utils import *
+import datetime, re, home.logger
 
 ''' Display the PetMatch object '''
 def display_PetMatch(request, petmatch_id):
@@ -70,7 +66,7 @@ def vote_PetMatch(request):
             
             pm.up_votes.add(userprofile)
             pm.down_votes.remove(userprofile)
-            log_activity(ACTIVITY_PETMATCH_UPVOTE, userprofile, petmatch=pm)
+            logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, userprofile, petmatch=pm)
             message = "You have successfully upvoted this PetMatch!"
         elif vote == "downvote":
             # If the user is voting for the 1st time, add reputation points
@@ -79,7 +75,7 @@ def vote_PetMatch(request):
                 
             pm.down_votes.add(userprofile)
             pm.up_votes.remove(userprofile)
-            log_activity(ACTIVITY_PETMATCH_DOWNVOTE, userprofile, petmatch=pm)
+            logger.log_activity(ACTIVITY_PETMATCH_DOWNVOTE, userprofile, petmatch=pm)
             message = "You have successfully downvoted this PetMatch!"
         else:
             message = "There was something wrong with this vote. Please let us know by emailing us at emergencypetmatcher@gmail.com"
@@ -128,8 +124,7 @@ def match_PetReport(request, petreport_id):
 
 @login_required
 def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
-
-    print "PROPOSE MATCH: target:%s candidate:%s" % (target_petreport_id, candidate_petreport_id)
+    print_info_msg ("PROPOSE MATCH: target:%s candidate:%s" % (target_petreport_id, candidate_petreport_id))
 
     #Grab the Target and Candidate PetReports first.
     target = get_object_or_404(PetReport, pk=target_petreport_id)
@@ -174,10 +169,11 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                 result.up_votes.add(proposed_by)
                 result.save()
                 messages.success(request, "Nice job! Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
-                log_activity(ACTIVITY_PETMATCH_UPVOTE, proposed_by, petmatch=result)
+                logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, proposed_by, petmatch=result)
 
             elif outcome == PETMATCH_OUTCOME_NEW_PETMATCH:
                 messages.success(request, "Congratulations - The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
+                logger.log_activity(ACTIVITY_PETMATCH_PROPOSED, proposed_by, petmatch=result)
                 # add reputation points for proposing a new petmatch
                 proposed_by.update_reputation(ACTIVITY_PETMATCH_PROPOSED)
 
@@ -198,7 +194,7 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                 result.up_votes.add(proposed_by)
                 result.save()          
                 messages.success(request, "Nice job! Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
-                log_activity(ACTIVITY_PETMATCH_UPVOTE, proposed_by, petmatch=result)
+                logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, proposed_by, petmatch=result)
             else:                
                 messages.error(request, "A Problem was found when trying to propose the PetMatch. We have been notified of the issue and will fix it as soon as possible.")            
 

@@ -6,7 +6,6 @@ from utils import *
 from constants import *
 import unittest, string, random, sys, time
 from django.contrib.messages import constants as messages
-from petcompare import *
 
 
 '''===================================================================================

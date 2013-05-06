@@ -27,7 +27,7 @@ from django.contrib import messages
 from django.utils import simplejson
 from home.models import *
 from constants import *
-from logging import *
+import logger
 from registration.models import RegistrationProfile
 from registration.views import activate
 from utils import *
@@ -77,22 +77,22 @@ def get_activities_json(request):
             current_userprofile = request.user.get_profile()      
 
             # Get all activities from this UserProfile's log file that show who has followed this UserProfile 
-            activities += get_recent_activites_from_log(userprofile=current_userprofile, current_userprofile=current_userprofile, 
+            activities += logger.get_recent_activites_from_log(userprofile=current_userprofile, current_userprofile=current_userprofile, 
                  since_date=current_userprofile.last_logout, activity=ACTIVITY_FOLLOWER)
         
             # Get all activities that associated to the PetReports I bookmarked
-            activities += get_bookmark_activities(userprofile=current_userprofile, since_date=current_userprofile.last_logout)
+            activities += logger.get_bookmark_activities(userprofile=current_userprofile, since_date=current_userprofile.last_logout)
 
             # Get all activities that are associated with the UserProfiles I follow
             for following in current_userprofile.following.all().order_by("?")[:ACTIVITY_FEED_LENGTH]:
-                activities += get_recent_activites_from_log(userprofile=following, current_userprofile=current_userprofile,
+                activities += logger.get_recent_activites_from_log(userprofile=following, current_userprofile=current_userprofile,
                     since_date=current_userprofile.last_logout) 
 
         else:
             print "[INFO]: get_activities_json(): Anonymous User - random sample of activities..."
             # Get random activities for the anonymous user           
             for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:ACTIVITY_FEED_LENGTH]:
-                activities += get_recent_activites_from_log(userprofile=userprof, num_activities=1)
+                activities += logger.get_recent_activites_from_log(userprofile=userprof, num_activities=1)
 
             #print "[INFO]: Activities are: %s" % activities
 
@@ -130,7 +130,6 @@ def get_activities_json(request):
 
 def login_User(request):
     if request.method == "POST":
-        
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
@@ -140,16 +139,15 @@ def login_User(request):
                 userprofile = user.get_profile()
 
                 #if log_exists(userprofile) == False:
-                 #   log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)
+                 #   logger.log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)
 
                 login(request, user)
                 messages.success(request, 'Welcome, %s!' % (username))
-                log_activity(ACTIVITY_LOGIN, user.get_profile())
+                logger.log_activity(ACTIVITY_LOGIN, user.get_profile())
                 next_url = request.REQUEST ['next']
 
                 if "//" in next_url and re.match(r'[^\?]*//', next_url):
                     next_url = settings.LOGIN_REDIRECT_URL
-
                 return redirect(next_url)
 
             else:
@@ -168,14 +166,14 @@ def login_User(request):
 
 @login_required
 def logout_User(request):
-    print "[INFO]: Logging out UserProfile {%s}" % request.user.get_profile()
+    print "[INFO]: logger out UserProfile {%s}" % request.user.get_profile()
 
     # Update to last_logout date field
     u = get_object_or_404(UserProfile, pk=request.user.get_profile().id)
     u.last_logout = datetime.now()
     u.save()
  
-    log_activity(ACTIVITY_LOGOUT, request.user.get_profile())
+    logger.log_activity(ACTIVITY_LOGOUT, request.user.get_profile())
     messages.success(request, "You have successfully logged out.")
     logout(request)
     return redirect(URL_HOME)
@@ -331,7 +329,7 @@ def follow_UserProfile(request):
                 messages.success(request, "You are now following " + str(target_userprofile.user.username) + ".")     
 
                 # Log the following activity for this UserProfile
-                log_activity(ACTIVITY_FOLLOWING, userprofile, target_userprofile)
+                logger.log_activity(ACTIVITY_FOLLOWING, userprofile, target_userprofile)
 
             return redirect (URL_USERPROFILE + str(target_userprofile.id))
 
@@ -355,7 +353,7 @@ def unfollow_UserProfile(request):
                 target_userprofile.update_reputation(ACTIVITY_USER_BEING_UNFOLLOWED)
                 messages.success(request, "You are no longer following " + str(target_userprofile.user.username) + ".") 
                 # Log the unfollowing activity for this UserProfile
-                log_activity(ACTIVITY_UNFOLLOWING, userprofile, target_userprofile)
+                logger.log_activity(ACTIVITY_UNFOLLOWING, userprofile, target_userprofile)
                 return redirect(URL_USERPROFILE + str(target_userprofile.id))
 
             else:

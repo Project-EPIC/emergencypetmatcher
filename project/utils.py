@@ -51,7 +51,7 @@ def generate_lipsum_paragraph(max_length):
 
 #Keep the user/tester updated.
 def output_update (i):	
-	output = "%d of %d iterations complete" % (i, NUMBER_OF_TESTS)
+	output = "%d of %d iterations complete\n" % (i, NUMBER_OF_TESTS)
 	sys.stdout.write("\r\x1b[K"+output.__str__())
 	sys.stdout.flush()
 
@@ -189,7 +189,7 @@ def create_random_following_list (userprofile, num_following=None):
 
 	for followed in following_list:
 		userprofile.following.add(followed)
-		log_activity(ACTIVITY_FOLLOWING, userprofile, userprofile2=followed)
+		logger.log_activity(ACTIVITY_FOLLOWING, userprofile, userprofile2=followed)
 
 	return userprofile
 
@@ -306,7 +306,7 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 			pr.img_path.name = "images/defaults/other_silhouette.jpg"
 
 	pr.workers = create_random_Userlist()
-	log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr, )
+	logger.log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr, )
 	return pr
 
 #Create Random Object for: Chat
@@ -395,11 +395,11 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 				petmatch.down_votes = set(down_votes) - set(up_votes)
 				petmatch.up_votes = set(up_votes) - set(down_votes)
 
-			log_activity(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=petmatch, )
+			logger.log_activity(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=petmatch, )
 		
 		elif outcome == "SQL UPDATE":
 			petmatch.up_votes.add(user.get_profile())
-			log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=petmatch, )			
+			logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=petmatch, )			
 
 	else:
 		if outcome =="DUPLICATE PETMATCH":
@@ -408,11 +408,11 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 			if random.random() >= 0.5:
 				existing_petmatch.up_votes.add(user.get_profile())
 				existing_petmatch.down_votes.remove(user.get_profile())
-				log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=existing_petmatch, )				
+				logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=existing_petmatch, )				
 			else:
 				existing_petmatch.down_votes.add(user.get_profile())
 				existing_petmatch.up_votes.remove(user.get_profile())
-				log_activity(ACTIVITY_PETMATCH_DOWNVOTE, user.get_profile(), petmatch=existing_petmatch, )				
+				logger.log_activity(ACTIVITY_PETMATCH_DOWNVOTE, user.get_profile(), petmatch=existing_petmatch, )				
 			
 	print "\n"
 	#Return the (possibly None) PetMatch
