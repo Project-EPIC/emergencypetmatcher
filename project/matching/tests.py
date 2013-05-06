@@ -586,7 +586,13 @@ class VerificationTesting (unittest.TestCase):
 			client = random.choice(clients)
 			petmatch = random.choice(petmatches)
 			petmatch_i = petmatches.index(petmatch)
+			petmatch = PetMatch.objects.get(pk=petmatch.id)
+
 			if petmatch.PetMatch_has_reached_threshold() == False:
+				continue
+
+			#If the test has been run for this pet match before then the current test run is disallowed
+			if petmatch.verification_votes != '00':
 				continue
 
 			#Looking for other users and their passwords in the users list.
