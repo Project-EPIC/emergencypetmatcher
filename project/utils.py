@@ -263,9 +263,6 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 		pr.breed = generate_string(PETREPORT_BREED_LENGTH)
 		pr.tag_info = generate_string(PETREPORT_TAG_INFO_LENGTH)
 
-	#Need to save.
-	pr.save()
-
 	#Need to handle the cases where the contact might/might not have a photo for this PetReport!
 	if random.random() <= 0.95:
 		load_PetReport_sample_images()
@@ -305,6 +302,8 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 		else:
 			pr.img_path.name = "images/defaults/other_silhouette.jpg"
 
+	#Need to save.
+	pr.save()
 	pr.workers = create_random_Userlist()
 	logger.log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr, )
 	return pr
