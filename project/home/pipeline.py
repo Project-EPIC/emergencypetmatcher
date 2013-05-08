@@ -54,6 +54,6 @@ def get_user_avatar(backend, details, response, social_user, uid, user, *args, *
 def create_user_log(backend, details, response, social_user, uid, user, *args, **kwargs):
     userprofile = user.get_profile()
     if logger.log_exists(userprofile) == False:
-        logger.log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)
-    logger.log_activity(ACTIVITY_LOGIN, user.get_profile())
+        logger.log_activity(logger.ACTIVITY_ACCOUNT_CREATED, userprofile)
+    logger.log_activity(logger.ACTIVITY_LOGIN, user.get_profile())
            
