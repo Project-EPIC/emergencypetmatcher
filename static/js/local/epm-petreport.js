@@ -16,7 +16,6 @@ $(document).ready(function(){
     }
 
     $(".prdp_pmdp_dialog a").click(function(){
-
       var link = $(this);
       return load_dialog(link.attr("href"), "Pet Match Detailed Page", 850, "auto");  
 
@@ -65,3 +64,5 @@ function bookmark(){
   });
   return true;
 }
+
+//@ sourceURL=epm-petreport.js

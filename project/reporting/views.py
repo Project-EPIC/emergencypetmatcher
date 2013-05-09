@@ -106,7 +106,7 @@ def disp_PetReport(request, petreport_id):
             #print "user has not bookmarked this petreport"
     else:
         user_has_bookmarked = "false"
-        print "user is not authenticated" 
+        print_info_msg ("Unauthenticated User accessing PetReport %s" % pet_report) 
     return render_to_response(HTML_PRDP,{'pet_report': pet_report,'matches': matches,'user_has_bookmarked':user_has_bookmarked}, RequestContext(request))
 
 @login_required
