@@ -93,7 +93,7 @@
 			<h3>Submitted Pet Reports:</h3>
 		    <div class="prdp_ppm_wk">	
 		    	<div class = "prdp_overflow1"> 
-					{% for pet_report in show_profile.petreport_set.all %}
+					{% for pet_report in show_profile.proposed_related.all %}
 					<div class="prdp_dialog">
 						<a class="prdp_pmdp_dialog_pr" href= "{% url 'disp_PetReport' pet_report.id %}" 
 						name = "{{ pet_report.pet_name }}"
