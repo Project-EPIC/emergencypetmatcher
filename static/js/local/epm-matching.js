@@ -64,13 +64,6 @@ $(document).ready(function(){
 		}
 	});	
 
-	//Click Event handler for the target petreport in the Workspace.
-	$("#prtarget .target").click(function(){
-		//Grab the Image from the target petreport and copy it in the Workspace Detail Div.
-		var img = $(this);
-		move_petreport_to_workspace_match_detail(TARGET_PETREPORT, img);
-	});	
-
 
 	$("#button_propose_match").click(function(){
 		var link = URL_PROPOSE_MATCH + TARGET_PETREPORT.id + "/" + CANDIDATE_PETREPORT.id + "/";
