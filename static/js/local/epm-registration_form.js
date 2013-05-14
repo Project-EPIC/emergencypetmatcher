@@ -12,8 +12,8 @@ $(document).ready(function(){
 	  	var born = new Date($(this).attr("value"));
 		var age = Math.floor((now.getTime() -  born.getTime()) / (365.25 * 24 * 60 * 60 * 1000));    
 	    //document.getElementById('id_age').value = age;
-	    if (age>18){
-	    	// alert("old than 18.")
+	    if (age > 18){
+	    	// alert("older than 18.")
 	    	$("#id_tc_link").attr("href", "/tc");
 		}
 		else{

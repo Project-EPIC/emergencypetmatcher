@@ -3,13 +3,12 @@ from django.test.client import Client
 from django.contrib.sites.models import Site
 from constants import *
 from home.models import *
-import logger
 from utils import *
 from time import sleep
 from selenium import webdriver
 from django.template.loader import render_to_string
 from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD, TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD, TEST_DOMAIN, EMAIL_FILE_PATH, EMAIL_BACKEND
-import unittest, string, random, sys, time, urlparse, project.settings
+import unittest, string, random, sys, time, urlparse, project.settings, logger
 
 '''===================================================================================
 home.tests.py: Testing for Home App Functionality:
@@ -61,7 +60,6 @@ class ModelTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
-		print ''
 		self.assertTrue (len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
 		self.assertTrue (len(User.objects.all()) == NUMBER_OF_TESTS)
 		performance_report(iteration_time)
@@ -101,7 +99,6 @@ class ModelTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
-		print ''
 		self.assertTrue (len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
 		self.assertTrue (len(User.objects.all()) == NUMBER_OF_TESTS)
 		performance_report(iteration_time)
@@ -132,7 +129,6 @@ class ModelTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
-		print ''
 		self.assertTrue(len(UserProfile.objects.all()) == 0)
 		self.assertTrue(len(User.objects.all()) == 0)
 		performance_report(iteration_time)
@@ -168,7 +164,6 @@ class ModelTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
-		print ''
 		self.assertTrue (len(PetReport.objects.all()) == NUMBER_OF_TESTS)
 		self.assertTrue (len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
 		self.assertTrue (len(User.objects.all()) == NUMBER_OF_TESTS)
@@ -215,7 +210,6 @@ class ModelTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
-		print ''
 		self.assertTrue (len(PetReport.objects.all()) == NUMBER_OF_TESTS)
 		self.assertTrue (len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
 		self.assertTrue (len(User.objects.all()) == NUMBER_OF_TESTS)
@@ -240,7 +234,6 @@ class ModelTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
-		print ''
 		self.assertTrue (len(UserProfile.objects.all()) == NUMBER_OF_TESTS)
 		self.assertTrue (len(User.objects.all()) == NUMBER_OF_TESTS)
 		self.assertTrue (len(PetReport.objects.all()) == 0)
@@ -278,7 +271,6 @@ class ModelTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
-		print ''
 		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS * 3)
 		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS * 3)
 		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS * 2)
@@ -309,7 +301,6 @@ class ModelTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
-		print ''
 		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS * 2)
 		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS * 2)
 		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS * 2)
@@ -340,7 +331,6 @@ class ModelTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
-		print ''
 		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS * 2)
 		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS * 2)
 		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS * 2)
@@ -384,7 +374,6 @@ class ModelTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
-		print ''
 		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS * 3)
 		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS * 3)
 		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS * 2)
@@ -420,13 +409,11 @@ class ModelTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 
-		print ''
 		self.assertTrue(len(User.objects.all()) == NUMBER_OF_TESTS * 3)
 		self.assertTrue(len(UserProfile.objects.all()) == NUMBER_OF_TESTS * 3)
 		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS * 2)
 		self.assertTrue(len(PetMatch.objects.all()) == 0)
 		performance_report(iteration_time)
-
 
 
 '''===================================================================================
@@ -445,9 +432,10 @@ class LoginTesting (unittest.TestCase):
 	def test_login_Users_successfully(self):
 		print_testing_name("test_login_Users_successfully")
 		iteration_time = 0.00
-
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients) = create_test_view_setup()	
+		results = setup_objects()
+		users = results ["users"]
+		clients = results ["clients"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -456,7 +444,7 @@ class LoginTesting (unittest.TestCase):
 			user, password = random.choice(users)
 			client = random.choice(clients)
 
-			print "[INFO]:%s logs onto %s and attempts to login..." % (user.username, client)
+			print_test_msg("%s logs onto %s and attempts to login..." % (user.username, client))
 
 			#Go to the Login Page
 			response = client.get(URL_LOGIN)
@@ -477,11 +465,9 @@ class LoginTesting (unittest.TestCase):
 			client.logout()
 
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
-		print ''
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)
@@ -490,15 +476,8 @@ class LoginTesting (unittest.TestCase):
 '''===================================================================================
 SocialAuthTesting: Testing for Social Authentication
 ==================================================================================='''
-import urlparse
-from selenium import webdriver
-from django.test import TestCase
-from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD
-from project.settings import TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD
-from project.settings import TEST_DOMAIN
-from time import sleep
 
-class SocialAuthTesting(TestCase):
+class SocialAuthTesting(unittest.TestCase):
     def setUp(self):
         self.driver = webdriver.Chrome()
 
@@ -510,8 +489,7 @@ class SocialAuthTesting(TestCase):
         return urlparse.urljoin(TEST_DOMAIN, path)
 
     def test_twitter_authentication(self):
-    	print "\n>>>> Testing 'test_twitter_authentication'"
-
+    	print_testing_name('test_twitter_authentication')
         start_time = time.clock()
 
         # Assert the username and passward for the testing Twitter account are not none
@@ -521,7 +499,7 @@ class SocialAuthTesting(TestCase):
         # Go to Twitter App Authorization page
         self.driver.get(self.url('/login/twitter/'))
         self.assertEqual("Twitter / Authorize an application", self.driver.title)
-        print "  Redirecting to log in Twitter App Authorization page."
+        print_test_msg("Redirecting to log in Twitter App Authorization page.")
 
         # Log in Twitter using the testing user credential
         username_field = self.driver.find_element_by_id('username_or_email')
@@ -555,17 +533,16 @@ class SocialAuthTesting(TestCase):
 	        # after successful authentication by Twitter 
             assert "EPM" in self.driver.title
             self.assertTrue(self.driver.find_element_by_id('logout'))
-            print "  Successfully logger in EPM home page with Twitter authentication."
+            print_test_msg("Successfully logger in EPM home page with Twitter authentication.")
         except:
-        	print "  Unable to authenticate the testing user with Twitter."
+        	print_test_msg("Unable to authenticate the testing user with Twitter.")
 
         end_time = time.clock()
-        print '\n\tTotal Time: %s sec' % (end_time - start_time)
+        performance_report(end_time - start_time)
        
 
     def test_facebook_authentication(self):
-    	print "\n>>>> Testing 'test_facebook_authentication'"
-
+    	print_testing_name("test_facebook_authentication")
         start_time = time.clock()
 
         # Assert the username and passward for the testing Facebook account are not none
@@ -575,7 +552,7 @@ class SocialAuthTesting(TestCase):
         # Go to Facebook App Authorization page
         self.driver.get(self.url('/login/facebook/'))
         self.assertEqual("Log In | Facebook", self.driver.title)
-        print "  Redirecting to log in Facebook App Authorization page."
+        print_test_msg("Redirecting to log in Facebook App Authorization page.")
 
         # Log in Facebook using the testing user credential
         username_field = self.driver.find_element_by_id('email')
@@ -605,10 +582,10 @@ class SocialAuthTesting(TestCase):
             # after successful authentication by Facebook
             assert "EPM" in self.driver.title
             self.assertTrue(self.driver.find_element_by_id('logout'))
-            print "  Successfully logger in EPM home page with Facebook authentication."
+            print_test_msg("Successfully logger in EPM home page with Facebook authentication.")
 
         except:
-        	print "  Unable to authenticate the testing user with Facebook."
+        	print_test_msg("Unable to authenticate the testing user with Facebook.")
         	
         performance_report(end_time - start_time)
 
@@ -630,7 +607,9 @@ class UserProfileTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate accessing UserProfile pages.
-		(users, clients) = create_test_view_setup()
+		results = setup_objects()
+		users = results ['users']
+		clients = results['clients']
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -664,7 +643,9 @@ class UserProfileTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords.
-		(users, clients) = create_test_view_setup()
+		results = setup_objects()
+		users = results ['users']
+		clients = results ['clients']
 
 		#We assume that the subject's email address is formatted properly and is a real email address.
 		#For testing purposes, we dump email messages to file and assert that their contents are correct.
@@ -675,9 +656,6 @@ class UserProfileTesting (unittest.TestCase):
 			userprofile_one = user_one.get_profile()
 			userprofile_two = user_two.get_profile()
 			client = random.choice(clients)
-
-			if user_one.id == user_two.id:
-				continue
 
 			#Log onto the first user.
 			loggedin = client.login(username = userprofile_one.user.username, password = password_one)
@@ -728,9 +706,9 @@ class EditUserProfileTesting (unittest.TestCase):
 	def test_editUserProfile_savePassword(self):
 		print_testing_name("test_editUserProfile_savePassword")
 		iteration_time = 0.00
+
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-
 			#objects
 			(user,password) = create_random_User(i)
 			client = Client (enforce_csrf_checks=False)
@@ -738,7 +716,7 @@ class EditUserProfileTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the EditUserProfile page..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the EditUserProfile page..." % (user, client))
 
 			
 			#Navigate to the EditUserProfile_form page
@@ -778,12 +756,10 @@ class EditUserProfileTesting (unittest.TestCase):
 			self.assertEquals(response.status_code,200) 
 			self.assertTrue(user.check_password(new_password))
 
-			print "[INFO]:Test test_editUserProfile_savePassword was successful for user %s" % (user)
+			print_test_msg("Test test_editUserProfile_savePassword was successful for user %s" % (user))
 			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
-
-		print ''
 		performance_report(iteration_time)
 
 
@@ -800,7 +776,7 @@ class EditUserProfileTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the EditUserProfile page..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the EditUserProfile page..." % (user, client))
 
 			#Edit the User's information and save it
 			username = generate_string (User._meta.get_field('username').max_length)
@@ -837,12 +813,10 @@ class EditUserProfileTesting (unittest.TestCase):
 			user = User.objects.get(pk=user_i)
 			self.assertEquals(user.email,email)
 
-			print "[INFO]:Test test_editUserProfile_saveProfile was successful for user %s" % (user)
+			print_test_msg("test_editUserProfile_saveProfile was successful for user %s" % (user))
 			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
-
-		print ''
 		performance_report(iteration_time)
 		
 
@@ -866,7 +840,9 @@ class FollowingTesting (unittest.TestCase):
         iteration_time = 0.00
 
         # Need to setup clients, users, and their passwords in order to simula the following function.
-        (users, clients) = create_test_view_setup()
+        results  = setup_objects()
+        users = results ['users']
+        clients = results ['clients']
         
         for i in range (NUMBER_OF_TESTS):
             start_time = time.clock()
@@ -879,13 +855,11 @@ class FollowingTesting (unittest.TestCase):
 
             if user_one.id == user_two.id:
             	continue
-           
-            print "[INFO]: %s (id:%s) and %s (id:%s) have been created." % (userprofile_one, userprofile_one.id, userprofile_two, userprofile_two.id)
 
 			#Log onto the first user.
             loggedin = client.login(username = userprofile_one.user.username, password = password_one)
             self.assertTrue(loggedin == True)			
-            print "[INFO]: %s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username)
+            print_test_msg ("%s logs onto %s to follow %s" % (userprofile_one.user.username, client, userprofile_two.user.username))
 
             # Go to the second user's profile page
             response = client.get(URL_USERPROFILE + str(userprofile_two.id) + "/")
@@ -908,7 +882,7 @@ class FollowingTesting (unittest.TestCase):
             # the first user is in the second user's followers list
             self.assertTrue(userprofile_two in userprofile_one.following.all())
             self.assertTrue(userprofile_one in userprofile_two.followers.all())
-            print "[INFO]: %s has followed %s." % (userprofile_one.user.username, userprofile_two.user.username)
+            print_test_msg ("%s has followed %s" % (userprofile_one.user.username, userprofile_two.user.username))
  
             # ...................Testing Unfollowing Function.........................
 
@@ -927,7 +901,7 @@ class FollowingTesting (unittest.TestCase):
             # the first user is not in the second user's followers list
             self.assertTrue(not userprofile_two in userprofile_one.following.all())
             self.assertTrue(not userprofile_one in userprofile_two.followers.all())
-            print "[INFO]: %s then unfollowed %s." % (userprofile_one, userprofile_two)
+            print_test_msg ("%s then unfollowed %s" % (userprofile_one.user.username, userprofile_two.user.username))
 
             # Logout the first user
             client.logout()
@@ -935,8 +909,6 @@ class FollowingTesting (unittest.TestCase):
             end_time = time.clock()
             iteration_time += (end_time - start_time)
 
-
-        print ''
         self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
         self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
         performance_report(iteration_time)
@@ -971,7 +943,6 @@ class LoggerTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
-		print ''
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)	
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)				
@@ -981,7 +952,12 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_delete_objects_and_check_log")
 		iteration_time = 0.00
 
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_following_lists=True, create_petreports=True, create_petmatches=True)
+		results  = setup_objects(create_following_lists=True, create_petreports=True, create_petmatches=True)
+		users = results ['users']
+		clients = results ['clients']
+		petreports = results ['petreports']
+		petmatches = results ['petmatches']
+
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 			user, password = users.pop()
@@ -999,12 +975,12 @@ class LoggerTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s..." % (user, client)
+			print_test_msg ("%s logs onto %s..." % (user, client))
 
 			#We expect the system not to throw errors but to catch them.
 			activities = logger.get_recent_activites_from_log(userprofile=user.userprofile)
 			activities += logger.get_bookmark_activities(userprofile=user.userprofile)
-			print "[INFO]: %s has an activity feed list of size [%d]" % (user, len(activities))
+			print_test_msg("%s has an activity feed list of size [%d]" % (user, len(activities)))
 			self.assertTrue(logger.log_exists(user.userprofile))
 
 			#Now, delete the user.
@@ -1012,11 +988,8 @@ class LoggerTesting (unittest.TestCase):
 			self.assertFalse(logger.log_exists(user.userprofile))
 
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
 		performance_report(iteration_time)
 
 
@@ -1038,11 +1011,9 @@ class LoggerTesting (unittest.TestCase):
 
 			logging.close()
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
-		print ''
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)	
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)		
@@ -1051,9 +1022,10 @@ class LoggerTesting (unittest.TestCase):
 	def test_log_submit_PetReport(self):
 		print_testing_name("test_log_submit_PetReport")
 		iteration_time = 0.00
-
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients) = create_test_view_setup()
+		results = setup_objects()
+		users = results ['users']
+		clients = results ['clients']
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -1098,11 +1070,9 @@ class LoggerTesting (unittest.TestCase):
 			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=petreport) == True)	
 
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
-		print ''
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		self.assertTrue(len(PetReport.objects.all()) == 2*NUMBER_OF_TESTS) 
@@ -1113,7 +1083,10 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_log_propose_PetMatch")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results ['users']
+		clients = results ['clients']
+		petreports = results ['petreports']
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -1176,15 +1149,15 @@ class LoggerTesting (unittest.TestCase):
 			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)		
-
-		print ''
 		performance_report(iteration_time)
 
 	def test_log_following_UserProfile(self):
 		print_testing_name("test_log_following_UserProfile")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients) = create_test_view_setup()
+		results = setup_objects()
+		users = results ['users']
+		clients = results ['clients']
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -1201,7 +1174,7 @@ class LoggerTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = userprofile_one.user.username, password = password_one)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username)
+			print_test_msg("%s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username))
 
 			# Go to the second user's profile page
 			response = client.get(URL_USERPROFILE + str(userprofile_two.id) + "/")
@@ -1215,18 +1188,15 @@ class LoggerTesting (unittest.TestCase):
 
 			# Check if the activity for following a UserProfile appears in this userprofile_one's log.
 			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_FOLLOWING, userprofile=userprofile_one, userprofile2=userprofile_two) == True)		
-			print "[OK]:%s has followed %s" % (userprofile_one.user.username, userprofile_two.user.username)
+			print_success_msg("%s has followed %s" % (userprofile_one.user.username, userprofile_two.user.username))
 
 			# Check if the activity for following a UserProfile appears in this userprofile_two's log.
 			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_FOLLOWER, userprofile=userprofile_two, userprofile2=userprofile_one) == True)				
-			print "[OK]:%s has been followed by %s" % (userprofile_two.user.username, userprofile_one.user.username)
+			print_success_msg("%s has been followed by %s" % (userprofile_two.user.username, userprofile_one.user.username))
 	
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)		
-
-		print ''
 		performance_report(iteration_time)
 
 
@@ -1234,11 +1204,12 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_log_unfollowing_UserProfile")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients) = create_test_view_setup()
+		results = setup_objects()
+		users = results ['users']
+		clients = results ['clients']
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
-
 			user_one, password_one = random.choice(users)
 			user_two, password_two = random.choice(users)
 			userprofile_one = user_one.get_profile()
@@ -1251,7 +1222,7 @@ class LoggerTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = userprofile_one.user.username, password = password_one)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username)			
+			print_test_msg("%s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username))
 
 			# Go to the second user's profile page
 			response = client.get(URL_USERPROFILE + str(userprofile_two.id) + "/")
@@ -1270,18 +1241,15 @@ class LoggerTesting (unittest.TestCase):
 
 			# Check if the activity for unfollowing a UserProfile appears in this userprofile_one's log.
 			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_UNFOLLOWING, userprofile=userprofile_one, userprofile2=userprofile_two) == True)			
-			print "[OK]:%s has unfollowed %s" % (userprofile_one.user.username, userprofile_two.user.username)
+			print_success_msg("%s has unfollowed %s" % (userprofile_one.user.username, userprofile_two.user.username))
 				
 			# Check if the activity for unfollowing a UserProfile appears in this userprofile_two's log.
 			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_UNFOLLOWER, userprofile=userprofile_two, userprofile2=userprofile_one) == True)			
-			print "[OK]:%s has been unfollowed by %s" % (userprofile_two.user.username, userprofile_one.user.username)
+			print_success_msg("%s has been unfollowed by %s" % (userprofile_two.user.username, userprofile_one.user.username))
 				
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)		
-
-		print ''
 		performance_report(iteration_time)
 
 
@@ -1289,7 +1257,10 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_log_add_PetReport_bookmark")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results ["users"]
+		clients = results ["clients"]
+		petreports = results ["petreports"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -1298,12 +1269,12 @@ class LoggerTesting (unittest.TestCase):
 			user, password = random.choice(users)
 			client = random.choice(clients)
 			petreport = random.choice(petreports)
-			print "[INFO]: A user %s and a pet report %s have been created." % (user.userprofile, petreport)
+			print_test_msg("A user %s and a pet report %s have been created." % (user.userprofile, petreport))
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]: %s logs onto %s to enter the prdp interface to add a bookmark." % (user, client)			
+			print_test_msg("%s logs onto %s to enter the prdp interface to add a bookmark." % (user, client))		
 
 			# Go to the PRDP (Pet Report Detailed Page) interface
 			response = client.get(URL_PRDP + str(petreport.id) + "/")
@@ -1329,15 +1300,12 @@ class LoggerTesting (unittest.TestCase):
 				self.assertEquals(old_bookmarks_count, (new_bookmarks_count-1))
 
 			# Check if the activity for adding a PetReport bookmark appears in this user's log.
-			print "[INFO]: %s has added a bookmark for %s." % (user, petreport)
+			print_test_msg("%s has added a bookmark for %s." % (user, petreport))
 			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)
 
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)		
-
-		print ''
 		performance_report(iteration_time)
 
 
@@ -1345,7 +1313,10 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_log_remove_PetReport_bookmark")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results ["users"]
+		clients = results ["clients"]
+		petreports = results ["petreports"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -1354,12 +1325,12 @@ class LoggerTesting (unittest.TestCase):
 			user, password = random.choice(users)
 			client = random.choice(clients)
 			petreport = random.choice(petreports)
-			print "[INFO]: A user %s and a pet report %s have been created." % (user.userprofile, petreport)
+			print_test_msg("A user %s and a pet report %s have been created." % (user.userprofile, petreport))
 
 			# Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the prdp interface to remove a bookmark." % (user, client)			
+			print_test_msg("%s logs onto %s to enter the prdp interface to remove a bookmark." % (user, client))
 
 			# Go to the PRDP (Pet Report Detailed Page) interface
 			response = client.get(URL_PRDP + str(petreport.id) + "/")
@@ -1384,15 +1355,12 @@ class LoggerTesting (unittest.TestCase):
 			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
 
 			# Check if the activity for adding a PetReport bookmark appears in this user's log.
-			print "[INFO]: %s has removed a bookmark for %s." % (user, petreport)
+			print_test_msg("%s has removed a bookmark for %s." % (user, petreport))
 			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)				
 
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)		
-
-		print ''
 		performance_report(iteration_time)
 
 
@@ -1400,7 +1368,11 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_get_activities_json")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		results = setup_objects(create_petreports=True, create_petmatches=True)
+		users = results ["users"]
+		clients = results ["clients"]
+		petreports = results ["petreports"]
+		petmatches = results ["petmatches"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -1412,7 +1384,7 @@ class LoggerTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the matching interface..." % (user, client)	
+			print_test_msg ("%s logs onto %s to enter the matching interface..." % (user, client))	
 
 			#Request the get_activities_json view function()
 			response = client.get(URL_GET_ACTIVITIES, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
@@ -1432,7 +1404,7 @@ class LoggerTesting (unittest.TestCase):
 
 			num_following = len(user.get_profile().following.all())
 			num_activities = len(activities)
-			print "[INFO]: %s has %d followers and got an activity feed list of size %d when ACTIVITY_FEED_LENGTH = %d" % (user, num_following, num_activities, random_activity_range)
+			print_test_msg("%s has %d followers and got an activity feed list of size %d when ACTIVITY_FEED_LENGTH = %d" % (user, num_following, num_activities, random_activity_range))
 
 			#Bounds checking
 			self.assertTrue(num_activities >= 0 and num_activities <= random_activity_range)
@@ -1443,11 +1415,8 @@ class LoggerTesting (unittest.TestCase):
 				self.assertTrue(num_activities <= num_following)
 
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
-			iteration_time += (end_time - start_time)		
-
-		print ''
+			iteration_time += (end_time - start_time)
 		performance_report(iteration_time)	
 
 
@@ -1455,7 +1424,9 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_get_activities_json_for_anonymous_user")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients) = create_test_view_setup()
+		results = setup_objects()
+		users = results ["users"]
+		clients = results ["clients"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -1476,17 +1447,14 @@ class LoggerTesting (unittest.TestCase):
 			for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:max_num_activities]:
 				activities += logger.get_recent_activites_from_log(userprofile=userprof, num_activities=1)			
 			num_activities = len(activities)
-			print "=======[INFO]: The anonymous user got an activity feed list of size %d when the maximum length = %d" % (num_activities, max_num_activities)
+			print_test_msg("The anonymous user got an activity feed list of size %d when the maximum length = %d" % (num_activities, max_num_activities))
 
 			#Bounds checking
 			self.assertTrue(num_activities >= 0 and num_activities <= max_num_activities)
 
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)		
-
-		print ''
 		performance_report(iteration_time)	
 
 
@@ -1494,7 +1462,11 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_get_activities_json_for_authenticated_user")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		results = setup_objects(create_petreports=True, create_petmatches=True)
+		users = results ["users"]
+		clients = results ["clients"]
+		petreports = results ["petreports"]
+		petmatches = results ["petmatches"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -1558,17 +1530,14 @@ class LoggerTesting (unittest.TestCase):
 
 			num_following = len(user.get_profile().following.all())
 			num_activities = len(activities)
-			print "[INFO]: %s has %d followers and got an activity feed list of size %d when the minimum length = %d" % (user, num_following, num_activities, min_num_activities)
+			print_test_msg ("%s has %d followers and got an activity feed list of size %d when the minimum length = %d" % (user, num_following, num_activities, min_num_activities))
 
 			#Bounds checking
 			# self.assertTrue(num_activities >= min_num_activities)
 
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)		
-
-		print ''
 		performance_report(iteration_time)	
 
 '''===================================================================================
@@ -1588,8 +1557,11 @@ class ReputationTesting(unittest.TestCase):
 		print_testing_name("test_reputation_points_for_upvoting_PetMatch")
 		iteration_time = 0.00
 
-		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		results = setup_objects(create_petreports=True, create_petmatches=True)
+		users = results ["users"]
+		clients = results ["clients"]
+		petreports = results ["petreports"]
+		petmatches = results ["petmatches"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -1608,22 +1580,22 @@ class ReputationTesting(unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the PMDP..." % (user, client)
+			print_test_msg ("%s logs onto %s to enter the PMDP..." % (user, client))
 
 			pmdp_url = URL_PMDP + str(petmatch.id) + "/"
 			response = client.get(pmdp_url)
 			
-			print "[INFO]: Reputation points for %s BEFORE upvoting: %s" % (user, old_reputation)
-			print "[INFO]: Reputation points for %s (who proposed this PetMatch) BEFORE upvoting: %s" %(pm_proposed_by_user, p_old_reputation)
-			print "[INFO] Voted or not for this petmatch before: %s" % petmatch.UserProfile_has_voted(user.get_profile())
+			print_test_msg ("Reputation points for %s BEFORE upvoting: %s" % (user, old_reputation))
+			print_test_msg ("Reputation points for %s (who proposed this PetMatch) BEFORE upvoting: %s" %(pm_proposed_by_user, p_old_reputation))
+			print_test_msg ("Voted or not for this petmatch before: %s" % petmatch.UserProfile_has_voted(user.get_profile()))
 			
 			# check if the user has voted before or not and set the 'voted' flag accordingly
 			if petmatch.UserProfile_has_voted(user.get_profile()) is False:
 				voted = False
-				print "[INFO]: *** User has NEVER voted for this petmatch ***"
+				print_test_msg ("User has NEVER voted for this petmatch")
 			else:
 				voted = petmatch.UserProfile_has_voted(user.get_profile())
-				print "[INFO]: *** User has Voted for this petmatch before ***"
+				print_test_msg ("User has Voted for this petmatch before")
 
 			vote_url = URL_VOTE_MATCH
 			post =  {"vote":"upvote", "match_id":petmatch.id, "user_id":user.id}
@@ -1635,9 +1607,9 @@ class ReputationTesting(unittest.TestCase):
 			user_index = [u[0] for u in users].index(user)
 			users[user_index] = (user, password)
 
-			print "[INFO]: Reputation points for %s AFTER upvoting: %s" %(user, user.get_profile().reputation)
+			print_test_msg ("Reputation points for %s AFTER upvoting: %s" %(user, user.get_profile().reputation))
 			pm_proposed_by_user = PetMatch.objects.get(pk=petmatch.id).proposed_by
-			print "[INFO]: Reputation points for %s (who proposed this PetMatch) AFTER upvoting: %s" %(pm_proposed_by_user, pm_proposed_by_user.reputation)
+			print_test_msg ("Reputation points for %s (who proposed this PetMatch) AFTER upvoting: %s" %(pm_proposed_by_user, pm_proposed_by_user.reputation))
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
@@ -1661,14 +1633,12 @@ class ReputationTesting(unittest.TestCase):
 				self.assertEquals(user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE + REWARD_USER_PROPOSED_PETMATCH_VOTE)
 				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_PETMATCH_VOTE + REWARD_USER_PROPOSED_PETMATCH_VOTE)
 			else:
-				print "[ERROR]: Unexpected case..."
+				print_error_msg("Unexpected case...")
+				self.assertFalse(True) #Should fail.
 
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
 		performance_report(iteration_time)
 
 
@@ -1676,8 +1646,12 @@ class ReputationTesting(unittest.TestCase):
 		print_testing_name("test_reputation_points_for_downvoting_PetMatch")
 		iteration_time = 0.00
 
-		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects
+		results = setup_objects(create_petreports=True, create_petmatches=True)
+		users = results ["users"]
+		clients = results ["clients"]
+		petreports = results ["petreports"]
+		petmatches = results ["petmatches"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -1696,25 +1670,25 @@ class ReputationTesting(unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the PMDP..." % (user, client)
+			print_test_msg ("%s logs onto %s to enter the PMDP..." % (user, client))
 
 			pmdp_url = URL_PMDP + str(petmatch.id) + "/"
-			print pmdp_url
 			response = client.get(pmdp_url)
 			
-			print "[INFO]: Reputation points BEFORE downvoting: %s" % (old_reputation)
-			print "[INFO]: Voted or not for this petmatch before: %s" % petmatch.UserProfile_has_voted(user.get_profile())
-			print "[INFO]: Reputation points for %s (who proposed this PetMatch) BEFORE downvoting: %s" % (pm_proposed_by_user, p_old_reputation)
+			print_test_msg ("Reputation points BEFORE downvoting: %s" % (old_reputation))
+			print_test_msg ("Voted or not for this petmatch before: %s" % petmatch.UserProfile_has_voted(user.get_profile()))
+			print_test_msg ("Reputation points for %s (who proposed this PetMatch) BEFORE downvoting: %s" % (pm_proposed_by_user, p_old_reputation))
 			
 			# check if the user has voted before or not and set the 'voted' flag accordingly
 			if petmatch.UserProfile_has_voted(user.get_profile()) is False:
 				voted = False
-				print "[INFO]: *** User has NEVER voted for this petmatch ***"
+				print_test_msg ("User has NEVER voted for this petmatch")
 			elif petmatch.UserProfile_has_voted(user.get_profile()) is not False:
 				voted = petmatch.UserProfile_has_voted(user.get_profile())
-				print "[INFO]: *** User has Voted for this petmatch before ***"
+				print_test_msg ("User has Voted for this petmatch before")
 			else:
-				print "[ERROR]:Something is wrong!"
+				print_error_msg ("Something is wrong!")
+				self.assertFalse(True)
 
 			vote_url = URL_VOTE_MATCH
 			post =  {"vote":"downvote", "match_id":petmatch.id, "user_id":user.id}
@@ -1726,9 +1700,9 @@ class ReputationTesting(unittest.TestCase):
 			user_index = [u[0] for u in users].index(user)
 			users[user_index] = (user, password)
 
-			print "[INFO]: Reputation points AFTER downvoting: %s" %(user.get_profile().reputation)
+			print_test_msg ("Reputation points AFTER downvoting: %s" %(user.get_profile().reputation))
 			pm_proposed_by_user = PetMatch.objects.get(pk=petmatch.id).proposed_by
-			print "[INFO]: Reputation points for %s (who proposed this PetMatch) AFTER downvoting: %s" %(pm_proposed_by_user, pm_proposed_by_user.reputation)
+			print_test_msg ("Reputation points for %s (who proposed this PetMatch) AFTER downvoting: %s" %(pm_proposed_by_user, pm_proposed_by_user.reputation))
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
@@ -1750,14 +1724,12 @@ class ReputationTesting(unittest.TestCase):
 				self.assertEquals(user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE)
 				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_PETMATCH_VOTE)
 			else:
-				print "[ERROR]:Assert FAILED! Something is wrong!"
+				print_error_msg ("Assert FAILED! Something is wrong!")
+				self.assertFalse(True)
 
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
 		performance_report(iteration_time)
 
 
@@ -1766,7 +1738,9 @@ class ReputationTesting(unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients) = create_test_view_setup(create_petreports=False)
+		results = setup_objects(create_petreports=False)
+		users = results ["users"]
+		clients = results ["clients"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -1779,7 +1753,7 @@ class ReputationTesting(unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the pet report form..." % (user, client)
+			print_test_msg ("%s logs onto %s to enter the pet report form..." % (user, client))
 
 			#Go to the Pet Report Form Page
 			response = client.get(URL_SUBMIT_PETREPORT)
@@ -1794,7 +1768,7 @@ class ReputationTesting(unittest.TestCase):
 			post = {'form': form}
 			post.update(pr_dict)
 
-			print "[INFO]: Reputation points BEFORE submitting a PetReport: %s" %(old_reputation)
+			print_test_msg ("Reputation points BEFORE submitting a PetReport: %s" %(old_reputation))
 
 			#Make the POST request Call
 			response = client.post(URL_SUBMIT_PETREPORT, post, follow=True)
@@ -1804,7 +1778,7 @@ class ReputationTesting(unittest.TestCase):
 			user = User.objects.get(pk=user.id)
 			user_index = [u[0] for u in users].index(user)
 			users[user_index] = (user, password)
-			print "[INFO]: Reputation points AFTER submitting a PetReport: %s" %(user.get_profile().reputation)
+			print_test_msg ("Reputation points AFTER submitting a PetReport: %s" %(user.get_profile().reputation))
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
@@ -1818,11 +1792,9 @@ class ReputationTesting(unittest.TestCase):
 			client.logout()
 
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
-		print ''
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		self.assertTrue(len(PetReport.objects.all()) == 2*NUMBER_OF_TESTS) 
@@ -1834,7 +1806,10 @@ class ReputationTesting(unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results ["users"]
+		clients = results ["clients"]
+		petreports = results ["petreports"]
 		num_petmatches = 0
 
 		for i in range (NUMBER_OF_TESTS):
@@ -1853,7 +1828,7 @@ class ReputationTesting(unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the matching interface..." % (user, client)			
+			print_test_msg ("%s logs onto %s to enter the matching interface..." % (user, client))
 
 			#Go to the matching interface
 			matching_url = URL_MATCHING + str(petreport.id) + "/"
@@ -1863,38 +1838,38 @@ class ReputationTesting(unittest.TestCase):
 			filtered_pet_reports = PetReport.objects.all().exclude(pk=petreport.id).exclude(status = petreport.status).filter(pet_type = petreport.pet_type)
 			if len(filtered_pet_reports) == 0:
 				self.assertEquals(response.status_code, 302)
-				print "[INFO]:Oh! There are no PetReports to match this PetReport with - Back to the Home Page!"
+				print_test_msg ("There are no PetReports to match this PetReport with - Back to the Home Page!")
 				continue
 
 			self.assertEquals(response.status_code, 200)
-			print "[INFO]:%s has successfully requested page '%s'..." % (user, matching_url) 
+			print_test_msg ("%s has successfully requested page '%s'..." % (user, matching_url))
 			candidate_petreport = random.choice(filtered_pet_reports) 
 
 			#Go to the propose match dialog
 			propose_match_url = URL_PROPOSE_MATCH + str(petreport.id) + "/" + str(candidate_petreport.id) + "/"
 			response = client.get(propose_match_url)
-			print "[INFO]:%s has successfully requested page '%s'..." % (user, propose_match_url) 
-			print "[INFO]: Reputation points BEFORE proposing a PetMatch: %s" %(old_reputation)
+			print_test_msg ("%s has successfully requested page '%s'..." % (user, propose_match_url))
+			print_test_msg ("Reputation points BEFORE proposing a PetMatch: %s" %(old_reputation))
 
 			#Grab the PetMatch that is either a new one, has been posted in the past or has been posted by this User, and set the pm_status flag accordingly based on the activities.
 			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
 			if match is not None:
 				if match.UserProfile_has_voted(user.get_profile()) is not False:
-					print "[OK]:A duplicate PetMatch, and %s has VOTED this match before!" % (user)
-					print "[INFO]: User will get no points."
+					print_test_msg ("A duplicate PetMatch, and %s has VOTED this match before! User will get no points." % (user))
 					pm_status = None
 				elif match.UserProfile_has_voted(user.get_profile()) is False:
-					print "[OK]: A duplicate PetMatch, and %s has NEVER voted this match before!" % (user)
-					print "[INFO]: User will get voting points."
+					print_test_msg ("A duplicate PetMatch, and %s has NEVER voted this match before! User will get voting points." % (user))
 					pm_status = ACTIVITY_PETMATCH_UPVOTE
 				else:
-					print "[ERROR]:Something went wrong with checking the UserProfile_has_voted function!"
+					print_error_msg ("Something went wrong with checking the UserProfile_has_voted function!")
+					self.assertTrue(False)
+
 			elif match is None:
-				print "[OK]:This will be a new PetMatch."
-				print "[INFO]: User will get proposing points."
+				print_test_msg ("This will be a new PetMatch. User will get proposing points.")
 				pm_status = ACTIVITY_PETMATCH_PROPOSED
 			else:
-				print "[ERROR]:Something went wrong while checking of the 'match exists or not!"
+				print_error_msg ("Something went wrong while checking of the 'match exists or not!")
+				self.assertFalse(True)
 
 			#Make the POST request Call		
 			description = generate_lipsum_paragraph(500)
@@ -1907,14 +1882,14 @@ class ReputationTesting(unittest.TestCase):
 			user = User.objects.get(pk=user.id)
 			user_index = [u[0] for u in users].index(user)
 			users[user_index] = (user, password)
-			print "[INFO]: Reputation points AFTER proposing a PetMatch: %s" %(user.get_profile().reputation)
+			print_test_msg ("Reputation points AFTER proposing a PetMatch: %s" %(user.get_profile().reputation))
 
 			#Grab the PetMatch, again, that has either been posted in the past or has been posted by this User.
 			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
 			if match.UserProfile_has_voted(user.get_profile()) is not False:
-				print "[OK]:A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user)
+				print_test_msg ("A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user))
 			else:
-				print "[OK]: has successfully POSTED a new match!" % (user)				
+				print_test_msg ("%s has successfully POSTED a new match!" % (user))
 				num_petmatches += 1
 
 			#Make assertions
@@ -1930,16 +1905,14 @@ class ReputationTesting(unittest.TestCase):
 			elif pm_status == None:
 				self.assertEquals(user.get_profile().reputation, old_reputation)
 			else:
-				print "[ERROR]:Assert Failed! Something went wrong with reputation points!"			
+				print_error_msg ("Assert Failed! Something went wrong with reputation points!")
+				self.assertTrue(False)
 
 			#Some checks for the PetMatch objects stored
 			self.assertTrue(len(PetMatch.objects.all()) == num_petmatches or len(PetMatch.objects.all()) <= i)
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
-
-		print ''
 		performance_report(iteration_time)
 
 
@@ -1948,7 +1921,9 @@ class ReputationTesting(unittest.TestCase):
 	    iteration_time = 0.00
 
 	    # Need to setup clients, users, and their passwords in order to simula the following function.
-	    (users, clients) = create_test_view_setup(create_petreports=False, create_petmatches=False)
+	    results = setup_objects(create_petreports=False, create_petmatches=False)
+	    users = results ["users"]
+	    clients = results ["clients"]
 	        
 	    for i in range (NUMBER_OF_TESTS):
 	        start_time = time.clock()
@@ -1964,19 +1939,18 @@ class ReputationTesting(unittest.TestCase):
 	        if user_one.id == user_two.id:
 	        	continue
 
-	        print "\n%s ............................................................." % i
-	        print "[INFO]: %s (id:%s) and %s (id:%s) have been created." % (userprofile_one, userprofile_one.id, userprofile_two, userprofile_two.id)
+	        print_test_msg("%s (id:%s) and %s (id:%s) have been created." % (userprofile_one, userprofile_one.id, userprofile_two, userprofile_two.id))
 
 			#Log onto the first user.
 	        loggedin = client.login(username = userprofile_one.user.username, password = password_one)
 	        self.assertTrue(loggedin == True)			
-	        print "[INFO]: %s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username)
+	        print_test_msg ("%s logs onto %s to follow %s." % (userprofile_one.user.username, client, userprofile_two.user.username))
 
 	        # Go to the second user's profile page
 	        response = client.get(URL_USERPROFILE + str(userprofile_two.id) + "/")
 	        self.assertEquals(response.status_code, 200)
 
-	        print "[INFO]: Reputation points for %s BEFORE being followed: %s" %(userprofile_two, old_reputation)
+	        print_test_msg ("Reputation points for %s BEFORE being followed: %s" %(userprofile_two, old_reputation))
 
 	        # ...................Testing Following Function.........................
 
@@ -1986,7 +1960,7 @@ class ReputationTesting(unittest.TestCase):
 
 	        # Reset userprofile_two with a new fresh copy from the db
 	        userprofile_two = UserProfile.objects.get(pk=user_two.id)
-	        print "[INFO]: Reputation points for %s AFTER being followed: %s" %(userprofile_two, userprofile_two.reputation)
+	        print_test_msg ("Reputation points for %s AFTER being followed: %s" %(userprofile_two, userprofile_two.reputation))
 
 			# Make assertions
 	        self.assertEquals(response.status_code, 200)
@@ -2000,13 +1974,13 @@ class ReputationTesting(unittest.TestCase):
 	        # the first user is in the second user's followers list
 	        self.assertTrue(userprofile_two in userprofile_one.following.all())
 	        self.assertTrue(userprofile_one in userprofile_two.followers.all())
-	        print "[INFO]: %s has followed %s." % (userprofile_one.user.username, userprofile_two.user.username)
+	        print_test_msg ("%s has followed %s." % (userprofile_one.user.username, userprofile_two.user.username))
 
 	        # ...................Testing Unfollowing Function.........................
 
 	        # reset old_reputation with a new fresh copy from the db
 	        old_reputation = userprofile_two.reputation
-	        print "[INFO]: Reputation points for %s BEFORE being unfollowed: %s" %(userprofile_two, old_reputation)
+	        print_test_msg ("Reputation points for %s BEFORE being unfollowed: %s" %(userprofile_two, old_reputation))
 
 	        # Make the POST request Call for unfollowing the second user
 	        post = {"target_userprofile_id": userprofile_two.id}
@@ -2014,7 +1988,7 @@ class ReputationTesting(unittest.TestCase):
 
 	        # reset userprofile_two with a new fresh copy from the db
 	        userprofile_two = UserProfile.objects.get(pk=user_two.id)
-	        print "[INFO]: Reputation points for %s AFTER being unfollowed: %s" %(userprofile_two, userprofile_two.reputation)
+	        print_test_msg ("Reputation points for %s AFTER being unfollowed: %s" %(userprofile_two, userprofile_two.reputation))
 
 			# Make assertions
 	        self.assertEquals(response.status_code, 200)
@@ -2027,21 +2001,19 @@ class ReputationTesting(unittest.TestCase):
 	        # the first user is not in the second user's followers list
 	        self.assertTrue(not userprofile_two in userprofile_one.following.all())
 	        self.assertTrue(not userprofile_one in userprofile_two.followers.all())
-	        print "[INFO]: %s then unfollowed %s." % (userprofile_one, userprofile_two)
+	        print_test_msg ("%s then unfollowed %s." % (userprofile_one, userprofile_two))
 
 	        self.assertEquals(userprofile_two.reputation, old_reputation-REWARD_USER_FOLLOWED)
 
 	        # Logout the first user
 	        client.logout()
-
 	        end_time = time.clock()
+	        output_update(i + 1)
 	        iteration_time += (end_time - start_time)
 
-
-	        print ''
-	        self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
-	        self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
-	        performance_report(iteration_time)
+	    self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
+	    self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+	    performance_report(iteration_time)
 
 
 	def test_reputation_points_for_adding_and_removing_PetReport_bookmark(self):
@@ -2049,7 +2021,10 @@ class ReputationTesting(unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate bookmarking of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results ['users']
+		clients = results ['clients']
+		petreports = results ['petreports']
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -2063,15 +2038,14 @@ class ReputationTesting(unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the PRDP..." % (user, client)
+			print_test_msg ("%s logs onto %s to enter the PRDP..." % (user, client))
 
 			#navigate to the prdp
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
-			print prdp_url
 			response = client.get(prdp_url)
 
 			# ...................Testing Adding a Bookmark.........................
-			print "[INFO]: Reputation points BEFORE bookmarking a PetReport: %s" %(old_reputation)
+			print_test_msg ("Reputation points BEFORE bookmarking a PetReport: %s" %(old_reputation))
 
 			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
@@ -2084,7 +2058,7 @@ class ReputationTesting(unittest.TestCase):
 			user_index = [u[0] for u in users].index(user)
 			users[user_index] = (user, password)
 
-			print "[INFO]: Reputation points AFTER bookmarking a PetReport: %s" %(user.get_profile().reputation)
+			print_test_msg ("Reputation points AFTER bookmarking a PetReport: %s" %(user.get_profile().reputation))
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
@@ -2094,7 +2068,7 @@ class ReputationTesting(unittest.TestCase):
 
 			# ...................Testing Removing a Bookmark.........................
 			old_reputation = user.get_profile().reputation
-			print "[INFO]: Reputation points BEFORE unbookmarking a PetReport: %s" %(old_reputation)
+			print_test_msg ("Reputation points BEFORE unbookmarking a PetReport: %s" %(old_reputation))
 
 			remove_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Remove Bookmark"}
@@ -2107,7 +2081,7 @@ class ReputationTesting(unittest.TestCase):
 			user_index = [u[0] for u in users].index(user)
 			users[user_index] = (user, password)
 
-			print "[INFO]: Reputation points AFTER unbookmarking a PetReport: %s" %(user.get_profile().reputation)
+			print_test_msg ("Reputation points AFTER unbookmarking a PetReport: %s" %(user.get_profile().reputation))
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
@@ -2115,21 +2089,20 @@ class ReputationTesting(unittest.TestCase):
 			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
 			self.assertEquals(user.get_profile().reputation, old_reputation-REWARD_PETREPORT_BOOKMARK)
 
-
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
-
 		performance_report(iteration_time)
 
 	def test_reputation_points_for_PetMatch_verification(self):
 		print_testing_name = ("test_reputation_points_for_PetMatch_verification")
 		iteration_time = 0.00
 		# setup clients, users and their passwords
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		results = setup_objects(create_petreports=True, create_petmatches=True)
+		users = results ['users']
+		clients = results ['clients']
+		petreports = results ['petreports']
+		petmatches = results ['petmatches']
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -2152,36 +2125,31 @@ class ReputationTesting(unittest.TestCase):
 				found_pet_contact = petmatch.found_pet.proposed_by
 				# reputation: [0]petmatch_owner, [1]lost_pet_contact, [2]found_pet_contact
 				reputation = [petmatch_owner.reputation, lost_pet_contact.reputation, found_pet_contact.reputation]
-				
-				print 20*"=" + "*BEGIN*" + 20*"="
 
 				# log in first
 				loggedin = client.login(username = user.username, password = password)
 				self.assertTrue(loggedin == True)
-				print "[INFO]: %s logs onto %s to enter the verification page..." % (user, client)
-
-				print '[INFO]: petmatch users: %s, %s ' % (str(petmatch.lost_pet.proposed_by.user), str(petmatch.found_pet.proposed_by.user))
-
+				print_test_msg ("%s logs onto %s to enter the verification page..." % (user, client))
+				print_test_msg ('petmatch users: %s, %s ' % (str(petmatch.lost_pet.proposed_by.user), str(petmatch.found_pet.proposed_by.user)))
 				verification_page_url = URL_VERIFY_PETMATCH + str(petmatch.id) + "/"
-				print verification_page_url
 
 				response = client.get(verification_page_url)
 				userprofile = user.get_profile()
 				self.assertEquals(response.status_code, 200)
 
-				print "[INFO]:PetMatch owner (%s) reputation BEFORE: %s " % (petmatch_owner.user, reputation[0])
-				print "[INFO]:Lost pet contact (%s) reputation BEFORE: %s " % (lost_pet_contact.user, reputation[1])
-				print "[INFO]:Found pet contact (%s) reputation BEFORE: %s " % (found_pet_contact.user, reputation[2])
+				print_test_msg ("PetMatch owner (%s) reputation BEFORE: %s " % (petmatch_owner.user, reputation[0]))
+				print_test_msg ("Lost pet contact (%s) reputation BEFORE: %s " % (lost_pet_contact.user, reputation[1]))
+				print_test_msg ("Found pet contact (%s) reputation BEFORE: %s " % (found_pet_contact.user, reputation[2]))
 
 				old_verification_vote = int(petmatch.verification_votes[0])
 				old_verification_votes = str(petmatch.verification_votes)
-				print "[INFO]: OLD verification vote: %s" %old_verification_vote
-				print "[INFO]: OLD verification votes: %s" %old_verification_votes
+				print_test_msg ("OLD verification vote: %s" %old_verification_vote)
+				print_test_msg ("OLD verification votes: %s" %old_verification_votes)
 
-				print "----UPVOTERS----"
+				print_test_msg ("----UPVOTERS----")
 				for upvoters in petmatch.up_votes.all():
-					print "%s reputation BEFORE: %s" %(upvoters.user, upvoters.reputation)
-				print "----------------"
+					print_test_msg ("%s reputation BEFORE: %s" %(upvoters.user, upvoters.reputation))
+				print_test_msg ("----------------")
 				
 				message = random.choice(['yes', 'no'])
 				# message = 'yes'
@@ -2195,17 +2163,18 @@ class ReputationTesting(unittest.TestCase):
 				petmatch_owner = petmatch.proposed_by
 				lost_pet_contact = petmatch.lost_pet.proposed_by
 				found_pet_contact = petmatch.found_pet.proposed_by
-				print "[INFO]: NEW verification vote: %s" %new_verification_vote
-				print "[INFO]: NEW verification votes: %s" %new_verification_votes
-				print "[INFO] Is successful: %s" %petmatch.is_successful
-				print "[INFO]:PetMatch owner (%s) reputation AFTER: %s " % (petmatch_owner.user, petmatch_owner.reputation)
-				print "[INFO]:Lost pet contact (%s) reputation AFTER: %s " % (lost_pet_contact.user, lost_pet_contact.reputation)
-				print "[INFO]:Found pet contact (%s) reputation AFTER: %s " % (found_pet_contact.user, found_pet_contact.reputation)
+
+				print_test_msg ("NEW verification vote: %s" % new_verification_vote)
+				print_test_msg ("NEW verification votes: %s" % new_verification_votes)
+				print_test_msg ("Is successful: %s" % petmatch.is_successful)
+				print_test_msg ("PetMatch owner (%s) reputation AFTER: %s " % (petmatch_owner.user, petmatch_owner.reputation))
+				print_test_msg ("Lost pet contact (%s) reputation AFTER: %s " % (lost_pet_contact.user, lost_pet_contact.reputation))
+				print_test_msg ("Found pet contact (%s) reputation AFTER: %s " % (found_pet_contact.user, found_pet_contact.reputation))
 				
-				print "----UPVOTERS----"
+				print_test_msg ("----UPVOTERS----")
 				for upvoters in petmatch.up_votes.all():
-					print "%s reputation AFTER: %s" %(upvoters.user, upvoters.reputation)
-				print "----------------"
+					print_test_msg ("%s reputation AFTER: %s" %(upvoters.user, upvoters.reputation))
+				print_test_msg ("----------------")
 
 				sent_vote = 0
 				if old_verification_vote == 0:
@@ -2294,12 +2263,8 @@ class ReputationTesting(unittest.TestCase):
 					self.assertEquals(petmatch_owner.reputation, reputation[0])
 					self.assertEquals(lost_pet_contact.reputation, reputation[1])
 					self.assertEquals(found_pet_contact.reputation, reputation[2])
-				
-				
-				print 21*"=" + "*END*" + 21*"="
 
 			output_update(i+1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
@@ -2320,7 +2285,10 @@ class HomePageTesting (unittest.TestCase):
 		print_testing_name("test_homepage_newlyadded")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results ['users']
+		clients = results ['clients']
+		petreports = results ['petreports']
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -2337,4 +2305,20 @@ class HomePageTesting (unittest.TestCase):
 			pet_reports_list = response.context['pet_reports_list']
 			pet_reports = PetReport.objects.filter(closed = False).order_by("id").reverse()
 			self.assertEquals(str(pet_reports_list.object_list.all()),str(pet_reports))
+
+			output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		performance_report(iteration_time)
+
+
+
+
+
+
+
+
+
+
 

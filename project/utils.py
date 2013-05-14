@@ -51,7 +51,7 @@ def generate_lipsum_paragraph(max_length):
 
 #Keep the user/tester updated.
 def output_update (i):	
-	output = "%d of %d iterations complete\n" % (i, NUMBER_OF_TESTS)
+	output = "%d of %d iterations complete\n\n" % (i, NUMBER_OF_TESTS)
 	sys.stdout.write("\r\x1b[K"+output.__str__())
 	sys.stdout.flush()
 
@@ -102,7 +102,7 @@ def generate_random_date(start, end, format, prop):
 #Give the lap time (and AVG) for a 'critical section'.
 def performance_report(total_time):
 	print '\tTotal Time: %s sec' % (total_time)
-	print '\tAVG Time Taken for a Single Test: %s sec' % (total_time/NUMBER_OF_TESTS)
+	print '\tAVG Time Taken for a Single Test: %s sec\n' % (total_time/NUMBER_OF_TESTS)
 
 #Delete all model data
 def delete_all(leave_users = False, only_test_users=True):
@@ -159,10 +159,11 @@ def create_random_User(i, pretty_name=True, test_user=True):
 
 	password = generate_string(10)
 	email = generate_string(6) + '@' + 'test.com'
+
 	try:
 		user = User.objects.create_user(username = username, email = email, password = password)
 	except IntegrityError, e:
-		print '[ERROR]: '+str(e.message)
+		print_error_msg (str(e.message))
 
 	userprofile = user.get_profile()
 	userprofile.set_activity_log(is_test=test_user)
@@ -418,54 +419,85 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 	return petmatch
 
 
-''' Function for setting up Client, User (with passwords), and (optionally) following lists, PetReport, and PetMatch objects for testing purposes.'''
-def create_test_view_setup(create_clients=True, create_following_lists=False, create_petreports=False, create_petmatches=False):
+''' Function for setting up User (with passwords and optionally following lists), Client, PetReport, and PetMatch objects for testing purposes.'''
+def setup_objects(delete_all_objects=True, create_users=True, create_following_lists=False, create_clients=True, create_petreports=False, create_petmatches=False):
+	#Check if there's anything to do.
+	if create_users == False and create_clients == False and create_petreports == False and create_petmatches == False:
+		print_info_msg ("Nothing to do in setup_objects().")
+		return False
+
+	#Results Dictionary containing objects.
+	results = {}	
 
 	#Firstly, delete everything existing.
-	delete_all(only_test_users=True)
-	
+	if delete_all_objects == True:
+		delete_all(only_test_users=True)
+
 	#Need to setup the object lists. The users list encapsulates tuples of <user, password>
-	users = [ (None, None) for i in range (NUMBER_OF_TESTS) ]
-	clients = [ None for i in range (NUMBER_OF_TESTS) ]
-	petreports = [ None for i in range (NUMBER_OF_TESTS) ]
+	users = [(None, None) for i in range (NUMBER_OF_TESTS)]
+	clients = [None for i in range (NUMBER_OF_TESTS)]
+	petreports = [None for i in range (NUMBER_OF_TESTS)]
 	petmatches = [] #Cannot determine size of petmatch list up front.
 
 	#First, create random Users
-	for i in range (NUMBER_OF_TESTS):
-		(user, password) = create_random_User(i, pretty_name=True)
-		users [i] = (user, password)
+	if create_users == True:
+		for i in range (NUMBER_OF_TESTS):
+			(user, password) = create_random_User(i, pretty_name=True)
+			users [i] = (user, password)
 
-	#Then, create the Users' following lists (if specified)
-	if create_following_lists == True:
-		for user in users:
-			userprofile = user[0].get_profile()
-			create_random_following_list(userprofile)
+		#Then, create the Users' following lists (if specified)
+		if create_following_lists == True:
+			for user in users:
+				userprofile = user[0].get_profile()
+				create_random_following_list(userprofile)
+		results ["users"] = users
 
 	#Then, create the Client objects (if specified)
 	if create_clients == True:
 		for i in range (NUMBER_OF_TESTS):
 			clients [i] = Client (enforce_csrf_checks=False)
+		results ["clients"] = clients
 
 	#Then, create random PetReport objects (if specified)
 	if create_petreports == True:
 		for i in range (NUMBER_OF_TESTS):
 			(user, password) = random.choice(users)
 			petreports [i] = create_random_PetReport(user=user)
+		results ["petreports"] = petreports
 
-		#Finally, create PetMatch objects (if specified)
-		if create_petmatches == True:
-			for i in range (NUMBER_OF_TESTS):
-				(user, password) = random.choice(users)
-				petmatch = create_random_PetMatch(user=user, threshold_bias=False)
+	#Finally, create PetMatch objects (if specified)
+	if create_petmatches == True:
+		for i in range (NUMBER_OF_TESTS):
+			petmatch = create_random_PetMatch(threshold_bias=False)
 
-				#If we get back None, try again.
-				if petmatch == None:
-					continue
-				petmatches.append(petmatch)
+			#If we get back None, try again.
+			if petmatch == None:
+				continue
+			petmatches.append(petmatch)
+		results ["petmatches"] = petmatches
 
-	if create_petmatches == True and create_petreports == True:
-		return (users, clients, petreports, petmatches)
-	if create_petreports == True:
-		return (users, clients, petreports)
-	#just return the simple ones, geez!		
-	return (users, clients)
+	#Return the full dictionary.
+	return results
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

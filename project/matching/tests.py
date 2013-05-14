@@ -28,7 +28,7 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = setup_objects(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -66,7 +66,7 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = setup_objects(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -114,7 +114,7 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = setup_objects(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -164,7 +164,7 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = setup_objects(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -218,7 +218,7 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = setup_objects(create_petreports=True)
 		num_petmatches = 0
 
 		for i in range (NUMBER_OF_TESTS):
@@ -291,7 +291,7 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = setup_objects(create_petreports=True)
 		num_petmatches = 0
 
 		for i in range (NUMBER_OF_TESTS):
@@ -367,7 +367,7 @@ class PetMatchTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -422,7 +422,7 @@ class PetMatchTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -465,7 +465,7 @@ class PetMatchTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -521,7 +521,7 @@ class VerificationTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -576,7 +576,7 @@ class VerificationTesting (unittest.TestCase):
 		print_testing_name("test_post_verification_response")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -642,7 +642,7 @@ class VerificationTesting (unittest.TestCase):
 		print_testing_name("test_function_PetMatch_has_reached_threshold")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -668,7 +668,7 @@ class VerificationTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -691,7 +691,7 @@ class VerificationTesting (unittest.TestCase):
 		print_testing_name("test_function_close_PetMatch")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords
-		(users, clients, petreports, petmatches) = create_test_view_setup(create_petreports=True, create_petmatches=True)
+		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()

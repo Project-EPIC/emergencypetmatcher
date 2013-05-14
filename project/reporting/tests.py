@@ -25,7 +25,7 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients) = create_test_view_setup(create_petreports=False)
+		(users, clients) = setup_objects(create_petreports=False)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -61,7 +61,7 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients) = create_test_view_setup(create_petreports=False)
+		(users, clients) = setup_objects(create_petreports=False)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -117,7 +117,7 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients) = create_test_view_setup()
+		(users, clients) = setup_objects()
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -189,7 +189,7 @@ class ReportingTesting (unittest.TestCase):
 		saved_images = []
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = setup_objects(create_petreports=True)
 
 		#We need this because PostgreSQL doesn't start IDs at 0 if running previous tests.
 		petreport_lower_bound_index = petreports[0].id
@@ -266,7 +266,7 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords and petreports 
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = setup_objects(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -329,7 +329,7 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate bookmarking of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = setup_objects(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -381,7 +381,7 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate bookmarking of PetReport objects.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = setup_objects(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -460,7 +460,7 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate retrieving the bookmarks page for a user.
-		(users, clients, petreports) = create_test_view_setup(create_petreports=True)
+		(users, clients, petreports) = setup_objects(create_petreports=True)
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()

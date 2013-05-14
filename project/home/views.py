@@ -27,21 +27,15 @@ from django.contrib import messages
 from django.utils import simplejson
 from home.models import *
 from constants import *
-import logger
 from registration.models import RegistrationProfile
 from registration.views import activate
 from utils import *
 from datetime import datetime
-import oauth2 as oauth, random, urllib, hashlib, random, re, project.settings
-
-
 from registration.views import register
-
-
+import oauth2 as oauth, logger, random, urllib, hashlib, random, re, project.settings
 
 #Home view, displays login mechanism
 def home (request):
-
     #Get Pet Report objects and organize them into a Paginator Object.
     #pet_reports = PetReport.objects.order_by("id").reverse()
     pet_reports = PetReport.objects.filter(closed = False).order_by("id").reverse()
@@ -62,18 +56,14 @@ def home (request):
 
 
 def get_activities_json(request):
-    print "======= [AJAX]: get_activities_json ========="
-
+    #Let's populate the activity feed based upon whether the user is logged in.
     if request.is_ajax() == True:
-
-        #Let's populate the activity feed based upon whether the user is logged in.
-
         # Initialize the activity list
         activities = []
 
         if request.user.is_authenticated() == True:
 
-            print "[INFO]: get_activities_json(): Authenticated User - recent activities..."
+            print_info_msg ("get_activities_json(): Authenticated User - recent activities...")
             current_userprofile = request.user.get_profile()      
 
             # Get all activities from this UserProfile's log file that show who has followed this UserProfile 
@@ -89,7 +79,7 @@ def get_activities_json(request):
                     since_date=current_userprofile.last_logout) 
 
         else:
-            print "[INFO]: get_activities_json(): Anonymous User - random sample of activities..."
+            print_info_msg ("get_activities_json(): Anonymous User - random sample of activities...")
             # Get random activities for the anonymous user           
             for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:ACTIVITY_FEED_LENGTH]:
                 activities += logger.get_recent_activites_from_log(userprofile=userprof, num_activities=1)
@@ -115,16 +105,14 @@ def get_activities_json(request):
 
         #ERROR message print to flag for potential problem in the log directory.
         if request.user.is_authenticated() == False and len(activities) != ACTIVITY_FEED_LENGTH:
-            print "[ERROR]: Length of activity list is %d when it should be ACTIVITY_FEED_LENGTH = %d" % (len(activities), ACTIVITY_FEED_LENGTH)
+            print_error_msg ("Length of activity list is %d when it should be ACTIVITY_FEED_LENGTH = %d" % (len(activities), ACTIVITY_FEED_LENGTH))
 
-        print "======= END [AJAX]: get_activities_json =========\n"
         #Zip it up in JSON and ship it out as an HTTP Response.
         json = simplejson.dumps ({"activities":activities})
-        print json
         return HttpResponse(json, mimetype="application/json")     
 
     else:
-        print "[ERROR]: Request for get_activities_json not an AJAX request!"
+        print_error_msg ("Request for get_activities_json not an AJAX request!")
         raise Http404           
 
 
@@ -166,7 +154,7 @@ def login_User(request):
 
 @login_required
 def logout_User(request):
-    print "[INFO]: logger out UserProfile {%s}" % request.user.get_profile()
+    print_info_msg ("logger out UserProfile {%s}" % request.user.get_profile())
 
     # Update to last_logout date field
     u = get_object_or_404(UserProfile, pk=request.user.get_profile().id)
@@ -179,7 +167,7 @@ def logout_User(request):
     return redirect(URL_HOME)
 
 def registration_activate (request, activation_key=None, backend=None):
-    print "[INFO]: Activation Key: %s" % activation_key
+    print_info_msg ("Activation Key: %s" % activation_key)
 
     #Does the activation key exist within a RegistrationProfile? (i.e. is somebody actually trying to activate an account or resurrect an old activation link?)
     try:
@@ -193,7 +181,6 @@ def registration_activate (request, activation_key=None, backend=None):
     return activate(request, backend=backend, activation_key=activation_key)
 
 def registration_activation_complete (request):
-    print request
     messages.success (request, "Alright, you are all set registering! You may now login to the system.")
     return redirect (URL_LOGIN)     
 
@@ -207,7 +194,6 @@ def disp_TC_18(request):
 
 def registration_complete (request):
     messages.success (request, "Thanks for registering for EPM. Look for an account verification email and click on the link to finish registering.")
-    print request
     return home(request)
 
 def registration_disallowed (request):
@@ -372,6 +358,11 @@ def message_UserProfile(request):
         target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
         from_userprofile = request.user.get_profile()
 
+        #You cannot send a message to yourself!
+        if from_userprofile.id == target_userprofile.id:
+            messages.failure (request, "You cannot send a message to yourself.")
+            return redirect(URL_USERPROFILE + str(from_userprofile.id))
+
         print_info_msg ("Sending an email message from %s to %s" % (from_userprofile.user.username, target_userprofile.user.username))
 
         #Send message to UserProfile
@@ -400,10 +391,10 @@ def editUserProfile_page(request):
             if edit_userprofile_form.is_valid():
                 ''' If the user enters a blank/ invalid email, it would be caught by this condition'''
                 if not email_re.match(request.POST["email"]):
-                    print '[INFO]:  Invalid Email!'
+                    print_info_msg ('Invalid Email!')
                     message = "<li class='error'>Please enter a valid email address!</li>"
                     json = simplejson.dumps ({"message":message})
-                    print "JSON: " + str(json)
+                    print_info_msg ("JSON: " + str(json))
                     return HttpResponse(json, mimetype="application/json")
 
                 if request.POST["username"] != user.username:
@@ -414,7 +405,7 @@ def editUserProfile_page(request):
                     except:
                         message = "<li class='error'>This username is unavailable, please try another one.</li>"
                         json = simplejson.dumps ({"message":message})
-                        print "JSON: " + str(json)
+                        print_info_msg ("JSON: " + str(json))
                         return HttpResponse(json, mimetype="application/json")
 
                 if user.first_name != request.POST["first_name"]:
@@ -428,7 +419,7 @@ def editUserProfile_page(request):
                         user.save()
                         message = "<li class='success'>Thank you. Your changes have been saved!</li>"
                     except:
-                        print "[ERROR]: Error while saving your changes, please try again!"      
+                        print_error_msg ("Error while saving your changes, please try again!"      )
                         message = "<li class='error'>Error while saving your changes. Please try again.</li>"                  
                 
                 #Email change.
@@ -440,7 +431,7 @@ def editUserProfile_page(request):
                     if isinstance(username, unicode):
                         username = username.encode('utf-8')
                     activation_key = hashlib.sha1(salt+username).hexdigest()
-                    print 'user: %s \tactivation-key: %s' % (user,activation_key)
+                    print_info_msg ('user: %s \tactivation-key: %s' % (user,activation_key))
                     try:
                         edit_userprofile = EditUserProfile.objects.get(user=user)
                         edit_userprofile.activation_key = activation_key
@@ -456,7 +447,7 @@ def editUserProfile_page(request):
                     message = render_to_string(TEXTFILE_EMAIL_CHANGE_VERICATION, ctx)
                     user.email = request.POST["email"]
                     user.email_user(subject, message, from_email = None)
-                    print "[INFO]: sent email verification"              
+                    print_info_msg ("Sent email verification")
                     message = "<li class='success'>Thank you. Your changes have been saved! Your email will be updated once you verify it. Please check your email for more information on how to verify.</li>"
 
                 if not user_changed:
@@ -482,7 +473,7 @@ def editUserProfile_page(request):
                 message = "<li class='success'>Congratulations! Your password has been changed successfully.</li>"
                 user.save()  
         json = simplejson.dumps ({"message":message})
-        print "JSON: " + str(json)
+        print_info_msg ("JSON: " + str(json))
         return HttpResponse(json, mimetype="application/json")
 
     elif request.method=='GET':

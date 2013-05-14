@@ -53,10 +53,10 @@ class UserProfile (models.Model):
     def set_activity_log(self, is_test=False):
         if is_test == True:
             self.is_test = True
-            print "[OK]: A new UserProfile TEST log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id)                        
+            print_success_msg("A new UserProfile TEST log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id))
         else:
             self.is_test = False
-            print "[OK]: A new UserProfile log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id)                        
+            print_success_msg("A new UserProfile log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id))
 
         self.save()
         logger.log_activity(ACTIVITY_ACCOUNT_CREATED, self)    
@@ -109,7 +109,7 @@ class UserProfile (models.Model):
         elif activity == ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL:
             self.reputation += REWARD_PETMATCH_UPVOTE_SUCCESSFUL
         else:
-            print '[ERROR]: Cannot update reputation points: This is not a valid activity! \n'
+            print_error_msg("Cannot update reputation points: This is not a valid activity!")
             return False
 
         #Save the UserProfile and return True
@@ -281,7 +281,7 @@ class PetReport(models.Model):
     def toJSON(self):
         #Convert a PetReport model object to a json object
         json = simplejson.dumps(self.toDICT())
-        #print "toJSON: " + str(json)
+        #print_info_msg("toJSON: " + str(json))
         return json
 
 
@@ -429,10 +429,10 @@ class PetMatch(models.Model):
                 
                 if not lost_pet_contact.get_profile().is_test:
                     lost_pet_contact.email_user(email_subject,email_body,from_email=None)
-                #print '[INFO]: Email to lost pet owner: '+email_body
+                #print_info_msg ('Email to lost pet owner: '+email_body)
 
             else:
-                print '[ERROR] User %s does not have a valid email address' %(str(lost_pet_contact.get_profile()))
+                print_error_msg ('User %s does not have a valid email address' %(str(lost_pet_contact.get_profile())))
 
             ''' An email is sent to the found pet owner '''
             if email_re.match(found_pet_contact.email):
@@ -441,10 +441,10 @@ class PetMatch(models.Model):
                 email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
                 if not found_pet_contact.get_profile().is_test:
                     found_pet_contact.email_user(email_subject,email_body,from_email=None)
-                #print '[INFO]: Email to found pet owner: '+email_body
+                #print_info_msg ('[INFO]: Email to found pet owner: '+email_body)
 
             else:
-                print '[ERROR] User %s does not have a valid email address' %(str(found_pet_contact.get_profile()))           
+                print_error_msg ('User %s does not have a valid email address' %(str(found_pet_contact.get_profile())))
 
             '''If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact,
             an email will be sent to this person '''
@@ -455,7 +455,7 @@ class PetMatch(models.Model):
 
                 if not petmatch_owner.get_profile().is_test:
                     petmatch_owner.email_user(email_subject,email_body,from_email=None)
-                #print '[INFO]: Email to pet match owner: '+email_body
+                #print_info_msg ('[INFO]: Email to pet match owner: '+email_body)
         else:
             print_error_msg("PetMatch.verification_triggered field is %s when it should be %s" % (self.verification_triggered, not self.verification_triggered))
 
@@ -490,7 +490,7 @@ class PetMatch(models.Model):
                 # --------Reputation points--------
                 # update reputation points for the following users:
                 # petmatch_owner, lost_pet_contact, and found_pet_contact
-                print "[INFO]: PetMatch Verification was a SUCCESS!"
+                print_info_msg ("PetMatch Verification was a SUCCESS!")
                 # Must to update reputation points twice since if updating petmatch_owner and lost_pet_contact
                 # separately for the same user doesn't work
                 if petmatch_owner.id == lost_pet_contact.id:
@@ -672,7 +672,7 @@ def setup_UserProfile(sender, instance, created, **kwargs):
 def trigger_PetMatch_verification(sender, instance, action,**kwargs):
     #Checking condition that will return true once PetMatch reaches a threshold value,
     #if it returns true, pet match verification work flow is triggered.
-    print_debug_msg("PetMatch Verification Signal (Upvotes) TRIGGERED: %s" % action)
+    #print_debug_msg("PetMatch Verification Signal (Upvotes) TRIGGERED: %s" % action)
     if action == 'post_add':
         if instance.PetMatch_has_reached_threshold() == True:
             instance.verify_petmatch()

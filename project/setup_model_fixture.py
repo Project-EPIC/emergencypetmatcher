@@ -4,7 +4,6 @@ from home.models import *
 from utils import *
 from django.contrib.auth import authenticate
 
-
 '''===================================================================================
 setup_model_fixture.py: Setup sample (random) data for your dev env.
 ==================================================================================='''

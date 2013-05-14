@@ -30,8 +30,6 @@ import datetime, re, Image, home.logger
 @login_required
 def submit_PetReport(request):
     if request.method == "POST":
-
-        print request.POST
         
         #Let's make some adjustments to non-textual form fields before converting to a PetReportForm.
         if request.POST ['geo_location_lat'] == 'None' or request.POST ['geo_location_long'] == 'None':
@@ -39,13 +37,15 @@ def submit_PetReport(request):
             request.POST ['geo_location_long'] = None
 
         form = PetReportForm(request.POST, request.FILES)
-        print request.POST, request.FILES
+        print_info_msg (request.POST)
+        print_info_msg (request.FILES)
 
         if form.is_valid() == True:
             pr = form.save(commit=False)
             #Create (but do not save) the Pet Report Object associated with this form data.
             pr.proposed_by = request.user.get_profile()
-            print "[INFO]: Pet Report Image Path: %s" % pr.img_path
+            print_info_msg ("Pet Report Image Path: %s" % pr.img_path)
+
             #If there was no image attached, let's take care of defaults.
             if pr.img_path == None:
                 if pr.pet_type == PETREPORT_PET_TYPE_DOG:
@@ -75,13 +75,13 @@ def submit_PetReport(request):
 
             #Log the PetReport submission for this UserProfile
             logger.log_activity(ACTIVITY_PETREPORT_SUBMITTED, request.user.get_profile(), petreport=pr)
-            print "[SUCCESS]: Pet Report submitted successfully" 
+            print_success_msg("Pet Report submitted successfully")
             return redirect(URL_HOME)
 
         else:
-            print "[ERROR]: Pet Report not submitted successfully" 
-            print form.errors
-            print form.non_field_errors()
+            print_error_msg ("Pet Report not submitted successfully")
+            print_error_msg (form.errors())
+            print_error_msg (form.non_field_errors())
     else:
         form = PetReportForm() #Unbound Form
     return render_to_response(HTML_SUBMIT_PETREPORT, {'form':form, "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
@@ -151,7 +151,7 @@ def bookmark_PetReport(request):
             petreport.bookmarked_by.add(user)
             petreport.save()
             user.update_reputation(ACTIVITY_PETREPORT_ADD_BOOKMARK)
-            print 'Bookmarked pet report #'+str(petreport_id)+" for user #"+str(user.id)
+            print_info_msg ('Bookmarked pet report #'+str(petreport_id)+" for user #"+str(user.id))
             message = "You have successfully bookmarked this Pet Report!" 
             text = "Remove Bookmark"
 
@@ -159,11 +159,11 @@ def bookmark_PetReport(request):
             logger.log_activity(ACTIVITY_PETREPORT_ADD_BOOKMARK, request.user.get_profile(), petreport=petreport)
 
         else:
-            print "User has bookmarked the pet: "+str(petreport.UserProfile_has_bookmarked(user))
+            print_info_msg ("User has bookmarked the pet: "+str(petreport.UserProfile_has_bookmarked(user)))
             message = "Unable to "+action+"!"
             text = action
         json = simplejson.dumps ({"message":message, "text":text})
-        print "JSON: " + str(json)
+        #print "JSON: " + str(json)
         return HttpResponse(json, mimetype="application/json")
     else:
         raise Http404

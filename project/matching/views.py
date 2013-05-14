@@ -50,9 +50,9 @@ def vote_PetMatch(request):
         vote = request.POST ['vote']
         pm = get_object_or_404(PetMatch, pk=request.POST["match_id"])
 
-        print "VOTE: %s" % vote
-        print "#UPVOTES: %d" % len(pm.up_votes.all())
-        print "#DOWNVOTES: %d" % len(pm.down_votes.all())
+        print_info_msg ("VOTE: %s" % vote)
+        print_info_msg ("#UPVOTES: %d" % len(pm.up_votes.all()))
+        print_info_msg ("#DOWNVOTES: %d" % len(pm.down_votes.all()))
 
         if vote == "upvote":
             # If the user is voting for the 1st time, add reputation points
@@ -85,7 +85,7 @@ def vote_PetMatch(request):
 
         
         json = simplejson.dumps ({"vote":vote, "message":message, "num_downvotes":num_downvotes, "num_upvotes":num_upvotes})
-        print "JSON: " + str(json)
+        print_info_msg ("JSON: " + str(json))
         return HttpResponse(json, mimetype="application/json")
 
     else:
