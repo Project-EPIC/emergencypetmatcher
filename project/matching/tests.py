@@ -521,7 +521,10 @@ class VerificationTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords
-		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
+		result = setup_objects(create_petreports=True, create_petmatches=True)
+		users = result['users']
+		petmatches = result['petmatches']
+		clients = result['clients']
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -576,7 +579,10 @@ class VerificationTesting (unittest.TestCase):
 		print_testing_name("test_post_verification_response")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords
-		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
+		result = setup_objects(create_petreports=True, create_petmatches=True)
+		petmatches = result["petmatches"]
+		clients = result["clients"]
+		users = result["users"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -642,8 +648,8 @@ class VerificationTesting (unittest.TestCase):
 		print_testing_name("test_function_PetMatch_has_reached_threshold")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords
-		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
-
+		result = setup_objects(create_petreports=True, create_petmatches=True)
+		petmatches = result["petmatches"]
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 			petmatch = random.choice(petmatches)
@@ -668,8 +674,8 @@ class VerificationTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords
-		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
-
+		result = setup_objects(create_petreports=True, create_petmatches=True)
+		petmatches = result["petmatches"]
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 			petmatch = random.choice(petmatches)
@@ -691,7 +697,9 @@ class VerificationTesting (unittest.TestCase):
 		print_testing_name("test_function_close_PetMatch")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords
-		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
+		result = setup_objects(create_petreports=True, create_petmatches=True)
+		petmatches = result["petmatches"]
+		clients = result["clients"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -758,14 +766,3 @@ class VerificationTesting (unittest.TestCase):
 			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-
-
-
-
-
-
-
-
-
-

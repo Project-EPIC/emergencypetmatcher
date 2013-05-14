@@ -158,7 +158,7 @@ def create_random_User(i, pretty_name=True, test_user=True):
 			username = generate_string(10) + str(i)
 
 	password = generate_string(10)
-	email = generate_string(6) + '@' + 'test.com'
+	email = generate_string(6) + '(at)' + 'test.com'
 
 	try:
 		user = User.objects.create_user(username = username, email = email, password = password)

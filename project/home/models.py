@@ -431,6 +431,8 @@ class PetMatch(models.Model):
                     lost_pet_contact.email_user(email_subject,email_body,from_email=None)
                 #print_info_msg ('Email to lost pet owner: '+email_body)
 
+            elif lost_pet_contact.get_profile().is_test:
+                    print_info_msg('Email not sent to test user %s' %(str(lost_pet_contact.get_profile())))
             else:
                 print_error_msg ('User %s does not have a valid email address' %(str(lost_pet_contact.get_profile())))
 
@@ -442,20 +444,27 @@ class PetMatch(models.Model):
                 if not found_pet_contact.get_profile().is_test:
                     found_pet_contact.email_user(email_subject,email_body,from_email=None)
                 #print_info_msg ('[INFO]: Email to found pet owner: '+email_body)
-
+            elif found_pet_contact.get_profile().is_test:
+                    print_info_msg('Email not sent to test user %s' %(str(found_pet_contact.get_profile())))
             else:
                 print_error_msg ('User %s does not have a valid email address' %(str(found_pet_contact.get_profile())))
 
             '''If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact,
             an email will be sent to this person '''
             if Optionally_discuss_with_digital_volunteer != "":
-                ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
-                email_body = render_to_string(TEXTFILE_EMAIL_PETMATCH_PROPOSER,ctx)
-                email_subject =  EMAIL_SUBJECT_PETMATCH_PROPOSER  
+                if email_re.match(found_pet_contact.email):
+                    ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
+                    email_body = render_to_string(TEXTFILE_EMAIL_PETMATCH_PROPOSER,ctx)
+                    email_subject =  EMAIL_SUBJECT_PETMATCH_PROPOSER  
 
-                if not petmatch_owner.get_profile().is_test:
-                    petmatch_owner.email_user(email_subject,email_body,from_email=None)
-                #print_info_msg ('[INFO]: Email to pet match owner: '+email_body)
+                    if not petmatch_owner.get_profile().is_test:
+                        petmatch_owner.email_user(email_subject,email_body,from_email=None)
+                    #print_info_msg ('[INFO]: Email to pet match owner: '+email_body)
+                elif petmatch_owner.get_profile().is_test:
+                        print_info_msg('Email not sent to test user %s' %(str(petmatch_owner.get_profile())))
+                else:
+                    print_error_msg ('User %s does not have a valid email address' %(str(petmatch_owner.get_profile())))
+
         else:
             print_error_msg("PetMatch.verification_triggered field is %s when it should be %s" % (self.verification_triggered, not self.verification_triggered))
 
