@@ -28,7 +28,10 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = setup_objects(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results['users']
+		clients = results['clients']
+		petreports = results['petreports']
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -41,7 +44,7 @@ class MatchingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]: %s logs onto %s to enter the matching interface..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))
 
 			#From here, go to the matching interface
 			matching_url = URL_MATCHING + str(petreport.id) + "/"
@@ -66,7 +69,10 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = setup_objects(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results['users']
+		clients = results['clients']
+		petreports = results['petreports']
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -79,25 +85,25 @@ class MatchingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]: %s logs onto %s to enter the matching interface..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))
 
 			#Go to the PRDP Page
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
 			response = client.get(prdp_url)
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], prdp_url)
-			print "[SUCCESS]: %s has successfully requested page %s..." % (user, prdp_url)  
+			print_success_msg("%s has successfully requested page %s..." % (user, prdp_url))  
 
 			#From here, go to the matching interface
 			matching_url = URL_MATCHING + str(petreport.id) + "/"
 			response = client.get(matching_url)
 
 			if response.status_code == 302:
-				print "[INFO]:Oh! There are no PetReports to match this PetReport with - Back to the Home Page!"
+				print_test_msg("Oh! There are no PetReports to match this PetReport with - Back to the Home Page!")
 				continue
 			else:
 				self.assertEquals(response.status_code, 200)
-				print "[SUCCESS]:%s has successfully requested page %s..." % (user, matching_url)  	
+				print_success_msg("%s has successfully requested page %s..." % (user, matching_url))  	
 			
 			self.assertEquals(response.request ['PATH_INFO'], matching_url)	
 			client.logout()	
@@ -114,7 +120,10 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = setup_objects(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results['users']
+		clients = results['clients']
+		petreports = results['petreports']
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -127,25 +136,25 @@ class MatchingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the matching interface..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))
 
 			#Go to the PRDP Page
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
 			response = client.get(prdp_url)
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], prdp_url)
-			print "[SUCCESS]:%s has successfully requested page %s..." % (user, prdp_url)  
+			print_success_msg("%s has successfully requested page %s..." % (user, prdp_url)) 
 
 			#From here, go to the matching interface
 			matching_url = URL_MATCHING + str(petreport.id) + "/"
 			response = client.get(matching_url)
 
 			if response.status_code == 302:
-				print "[INFO]:Oh! There are no PetReports to match this PetReport with - Back to the Home Page!"
+				print_test_msg("Oh! There are no PetReports to match this PetReport with - Back to the Home Page!")
 				continue
 			else:
 				self.assertEquals(response.status_code, 200)
-				print "[SUCCESS]:%s has successfully requested page %s..." % (user, matching_url)  	
+				print_test_msg("%s has successfully requested page %s..." % (user, matching_url))  	
 			
 			self.assertEquals(response.request ['PATH_INFO'], matching_url)	
 			self.assertTrue(user.get_profile() in petreport.workers.all())
@@ -164,7 +173,10 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = setup_objects(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results["users"]
+		clients = results["clients"]
+		petreports = results["petreports"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -177,7 +189,7 @@ class MatchingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the matching interface..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))
 
 			#Go to the matching interface
 			matching_url = URL_MATCHING + str(petreport.id) + "/"
@@ -188,11 +200,11 @@ class MatchingTesting (unittest.TestCase):
 			filtered_pet_reports = PetReport.objects.all().exclude(pk=petreport.id).exclude(status = petreport.status).filter(pet_type = petreport.pet_type)
 			if len(filtered_pet_reports) == 0:
 				self.assertEquals(response.status_code, 302)
-				print "[INFO]:Oh! There are no PetReports to match this PetReport with - Back to the Home Page!"
+				print_test_msg("Oh! There are no PetReports to match this PetReport with - Back to the Home Page!")
 				continue
 
 			self.assertEquals(response.status_code, 200)
-			print "[INFO]:%s has successfully requested page %s..." % (user, matching_url)  				
+			print_success_msg("%s has successfully requested page %s..." % (user, matching_url))  				
 
 			#PetReport filters
 			filtered_pet_reports = PetReport.objects.all().exclude(pk=petreport.id).exclude(status = petreport.status).filter(pet_type = petreport.pet_type)
@@ -218,7 +230,10 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = setup_objects(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results["users"]
+		clients = results["clients"]
+		petreports = results["petreports"]
 		num_petmatches = 0
 
 		for i in range (NUMBER_OF_TESTS):
@@ -232,7 +247,7 @@ class MatchingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the matching interface..." % (user, client)			
+			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))			
 
 			#Go to the matching interface
 			matching_url = URL_MATCHING + str(petreport.id) + "/"
@@ -242,17 +257,17 @@ class MatchingTesting (unittest.TestCase):
 			filtered_pet_reports = PetReport.objects.all().exclude(pk=petreport.id).exclude(status = petreport.status).filter(pet_type = petreport.pet_type)
 			if len(filtered_pet_reports) == 0:
 				self.assertEquals(response.status_code, 302)
-				print "[INFO]:Oh! There are no PetReports to match this PetReport with - Back to the Home Page!"
+				print_test_msg("Oh! There are no PetReports to match this PetReport with - Back to the Home Page!")
 				continue
 
 			self.assertEquals(response.status_code, 200)
-			print "[INFO]:%s has successfully requested page '%s'..." % (user, matching_url) 
+			print_test_msg("%s has successfully requested page '%s'..." % (user, matching_url)) 
 			candidate_petreport = random.choice(filtered_pet_reports) 
 
 			#Go to the propose match dialog
 			propose_match_url = URL_PROPOSE_MATCH + str(petreport.id) + "/" + str(candidate_petreport.id) + "/"
 			response = client.get(propose_match_url)
-			print "[INFO]:%s has successfully requested page '%s'..." % (user, propose_match_url) 
+			print_test_msg("%s has successfully requested page '%s'..." % (user, propose_match_url)) 
 
 			#Make the POST request Call		
 			description = generate_lipsum_paragraph(500)
@@ -263,9 +278,9 @@ class MatchingTesting (unittest.TestCase):
 			#Grab the PetMatch that has either been posted in the past or has been posted by this User.
 			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
 			if match.UserProfile_has_voted(user.get_profile()) == True:
-				print "[OK]:A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user)
+				print_test_msg("[OK]:A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user))
 			else:
-				print "[OK]: has successfully POSTED a new match!" % (user)				
+				print_test_msg("[OK]: has successfully POSTED a new match!" % (user))				
 				num_petmatches += 1
 
 			#Make assertions
@@ -291,7 +306,10 @@ class MatchingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = setup_objects(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results["users"]
+		clients = results["clients"]
+		petreports= results["petreports"]
 		num_petmatches = 0
 
 		for i in range (NUMBER_OF_TESTS):
@@ -305,7 +323,7 @@ class MatchingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the matching interface..." % (user, client)			
+			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))			
 
 			#Go to the matching interface
 			matching_url = URL_MATCHING + str(petreport.id) + "/"
@@ -315,17 +333,17 @@ class MatchingTesting (unittest.TestCase):
 			filtered_pet_reports = PetReport.objects.all().exclude(pk=petreport.id).exclude(status = petreport.status).filter(pet_type = petreport.pet_type)
 			if len(filtered_pet_reports) == 0:
 				self.assertEquals(response.status_code, 302)
-				print "[INFO]:Oh! There are no PetReports to match this PetReport with - Back to the Home Page!"
+				print_test_msg("Oh! There are no PetReports to match this PetReport with - Back to the Home Page!")
 				continue
 
 			self.assertEquals(response.status_code, 200)
-			print "[INFO]:%s has successfully requested page '%s'..." % (user, matching_url) 
+			print_test_msg("%s has successfully requested page '%s'..." % (user, matching_url)) 
 			candidate_petreport = random.choice(filtered_pet_reports) 
 
 			#Go to the propose match dialog
 			propose_match_url = URL_PROPOSE_MATCH + str(petreport.id) + "/" + str(candidate_petreport.id) + "/"
 			response = client.get(propose_match_url)
-			print "[INFO]:%s has successfully requested page '%s'..." % (user, propose_match_url) 
+			print("%s has successfully requested page '%s'..." % (user, propose_match_url)) 
 
 			#The description is empty, so this POST should fail.
 			# description = "       "
@@ -367,8 +385,11 @@ class PetMatchTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
-
+		result = setup_objects(create_petreports=True, create_petmatches=True)
+		users = result["users"]
+		clients = result["clients"]
+		petreports = result["petreports"]
+		petmatches = result["petmatches"]
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
@@ -383,12 +404,12 @@ class PetMatchTesting (unittest.TestCase):
 			client = random.choice(clients)
 			petreport = random.choice(petreports)
 			petmatch = random.choice(petmatches)
-			print "[INFO]: PetMatch: %s" % petmatch
+			print_test_msg("PetMatch: %s" % petmatch)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the PMDP..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the PMDP..." % (user, client))
 
 			#Go to the PRDP
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
@@ -397,7 +418,7 @@ class PetMatchTesting (unittest.TestCase):
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], prdp_url)
-			print "[INFO]:%s enters the Pet Report Detailed Page successfully" % (user)
+			print_test_msg("%s enters the Pet Report Detailed Page successfully" % (user))
 
 			#Now go to the PMDP
 			pmdp_url = URL_PMDP + str(petmatch.id) + "/"
@@ -406,7 +427,7 @@ class PetMatchTesting (unittest.TestCase):
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], pmdp_url)
-			print "[INFO]:%s enters the Pet Match Detailed Page successfully" % (user)
+			print("%s enters the Pet Match Detailed Page successfully" % (user))
 
 			output_update(i + 1)
 			print '\n'
@@ -422,7 +443,11 @@ class PetMatchTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
+		result = setup_objects(create_petreports=True, create_petmatches=True)
+		users = result["users"]
+		clients = result["clients"]
+		petreports = result["petreports"]
+		petmatches = result["petmatches"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -435,7 +460,7 @@ class PetMatchTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the PMDP..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the PMDP..." % (user, client))
 
 			pmdp_url = URL_PMDP + str(petmatch.id) + "/"
 			print pmdp_url
@@ -465,8 +490,12 @@ class PetMatchTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports, petmatches) = setup_objects(create_petreports=True, create_petmatches=True)
-
+		results = setup_objects(create_petreports=True, create_petmatches=True)
+		users = results["users"]
+		clients = results["clients"]
+		petreports = results["petreports"]
+		petmatches = results["petmatches"]
+		
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
 
@@ -478,10 +507,10 @@ class PetMatchTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the PMDP..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the PMDP..." % (user, client))
 
 			pmdp_url = URL_PMDP + str(petmatch.id) + "/"
-			print pmdp_url
+			print_test_msg(pmdp_url)
 			response = client.get(pmdp_url)
 
 			vote_url = URL_VOTE_MATCH
@@ -537,10 +566,10 @@ class VerificationTesting (unittest.TestCase):
 			#Log in First
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the verification page..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the verification page..." % (user, client))
 			
 			verification_page_url = URL_VERIFY_PETMATCH + str(petmatch.id) + "/"
-			print verification_page_url
+			print_test_msg(verification_page_url)
 			response = client.get(verification_page_url)
 
 			userprofile = user.get_profile()
@@ -562,7 +591,7 @@ class VerificationTesting (unittest.TestCase):
 			#Log in First
 			loggedin = client.login(username = proposer.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the verification page..." % (proposer, client)
+			print_test_msg("%s logs onto %s to enter the verification page..." % (proposer, client))
 			response = client.get(verification_page_url)
 
 			if petmatch.PetMatch_has_reached_threshold() == True:
@@ -610,9 +639,9 @@ class VerificationTesting (unittest.TestCase):
 				#Log in First
 				loggedin = client.login(username = user.username, password = password)
 				self.assertTrue(loggedin == True)			
-				print "[INFO]:%s logs onto %s to enter the verification page..." % (user, client)
+				print_test_msg("%s logs onto %s to enter the verification page..." % (user, client))
 				
-				print 'petmatch users: %s, %s ' % (str(petmatch.lost_pet.proposed_by.user),str(petmatch.found_pet.proposed_by.user))
+				print_test_msg('petmatch users: %s, %s ' % (str(petmatch.lost_pet.proposed_by.user),str(petmatch.found_pet.proposed_by.user)))
 
 				verification_page_url = URL_VERIFY_PETMATCH + str(petmatch.id) + "/"
 				print verification_page_url
@@ -664,6 +693,7 @@ class VerificationTesting (unittest.TestCase):
 				self.assertFalse(petmatch.verification_triggered)
 				self.assertTrue(petmatch.is_open)			
 
+			print_success_msg("Pet Match has passed the test: test_function_verify_PetMatch\n")
 			output_update(i + 1)
 			print '\n'
 			end_time = time.clock()

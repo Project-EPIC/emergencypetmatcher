@@ -80,7 +80,7 @@ def submit_PetReport(request):
 
         else:
             print_error_msg ("Pet Report not submitted successfully")
-            print_error_msg (form.errors())
+            print_error_msg (form.errors)
             print_error_msg (form.non_field_errors())
     else:
         form = PetReportForm() #Unbound Form

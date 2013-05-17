@@ -25,7 +25,9 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients) = setup_objects(create_petreports=False)
+		results = setup_objects(create_petreports=False)
+		users = results["users"]
+		clients = results["clients"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -37,7 +39,7 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the pet report form..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the pet report form..." % (user, client))
 
 			#Go to the Pet Report Form Page
 			response = client.get(URL_SUBMIT_PETREPORT)
@@ -61,7 +63,9 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients) = setup_objects(create_petreports=False)
+		results = setup_objects(create_petreports=False)
+		users = results["users"]
+		clients = results["clients"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -73,7 +77,7 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the pet report form..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the pet report form..." % (user, client))
 
 			#Go to the Pet Report Form Page
 			response = client.get(URL_SUBMIT_PETREPORT)
@@ -117,7 +121,9 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients) = setup_objects()
+		results = setup_objects()
+		users = results["users"]
+		clients = results["clients"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -129,7 +135,7 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the pet report form..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the pet report form..." % (user, client))
 
 			#Go to the Pet Report Form Page
 			response = client.get(URL_SUBMIT_PETREPORT)
@@ -189,7 +195,10 @@ class ReportingTesting (unittest.TestCase):
 		saved_images = []
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		(users, clients, petreports) = setup_objects(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results["users"]
+		clients = results["clients"]
+		petreports = results["petreports"]
 
 		#We need this because PostgreSQL doesn't start IDs at 0 if running previous tests.
 		petreport_lower_bound_index = petreports[0].id
@@ -205,7 +214,7 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to enter the pet report form..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the pet report form..." % (user, client))
 
 			#Go to the Pet Report Form Page
 			response = client.get(URL_SUBMIT_PETREPORT)
@@ -215,7 +224,7 @@ class ReportingTesting (unittest.TestCase):
 
 			#Randomly choose the image path to use for this request.
 			image = random.choice(images)
-			print "[INFO]: %s will use the file '%s' for a new PetReport submission." % (user.username, image)
+			print_test_msg("%s will use the file '%s' for a new PetReport submission." % (user.username, image))
 			image_file = open(image, "rb") #Need to specify "reading (r) a binary (b) file"
 			pr_dict ['img_path'] = image_file
 			form  = PetReportForm() #Create an unbound form
@@ -228,7 +237,7 @@ class ReportingTesting (unittest.TestCase):
 
 			#Get the new PetReport created with new image file path.
 			new_petreport_index = (petreport_lower_bound_index + NUMBER_OF_TESTS + i)
-			print "[INFO]: New PetReport index [%s]" % str(new_petreport_index)
+			print_test_msg("New PetReport index [%s]" % str(new_petreport_index))
 			new_petreport = PetReport.objects.get(pk=new_petreport_index)
 			#Just grab the name of the file, nothing else.
 			img_name = new_petreport.img_path.name.split("/")[2]
@@ -266,7 +275,10 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords and petreports 
-		(users, clients, petreports) = setup_objects(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results["users"]
+		clients = results["clients"]
+		petreports = results["petreports"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -278,7 +290,7 @@ class ReportingTesting (unittest.TestCase):
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
 
 			#Test without logger in First.
-			print "[INFO]:Getting PRDP from %s without being logged in" % (client)
+			print_test_msg("Getting PRDP from %s without being logged in" % (client))
 			response = client.get(prdp_url)
 			self.assertEquals(response.status_code, 200)
 			self.assertTrue(response.request ['PATH_INFO'] == prdp_url)
@@ -286,7 +298,7 @@ class ReportingTesting (unittest.TestCase):
 			#Log in
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print "[INFO]:%s logs onto %s to EPM" % (user, client)
+			print_test_msg("%s logs onto %s to EPM" % (user, client))
 
 			#Test after logger in.
 			response = client.get(prdp_url)
@@ -300,7 +312,7 @@ class ReportingTesting (unittest.TestCase):
 				self.assertEquals(response.status_code, 200)
 				self.assertTrue(response.request ['PATH_INFO'] == worker_url)
 
-			print "[OK]:Navigation to all workers' user profiles is successful"
+			print_test_msg("[OK]:Navigation to all workers' user profiles is successful")
 
 			expected_status_code = 200
 			all_pet_reports = PetReport.objects.all().exclude(pk=petreport.id)
@@ -313,7 +325,7 @@ class ReportingTesting (unittest.TestCase):
 			response = client.get(matching_url)
 			self.assertEquals(response.status_code, expected_status_code) 
 			self.assertTrue(response.request ['PATH_INFO'] == matching_url)
-			print "[OK]:Navigation to the matching interface is successful"
+			print_test_msg("[OK]:Navigation to the matching interface is successful")
 
 			client.logout()
 			output_update(i + 1)
@@ -329,7 +341,10 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate bookmarking of PetReport objects.
-		(users, clients, petreports) = setup_objects(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results["users"]
+		clients = results["clients"]
+		petreports = results["petreports"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -342,10 +357,10 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the PRDP..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the PRDP..." % (user, client))
 
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
-			print prdp_url
+			print_test_msg(prdp_url)
 			response = client.get(prdp_url)
 			old_bookmarks_count = user.get_profile().bookmarks_related.count()
 
@@ -381,7 +396,10 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate bookmarking of PetReport objects.
-		(users, clients, petreports) = setup_objects(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results["users"]
+		clients = results["clients"]
+		petreports = results["petreports"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -394,11 +412,11 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the PRDP..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the PRDP..." % (user, client))
 
 			#navigate to the prdp
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
-			print prdp_url
+			print_test_msg(prdp_url)
 			response = client.get(prdp_url)
 
 
@@ -429,7 +447,7 @@ class ReportingTesting (unittest.TestCase):
 
 			#navigate to the bookmarks page
 			bookmarks_page_url = URL_BOOKMARKED
-			print bookmarks_page_url
+			print_test_msg(bookmarks_page_url)
 			response = client.get(bookmarks_page_url)
 
 			#remove the bookmark 
@@ -460,7 +478,10 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate retrieving the bookmarks page for a user.
-		(users, clients, petreports) = setup_objects(create_petreports=True)
+		results = setup_objects(create_petreports=True)
+		users = results["users"]
+		clients = results["clients"]
+		petreports = results["petreports"]
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -473,13 +494,9 @@ class ReportingTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
-			print "[INFO]:%s logs onto %s to enter the bookmarks page..." % (user, client)
+			print_test_msg("%s logs onto %s to enter the bookmarks page..." % (user, client))
 
 			#navigate to the bookmarks page
 			bookmarks_page_url = URL_BOOKMARKED
-			print bookmarks_page_url
+			print_test_msg(bookmarks_page_url)
 			response = client.get(bookmarks_page_url)
-
-
-
-			
