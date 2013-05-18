@@ -420,7 +420,9 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 
 
 ''' Function for setting up User (with passwords and optionally following lists), Client, PetReport, and PetMatch objects for testing purposes.'''
-def setup_objects(delete_all_objects=True, create_users=True, create_following_lists=False, create_clients=True, create_petreports=False, create_petmatches=False):
+def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_OF_TESTS, create_following_lists=False, create_clients=True, 
+	num_clients=NUMBER_OF_TESTS, create_petreports=False, num_petreports=NUMBER_OF_TESTS, create_petmatches=False, num_petmatches=NUMBER_OF_TESTS):
+
 	#Check if there's anything to do.
 	if create_users == False and create_clients == False and create_petreports == False and create_petmatches == False:
 		print_info_msg ("Nothing to do in setup_objects().")
@@ -434,14 +436,14 @@ def setup_objects(delete_all_objects=True, create_users=True, create_following_l
 		delete_all(only_test_users=True)
 
 	#Need to setup the object lists. The users list encapsulates tuples of <user, password>
-	users = [(None, None) for i in range (NUMBER_OF_TESTS)]
-	clients = [None for i in range (NUMBER_OF_TESTS)]
-	petreports = [None for i in range (NUMBER_OF_TESTS)]
+	users = [(None, None) for i in range (num_users)]
+	clients = [None for i in range (num_clients)]
+	petreports = [None for i in range (num_petreports)]
 	petmatches = [] #Cannot determine size of petmatch list up front.
 
 	#First, create random Users
 	if create_users == True:
-		for i in range (NUMBER_OF_TESTS):
+		for i in range (num_users):
 			(user, password) = create_random_User(i, pretty_name=True)
 			users [i] = (user, password)
 
@@ -454,20 +456,20 @@ def setup_objects(delete_all_objects=True, create_users=True, create_following_l
 
 	#Then, create the Client objects (if specified)
 	if create_clients == True:
-		for i in range (NUMBER_OF_TESTS):
+		for i in range (num_clients):
 			clients [i] = Client (enforce_csrf_checks=False)
 		results ["clients"] = clients
 
 	#Then, create random PetReport objects (if specified)
 	if create_petreports == True:
-		for i in range (NUMBER_OF_TESTS):
+		for i in range (num_petreports):
 			(user, password) = random.choice(users)
 			petreports [i] = create_random_PetReport(user=user)
 		results ["petreports"] = petreports
 
 	#Finally, create PetMatch objects (if specified)
 	if create_petmatches == True:
-		for i in range (NUMBER_OF_TESTS):
+		for i in range (num_petmatches):
 			petmatch = create_random_PetMatch(threshold_bias=False)
 
 			#If we get back None, try again.

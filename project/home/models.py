@@ -63,7 +63,7 @@ class UserProfile (models.Model):
 
     def send_email_message_to_UserProfile (self, target_userprofile, message, test_email=True):
         
-        if email_re.match(target_userprofile.user.email):
+        if email_re.match(target_userprofile.user.email) or (test_email == True):
             site = Site.objects.get(pk=1)
             ctx = {"site":site, "message":message, "from_user":self.user, "from_user_profile_URL": URL_USERPROFILE + str(self.id)}
             email_body = render_to_string(TEXTFILE_EMAIL_USERPROFILE_MESSAGE, ctx)

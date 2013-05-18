@@ -25,7 +25,7 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(create_petreports=False)
+		results = setup_objects()
 		users = results["users"]
 		clients = results["clients"]
 
@@ -50,11 +50,8 @@ class ReportingTesting (unittest.TestCase):
 			client.logout()
 
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
 		performance_report(iteration_time)
 
 
@@ -63,7 +60,7 @@ class ReportingTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(create_petreports=False)
+		results = setup_objects()
 		users = results["users"]
 		clients = results["clients"]
 
@@ -105,11 +102,9 @@ class ReportingTesting (unittest.TestCase):
 			client.logout()
 
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
-		print ''
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		self.assertTrue(len(PetReport.objects.all()) == 2*NUMBER_OF_TESTS) 
@@ -168,13 +163,10 @@ class ReportingTesting (unittest.TestCase):
 			self.assertTrue(response.request ['PATH_INFO'] == URL_SUBMIT_PETREPORT)
 			self.assertTrue(len(PetReport.objects.all()) == i + 1)
 			client.logout()
-
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
-		print ''
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
@@ -256,11 +248,9 @@ class ReportingTesting (unittest.TestCase):
 			#Add the img name to this saved images list for future deletion.
 			saved_images.append(img_name)
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
-		print ''
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS * 2)
@@ -329,11 +319,8 @@ class ReportingTesting (unittest.TestCase):
 
 			client.logout()
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
 		performance_report(iteration_time)
 
 	def test_add_PetReport_bookmark(self):
@@ -384,11 +371,8 @@ class ReportingTesting (unittest.TestCase):
 				self.assertEquals(old_bookmarks_count, (new_bookmarks_count-1))
 
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
 		performance_report(iteration_time)	
 
 	def test_remove_PetReport_bookmark(self):
@@ -418,7 +402,6 @@ class ReportingTesting (unittest.TestCase):
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
 			print_test_msg(prdp_url)
 			response = client.get(prdp_url)
-
 
 			#add a bookmark
 			add_bookmark_url = URL_BOOKMARK_PETREPORT
@@ -456,21 +439,15 @@ class ReportingTesting (unittest.TestCase):
 			response = client.post(add_bookmark_url, post, follow=True)
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
 
-
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], remove_bookmark_url)
 			#self.assertTrue(petreport.UserProfile_has_bookmarked(user.get_profile()),False)
 			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
 
-
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
-
 		performance_report(iteration_time)	
 
 	def test_get_bookmarks_page(self):
@@ -500,3 +477,11 @@ class ReportingTesting (unittest.TestCase):
 			bookmarks_page_url = URL_BOOKMARKED
 			print_test_msg(bookmarks_page_url)
 			response = client.get(bookmarks_page_url)
+
+
+
+
+
+
+
+			

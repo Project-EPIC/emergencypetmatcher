@@ -628,11 +628,9 @@ class UserProfileTesting (unittest.TestCase):
 
 			client.logout()
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
-		print ''
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
 		performance_report(iteration_time)
@@ -2311,6 +2309,174 @@ class HomePageTesting (unittest.TestCase):
 			iteration_time += (end_time - start_time)
 
 		performance_report(iteration_time)
+
+
+'''===================================================================================
+RegistrationTesting: Testing for EPM Registration
+==================================================================================='''
+class RegistrationTesting (unittest.TestCase):
+
+	#Get rid of all objects in the QuerySet.
+	def setUp(self):
+		delete_all()
+
+	#Get rid of all objects in the QuerySet.
+	def tearDown(self):
+		delete_all()	
+
+	def test_duplicate_email_register_User (self):
+		print_testing_name("test_duplicate_email_register_User")
+		iteration_time = 0.0
+
+		results = setup_objects(create_users=False, create_clients=True)
+		clients = results ['clients']
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+			client = random.choice(clients)
+
+			print_test_msg("Some user logs onto %s to register for EPM" % client)
+
+			response = client.get(URL_LOGIN)
+			self.assertEquals(response.status_code, 200)
+			response = client.get(URL_REGISTRATION)
+			self.assertEquals(response.status_code, 200)
+
+			#develop the post
+			username = generate_string(10)
+			email = generate_string(6) + "@test.com"
+			password = generate_string (10)
+
+			#Coverage: Let's assume that half of the time, a User account with that email already exists...
+			chance = random.random()
+			if (chance < .50):
+				User.objects.create_user(username = generate_string(10) + "a", email = email, password = password)
+				print_test_msg ("A User with the same email already exists...")
+
+			response = client.post(URL_REGISTRATION, {"username":username, "email":email, "password1":password, "password2":password}, follow=True)
+			self.assertEquals(response.status_code, 200)
+
+			if (chance < .50):
+				self.assertEquals(response.request ["PATH_INFO"], URL_REGISTRATION)
+			else:
+				self.assertEquals(response.request ["PATH_INFO"], URL_HOME)
+
+			output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+		performance_report(iteration_time)
+
+	def test_duplicate_username_register_User (self):
+		print_testing_name("test_duplicate_username_register_User")
+		iteration_time = 0.0
+
+		results = setup_objects(create_users=False, create_clients=True)
+		clients = results ['clients']
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+			client = random.choice(clients)
+
+			print_test_msg("Some user logs onto %s to register for EPM" % client)
+
+			response = client.get(URL_LOGIN)
+			self.assertEquals(response.status_code, 200)
+			response = client.get(URL_REGISTRATION)
+			self.assertEquals(response.status_code, 200)
+
+			#develop the post
+			username = generate_string(10)
+			email = generate_string(6) + "@test.com"
+			password = generate_string (10)
+
+			#Coverage: Let's assume that half of the time, a User account with that username already exists...
+			chance = random.random()
+			if (chance < .50):
+				User.objects.create_user(username = username, email = generate_string(10), password = password)
+				print_test_msg ("A User with the same username already exists...")
+
+			response = client.post(URL_REGISTRATION, {"username":username, "email":email, "password1":password, "password2":password}, follow=True)
+			self.assertEquals(response.status_code, 200)
+
+			if (chance < .50):
+				self.assertEquals(response.request ["PATH_INFO"], URL_REGISTRATION)
+			else:
+				self.assertEquals(response.request ["PATH_INFO"], URL_HOME)
+
+			output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+		performance_report(iteration_time)
+
+	def test_inconsistent_passwords_register_User (self):
+		print_testing_name("test_inconsistent_passwords_register_User")
+		iteration_time = 0.0
+
+		results = setup_objects(create_users=False, create_clients=True)
+		clients = results ['clients']
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+			client = random.choice(clients)
+
+			print_test_msg("Some user logs onto %s to register for EPM" % client)
+
+			response = client.get(URL_LOGIN)
+			self.assertEquals(response.status_code, 200)
+			response = client.get(URL_REGISTRATION)
+			self.assertEquals(response.status_code, 200)
+
+			#develop the post
+			username = generate_string(10)
+			email = generate_string(6) + "@test.com"
+			password1 = generate_string (10)
+			password2 = password1
+
+			#Coverage: Let's assume that half of the time, the passwords don't align...
+			chance = random.random()
+			if (chance < .50):
+				print_test_msg ("Whoops, passwords do not match.")
+				password2 = password1 + "a"
+			
+			response = client.post(URL_REGISTRATION, {"username":username, "email":email, "password1":password1, "password2":password2}, follow=True)
+			self.assertEquals(response.status_code, 200)
+
+			if (chance < .50):
+				self.assertEquals(response.request ["PATH_INFO"], URL_REGISTRATION)
+			else:
+				self.assertEquals(response.request ["PATH_INFO"], URL_HOME)
+
+			output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+		performance_report(iteration_time)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -5,7 +5,7 @@ import os
 ==================================================================================='''
 
 #Number of Tests
-NUMBER_OF_TESTS = 20
+NUMBER_OF_TESTS = 30
 
 #Lower and Upper bounds for Lost and Found Dates
 DATE_LOWER_BOUND = "2012-01-01"
@@ -143,21 +143,24 @@ URL_GET_ACTIVITIES = "/get_activities_json"
 URL_LOGIN = '/login'
 URL_TC = '/tc'
 URL_TC_18 = '/tc_18'
-URL_SUBMIT_PETREPORT ='/reporting/submit_PetReport'
 URL_USERPROFILE = '/UserProfile/'
+URL_EDITUSERPROFILE = "/edituserprofile"
+URL_SEND_MESSAGE_TO_USERPROFILE = "/UserProfile/message_UserProfile"
+URL_FOLLOW = "/follow"
+URL_UNFOLLOW = "/unfollow"
 URL_PRDP = '/reporting/PetReport/'
+URL_SUBMIT_PETREPORT ='/reporting/submit_PetReport'
+URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
+URL_BOOKMARKED = "/reporting/bookmarks/"
 URL_PMDP = '/matching/PetMatch/'
 URL_VOTE_MATCH = '/matching/vote_PetMatch'
 URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
-URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
-URL_BOOKMARKED = "/reporting/bookmarks/"
-URL_FOLLOW = "/follow"
-URL_UNFOLLOW = "/unfollow"
-URL_EDITUSERPROFILE = "/edituserprofile"
-URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/" 
 URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
-URL_SEND_MESSAGE_TO_USERPROFILE = "/UserProfile/message_UserProfile"
+URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/" 
+URL_REGISTRATION = "/accounts/register/"
+URL_REGISTRATION_COMPLETE = "/register/complete/"
+URL_ACTIVATION_COMPLETE = "/accounts/activate/complete/"
 
 
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
@@ -176,6 +179,7 @@ HTML_SOCIAL_AUTH_FORM = "registration/social_auth_username_form.html"
 HTML_VERIFY_PETMATCH = "matching/verify_petmatch.html"
 HTML_SOCIAL_AUTH_FORM = "registration/social_auth_form.html"
 HTML_EDITUSERPROFILE_FORM ="home/EditUserProfile_form.html"
+HTML_REGISTRATION_FORM = "registration/registration_form.html"
 
 TEXTFILE_EMAIL_ACTIVATION_SUBJECT="registration/activation_email_subject.txt"
 TEXTFILE_EMAIL_CHANGE_VERICATION="home/email_change_verification.txt"

@@ -64,6 +64,11 @@ class MatchingTesting (unittest.TestCase):
 						self.assertTrue(target_petreport.compare (candidate_matches[i]) >= target_petreport.compare (candidate_matches[j]))
 				print_info_msg("Ordering on Attribute-matched candidate pets verified for this petreport!\n")
 
+			end_time = time.clock()
+			iteration_time += end_time - start_time
+			output_update(i + 1)
+		performance_report(iteration_time)
+
 	def test_get_matching_interface(self):
 		print_testing_name("test_get_matching_interface")
 		iteration_time = 0.00
@@ -108,11 +113,8 @@ class MatchingTesting (unittest.TestCase):
 			self.assertEquals(response.request ['PATH_INFO'], matching_url)	
 			client.logout()	
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
 		performance_report(iteration_time)		
 
 	def test_UserProfile_added_to_PetReport_workers_list(self):
@@ -161,11 +163,8 @@ class MatchingTesting (unittest.TestCase):
 			self.assertTrue(petreport in user.get_profile().workers_related.all())
 			client.logout()	
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
 		performance_report(iteration_time)				
 
 	def test_get_propose_match_dialog (self):
@@ -217,11 +216,8 @@ class MatchingTesting (unittest.TestCase):
 			self.assertEquals(response.request ['PATH_INFO'], propose_match_url)			
 
 			output_update(i + 1)
-			print "\n"
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
 		performance_report(iteration_time)	
 
 
@@ -293,11 +289,8 @@ class MatchingTesting (unittest.TestCase):
 			#Some checks for the PetMatch objects stored
 			self.assertTrue(len(PetMatch.objects.all()) == num_petmatches or len(PetMatch.objects.all()) <= i)
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
-
-		print ''
 		performance_report(iteration_time)
 
 
@@ -359,11 +352,8 @@ class MatchingTesting (unittest.TestCase):
 			#Some checks for the PetMatch objects stored
 			# self.assertTrue(len(PetMatch.objects.all()) == 0)
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
-
-		print ''
 		performance_report(iteration_time)	
 
 '''===================================================================================
@@ -430,11 +420,8 @@ class PetMatchTesting (unittest.TestCase):
 			print("%s enters the Pet Match Detailed Page successfully" % (user))
 
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
 		performance_report(iteration_time)	
 
 
@@ -477,11 +464,8 @@ class PetMatchTesting (unittest.TestCase):
 			self.assertEquals(petmatch.up_votes.get(pk = user.id), user.get_profile())
 
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
 		performance_report(iteration_time)	
 
 
@@ -524,11 +508,8 @@ class PetMatchTesting (unittest.TestCase):
 			self.assertEquals(petmatch.down_votes.get(pk = user.id), user.get_profile())
 
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
-
-		print ''
 		performance_report(iteration_time)
 
 
@@ -599,9 +580,9 @@ class VerificationTesting (unittest.TestCase):
 				self.assertTrue((userprofile == petmatch.lost_pet.proposed_by) or (userprofile == petmatch.found_pet.proposed_by))
 
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)				
+		performance_report(iteration_time)
 
 
 	def test_post_verification_response(self):
@@ -668,9 +649,9 @@ class VerificationTesting (unittest.TestCase):
 				object replaces the existing one in the petmatches list'''
 				petmatches[petmatch_i] = petmatch
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)					
+		performance_report(iteration_time)
 				
 				
 	def test_function_PetMatch_has_reached_threshold(self):
@@ -695,9 +676,9 @@ class VerificationTesting (unittest.TestCase):
 
 			print_success_msg("Pet Match has passed the test: test_function_verify_PetMatch\n")
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
+		performance_report(iteration_time)
 
 	def test_function_verify_PetMatch(self):
 		print_testing_name("test_function_verify_PetMatch")
@@ -719,9 +700,9 @@ class VerificationTesting (unittest.TestCase):
 
 			print_success_msg("Pet Match has passed the test: test_function_verify_PetMatch\n")
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
+		performance_report(iteration_time)
 
 	def test_function_close_PetMatch(self):
 		print_testing_name("test_function_close_PetMatch")
@@ -741,58 +722,66 @@ class VerificationTesting (unittest.TestCase):
 			petmatch = PetMatch.objects.get(pk=petmatch.id)
 
 			if petmatch.PetMatch_has_reached_threshold() == True:
-					self.assertTrue(petmatch.verification_triggered)
+				self.assertTrue(petmatch.verification_triggered)
 
-					#if the pet match as already been closed, disallow the test from running for this pet match
-					if petmatch.is_open == False:
-						continue
+				#if the pet match as already been closed, disallow the test from running for this pet match
+				if petmatch.is_open == False:
+					continue
 
-					self.assertFalse(petmatch.is_open)
-					old_pet_vote = petmatch.verification_votes
+				self.assertFalse(petmatch.is_open)
+				old_pet_vote = petmatch.verification_votes
+				#Looking for other users and their passwords in the users list.
+				proposers = [petmatch.lost_pet.proposed_by.user, petmatch.found_pet.proposed_by.user]
 
-					#Looking for other users and their passwords in the users list.
-					proposers = [petmatch.lost_pet.proposed_by.user, petmatch.found_pet.proposed_by.user]
+				#Disallow the test from allowing the lost and found pet contacts to be the same person.
+				if proposers[0] == proposers[1]:
+					continue
 
-					#Disallow the test from allowing the lost and found pet contacts to be the same person.
-					if proposers[0] == proposers[1]:
-						continue
+				lostpet_proposer_index = [user[0] for user in users].index(proposers[0])
+				foundpet_proposer_index = [user[0] for user in users].index(proposers[1])
 
-					lostpet_proposer_index = [user[0] for user in users].index(proposers[0])
-					foundpet_proposer_index = [user[0] for user in users].index(proposers[1])
+				for (user, password) in [users[lostpet_proposer_index], users[foundpet_proposer_index]]:
+					#Log in First
+					loggedin = client.login(username = user.username, password = password)
+					self.assertTrue(loggedin == True)			
+					print_test_msg ("%s logs onto %s to enter the verification page..." % (user, client))
+					user_response = random.randint(1,2)
+					message = random.choice(['yes','no'])
+					print_test_msg ("%s has responded with {%d, %s}" % (user, user_response, message))
+					post = {'message':message}
+					response = client.post(verification_page_url, post, follow = True)
+					self.assertEquals(response.status_code, 200)
 
-					for (user, password) in [users[lostpet_proposer_index], users[foundpet_proposer_index]]:
-						#Log in First
-						loggedin = client.login(username = user.username, password = password)
-						self.assertTrue(loggedin == True)			
-						print_test_msg ("%s logs onto %s to enter the verification page..." % (user, client))
-						user_response = random.randint(1,2)
-						message = random.choice(['yes','no'])
-						print_test_msg ("%s has responded with {%d, %s}" % (user, user_response, message))
-						post = {'message':message}
-						response = client.post(verification_page_url, post, follow = True)
-						self.assertEquals(response.status_code, 200)
+				petmatch = PetMatch.objects.get(pk=petmatch.id)
+				lost_pet = PetReport.objects.get(pk=petmatch.lost_pet.id)
+				new_pet_vote = petmatch.verification_votes
+				self.assertTrue(petmatch.closed_date != None)
 
-					petmatch = PetMatch.objects.get(pk=petmatch.id)
-					lost_pet = PetReport.objects.get(pk=petmatch.lost_pet.id)
-					new_pet_vote = petmatch.verification_votes
-					self.assertTrue(petmatch.closed_date != None)
+				if new_pet_vote == '11':
+					self.assertTrue(petmatch.is_successful)
+					self.assertTrue(lost_pet.closed)
+					self.assertTrue(petmatch.found_pet.closed)
 
-					if new_pet_vote == '11':
-						self.assertTrue(petmatch.is_successful)
-						self.assertTrue(lost_pet.closed)
-						self.assertTrue(petmatch.found_pet.closed)
-						for pm in petmatch.lost_pet.lost_pet_related.all(): 
-							self.assertFalse(pm.is_open)
-							self.assertTrue(pm.closed_date != None)
+					for pm in petmatch.lost_pet.lost_pet_related.all(): 
+						self.assertFalse(pm.is_open)
+						self.assertTrue(pm.closed_date != None)
 
-						for pm in petmatch.found_pet.found_pet_related.all(): 
-							self.assertFalse(pm.is_open)
-							self.assertTrue(pm.closed_date != None)
-					else:
-						self.assertFalse(petmatch.is_successful)
+					for pm in petmatch.found_pet.found_pet_related.all(): 
+						self.assertFalse(pm.is_open)
+						self.assertTrue(pm.closed_date != None)
+
+				else:
+					self.assertFalse(petmatch.is_successful)
 
 			print_success_msg("Pet Match has passed the test: test_function_verify_PetMatch")
 			output_update(i + 1)
-			print '\n'
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
+		performance_report(iteration_time)
+
+
+
+
+
+
+

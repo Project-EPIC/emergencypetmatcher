@@ -15,9 +15,7 @@ from django.http import Http404
 from django.core import mail
 from django.core.validators import email_re
 from django.core.urlresolvers import reverse
-from registration.forms import RegistrationForm
 from django.forms.models import model_to_dict
-from registration.models import RegistrationProfile
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.timezone import now as datetime_now
@@ -25,14 +23,13 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.utils import simplejson
+from registration.models import RegistrationProfile
+from registration.forms import RegistrationForm
+from datetime import datetime
+from utils import *
 from home.models import *
 from constants import *
-from registration.models import RegistrationProfile
-from registration.views import activate
-from utils import *
-from datetime import datetime
-from registration.views import register
-import oauth2 as oauth, logger, random, urllib, hashlib, random, re, project.settings
+import oauth2 as oauth, logger, random, urllib, hashlib, random, re, project.settings, registration
 
 #Home view, displays login mechanism
 def home (request):
@@ -158,7 +155,7 @@ def logout_User(request):
 
     # Update to last_logout date field
     u = get_object_or_404(UserProfile, pk=request.user.get_profile().id)
-    u.last_logout = datetime.now()
+    u.last_logout = datetime.datetime.now()
     u.save()
  
     logger.log_activity(ACTIVITY_LOGOUT, request.user.get_profile())
@@ -178,7 +175,9 @@ def registration_activate (request, activation_key=None, backend=None):
         return redirect(URL_HOME)
 
     #Specify the django-registration default backend for activating this account. 
-    return activate(request, backend=backend, activation_key=activation_key)
+    activated_user = RegistrationProfile.objects.activate_user(activation_key)
+    print_info_msg ("RegistrationProfile now activated for active user %s" % activated_user)
+    return redirect (URL_ACTIVATION_COMPLETE)
 
 def registration_activation_complete (request):
     messages.success (request, "Alright, you are all set registering! You may now login to the system.")
@@ -192,13 +191,55 @@ def disp_TC_18(request):
     # request.session['agreed'] = False
     return render_to_response(HTML_TC_18, {}, RequestContext(request))
 
+def registration_register (request):
+    #Requesting the Registration Form Page
+    if request.method == "GET":
+        return render_to_response (HTML_REGISTRATION_FORM, {"form":RegistrationForm()}, RequestContext (request))
+
+    #Submitting Regisration Form Data
+    elif request.method == "POST":
+        #Need to check if data is OK for continuing registration.        
+        form = RegistrationForm(request.POST)
+        email = request.POST ["email"]
+        username = request.POST ["username"]
+        password = password1 = request.POST ["password1"]
+        password2 = request.POST ["password2"]
+
+        if password1 != password2:
+            print_info_msg("Passwords do not match. Registration failed for user.")
+            messages.error(request, "Passwords do not match. Please try again.")
+            return redirect (URL_REGISTRATION)
+
+        existing_username = User.objects.filter(username=username)
+
+        if existing_username.exists() == True:
+            print_info_msg("Existing Username - Registration failed for user.")
+            messages.error(request, "The username you provided already exists. Try another username.")
+            return redirect (URL_REGISTRATION)
+
+        existing_emails = User.objects.filter(email=email)
+
+        if existing_emails.exists() == True:
+            print_info_msg("Existing Email - Registration failed for user.")
+            messages.error(request, "The email address you provided already exists. Try another email.")
+            return redirect (URL_REGISTRATION)
+
+        #else, create the new inactive users here.
+        new_user = RegistrationProfile.objects.create_inactive_user(username, email, password, Site.objects.get_current())
+        print_info_msg ("RegistrationProfile now created for inactive user %s" % new_user)
+
+        #Redirect back to Home
+        return redirect (URL_REGISTRATION_COMPLETE)
+
+    else:
+        raise Http404
+
 def registration_complete (request):
     messages.success (request, "Thanks for registering for EPM. Look for an account verification email and click on the link to finish registering.")
-    return home(request)
+    return redirect(URL_HOME)
 
 def registration_disallowed (request):
-    # messages.error (request, "Sorry, we are not accepting registrations at this time. Please try again later.")
-    messages.error (request, "Sorry, we can not accept your registration. Please try again later.")
+    messages.error (request, "Sorry, we are not accepting registrations at this time. Please try again later.")
     return home(request)
 
 def social_auth_disallowed (request):
