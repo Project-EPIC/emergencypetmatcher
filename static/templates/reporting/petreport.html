@@ -39,27 +39,28 @@
     <script src="{{ STATIC_URL }}js/jquery-wookmark.js" type="text/javascript"></script>
     
     <!-- General, inheritable JS goes here -->
-    <script src = "{{ STATIC_URL }}/js/epm.js" type = 'text/javascript'></script>    
-    {% block js %}
-      <script src = "{{ STATIC_URL }}/js/local/epm-petreport.js" type = 'text/javascript'></script>
-      <script type = 'text/javascript'> 
-        var BOOKMARKED = "{{ user_has_bookmarked }}";
-        var USER_ID = "{{ user.id }}";
-        var PETREPORT_ID =  "{{ pet_report.id }}"
-        //Define this django-rendered petreport variable as a global javascript variable
-        var PETREPORT = convert_to_javascript_obj("{{ pet_report.toJSON }}");
-        var URL_LOGIN  = "{% url 'login_User' %}"
-        var URL_BOOKMARK_PETREPORT = "{% url 'bookmark_PetReport' %}"
-        var PETREPORT_URL = 'http://epm.cs.colorado.edu/reporting/PetReport/{{ pet_report.id }}';
-        var PETREPORT_IMAGE = 'http://epm.cs.colorado.edu{{ STATIC_URL }}{{ pet_report.img_path }}';
-        var PETREPORT_TITLE = 'A Pet Report at EPM';
-        var PETREPORT_CAPTION ='EmergencyPetMatcher';
-        var PETREPORT_SUMMARY = 'A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
-      </script>  
+    <script src = "{{ STATIC_URL }}/js/epm.js" type = 'text/javascript'></script> 
 
-    <!-- Page-specific JS goes in this block -->   
+    {% block js %}
+      <!-- Page-specific JS goes in this block -->   
+      <script type="text/javascript">
+      var BOOKMARKED = "{{ user_has_bookmarked }}";
+      var USER_ID = "{{ user.id }}";
+      var PETREPORT_ID =  "{{ pet_report.id }}";
+      //var PETREPORT = convert_to_javascript_obj("{{ pet_report_json|escapejs }}");
+      //Define this django-rendered petreport variable as a global javascript variable
+      var PETREPORT = convert_to_javascript_obj(("{{ pet_report_json|escapejs }}").replace(/&(l|g|quo)t;/g));
+      var URL_LOGIN  = "{% url 'login_User' %}";
+      var URL_BOOKMARK_PETREPORT = "{% url 'bookmark_PetReport' %}";
+      var PETREPORT_URL = 'http://epm.cs.colorado.edu/reporting/PetReport/{{ pet_report.id }}';
+      var PETREPORT_IMAGE = 'http://epm.cs.colorado.edu{{ STATIC_URL }}{{ pet_report.img_path }}';
+      var PETREPORT_TITLE = 'A Pet Report at EPM';
+      var PETREPORT_CAPTION ='EmergencyPetMatcher';
+      var PETREPORT_SUMMARY = 'A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
+      </script>    
+
+      <script src = "{{ STATIC_URL }}/js/local/epm-petreport.js" type='text/javascript'></script>
     {% endblock js %} 
-    <!-- Comment for Sahar -->
 
   </head>
   <body>
@@ -163,3 +164,4 @@
     {%  endblock petreportcontent %}
   </body>
 </html>
+

@@ -96,7 +96,8 @@ function share_on_twitter(url, image, title, summary){
 
 
 function convert_to_javascript_obj(json_str){
-    return JSON.parse(json_str.replace(/&quot;/ig, '"'));
+    var obj = $.parseJSON(json_str);
+    return obj;
  }
 
 function display_PetReport_fields(petreport, prdplist){

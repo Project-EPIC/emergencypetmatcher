@@ -19,7 +19,6 @@ from registration.forms import RegistrationForm
 from random import choice, uniform
 from django.contrib import messages
 from django.utils import simplejson
-# from django.core import serializers
 from matching.views import *
 from django.forms.models import model_to_dict
 from home.models import *
@@ -91,6 +90,7 @@ def disp_PetReport(request, petreport_id):
 
     pet_report = get_object_or_404(PetReport, pk = petreport_id)
 
+    #Get all PetMatches made already for this PetReport object.
     if pet_report.status == 'Lost':
         matches = PetMatch.objects.all().filter(lost_pet = pet_report)
     else:
@@ -100,14 +100,15 @@ def disp_PetReport(request, petreport_id):
         user = request.user.get_profile()
         if(pet_report.UserProfile_has_bookmarked(user)):
             user_has_bookmarked = "true"
-            #print "user has bookmarked this petreport"
         else:
             user_has_bookmarked = "false"    
-            #print "user has not bookmarked this petreport"
     else:
         user_has_bookmarked = "false"
         print_info_msg ("Unauthenticated User accessing PetReport %s" % pet_report) 
-    return render_to_response(HTML_PRDP,{'pet_report': pet_report,'matches': matches,'user_has_bookmarked':user_has_bookmarked}, RequestContext(request))
+
+    #Serialize the PetReport into JSON for easy accessing.
+    pr_json = simplejson.dumps(simplify_PetReport_dict(pet_report))
+    return render_to_response(HTML_PRDP,{'pet_report_json':pr_json, 'pet_report': pet_report, 'matches': matches,'user_has_bookmarked':user_has_bookmarked}, RequestContext(request))
 
 @login_required
 def disp_bookmarks(request):

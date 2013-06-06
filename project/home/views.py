@@ -295,7 +295,7 @@ def get_social_details(request):
             try:
                 # Check for a duplicate username
                 existing_user = User.objects.get(username=request.POST.get('username'))
-                message.append("Sorry! '%s' is a duplicate username. Please try another one." % request.POST.get('username'))
+                message.append("Sorry! '%s' already exists. Please try another one." % request.POST.get('username'))
             except:
                 username_accepted = True
         else:
@@ -307,7 +307,7 @@ def get_social_details(request):
             try:
                 # Check for a duplicate email
                 existing_email = User.objects.get(email=request.POST.get('email'))
-                message.append("Sorry! '%s' is a duplicate email. Please try another one." % request.POST.get('email'))
+                message.append("Sorry! '%s' already exists. Please try another one." % request.POST.get('email'))
             except:
                 email_accepted = True
         else:

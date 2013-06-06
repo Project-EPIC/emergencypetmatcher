@@ -3,6 +3,8 @@ from django.forms.models import model_to_dict
 from django.test.client import Client
 from home.models import *
 from constants import *
+from registration.models import RegistrationProfile
+from social_auth.models import UserSocialAuth
 import random, string, sys, time, datetime, lipsum, traceback
 
 '''===================================================================================
@@ -82,17 +84,7 @@ def simplify_PetReport_dict(petreport):
 	modeldict ["proposed_by_username"] = petreport.proposed_by.user.username		
 	return modeldict
 
-'''===================================================================================
-generate_random_date():
-
-Referenced from: http://stackoverflow.com/questions/553303/generate-a-random-date-between-two-other-dates
-
-Get a time at a proportion of a range of two formatted times.
-start and end should be strings specifying times formated in the
-given format (strftime-style), giving an interval [start, end].
-prop specifies how a proportion of the interval to be taken after
-start.  The returned time will be in the specified format.
-==================================================================================='''
+#generate_random_date(): Referenced from: http://stackoverflow.com/questions/553303/generate-a-random-date-between-two-other-dates
 def generate_random_date(start, end, format, prop):
     stime = time.mktime(time.strptime(start, format))
     etime = time.mktime(time.strptime(end, format))
@@ -116,9 +108,10 @@ def delete_all(leave_users = False, only_test_users=True):
 			#Get the users whose userprofile.is_test attribute is set to TRUE
 			test_users = User.objects.filter(userprofile__is_test=True)
 			test_users.all().delete()
-
 		else:
 			User.objects.all().delete()
+			RegistrationProfile.objects.all().delete()
+			SocialAuth.objects.all().delete()
 
 #Deletes all PetReport images in the static/images/petreport_images folder
 def delete_PetReport_images(from_list=None):
