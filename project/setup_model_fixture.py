@@ -9,9 +9,9 @@ setup_model_fixture.py: Setup sample (random) data for your dev env.
 ==================================================================================='''
 
 #Control Variables
-NUM_PETREPORTS = 100
-NUM_USERS = 50
-NUM_PETMATCHES = 50
+NUM_PETREPORTS = 300
+NUM_USERS = 15
+NUM_PETMATCHES = 100
 
 #When Executed: Setup our fixture
 if (len(sys.argv) < 2) == True or (len(sys.argv) > 3) == True:
@@ -43,7 +43,7 @@ elif argument == "onlyusers":
 		print l
 
 elif argument == "wipeout":
-	delete_all(only_test_users=True)
+	delete_all(leave_Users=False)
 	print_info_msg ("All model objects have been cleared from the database.")
 
 else:

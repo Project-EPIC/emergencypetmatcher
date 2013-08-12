@@ -4,7 +4,7 @@ from django.forms.models import model_to_dict
 from constants import *
 from utils import *
 from home.models import *
-from project.settings import STATIC_URL
+from pprint import pprint
 import unittest, string, random, sys, time
 
 '''===================================================================================
@@ -14,11 +14,10 @@ class ReportingTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		delete_all()
-
+		delete_all(leave_Users=False)
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	def test_get_PetReport_form(self):
 		print_testing_name("test_get_PetReport_form")
@@ -80,7 +79,7 @@ class ReportingTesting (unittest.TestCase):
 			response = client.get(URL_SUBMIT_PETREPORT)
 
 			#Create and submit a Pet Report object as form content
-			pr = create_random_PetReport(user=user)
+			pr = create_random_PetReport(user=user, save=False)
 
 			#Note here that we convert the PetReport attributes into a dictionary in order to pass it into the POST request object.
 			pr_dict = model_to_dict(pr) 
@@ -98,7 +97,7 @@ class ReportingTesting (unittest.TestCase):
 			self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/')
 			self.assertEquals(response.redirect_chain[0][1], 302)
 			self.assertTrue(response.request ['PATH_INFO'] == URL_HOME)
-			self.assertTrue(len(PetReport.objects.all()) == 2*i + 2)
+			self.assertTrue(len(PetReport.objects.all()) == i + 1)
 			client.logout()
 
 			output_update(i + 1)
@@ -107,7 +106,7 @@ class ReportingTesting (unittest.TestCase):
 
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
-		self.assertTrue(len(PetReport.objects.all()) == 2*NUMBER_OF_TESTS) 
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS) 
 		performance_report(iteration_time)
 
 
@@ -136,7 +135,7 @@ class ReportingTesting (unittest.TestCase):
 			response = client.get(URL_SUBMIT_PETREPORT)
 
 			#Create and submit a Pet Report object as form content
-			pr = create_random_PetReport(user=user)
+			pr = create_random_PetReport(user=user, save=False)
 			#Note here that we convert the PetReport attributes into a dictionary in order to pass it into the POST request object.
 			pr_dict = model_to_dict(pr)
 
@@ -161,7 +160,7 @@ class ReportingTesting (unittest.TestCase):
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertTrue(response.request ['PATH_INFO'] == URL_SUBMIT_PETREPORT)
-			self.assertTrue(len(PetReport.objects.all()) == i + 1)
+			self.assertTrue(len(PetReport.objects.all()) == 0)
 			client.logout()
 			output_update(i + 1)
 			end_time = time.clock()
@@ -169,7 +168,7 @@ class ReportingTesting (unittest.TestCase):
 
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
-		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
+		self.assertTrue(len(PetReport.objects.all()) == 0)
 		performance_report(iteration_time)
 
 
@@ -180,20 +179,16 @@ class ReportingTesting (unittest.TestCase):
 		#Need this to randomly choose the PetReport image we're going to use.
 		#Look in the test_images and append all images to the images list to do this.
 		images = []
-		for f in os.listdir("/srv/epm/static/images/test_images"):
-			if f != ".DS_Store" and f != ".anchor":
-				images.append("/srv/epm/static/images/test_images/" + f)
+		saved_images = []		
 
-		saved_images = []
+		for f in os.listdir(PETREPORT_IMAGES_DIFFERENT_FORMATS_DIRECTORY):
+			if f != ".DS_Store" and f != ".anchor":
+				images.append(PETREPORT_IMAGES_DIFFERENT_FORMATS_DIRECTORY + f)
 
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(create_petreports=True)
+		results = setup_objects()
 		users = results["users"]
 		clients = results["clients"]
-		petreports = results["petreports"]
-
-		#We need this because PostgreSQL doesn't start IDs at 0 if running previous tests.
-		petreport_lower_bound_index = petreports[0].id
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
@@ -201,17 +196,14 @@ class ReportingTesting (unittest.TestCase):
 			#objects
 			user, password = random.choice(users)
 			client = random.choice(clients)
-			petreport = random.choice(petreports)
 
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
 			print_test_msg("%s logs onto %s to enter the pet report form..." % (user, client))
 
-			#Go to the Pet Report Form Page
-			response = client.get(URL_SUBMIT_PETREPORT)
-
 			#Note here that we convert the PetReport attributes into a dictionary in order to pass it into the POST request object.
+			petreport = create_random_PetReport(user=user, save=False)
 			pr_dict = model_to_dict(petreport)
 
 			#Randomly choose the image path to use for this request.
@@ -222,15 +214,15 @@ class ReportingTesting (unittest.TestCase):
 			form  = PetReportForm() #Create an unbound form
 			post = {'form': form}
 			post.update(pr_dict)
+			petreport.img_path = image_file
+			petreport.thumb_path = image_file
 
 			#Make the POST request Call
 			response = client.post(URL_SUBMIT_PETREPORT, post, follow=True)
 			image_file.close()
 
 			#Get the new PetReport created with new image file path.
-			new_petreport_index = (petreport_lower_bound_index + NUMBER_OF_TESTS + i)
-			print_test_msg("New PetReport index [%s]" % str(new_petreport_index))
-			new_petreport = PetReport.objects.get(pk=new_petreport_index)
+			new_petreport = PetReport.objects.get(pk=i + 1)
 			#Just grab the name of the file, nothing else.
 			img_name = new_petreport.img_path.name.split("/")[2]
 
@@ -238,6 +230,16 @@ class ReportingTesting (unittest.TestCase):
 			self.assertEquals(petreport.status, new_petreport.status)
 			self.assertEquals(petreport.pet_type, new_petreport.pet_type)
 			self.assertEquals(petreport.pet_name, new_petreport.pet_name)
+			#Assert that PetReport name is found in the img_path and thumb_path name.
+			self.assertTrue(petreport.pet_name in new_petreport.img_path.name)
+			self.assertTrue(petreport.pet_name in new_petreport.thumb_path.name)
+			#Assert that PetReport Status is found in the img_path and thumb_path name.
+			self.assertTrue(petreport.status in new_petreport.img_path.name)
+			self.assertTrue(petreport.status in new_petreport.thumb_path.name)					
+			#Assert that PetReport UserProfile username  is found in the img_path and thumb_path name.
+			self.assertTrue(petreport.proposed_by.user.username in new_petreport.img_path.name)
+			self.assertTrue(petreport.proposed_by.user.username in new_petreport.thumb_path.name)		
+
 			self.assertEquals(response.status_code, 200)
 			self.assertTrue(len(response.redirect_chain) == 1) 
 			self.assertTrue(response.redirect_chain[0][0] == 'http://testserver/')
@@ -253,12 +255,63 @@ class ReportingTesting (unittest.TestCase):
 
 		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
 		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
-		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS * 2)
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
 		performance_report(iteration_time)
 		#Delete the test images created here in the petreport_images folder.
 		delete_PetReport_images(from_list=saved_images)
 
 
+	def test_check_PetReport_image_and_thumbnail(self):
+		print_testing_name("test_check_PetReport_image_and_thumbnail")
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		results = setup_objects()
+		users = results["users"]
+		clients = results["clients"]
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#objects
+			user, password = random.choice(users)
+			client = random.choice(clients)
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print_test_msg("%s logs onto %s to enter the pet report form..." % (user, client))
+
+			#Go to the Pet Report Form Page
+			response = client.get(URL_SUBMIT_PETREPORT)
+
+			#Create (but do not save) a random Pet Report object.
+			petreport = create_random_PetReport(save=False, user=user)
+
+			#We are testing this functionality: Save the img_path and thumb_path PetReport attributes.
+			petreport.set_images(petreport.img_path, save=True)
+			#At this point, we're supposed to have two images related to the submitted PetReport.
+
+			#The thumbnail Check
+			expected_thumbnail = PETREPORT_THUMBNAILS_DIRECTORY + str(petreport.proposed_by.id) + "-" + petreport.proposed_by.user.username + "-" + str(petreport.id) + "-" + petreport.pet_name + "-" + petreport.status + ".jpg"
+			print_test_msg ("Expected Thumbnail Path: " + expected_thumbnail)
+			self.assertTrue(os.path.exists(expected_thumbnail) == True)
+			print_success_msg ("Expected and Actual Thumbnail paths match.")
+
+			#The actual image Check
+			expected_img = PETREPORT_IMAGES_DIRECTORY + str(petreport.proposed_by.id) + "-" + petreport.proposed_by.user.username + "-" + str(petreport.id) + "-" + petreport.pet_name + "-" + petreport.status + ".jpg"
+			print_test_msg ("Expected Image Path: " + expected_img)
+			self.assertTrue(os.path.exists(expected_img) == True)
+			print_success_msg ("Expected and Actual Image paths match.")
+
+			output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		self.assertTrue(len(UserProfile.objects.all()) <= NUMBER_OF_TESTS)
+		self.assertTrue(len(User.objects.all()) <= NUMBER_OF_TESTS)	
+		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
+		performance_report(iteration_time)
 
 	def test_get_PetReport_detailed_page(self):
 		print_testing_name("test_get_PetReport_detailed_page")
@@ -358,8 +411,8 @@ class ReportingTesting (unittest.TestCase):
 				previously_bookmarked = False
 
 			add_bookmark_url = URL_BOOKMARK_PETREPORT
-			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
-			response = client.post(add_bookmark_url, post, follow=True)
+			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Bookmark this Pet"}
+			response = client.post(add_bookmark_url, post, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
 
 			#Make assertions
@@ -406,13 +459,13 @@ class ReportingTesting (unittest.TestCase):
 			#add a bookmark
 			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
-			response = client.post(add_bookmark_url, post, follow=True)
+			response = client.post(add_bookmark_url, post, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
 			old_bookmarks_count = user.get_profile().bookmarks_related.count()
 
 			#remove the bookmark
 			remove_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Remove Bookmark"}
-			response = client.post(remove_bookmark_url, post, follow=True)
+			response = client.post(remove_bookmark_url, post, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
 
 			#Make assertions
@@ -424,19 +477,14 @@ class ReportingTesting (unittest.TestCase):
 			#add back the bookmark
 			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
-			response = client.post(add_bookmark_url, post, follow=True)
+			response = client.post(add_bookmark_url, post, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
 			old_bookmarks_count = user.get_profile().bookmarks_related.count()
 
-
-			#navigate to the bookmarks page
-			bookmarks_page_url = URL_BOOKMARKED
-			print_test_msg(bookmarks_page_url)
-			response = client.get(bookmarks_page_url)
 
 			#remove the bookmark 
 			remove_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Remove Bookmark"}
-			response = client.post(add_bookmark_url, post, follow=True)
+			response = client.post(add_bookmark_url, post, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
 
 			#Make assertions
@@ -449,37 +497,6 @@ class ReportingTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 		performance_report(iteration_time)	
-
-	def test_get_bookmarks_page(self):
-		print_testing_name("test_get_bookmarks_page")
-		iteration_time = 0.00
-
-		#Need to setup clients, users, and their passwords in order to simulate retrieving the bookmarks page for a user.
-		results = setup_objects(create_petreports=True)
-		users = results["users"]
-		clients = results["clients"]
-		petreports = results["petreports"]
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-
-			#objects
-			user, password = random.choice(users)
-			client = random.choice(clients)
-			petreport = random.choice(petreports)
-			
-			#Log in First.
-			loggedin = client.login(username = user.username, password = password)
-			self.assertTrue(loggedin == True)			
-			print_test_msg("%s logs onto %s to enter the bookmarks page..." % (user, client))
-
-			#navigate to the bookmarks page
-			bookmarks_page_url = URL_BOOKMARKED
-			print_test_msg(bookmarks_page_url)
-			response = client.get(bookmarks_page_url)
-
-
-
 
 
 

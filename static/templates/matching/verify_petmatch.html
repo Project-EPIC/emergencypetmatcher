@@ -17,19 +17,21 @@
     <!-- EPM Style CSS -->
     <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css" type="text/css"></link>
     <!-- Include the JQuery UI Style CSS -->
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/ui-lightness/jquery-ui-1.8.23.custom.css" type="text/css"></link>
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/epm-theme/jquery-ui-1.10.3.custom.min.css" type="text/css"></link>
     <!-- Include the Reset CSS -->
     <link rel="stylesheet" href="{{ STATIC_URL }}css/reset.css" type="text/css"></link>
+    <!-- Include the simplePagination CSS -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/simplePagination.css" type="text/css"></link>
     
     <!-- Javascript & JQuery -->
     <!-- jquery original source -->
-    <script src="{{ STATIC_URL }}js/jquery-1.8.1.min.js" type="text/javascript"></script>
+    <script src="{{ STATIC_URL }}js/jquery-1.9.1.min.js" type="text/javascript"></script>
     <!-- jquery UI original source -->
-    <script src="{{ STATIC_URL }}js/jquery-ui-1.8.23.custom.min.js" type="text/javascript"></script>
+    <script src="{{ STATIC_URL }}js/jquery-ui-1.10.3.custom.min.js" type="text/javascript"></script>
     <!-- Include the Browser ID JS plugin -->
     <script src="{{ STATIC_URL }}js/browserid-include.js" type="text/javascript"></script>
     <!-- Include the BlockUI plugin -->
-    <script src="{{ STATIC_URL }}js/jquery-blockui.js" type="text/javascript"></script>
+    <!--<script src="{{ STATIC_URL }}js/jquery-blockui.js" type="text/javascript"></script>-->
     <!-- Include the hoverIntent plug-in -->
     <script src="{{ STATIC_URL }}js/jquery-hoverIntent.js" type="text/javascript"></script>
     <!-- Include the waypoints plug-in -->
@@ -37,7 +39,9 @@
     <!-- Include the imagesLoaded plug-in -->
     <script src="{{ STATIC_URL }}js/jquery-imagesloaded.js" type="text/javascript"></script>
     <!-- Include the wookmark plug-in -->
-    <script src="{{ STATIC_URL }}js/jquery-wookmark.js" type="text/javascript"></script>
+    <script src="{{ STATIC_URL }}js/jquery-wookmark.min.js" type="text/javascript"></script>
+    <!-- Include the SimplePagination Plug-in -->
+    <script src="{{ STATIC_URL }}js/jquery-simplePagination.js" type="text/javascript"></script>
 
     {% block js %}
     <!-- Page-specific JS goes in this block -->
@@ -69,10 +73,10 @@
             <div id ="prdp_buttons">
 
               {% csrf_token %}
-              <a class = "prdp_eachbutton"  title="Yes, this is a perfect match" style="float:left;cursor:pointer;margin-left:25%" onclick="post_user_response('yes')"> 
+              <a class = "epm_button"  title="Yes, this is a perfect match" style="float:left;cursor:pointer;margin-left:25%" onclick="post_user_response('yes')"> 
                 Yes, this is a perfect match
               </a>
-              <a class = "prdp_eachbutton" style="float:right;margin-right:25%cursor:pointer;" onclick="post_user_response('no')" >No, I do not agree with this match</a></br>
+              <a class = "epm_button" style="float:right;margin-right:25%cursor:pointer;" onclick="post_user_response('no')" >No, I do not agree with this match</a></br>
             </div>
       
         <!-- PMDP Match Container - contains PMDP Images and Attributes -->
@@ -142,10 +146,10 @@
               {% for worker in voters %}
                 <div id = "pmdp_user_box">
                   <a href= "{% url 'get_UserProfile_page' worker.id %}" title = "{{ worker.user.username }}">
-                    {% if worker.photo %}    
-                      <img src="{{ STATIC_URL }}{{ worker.photo }}" alt = "{{ worker.user.username }}"/>   
+                    {% if worker.img_path %}    
+                      <img src="{{ STATIC_URL }}{{ worker.img_path }}" alt = "{{ worker.user.username }}"/>   
                     {% else %}
-                      <img src="{{ STATIC_URL }}/images/defaults/anonymous.gif" alt = "{{ worker.user.username }}"/>
+                      <img src="{{ STATIC_URL }}/images/userprofile/defaults/anonymous.gif" alt = "{{ worker.user.username }}"/>
                     {% endif %}  
                   </a>
                 </div>

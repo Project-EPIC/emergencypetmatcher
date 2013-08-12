@@ -6,66 +6,65 @@
 {% endblock js %}
 
 {% block head_title %} EPM - Fill out Social Account {% endblock head_title %}
-{% block content_title %} Fill out your social account {% endblock content_title %}
-{% block content_subtitle %} Please give us some information for your social media account so that we can create a full profile for you. {% endblock content_subtitle %}
-
+{% block activity_feed %}{% endblock activity_feed %}
 
 {% block content %}
+<div id="content" style="padding:0px 10px 0px 10px; border:2px solid gray; width:500px; background-color: #E8E8E8">
+  {% block content_title %} <h2>Fill out your social account </h2>{% endblock content_title %}
+  {% block content_subtitle %} <h3>Please give us some information for your social media account so that we can create a full profile for you.</h3> {% endblock content_subtitle %}
 
-<form action="" method="post">
-    {% csrf_token %}
-    <p>
-    	<table border=0 cellpadding=5>
+  {% block messages %}
+  <ul id="messages"> {% for message in messages %} <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li> {% endfor %}</ul>
+  {% endblock messages %}  
+
+  <form enctype="multipart/form-data" action="{% url 'get_social_details' %}" method="POST">
+      {% csrf_token %}
+    	<table cellpadding=5>
     		<tr>
     			<td><label for="id_username">Username:</label></td>
-       			<td><input type="text" name="username" id="username_id" value="{{username}}" /> <font color=red size=+1>*</font></td>
+       		<td><input type="text" name="username" id="username_id" value="{{username}}" /> <font color=red size=+1>*</font></td>
        		</tr>
 	    	<tr>
-	    			<td><label for="email_id">Email:</label></td>
-       				<td><input type="text" name="email" id="email_id" value="{{email}}" /> <font color=red size=+1>*</font></td>             
-       		</tr>
-       		<tr>
-	    			<td><label for="first_name_id">First Name:</label></td>
-       				<td><input type="text" name="first_name" id="first_name_id" value="{{first_name}}" /></td>
-       		</tr>
-       		<tr>
-	    			<td><label for="last_name_id">Last Name:</label></td>
-       				<td><input type="text" name="last_name" id="last_name_id" value="{{last_name}}" /></td>
-       		</tr>
-       		<tr>
-	    			<td><label>Link:</label></td>
-	    			<td><label>{{link}}</label></td>
-       		</tr>
-       		<tr>
-       			<td>Profile Picture:</td>
-            <td><img src='{{pic_url}}' width=200 height=180></img>
-       			    <br/>
-            </td>
-       		</tr>
+	    		<td><label for="email_id">Email:</label></td>
+       		<td><input type="text" name="email" id="email_id" value="{{email}}" /> <font color=red size=+1>*</font></td>             
+       	</tr>
+       	<tr>
+	    		<td><label for="first_name_id">First Name:</label></td>
+       		<td><input type="text" name="first_name" id="first_name_id" value="{{first_name}}" /></td>
+       	</tr>
+       	<tr>
+	    		<td><label for="last_name_id">Last Name:</label></td>
+       		<td><input type="text" name="last_name" id="last_name_id" value="{{last_name}}" /></td>
+       	</tr>
+       	<tr>
+	    		<td><label>Link:</label></td>
+	    		<td><label>{{ link }}</label></td>
+       	</tr>
+       	<tr>
+       		<td>Profile Picture:</td>
+          <td><img src='{{ pic_url }}' width=200 height=200/></td>
+       	</tr>
+        <tr>
+          <td>Date of Birth:</td>
+          <td><input id="id_date_born" type="text"/></td>
+        </tr>
 
-          <tr>
-            <td>Date of Birth:</td>
-            <td><input id="id_date_born" type="text"/></td>
-          </tr>
+        <!-- T&C -->
+        <tr>
+          <div style="padding-bottom:15px; padding-top:15px; width:300px;">
+            <input id="id_tc_check" type="checkbox"/>
+            <a id="id_tc_link" name="Terms and Conditions" href= "#" > I accept the terms and conditions.</a> 
+          </div>
+        </tr>
 
-          <tr><td colspan=2>  
-            <div style="padding-bottom:15px; padding-top:15px; width:300px;">
-              <input id="id_tc_check" type="checkbox"/>
-              <a id="id_tc_link" name="Terms and Conditions" href= "#" > I accept the terms and conditions.</a> 
-            </div>
-          </td></tr>
-
-          <tr>
-            <td></td>
-            <td>
-              <input id="id_register_button" type="submit" value="Submit" disabled/>
-              <input id="id_cancel_button" type="submit" formaction="{% url 'home' %}" value="Cancel">
-            </td>
-          </tr> 
-        </table>
-        </br>
-    </p>    
-</form>
-
+        <tr>
+          <td>
+            <input id="id_register_button" type="submit" value="Submit" disabled/>
+            <input id="id_cancel_button" type="submit" formaction="{% url 'home' %}" value="Cancel">
+          </td>
+        </tr> 
+      </table>
+  </form>
+</div>
 {% endblock content %}
 

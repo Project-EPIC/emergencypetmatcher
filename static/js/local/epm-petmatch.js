@@ -1,6 +1,5 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
-
     //Variables to control for upvoting and downvoting and for readability.
     var downvote_button = $("#pmdp_downvote_button");
     var upvote_button = $("#pmdp_upvote_button");
@@ -29,6 +28,7 @@ $(document).ready(function(){
 
       //If the button hasn't been pushed yet.
       if ($(this).attr("src") != DOWNVOTE_BUTTON_INACTIVE_LINK){
+
         //Perform the vote.
         if (vote (DOWNVOTE) == true){
           $(this).attr("src", DOWNVOTE_BUTTON_INACTIVE_LINK);
@@ -46,6 +46,7 @@ $(document).ready(function(){
 
       //If the button hasn't been pushed yet.
       if ($(this).attr("src") != UPVOTE_BUTTON_INACTIVE_LINK){
+
         //Perform the vote.
         if (vote (UPVOTE) == true){
           $(this).attr("src", UPVOTE_BUTTON_INACTIVE_LINK);
@@ -67,12 +68,29 @@ $(document).ready(function(){
       share_on_twitter(PETMATCH_URL, PETMATCH_IMAGE, PETMATCH_TITLE, PETMATCH_SUMMARY);
     });
 
+    /***** Start things off. *****/
+
     //Retrieve and display the lost pet report fields
-    display_PetReport_fields(LOST_PETREPORT, $(".lost_pmdpfields"));
+    display_PetReport_fields(LOST_PETREPORT, $("#lost_prdpfields"));
 
     //Retrieve and display the found pet report fields
-    display_PetReport_fields(FOUND_PETREPORT, $(".found_pmdpfields"));
+    display_PetReport_fields(FOUND_PETREPORT, $("#found_prdpfields"));
+
+    //Use the Zoom plugin to zoom Lost pet pic.
+    $("#lost_pet_pic_wrapper img").on("mouseover", function(){
+      $(this).parent().zoom();
+      $("#lost_pet_pic_wrapper img:not(:first)").remove();
+    });    
+
+    //Use the Zoom plugin to zoom Found pet pic.
+    $("#found_pet_pic_wrapper img").on("mouseover", function(){
+      $(this).parent().zoom();
+      $("#found_pet_pic_wrapper img:not(:first)").remove();
+    });
+
 });
+
+/******************************* Utility functions *******************************************/
 
 //The voting AJAX POST call. Requires a string with either "up" or "down".
 function vote (user_vote){

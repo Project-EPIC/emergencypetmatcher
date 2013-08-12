@@ -5,24 +5,33 @@ from home.models import *
 #from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth import views as auth_views
 
-
 urlpatterns = patterns('home.views',
 
 	url(r'^$', 'home', name='home'),
-	url(r'^get_activities_json$', 'get_activities_json', name="get_activities_json"),	
+	url(r'^get_activities_json$', 'get_activities_json', name="get_activities_json"),
+	url (r'^get_PetReport/(?P<petreport_id>\d+)/$', 'get_PetReport', name="get_PetReport"),	
+	url (r'^get_PetReports/(?P<page>\d+)/$', 'get_PetReports', name="get_PetReports"),	
+	url (r'^get_PetMatches/(?P<page>\d+)/$', 'get_PetMatches', name="get_PetMatches"),	
+	url (r'^get_bookmarks/(?P<page>\d+)/$','get_bookmarks',name='get_bookmarks'),
 	url(r'^login$', 'login_User', name='login_User'),
 	url(r'^logout$', 'logout_User', name='logout_User'),
+	url (r'^tc$','disp_TC',name='disp_TC'),
+	url (r'^tc_18$','disp_TC_18',name='disp_TC_18'),	
 	url(r'^UserProfile/(?P<userprofile_id>\d+)/$', 'get_UserProfile_page', name='get_UserProfile_page'),
 	url(r'^UserProfile/message_UserProfile$', "message_UserProfile", name="message_UserProfile"),
+	url (r'^UserProfile/follow$','follow_UserProfile',name='follow_UserProfile'),
+	url (r'^UserProfile/unfollow$','unfollow_UserProfile',name='unfollow_UserProfile'),	
+	url(r'^UserProfile/edituserprofile/update_User_info$', "update_User_info", name="update_User_info"),
+	url(r'^UserProfile/edituserprofile/update_User_password$', "update_User_password", name="update_User_password"),	
+	url(r'^UserProfile/edituserprofile', 'editUserProfile_page', name='editUserProfile_page'),	
 	url(r'^about$', 'about', name='about'),
+
+	#Django-Social-Auth
 	url(r'^social_auth_login/([a-z]+)$', 'social_auth_login', name='users_social_auth_login'),
 	url(r'^get_social_details/$', 'get_social_details', name='get_social_details'),
-	url (r'^follow$','follow_UserProfile',name='follow_UserProfile'),
-	url (r'^unfollow$','unfollow_UserProfile',name='unfollow_UserProfile'),
+	url (r'^social_auth_disallowed', 'social_auth_disallowed', name='social_auth_disallowed'),
 	url(r'^', include('social_auth.urls')),
-	url(r'^edituserprofile', 'editUserProfile_page', name='editUserProfile_page'),
-	url (r'^tc$','disp_TC',name='disp_TC'),
-	url (r'^tc_18$','disp_TC_18',name='disp_TC_18'),
+
 
 	#registration-related URLs that have been customized.
 	url(r'^activate/complete/$', "registration_activation_complete", name='registration_activation_complete'),
@@ -35,7 +44,6 @@ urlpatterns = patterns('home.views',
 	url(r'^register/closed/$', "registration_disallowed", name='registration_disallowed'),
  	url(r'^accounts/register/$', "registration_register",  name='registration_register' ),
  	url(r'^accounts/activate/complete/$', "registration_activation_complete"),
-	url (r'^social_auth_disallowed', 'social_auth_disallowed', name='social_auth_disallowed'),
 	url (r'^accounts/', include('registration.backends.default.urls')),
 
 	#email verification URL

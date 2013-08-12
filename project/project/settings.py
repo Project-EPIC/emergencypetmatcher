@@ -28,13 +28,7 @@ NOSQL_DATABASES = {
         "HOST":"localhost",
         'PORT':27017,
         'MAX_POOL_SIZE':10
-    },
-    'mongodb_test': {
-        'NAME':'epm_db_test',
-        "HOST":"localhost",
-        'PORT':27017,
-        'MAX_POOL_SIZE':10
-    }    
+    }
 }
 
 # Local time zone for this installation. Choices can be found here:
@@ -189,9 +183,6 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
 EMAIL_HOST_PASSWORD = '3m3rgEncY'
 
-
-
-
 AUTHENTICATION_BACKENDS = (
 
     'django.contrib.auth.backends.ModelBackend',
@@ -199,13 +190,10 @@ AUTHENTICATION_BACKENDS = (
     'social_auth.backends.facebook.FacebookBackend',
 )
 
-
 SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter', 'facebook',)
-
 
 #DOMAIN_URL = 'http://www.emergencypetmatcher.com/'
 DOMAIN_URL = 'http://epm.cs.colorado.edu/'
-
 
 try:
     from social_auth_settings import *

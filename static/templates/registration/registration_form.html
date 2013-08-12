@@ -11,17 +11,25 @@
 {% endblock js %}
 
 {% block head_title %} EPM - Register for an Account{% endblock head_title %}
-{% block content_title %} Register for an Account {% endblock content_title %}
-{% block content_subtitle %} Please register below with username, email, and password. {% endblock content_subtitle %}
+{% block activity_feed %}{% endblock activity_feed %}
 
 {% block content %}
-
+<div id="content" style="padding:0px 10px 0px 10px; border:2px solid gray; width:600px; background-color: #E8E8E8">
 	{% if form.errors %}<p><strong>{{ form.errors }}</strong></p>{% endif %}
-	
-	<div class="form_container">
-		<form  method = "post">
+	{% block messages %}
+	<ul id="messages">
+		{% for message in messages %}
+	    <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
+	    {% endfor %}
+	</ul>
+	{% endblock messages %}
+		
+	{% block content_title %} <h2>Register for an Account </h2>{% endblock content_title %}
+	{% block content_subtitle %} <h3>Please register below with username, email, and password. </h3>{% endblock content_subtitle %}
+	<div>
+		<form method = "post" style="padding:5px; width:350px;" enctype="multipart/form-data">
 			{% csrf_token %}
-			<table border=1 bordercolor='#C2C2C2' cellpadding='10'>
+			<table>
 				{% for field in form %}
 				<tr>
 			    	<td><strong>{{ field.label_tag }} </strong></td>
@@ -31,29 +39,38 @@
 		
 				<tr>
 					<td><strong>Date of Birth</strong></td>
-					<td><input id="id_date_born" type="text"/>
-					</td>
+					<td><input id="id_date_born" type="text"/></td>
 				</tr>
+
+				<!-- File Chooser 
+				<tr>
+					<td><strong>Profile Picture </strong></td>
+					<td><input type="file" accept=".jpg, .png, .tiff"/></td>
+				</tr> -->
 
 				<tr><td colspan=2>	
 				<div style="padding-bottom:15px; padding-top:15px; width:300px;">
 					<input id="id_tc_check" type="checkbox"/>
-					<a id="id_tc_link" name="Terms and Conditions" href= "#" > I accept the terms and conditions.</a>	
+					<a id="id_tc_link" name="Terms and Conditions" href= "#" >I accept the terms and conditions.</a>	
 				</div>
 				</td></tr>
-
 			</table>
 
 			<div style="padding-bottom:10px; padding-top:15px; width:300px;">
 	 		<input id="id_register_button" type="submit" formaction="{% url 'registration_register' %}" value="Register" disabled/>
 	 		<input id="id_cancel_button" type="submit" formaction="{% url 'home' %}" value="Cancel">
 	 		</div>
-		</form>
-
-			
+		</form>	
 	</div>
-	<p/>
-	Twitter: <a rel="nofollow" href={% url 'socialauth_begin' 'twitter' %}>Enter using Twitter</a><br/>
-	Facebook: <a rel="nofollow" href={% url 'socialauth_begin' 'facebook' %}>Enter using Facebook</a><br/>
 
+	<!-- Social Login Buttons -->
+	<div style="margin-top:10px; margin-bottom:10px;">
+		<img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22"></img>
+		<a rel="nofollow" href="{% url 'socialauth_begin' 'twitter' %}">Enter using Twitter</a>
+	</div>
+	<div style="margin-top:10px; margin-bottom:10px;">
+		<img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22"></img>
+		<a rel="nofollow" href="{% url 'socialauth_begin' 'facebook' %}">Enter using Facebook</a><br/>
+	</div>
+</div>
 {% endblock content %}

@@ -24,10 +24,10 @@ class ModelTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		delete_all()
+		delete_all(leave_Users=False)
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	#CRUD Tests for: UserProfile + User		
  	def test_save_User(self):
@@ -423,11 +423,11 @@ class LoginTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	def test_login_Users_successfully(self):
 		print_testing_name("test_login_Users_successfully")
@@ -596,11 +596,11 @@ class UserProfileTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	def test_render_UserProfile_page(self):
 		print_testing_name("test_render_UserProfile_page")
@@ -695,11 +695,11 @@ class EditUserProfileTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		delete_all()
+		delete_all(leave_Users=False)
 	
 	def test_editUserProfile_savePassword(self):
 		print_testing_name("test_editUserProfile_savePassword")
@@ -919,11 +919,11 @@ class LoggerTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	def test_create_activity_log(self):
 		print_testing_name("test_create_activity_log")
@@ -976,7 +976,7 @@ class LoggerTesting (unittest.TestCase):
 			print_test_msg ("%s logs onto %s..." % (user, client))
 
 			#We expect the system not to throw errors but to catch them.
-			activities = logger.get_recent_activites_from_log(userprofile=user.userprofile)
+			activities = logger.get_recent_activities_from_log(userprofile=user.userprofile)
 			activities += logger.get_bookmark_activities(userprofile=user.userprofile)
 			print_test_msg("%s has an activity feed list of size [%d]" % (user, len(activities)))
 			self.assertTrue(logger.log_exists(user.userprofile))
@@ -1396,7 +1396,7 @@ class LoggerTesting (unittest.TestCase):
 			activities = []
 			random_activity_range = random.randrange(0, len(UserProfile.objects.all()))
 			for following in user.get_profile().following.all().order_by("?")[:random_activity_range]:
-				log = logger.get_recent_activites_from_log(following)
+				log = logger.get_recent_activities_from_log(following)
 				if log != None:
 					activities.append(log)
 
@@ -1443,7 +1443,7 @@ class LoggerTesting (unittest.TestCase):
 			activities = []
 			max_num_activities = ACTIVITY_FEED_LENGTH
 			for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:max_num_activities]:
-				activities += logger.get_recent_activites_from_log(userprofile=userprof, num_activities=1)			
+				activities += logger.get_recent_activities_from_log(userprofile=userprof, num_activities=1)			
 			num_activities = len(activities)
 			print_test_msg("The anonymous user got an activity feed list of size %d when the maximum length = %d" % (num_activities, max_num_activities))
 
@@ -1517,14 +1517,14 @@ class LoggerTesting (unittest.TestCase):
 			activities = []
 
 			# Get all activities from this UserProfile's log file that show who has followed this UserProfile 
-			activities += logger.get_recent_activites_from_log(userprofile=user.get_profile(), current_userprofile=user.get_profile(), since_date=user.get_profile().last_logout, activity=ACTIVITY_FOLLOWER)
+			activities += logger.get_recent_activities_from_log(userprofile=user.get_profile(), current_userprofile=user.get_profile(), since_date=user.get_profile().last_logout, activity=ACTIVITY_FOLLOWER)
 
 			# Get all activities that associated to the PetReports I bookmarked
 			activities += logger.get_bookmark_activities(userprofile=user.get_profile(), since_date=user.get_profile().last_logout)
 
             # Get all activities that are associated with the UserProfiles I follow
 			for following in user.get_profile().following.all():
-				activities += logger.get_recent_activites_from_log(userprofile=following, current_userprofile=user.get_profile(), since_date=user.get_profile().last_logout)
+				activities += logger.get_recent_activities_from_log(userprofile=following, current_userprofile=user.get_profile(), since_date=user.get_profile().last_logout)
 
 			num_following = len(user.get_profile().following.all())
 			num_activities = len(activities)
@@ -1545,11 +1545,11 @@ class ReputationTesting(unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	def test_reputation_points_for_upvoting_PetMatch (self):
 		print_testing_name("test_reputation_points_for_upvoting_PetMatch")
@@ -2273,11 +2273,11 @@ class HomePageTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		delete_all()	
+		delete_all(leave_Users=False)	
 
 	def test_homepage_newlyadded(self):
 		print_testing_name("test_homepage_newlyadded")
@@ -2318,11 +2318,11 @@ class RegistrationTesting (unittest.TestCase):
 
 	#Get rid of all objects in the QuerySet.
 	def setUp(self):
-		delete_all()
+		delete_all(leave_Users=False)
 
 	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
-		delete_all()	
+		delete_all(leave_Users=False)	
 
 	def test_duplicate_email_register_User (self):
 		print_testing_name("test_duplicate_email_register_User")

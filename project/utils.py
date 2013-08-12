@@ -5,6 +5,8 @@ from home.models import *
 from constants import *
 from registration.models import RegistrationProfile
 from social_auth.models import UserSocialAuth
+from django.db import IntegrityError
+from PIL import Image
 import random, string, sys, time, datetime, lipsum, traceback
 
 '''===================================================================================
@@ -84,6 +86,16 @@ def simplify_PetReport_dict(petreport):
 	modeldict ["proposed_by_username"] = petreport.proposed_by.user.username		
 	return modeldict
 
+
+#Given an image path, create an Image and return it, catching and ignoring any errors.
+def open_image(img_path):
+	try:
+		img = Image.open(img_path)
+		img.load()
+	except IOError:
+		pass
+	return img
+
 #generate_random_date(): Referenced from: http://stackoverflow.com/questions/553303/generate-a-random-date-between-two-other-dates
 def generate_random_date(start, end, format, prop):
     stime = time.mktime(time.strptime(start, format))
@@ -97,47 +109,51 @@ def performance_report(total_time):
 	print '\tAVG Time Taken for a Single Test: %s sec\n' % (total_time/NUMBER_OF_TESTS)
 
 #Delete all model data
-def delete_all(leave_users = False, only_test_users=True):
+def delete_all(leave_Users = True):
 	PetMatch.objects.all().delete()
 	PetReport.objects.all().delete()
-	Chat.objects.all().delete()
-	ChatLine.objects.all().delete()
+
+	#Delete uploaded images.
+	delete_PetReport_images(target_dir=PETREPORT_IMAGES_DIRECTORY)
+	delete_PetReport_images(target_dir=PETREPORT_THUMBNAILS_DIRECTORY)
+	delete_UserProfile_images(target_dir=USERPROFILE_IMAGES_DIRECTORY)
+	delete_UserProfile_images(target_dir=USERPROFILE_THUMBNAILS_DIRECTORY)
+
 	#Delete Users if you want to.
-	if leave_users == False:
-		if only_test_users == True:
-			#Get the users whose userprofile.is_test attribute is set to TRUE
-			test_users = User.objects.filter(userprofile__is_test=True)
-			test_users.all().delete()
-		else:
-			User.objects.all().delete()
-			RegistrationProfile.objects.all().delete()
-			SocialAuth.objects.all().delete()
+	if leave_Users == False:
+		User.objects.all().delete()
+		RegistrationProfile.objects.all().delete()
+		UserSocialAuth.objects.all().delete()
 
 #Deletes all PetReport images in the static/images/petreport_images folder
-def delete_PetReport_images(from_list=None):
-	for the_file in os.listdir(PETREPORT_IMAGES_DIRECTORY):
-		file_path = os.path.join(PETREPORT_IMAGES_DIRECTORY, the_file)
+def delete_PetReport_images(target_dir=PETREPORT_IMAGES_DIRECTORY, from_list=None):
+	for the_file in os.listdir(target_dir):
+		file_path = os.path.join(target_dir, the_file)
 		try:
 			if from_list != None:
 				if os.path.isfile(file_path) and the_file in from_list:
 					os.unlink(file_path)
-					print "[INFO]: Removed %s" % the_file
+					print_info_msg ("Removed %s" % the_file)
 			else:
 				if os.path.isfile(file_path):
 					os.unlink(file_path)
 
 		except Exception as e:
-			print "[ERROR]: Problem in delete_PetReport_images(): {%s}" % e
+			print_error_msg ("Problem in delete_PetReport_images(): {%s}" % e)
 			return False
 
 	if from_list != None:
-		print "[OK]: Specified Files in '%s' are now deleted." % PETREPORT_IMAGES_DIRECTORY
+		print_success_msg ("Specified Files in '%s' are now deleted." % target_dir)
 	else:
-		print "[OK]: All Files in '%s' are now deleted." % PETREPORT_IMAGES_DIRECTORY
+		print_success_msg("All Files in '%s' are now deleted." % target_dir)
+
+#Overloaded function for deleting images for UserProfile Images Directory.
+def delete_UserProfile_images(target_dir=USERPROFILE_IMAGES_DIRECTORY, from_list=None):
+	delete_PetReport_images(target_dir=target_dir, from_list=from_list)
 
 
 #Create Random Object for: User
-def create_random_User(i, pretty_name=True, test_user=True):
+def create_random_User(i, pretty_name=True):
 	if pretty_name == True:
 		username = random.choice(USERNAMES) + str(i)
 	else:
@@ -159,7 +175,7 @@ def create_random_User(i, pretty_name=True, test_user=True):
 		print_error_msg (str(e.message))
 
 	userprofile = user.get_profile()
-	userprofile.set_activity_log(is_test=test_user)
+	userprofile.set_activity_log()
 	return (user, password)
 
 #returns a random list of UserProfiles
@@ -201,7 +217,7 @@ def create_random_bookmark_list (userprofile, num_bookmark=None):
 	return userprofile
 
 #Create Random Object for: PetReport
-def create_random_PetReport(user=None, status=None, pet_type=None):
+def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 
 	#Bias the distribution towards (in order): [Dog, Cat, Bird, Horse, Rabbit, Snake, Turtle]
 	if pet_type == None:
@@ -262,59 +278,34 @@ def create_random_PetReport(user=None, status=None, pet_type=None):
 		load_PetReport_sample_images()
 
 		if pr.pet_type == PETREPORT_PET_TYPE_DOG:
-			pr.img_path.name = random.choice(PETREPORT_SAMPLE_DOG_IMAGES)
+			pr.img_path = pr.thumb_path = random.choice(PETREPORT_SAMPLE_DOG_IMAGES)
 		elif pr.pet_type == PETREPORT_PET_TYPE_CAT:
-			pr.img_path.name = random.choice(PETREPORT_SAMPLE_CAT_IMAGES)
+			pr.img_path = pr.thumb_path = random.choice(PETREPORT_SAMPLE_CAT_IMAGES)
 		elif pr.pet_type == PETREPORT_PET_TYPE_BIRD:
-			pr.img_path.name = random.choice(PETREPORT_SAMPLE_BIRD_IMAGES)
+			pr.img_path = pr.thumb_path = random.choice(PETREPORT_SAMPLE_BIRD_IMAGES)
 		elif pr.pet_type == PETREPORT_PET_TYPE_HORSE:
-			pr.img_path.name = random.choice(PETREPORT_SAMPLE_HORSE_IMAGES)			
+			pr.img_path = pr.thumb_path = random.choice(PETREPORT_SAMPLE_HORSE_IMAGES)			
 		elif pr.pet_type == PETREPORT_PET_TYPE_RABBIT:
-			pr.img_path.name = random.choice(PETREPORT_SAMPLE_RABBIT_IMAGES)
+			pr.img_path = pr.thumb_path = random.choice(PETREPORT_SAMPLE_RABBIT_IMAGES)
 		elif pr.pet_type == PETREPORT_PET_TYPE_SNAKE:
-			pr.img_path.name = random.choice(PETREPORT_SAMPLE_SNAKE_IMAGES)
+			pr.img_path = pr.thumb_path = random.choice(PETREPORT_SAMPLE_SNAKE_IMAGES)
 		elif pr.pet_type == PETREPORT_PET_TYPE_TURTLE:
-			pr.img_path.name = random.choice(PETREPORT_SAMPLE_TURTLE_IMAGES)
+			pr.img_path = pr.thumb_path = random.choice(PETREPORT_SAMPLE_TURTLE_IMAGES)
 		else:
-			pr.img_path.name = "images/defaults/other_silhouette.jpg"
+			pr.img_path = pr.thumb_path = "images/userprofile/defaults/other_silhouette.jpg"
 
 	else:
-		if pr.pet_type == PETREPORT_PET_TYPE_DOG:
-			pr.img_path.name = "images/defaults/dog_silhouette.jpg"
-		elif pr.pet_type == PETREPORT_PET_TYPE_CAT:
-			pr.img_path.name = "images/defaults/cat_silhouette.jpg"
-		elif pr.pet_type == PETREPORT_PET_TYPE_BIRD:
-			pr.img_path.name = "images/defaults/bird_silhouette.jpg"
-		elif pr.pet_type == PETREPORT_PET_TYPE_HORSE:
-			pr.img_path.name = "images/defaults/horse_silhouette.jpg"
-		elif pr.pet_type == PETREPORT_PET_TYPE_RABBIT:
-			pr.img_path.name = "images/defaults/rabbit_silhouette.jpg"
-		elif pr.pet_type == PETREPORT_PET_TYPE_SNAKE:
-			pr.img_path.name = "images/defaults/snake_silhouette.jpg"
-		elif pr.pet_type == PETREPORT_PET_TYPE_TURTLE:
-			pr.img_path.name = "images/defaults/turtle_silhouette.jpg"
-		else:
-			pr.img_path.name = "images/defaults/other_silhouette.jpg"
+		#Set the img and thumb paths.
+		pr.set_images (None, save=False)
 
-	#Need to save.
-	pr.save()
-	pr.workers = create_random_Userlist()
-	logger.log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr, )
-	return pr
-
-#Create Random Object for: Chat
-def create_random_Chat (pr):
-	chat = Chat (pet_report = pr)
-	chat.save()
-	return chat
-
-#Create Random Object for: ChatLine
-def create_random_ChatLine(user, chat):
-	chatline = ChatLine(userprofile = user.get_profile(), chat = chat)
-	chatline.text = generate_string(CHATLINE_TEXT_LENGTH)
-	chatline.save()
-	return chatline
-
+	#Need to save (most of the time).
+	if save == False:
+		return pr
+	else:
+		pr.save()
+		pr.workers = create_random_Userlist()
+		logger.log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr, )
+		return pr
 
 #Find all potential PetMatch PetReport (Lost, Found) pairs and return a list of them.
 def get_potential_PetMatch_PetReport_pairs(pet_type=None):
@@ -340,7 +331,7 @@ def get_potential_PetMatch_PetReport_pairs(pet_type=None):
 
 
 #Create Random Object for: PetMatch
-def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None, threshold_bias = False):
+def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None, threshold_bias=False):
 	#If the lost or found pet (or both) wasn't supplied, then search for potential PetMatch PetReport pairs
 	if lost_pet == None or found_pet == None:
 
@@ -386,7 +377,7 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 				up_votes = create_random_Userlist(num_users=random.randint(0, user_count))
 				down_votes = create_random_Userlist(num_users=random.randint(0, user_count))
 				petmatch.down_votes = set(down_votes) - set(up_votes)
-				petmatch.up_votes = set(up_votes) - set(down_votes)
+				#petmatch.up_votes = set(up_votes) - set(down_votes)
 
 			logger.log_activity(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=petmatch, )
 		
@@ -426,7 +417,7 @@ def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_O
 
 	#Firstly, delete everything existing.
 	if delete_all_objects == True:
-		delete_all(only_test_users=True)
+		delete_all(leave_Users=False)
 
 	#Need to setup the object lists. The users list encapsulates tuples of <user, password>
 	users = [(None, None) for i in range (num_users)]

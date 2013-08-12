@@ -3,7 +3,8 @@ from home.models import UserProfile, PetReport, PetMatch
 from django.utils import timezone 
 from django.utils.dateparse import parse_datetime
 from datetime import datetime
-import os, sys, time
+from pprint import pprint
+import os, sys, time, re
 
 '''===================================================================================
 [logger.py]: Logging Functionality for the EPM system
@@ -14,11 +15,7 @@ def log_activity(activity, userprofile, userprofile2=None, petreport=None, petma
     assert isinstance(userprofile, UserProfile)
     #Define the user filename and logger.
     user = userprofile.user
-
-    if userprofile.is_test == True:
-        user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
-    else:
-        user_log_filename = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
+    user_log_filename = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
 
     try:
         logger = open(user_log_filename, "a")
@@ -91,89 +88,122 @@ def log_activity(activity, userprofile, userprofile2=None, petreport=None, petma
         print "[ERROR]: problem in logger.log_activity(%s)." % e
         
 
-''' Helper function for returning an HTML representation for an input activity '''
-def get_activity_HTML(log, userprofile, userprofile2=None, petreport=None, petmatch=None, current_userprofile=None):
-    # print "in get_activity_HTML %s" % log
-    
-    log = log.strip()
-    html = "<a href='" + URL_USERPROFILE + str(userprofile.id) + "/'>" + userprofile.user.username + "</a> "
+''' Helper function for returning a dictionary for an input activity '''
+def get_activity_payload(logline, userprofile, current_userprofile, userprofile2=None, petreport=None, petmatch=None):
+    assert isinstance(userprofile, UserProfile)
+    logline = logline.strip()
 
-    if ACTIVITY_ACCOUNT_CREATED in log:
-        assert isinstance(userprofile, UserProfile)
-        html += "has just joined EPM!"
+    # Every line has an ID to denote what is being identified (PetMatch, UserProfile, etc).
+    identifier = re.search("\{(\d*)\}", logline)
+    identifier = int(identifier.group(1))    
 
-    elif ACTIVITY_PETREPORT_SUBMITTED in log:
+    #Grab the activity enum.
+    log_activity = re.search("\[(.*)\]", logline)
+    log_activity = log_activity.group(1)
+    print "ID FOUND: {%d}" % identifier
+    print "ACTIVITY FOUND: {%s}" % log_activity    
+
+    #Form the activity payload.
+    activity = {"userprofile_username":userprofile.user.username, "userprofile_id":str(userprofile.id)}
+
+    #If we have a current_userprofile (i.e. authenticated user)
+    if current_userprofile != None:
+        activity ["current_userprofile_id"] = str(current_userprofile.id)
+
+    #Begin the *switch* structure for activity payload forming.
+    if log_activity == ACTIVITY_ACCOUNT_CREATED:
+        activity ["activity"] = ACTIVITY_ACCOUNT_CREATED
+
+    elif log_activity == ACTIVITY_PETREPORT_SUBMITTED:
+        if petreport == None:
+            petreport = PetReport.objects.get(pk=identifier)
+
         assert isinstance(petreport, PetReport)
+        activity ["activity"] = ACTIVITY_PETREPORT_SUBMITTED
+        activity ["petreport_id"] = str(petreport.id)
+        
         if petreport.pet_name.strip() == "unknown" or petreport.pet_name.strip() == "":
-            html += "submitted a <a class='feedlist_prdp_dialog' href='" + URL_PRDP + str(petreport.id) + "/'>" + "Pet Report with no name.</a>"
+            activity ["petreport_name"] = None
         else:
-            html += "submitted a Pet Report named <a class='prdp_dialog' href= '" + URL_PRDP + str(petreport.id) + "/'>" + petreport.pet_name + "</a>!"
+            activity ["petreport_name"] = petreport.pet_name
 
-    elif ACTIVITY_PETREPORT_ADD_BOOKMARK in log:
+    elif log_activity == ACTIVITY_PETREPORT_ADD_BOOKMARK:
+        if petreport == None:
+            petreport = PetReport.objects.get(pk=identifier)
+
         assert isinstance(petreport, PetReport)
-        if petreport.pet_name.strip() == "unknown" or petreport.pet_name.strip() == "":
-            html += "bookmarked a " + "<a class='prdp_dialog' href= '" + URL_PRDP + str(petreport.id) + "/'>" + "Pet Report </a> with no name."
-        else:
-            html += "bookmarked a Pet Report named <a class='prdp_dialog' href= '" + URL_PRDP + str(petreport.id) + "/'>" + petreport.pet_name + "</a>!"
+        activity ["activity"] = ACTIVITY_PETREPORT_ADD_BOOKMARK
+        activity ["petreport_id"] = str(petreport.id)        
+        activity ["petreport_name"] = petreport.pet_name
 
-    elif ACTIVITY_PETMATCH_PROPOSED in log:
+    elif log_activity == ACTIVITY_PETMATCH_PROPOSED:
+        if petmatch == None:
+            petmatch = PetMatch.objects.get(pk=identifier)
+
         assert isinstance(petmatch, PetMatch)
-        html += "proposed a <a class='pmdp_dialog' href='" + URL_PMDP + str(petmatch.id) + "/'>" + "Pet Match</a> examining two " + petmatch.lost_pet.pet_type + "s!"
+        activity ["activity"] = ACTIVITY_PETMATCH_PROPOSED
+        activity ["petmatch_id"] = str(petmatch.id)
+        activity ["petmatch_type"] = petmatch.lost_pet.pet_type
+        activity ["lostpet_name"] = petmatch.lost_pet.pet_name
+        activity ["foundpet_name"] = petmatch.found_pet.pet_name
 
-    elif ACTIVITY_PETMATCH_PROPOSED_LOST_BOOKMARKED_PETREPORT in log:
-        assert isinstance(petmatch, PetMatch)  
-        assert isinstance(userprofile, UserProfile)
-        html = "Bookmark: <a href='" + URL_USERPROFILE + str(userprofile.id) + "/'>" + userprofile.user.username + "</a> "
-        html += "proposed a <a class='pmdp_dialog' href='" + URL_PMDP + str(petmatch.id) + "/'>" + "Pet Match</a>"
-        html += " for " + petmatch.lost_pet.status + " <a class='prdp_dialog' href= '" + URL_PRDP + str(petmatch.lost_pet.id) + "/'>" + petmatch.lost_pet.pet_name + "</a>." 
+    elif log_activity == ACTIVITY_PETMATCH_PROPOSED_FOR_BOOKMARKED_PETREPORT:
+        if petreport == None:
+            petreport = PetReport.objects.get(pk=identifier)
+        if petmatch == None:
+            petmatch = PetMatch.objects.get(pk=identifier)
 
-    elif ACTIVITY_PETMATCH_PROPOSED_FOUND_BOOKMARKED_PETREPORT in log:
-        assert isinstance(petmatch, PetMatch) 
-        assert isinstance(userprofile, UserProfile) 
-        html = "Bookmark: <a href='" + URL_USERPROFILE + str(userprofile.id) + "/'>" + userprofile.user.username + "</a> "
-        html += "proposed a <a class='pmdp_dialog' href='" + URL_PMDP + str(petmatch.id) + "/'>" + "Pet Match</a> "
-        html += "for " + petmatch.found_pet.status + " <a class='prdp_dialog' href= '" + URL_PRDP + str(petmatch.found_pet.id) + "/'>" + petmatch.found_pet.pet_name + "</a>." 
-
-    elif ACTIVITY_PETMATCH_UPVOTE in log:
         assert isinstance(petmatch, PetMatch)
-        html += "upvoted a <a class='pmdp_dialog' href='" + URL_PMDP + str(petmatch.id) + "/'>" + "Pet Match</a> examining two " + petmatch.lost_pet.pet_type + "s!"
+        assert isinstance(petreport, PetReport)
+        activity ["activity"] = ACTIVITY_PETMATCH_PROPOSED_FOR_BOOKMARKED_PETREPORT
+        activity ["petmatch_id"] = str(petmatch.id)
+        activity ["lostpet_name"] = petmatch.lost_pet.pet_name
+        activity ["foundpet_name"] = petmatch.found_pet.pet_name        
+        activity ["petreport_id"] = str(petreport.id)
+        activity ["petreport_name"] = petreport.pet_name
 
-    elif ACTIVITY_PETMATCH_DOWNVOTE in log:
+    elif log_activity == ACTIVITY_PETMATCH_UPVOTE or log_activity == ACTIVITY_PETMATCH_DOWNVOTE:
+        if petmatch == None:
+            petmatch = PetMatch.objects.get(pk=identifier)
+
         assert isinstance(petmatch, PetMatch)
-        html += "downvoted a <a class='pmdp_dialog' href='" + URL_PMDP + str(petmatch.id) + "/'>" + "Pet Match</a> examining two " + petmatch.lost_pet.pet_type + "s!"
+        activity ["activity"] = "ACTIVITY_PETMATCH_VOTE"
+        activity ["petmatch_id"] = str(petmatch.id)
+        activity ["petmatch_type"] = petmatch.lost_pet.pet_type
+        activity ["lostpet_name"] = petmatch.lost_pet.pet_name
+        activity ["foundpet_name"] = petmatch.found_pet.pet_name        
 
-    elif ACTIVITY_FOLLOWING in log:
-        assert isinstance(userprofile, UserProfile)
+    elif log_activity == ACTIVITY_FOLLOWING:
+        if userprofile2 == None:
+            userprofile2 = UserProfile.objects.get(pk=identifier)
+
         assert isinstance(userprofile2, UserProfile)
-        if userprofile2 == current_userprofile:
-            html = ""
-        else:
-            html += "has followed <a href='" + URL_USERPROFILE + str(userprofile2.id) + "/'>" + userprofile2.user.username + "</a> "
+        activity ["activity"] = ACTIVITY_FOLLOWING
+        activity ["userprofile2_id"] = str(userprofile2.id)
+        activity ["userprofile2_username"] = userprofile2.user.username
 
-    elif ACTIVITY_FOLLOWER in log:
-        assert isinstance(userprofile, UserProfile)
+    elif log_activity == ACTIVITY_FOLLOWER:
+        if userprofile2 == None:
+            userprofile2 = UserProfile.objects.get(pk=identifier)
+
         assert isinstance(userprofile2, UserProfile)
-        # If a user has followed the same current UserProfile, use the pronoun 'you'
-        if userprofile == current_userprofile:
-            html = "<a href='" + URL_USERPROFILE + str(userprofile2.id) + "/'>" + userprofile2.user.username + "</a> has followed you!"
-        # If a user has been followed by the same current UserProfile, no need to show this information
-        elif userprofile2 == current_userprofile:
-            html = ""
-        else:
-            html += "has been followed by <a href='" + URL_USERPROFILE + str(userprofile2.id) + "/'>" + userprofile2.user.username + "</a> "
+        activity ["activity"] = ACTIVITY_FOLLOWER
+        activity ["userprofile2_id"] = str(userprofile2.id)
+        activity ["userprofile2_username"] = userprofile2.user.username
 
-    return html
+    else:
+        return None #We don't want to return payloads for some activities (e.g. ACTIVITY_LOGIN).
+        
+    return activity
 
 
 '''Helper function to get the most recent activity from an input UserProfile and (optionally) activity type.'''
-def get_recent_activites_from_log(userprofile, current_userprofile=None, since_date=None, num_activities=100, activity=None):
-
+def get_recent_activities_from_log(userprofile, current_userprofile, since_date=None, num_activities=100, activity=None):
     # userprofile: the userprofile whose log file is read to get recent activiy feeds
     # current_userprofile: the authenticated user who gets the activity feeds
     # since_date: used to get all log activities that happened before that date 
     # num_activities: used to get a number of activites not more than this number
     # activity: used to decide about one type of activity and ignore the other 
-
     assert isinstance(userprofile, UserProfile)
 
     if current_userprofile != None:
@@ -181,11 +211,7 @@ def get_recent_activites_from_log(userprofile, current_userprofile=None, since_d
 
     # Define the user filename and logger.
     user = userprofile.user
-
-    if userprofile.is_test == True:
-        user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
-    else:
-        user_log_filename = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
+    user_log_filename = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
 
     # Initialize the activity list
     activities = [] 
@@ -194,26 +220,21 @@ def get_recent_activites_from_log(userprofile, current_userprofile=None, since_d
     #Catch the unlikely error that the log file does not exist.
     try:
         with open(user_log_filename, 'r') as logger:
-
             reversed_activities = iter(reversed(logger.readlines()))
             petreport = None
             petmatch = None
             userprofile2 = None
             num_log = 0
      
+            # Reference: http://docs.python.org/library/time.html#time.strptime
+            # http://agiliq.com/blog/2009/02/understanding-datetime-tzinfo-timedelta-amp-timezo/     
             if since_date == None:
                 since_date = datetime.strptime("1/1/1900", '%m/%d/%Y')
             else: 
                 since_date = datetime.strptime(str(since_date)[:19], '%Y-%m-%d %H:%M:%S')     
-            # Reference: http://docs.python.org/library/time.html#time.strptime
-            # http://agiliq.com/blog/2009/02/understanding-datetime-tzinfo-timedelta-amp-timezo/
      
             # Iterate through the log file.
             for line in reversed_activities:
-
-                # Before we do any work, check if the activity does not exist in this line.
-                if (activity != None) and (activity not in line):
-                    continue  
 
                 # Get the log date from each line in the log file
                 log_date = datetime.strptime(line[:24], '%a %b %d %H:%M:%S %Y')
@@ -223,61 +244,20 @@ def get_recent_activites_from_log(userprofile, current_userprofile=None, since_d
                 # Break the loop and close the log file
                 if (log_date < since_date) or (num_log >= num_activities):
                     break
-      
-                # Every line has an ID to denote what is being identified (PetMatch, UserProfile, etc).
-                identifier = line.split("ID")[1].replace('}','').replace('{','')   
 
-                #Capture unexpected objects that don't exist in a try-except block.
-                try:
+                # Before we do any work, check if the activity does not exist in this line.
+                if (activity != None) and (activity not in line):
+                    continue  
 
-                    if ACTIVITY_ACCOUNT_CREATED in line:
-                        recent_log = line
-                        # print "recent_log: %s" % recent_log
-                    elif ACTIVITY_PETREPORT_SUBMITTED in line:
-                        petreport = PetReport.objects.get(pk=int(identifier))
-                        recent_log = line     
-                        # print "recent_log: %s" % recent_log
-                    elif ACTIVITY_PETREPORT_ADD_BOOKMARK in line:
-                        petreport = PetReport.objects.get(pk=int(identifier))
-                        recent_log = line                    
-                        # print "recent_log: %s" % recent_log
-                    elif ACTIVITY_PETMATCH_PROPOSED in line:
-                        petmatch = PetMatch.objects.get(pk=int(identifier))
-                        recent_log = line                    
-                        # print "recent_log: %s" % recent_log
-                    elif ACTIVITY_PETMATCH_UPVOTE in line:
-                        petmatch = PetMatch.objects.get(pk=int(identifier))
-                        recent_log = line                    
-                        # print "recent_log: %s" % recent_log
-                    elif ACTIVITY_PETMATCH_DOWNVOTE in line:
-                        petmatch = PetMatch.objects.get(pk=int(identifier))
-                        recent_log = line  
-                        # print "recent_log: %s" % recent_log
-                    elif ACTIVITY_FOLLOWING in line:
-                        userprofile2 = UserProfile.objects.get(pk=int(identifier))
-                        recent_log = line 
-                        # print "recent_log: %s" % recent_log
-                    elif ACTIVITY_FOLLOWER in line:
-                        userprofile2 = UserProfile.objects.get(pk=int(identifier))
-                        recent_log = line 
-                        # print "recent_log: %s" % recent_log
-                    else:
-                        continue
+                #Grab the activity payload and ship it off to the receiver.
+                feed = get_activity_payload(line, userprofile, current_userprofile=current_userprofile, userprofile2=userprofile2, petreport=petreport, petmatch=petmatch)
+                num_log = num_log + 1
 
-                    num_log = num_log + 1
-
-                except Exception as e:
-                    print "[ERROR]: Problem in get_recent_activites_from_log(): {%s}" % e
-                    num_log = num_log + 1
-                    continue
-
-                if recent_log != None:   
-                    feed = get_activity_HTML(recent_log, userprofile, userprofile2=userprofile2, petreport=petreport, petmatch=petmatch, current_userprofile=current_userprofile)
-                    if feed not in activities and feed != "":
-                        activities.append([str(log_date),feed])
+                if feed != None:
+                    activities.append((str(log_date), feed))
 
     except IOError as i:
-        print "[ERROR]: Problem in get_recent_activites_from_log(): {%s}" % i
+        print "[ERROR]: Problem in get_recent_activities_from_log(): {%s}" % i
         return activities
 
     logger.close()
@@ -300,11 +280,9 @@ def get_bookmark_activities(userprofile, since_date=None):
 
         if bookmarked_petreport.status == "Lost":
             related_petmatches = bookmarked_petreport.lost_pet_related.all()
-            activity = ACTIVITY_PETMATCH_PROPOSED_LOST_BOOKMARKED_PETREPORT
 
         elif bookmarked_petreport.status == "Found":
             related_petmatches = bookmarked_petreport.found_pet_related.all()
-            activity = ACTIVITY_PETMATCH_PROPOSED_FOUND_BOOKMARKED_PETREPORT
 
         for related_petmatch in related_petmatches:
 
@@ -315,10 +293,14 @@ def get_bookmark_activities(userprofile, since_date=None):
             if proposed_date < since_date or related_petmatch.proposed_by == userprofile:
                 continue
 
+            pprint ("[DEBUG]: bookmarked_petreport: %s" % bookmarked_petreport)
+            pprint ("[DEBUG]: related_petmatch: %s" % related_petmatch)
+
             # Create a temp log
-            log = "%s proposed the PetMatch object with ID{%d}\n" % (related_petmatch.proposed_by.user.username, related_petmatch.id)
-            log = (" [%s]: " + log) % activity
-            activities.append([str(proposed_date),get_activity_HTML(log, related_petmatch.proposed_by, userprofile2=None, petreport=None, petmatch=related_petmatch)])
+            log = "%s proposed the PetMatch object with ID{%d} for bookmarked PetReport object with ID{%d} \n" % (related_petmatch.proposed_by.user.username, related_petmatch.id, bookmarked_petreport.id)
+            log = ("[%s]: " + log) % ACTIVITY_PETMATCH_PROPOSED_FOR_BOOKMARKED_PETREPORT
+            activity_payload = get_activity_payload(log, userprofile=related_petmatch.proposed_by, current_userprofile=related_petmatch.proposed_by, userprofile2=None, petreport=bookmarked_petreport, petmatch=related_petmatch)
+            activities.append([str(proposed_date), activity_payload])
 
     return activities
 
@@ -329,10 +311,7 @@ def activity_has_been_logged(activity, userprofile, userprofile2=None, petreport
 
     #Define the user filename and logger.
     user = userprofile.user
-    if userprofile.is_test == True:
-        user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
-    else:
-        user_log_filename = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
+    user_log_filename = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log"
 
     #If this particular user log file exists, then continue.
     if os.path.exists(user_log_filename) == True:
@@ -433,11 +412,7 @@ def activity_has_been_logged(activity, userprofile, userprofile2=None, petreport
 #Given a UserProfile instance, return True if its log file exists, False otherwise.
 def log_exists (userprofile):
     assert isinstance(userprofile, UserProfile)
-
-    if userprofile.is_test == True:
-        log_path = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log" 
-    else:
-        log_path = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log" 
+    log_path = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log" 
 
     if os.path.isfile(log_path):
         return True
@@ -448,11 +423,7 @@ def log_exists (userprofile):
 #Given a UserProfile instance, delete its log file.
 def delete_log (userprofile):
     assert isinstance(userprofile, UserProfile)
-    #Are we deleting a test log or real log?
-    if userprofile.is_test == True:
-        log_path = TEST_ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log" 
-    else:
-        log_path = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log" 
+    log_path = ACTIVITY_LOG_DIRECTORY + str(userprofile.id) + ".log" 
 
     if os.path.isfile(log_path):
         try:

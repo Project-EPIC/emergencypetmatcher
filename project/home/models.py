@@ -15,20 +15,12 @@ from django.conf import settings
 from django.core.files.images import ImageFile
 from django.forms.models import model_to_dict
 from constants import *
-import PIL, os, time, datetime as DATETIME, simplejson, project.settings
+from PIL import Image
+import os, time, datetime as DATETIME, simplejson, project.settings
 
 '''===================================================================================
 [models.py]: Models for the EPM system
 ==================================================================================='''
-
-'''Enums for Various Model Choice Fields'''
-PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Bird', 'Bird'), ('Horse', 'Horse'), ('Rabbit', 'Rabbit'), ('Snake', 'Snake'), ('Turtle', 'Turtle'), ('Other', 'Other')]
-STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
-SEX_CHOICES=[('M','Male'),('F','Female')]
-SIZE_CHOICES = [('XL', 'Extra Large'),('L', 'Large'), ('M', 'Medium'), ('S', 'Small')]
-BREED_CHOICES = [('Scottish Terrier','Scottish Terrier'),('Golden Retriever','Golden Retriever'),('Yellow Labrador','Yellow Labrador')]
-SPAYED_OR_NEUTERED_CHOICES = [("Not Known", "Not Known"),('Spayed', 'Spayed'), ('Neutered', 'Neutered'), ("Neither", "Neither")]
-AGE_CHOICES = [('Baby','Baby'),('Young','Young'),('Adult','Adult'),('Senior','Senior'),("Not Known", "Not Known")]
 
 #The User Profile Model containing a 1-1 association with the 
 #django.contrib.auth.models.User object, among other attributes.
@@ -37,11 +29,10 @@ class UserProfile (models.Model):
     user = models.OneToOneField(User, null=False, default=None)    
     
     '''Non-Required Fields'''
-    photo = models.ImageField(upload_to='images/profile_images', null=True)
+    img_path = models.ImageField(upload_to='images/userprofile', default="images/userprofile/defaults/anonymous.gif", null=True)
+    thumb_path = models.ImageField(upload_to='images/userprofile/thumbnails', default="images/userprofile/thumbnails/defaults/anonymous.gif", null=True)
     last_logout = models.DateTimeField(null=True, auto_now_add=True)
     following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
-    chats = models.ManyToManyField('Chat', null=True)
-    is_test = models.BooleanField(default=False)
     reputation = models.FloatField(default=0, null=True)
     # facebook_cred = models.CharField(max_length=100, null=True)
     # twitter_cred = models.CharField(max_length=100, null=True)
@@ -50,19 +41,12 @@ class UserProfile (models.Model):
     # terms = models.BooleanField(default=False, NullBooleanField=True)
 
     #Create the activity log for this user
-    def set_activity_log(self, is_test=False):
-        if is_test == True:
-            self.is_test = True
-            print_success_msg("A new UserProfile TEST log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id))
-        else:
-            self.is_test = False
-            print_success_msg("A new UserProfile log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id))
-
+    def set_activity_log(self):
+        print_success_msg("A new UserProfile log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id))
         self.save()
         logger.log_activity(ACTIVITY_ACCOUNT_CREATED, self)    
 
     def send_email_message_to_UserProfile (self, target_userprofile, message, test_email=True):
-        
         if email_re.match(target_userprofile.user.email) or (test_email == True):
             site = Site.objects.get(pk=1)
             ctx = {"site":site, "message":message, "from_user":self.user, "from_user_profile_URL": URL_USERPROFILE + str(self.id)}
@@ -78,7 +62,21 @@ class UserProfile (models.Model):
             return True
         return False        
 
-    ''' Update the current user's reputation points based on an activity '''
+    @staticmethod
+    def get_UserProfile(profile_id=None, username=None):
+        try:
+            if username != None:
+                existing_profile = UserProfile.objects.get(user__username=username)
+            elif profile_id != None:
+                existing_profile = UserProfile.objects.get(pk=profile_id)
+            else:
+                return None
+            return existing_profile
+
+        except UserProfile.DoesNotExist:
+            return None        
+
+    #Update the current user's reputation points based on an activity
     def update_reputation(self, activity):
         if activity == ACTIVITY_PETMATCH_UPVOTE:
             self.reputation += REWARD_PETMATCH_VOTE
@@ -127,6 +125,44 @@ class UserProfile (models.Model):
          return '{ID{%s} %s}' % (self.id, self.user.username)
 
 
+    #set_img_path(): Sets the image path and thumb path for this UserProfile. Save is optional.
+    def set_images(self, img_path, save=True, rotation=0):
+        #Deal with the 'None' case.
+        if img_path == None:
+            self.img_path = "images/userprofile/defaults/anonymous.gif"
+            self.thumb_path = "images/userprofile/thumbnails/defaults/anonymous.gif"
+
+            if save == True:
+                self.save()
+        else:
+            #Safely open the image.
+            img = open_image(img_path)
+
+            if save == True:
+                #Save first - we must have the UserProfile ID.
+                self.img_path = None
+                self.thumb_path = None
+                self.save()
+
+                #Make this unique to prevent any image overwrites when saving a picture for a UserProfile.
+                unique_img_name = str(self.id) + "-" + self.user.username + ".jpg"
+
+                #Perform rotation (if it applies)
+                img = img.rotate(rotation)
+                self.img_path = "images/userprofile/" + unique_img_name
+                self.thumb_path = "images/userprofile/test/" + unique_img_name                    
+                img.save(USERPROFILE_IMAGES_DIRECTORY + unique_img_name, "JPEG", quality=75)
+                img.thumbnail((USERPROFILE_THUMBNAIL_WIDTH, USERPROFILE_THUMBNAIL_HEIGHT), Image.ANTIALIAS)
+                img.save(USERPROFILE_THUMBNAILS_DIRECTORY + unique_img_name, "JPEG", quality=75)
+
+                #Save again.
+                self.save()
+
+            else:
+                self.img_path = img_path
+                self.thumb_path = img_path         
+
+
 class PetReport(models.Model):
 
     '''Required Fields'''
@@ -160,7 +196,9 @@ class PetReport(models.Model):
     #Contact Email Address of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
     contact_email = models.CharField(max_length=PETREPORT_CONTACT_EMAIL_LENGTH, null=True)        
     #Img of Pet
-    img_path = models.ImageField(upload_to='images/petreport_images', null=True)
+    img_path = models.ImageField(upload_to='images/petreport', null=True)
+    #Thumbnail Img of Pet
+    thumb_path = models.ImageField(upload_to="images/petreport/thumbnails", null=True)
     #Spayed or Neutered?
     spayed_or_neutered = models.CharField(max_length=PETREPORT_SPAYED_OR_NEUTERED_LENGTH, choices=SPAYED_OR_NEUTERED_CHOICES, null=True, default="Not Known")
     #Pet Name (if available)
@@ -183,8 +221,12 @@ class PetReport(models.Model):
 
     #Override the save method for this model
     def save(self, *args, **kwargs):
+        #Take care of defaults.
+        if self.pet_name == None or self.pet_name.strip() == "":
+            self.pet_name = "unknown"
+
         super(PetReport, self).save(args, kwargs) 
-        print_success_msg ("{%s} has been created by %s!" % (self, self.proposed_by))           
+        print_success_msg ("{%s} has been saved by %s!" % (self, self.proposed_by))           
         return self
 
     ''' Determine if the input UserProfile (user) has bookmarked this PetReport already '''
@@ -201,29 +243,94 @@ class PetReport(models.Model):
         return False
 
     '''this function compares 6 attributes of both pets and returns the number of matching attributes.
-    the attributes compared are: age, sex, size,spayed_or_neutered,pet_name and breed'''
+    the attributes compared are: age, sex, size, spayed_or_neutered, pet_name, and breed'''
     def compare(self, petreport):
         assert isinstance (petreport, PetReport)
         matching_attrs = 0
 
+        #Sex
         if self.sex == petreport.sex:
             matching_attrs += 1
+        #Size
         if self.size == petreport.size:
             matching_attrs += 1
+        #Spayed/Neutered
         if self.spayed_or_neutered == petreport.spayed_or_neutered:
             matching_attrs += 1
+        #Pet Name
         if self.pet_name.lower() == petreport.pet_name.lower():
             matching_attrs += 1
+        #Breed
         if self.breed.lower() == petreport.breed.lower():
             matching_attrs += 1
+        #Age
         if self.age == petreport.age:
             matching_attrs += 1
 
         return matching_attrs        
+    
+    #set_img_path(): Sets the image path and thumb path for this PetReport. Save is optional.
+    def set_images(self, img_path, save=True, rotation=0):
+        #Deal with the 'None' case.
+        if img_path == None:
+            if self.pet_type == PETREPORT_PET_TYPE_DOG:
+                self.img_path = "images/petreport/defaults/dog_silhouette.jpg"
+                self.thumb_path = "images/petreport/thumbnails/defaults/dog_silhouette.jpg"
+            elif self.pet_type == PETREPORT_PET_TYPE_CAT:
+                self.img_path = "images/petreport/defaults/cat_silhouette.jpg"
+                self.thumb_path = "images/petreport/thumbnails/defaults/cat_silhouette.jpg"
+            elif self.pet_type == PETREPORT_PET_TYPE_BIRD:
+                self.img_path = "images/petreport/defaults/bird_silhouette.jpg"                    
+                self.thumb_path = "images/petreport/thumbnails/defaults/bird_silhouette.jpg"
+            elif self.pet_type == PETREPORT_PET_TYPE_HORSE:
+                self.img_path = "images/petreport/defaults/horse_silhouette.jpg"
+                self.thumb_path = "images/petreport/thumbnails/defaults/horse_silhouette.jpg"
+            elif self.pet_type == PETREPORT_PET_TYPE_RABBIT:
+                self.img_path = "images/petreport/defaults/rabbit_silhouette.jpg"
+                self.thumb_path = "images/petreport/thumbnails/defaults/rabbit_silhouette.jpg"
+            elif self.pet_type == PETREPORT_PET_TYPE_SNAKE:
+                self.img_path = "images/petreport/defaults/snake_silhouette.jpg"                                       
+                self.thumb_path = "images/petreport/thumbnails/defaults/snake_silhouette.jpg"
+            elif self.pet_type == PETREPORT_PET_TYPE_TURTLE:
+                self.img_path = "images/petreport/defaults/turtle_silhouette.jpg"
+                self.thumb_path = "images/petreport/thumbnails/defaults/turtle_silhouette.jpg"
+            else:
+                self.img_path = "images/petreport/defaults/other_silhouette.jpg"
+                self.thumb_path = "images/petreport/thumbnails/defaults/other_silhouette.jpg"
 
+            if save == True:
+                self.save()
+        else:
+            #Safely open the image.
+            img = open_image(img_path)
+
+            if save == True:
+                #Save first - we must have the PetReport ID
+                self.img_path = None
+                self.thumb_path = None
+                self.save()
+
+                #Make this unique to prevent any image overwrites when saving a picture for a PetReport.
+                unique_img_name = str(self.proposed_by.id) + "-" + self.proposed_by.user.username + "-" + str(self.id) + "-" + self.pet_name + "-" + self.status + ".jpg"
+
+                #Perform rotation (if it applies)
+                img = img.rotate(rotation)
+                self.img_path = "images/petreport/" + unique_img_name
+                self.thumb_path = "images/petreport/thumbnails/" + unique_img_name
+                img.save(PETREPORT_IMAGES_DIRECTORY + unique_img_name, "JPEG", quality=75)
+                img.thumbnail((PETREPORT_THUMBNAIL_WIDTH, PETREPORT_THUMBNAIL_HEIGHT), Image.ANTIALIAS)
+                img.save(PETREPORT_THUMBNAILS_DIRECTORY + unique_img_name, "JPEG", quality=75)
+
+                #Save again.
+                self.save()
+
+            else:
+                self.img_path = img_path
+                self.thumb_path = img_path
+
+        
     @staticmethod
     def get_PetReport(status, pet_type, pet_name=None, petreport_id=None):
-
         try:
             if petreport_id != None:
                 existing_pet = PetReport.objects.get(pk=petreport_id)
@@ -236,6 +343,48 @@ class PetReport(models.Model):
 
         except PetReport.DoesNotExist:
             return None
+
+    @staticmethod
+    def get_PetReports_by_page(filtered_petreports, page):
+        if (page != None and page > 0):
+            page = int(page)
+            filtered_petreports = filtered_petreports [((page-1) * NUM_PETREPORTS_HOMEPAGE):((page-1) * NUM_PETREPORTS_HOMEPAGE + NUM_PETREPORTS_HOMEPAGE)]
+
+        #Just return the list of PetReports.
+        return filtered_petreports
+
+    #Return a list of candidate PetReports that could potentially be matches for this PetReport.
+    def get_candidate_PetReports(self):
+        candidates = PetReport.objects.exclude(status = self.status).filter(pet_type = self.pet_type, closed=False)
+
+        if len(candidates) == 0:
+            return None
+        return candidates
+
+    #This method returns a ranked list of all PetReports found in the input specified list. This ranking is based on the PetReport compare() method.
+    def get_ranked_PetReports(self, candidates, page=None):
+        #Begin criteria ranking process: Rank based on how many similar PetReport features occur between target and candidate.
+        results = []
+        matches = {"match6":[], "match5":[],"match4":[],"match3":[],"match2":[],"match1":[],"match0":[]}
+
+        for candidate in candidates:
+            num_attributes_matched = self.compare(candidate)
+            matches["match" + str(num_attributes_matched)].append(candidate)
+
+        #Finally, feed the keys in the order of rank to a new PetReports list.
+        for key in matches.keys():
+            results += matches[key]             
+
+        return self.get_PetReports_by_page (results, page)
+
+    #Determine if the input UserProfile (user) is a worker for this PetReport.
+    def UserProfile_is_worker(self, user_profile):
+        assert isinstance(user_profile, UserProfile)
+        try:
+            worker = self.workers.get(pk = user_profile.id)
+            return True
+        except UserProfile.DoesNotExist:
+            return False
 
     def has_image(self):
         if self.img_path == None:
@@ -386,6 +535,23 @@ class PetMatch(models.Model):
         elif (downvote != None):
             return DOWNVOTE
         return False  
+
+    def toDICT(self):
+        modeldict = model_to_dict(self)
+        #Iterate through all fields in the model_dict
+        for field in modeldict:
+            value = modeldict[field]
+            if isinstance(value, DATETIME.datetime) or isinstance(value, DATETIME.date):
+                modeldict[field] = value.strftime("%B %d, %Y")
+            elif isinstance(value, ImageFile):
+                modeldict[field] = value.name
+        #Just add a couple of nice attributes.
+        modeldict ["proposed_by_username"] = self.proposed_by.user.username       
+        return modeldict
+
+    def toJSON(self):
+        json = simplejson.dumps(self.toDICT())
+        return json        
 
     def PetMatch_has_reached_threshold(self):
         #Difference (D) is calculated as the difference between number of upvotes and downvotes.
@@ -543,30 +709,6 @@ class PetMatch(models.Model):
         return '{ID{%s} lost:%s, found:%s, proposed_by:%s}' % (self.id, self.lost_pet, self.found_pet, self.proposed_by)
 
 
-#The Chat Object Model
-class Chat (models.Model):
-
-    '''Required Fields'''
-    #One-to-One relationship with PetReport
-    pet_report = models.OneToOneField('PetReport', null=False, default=None)
-
-    def __unicode__ (self):
-        return 'Chat {pet_report:%s}' % (self.pet_report)
-
-
-#The Chat Line Object Model
-class ChatLine (models.Model):
-
-    '''Required Fields'''
-    chat = models.ForeignKey('Chat', null=False, default=None)
-    userprofile = models.ForeignKey('UserProfile', null=False, default=None)
-    text = models.CharField (max_length=CHATLINE_TEXT_LENGTH, blank=True, null=False, default=None)
-    date = models.DateTimeField(auto_now_add=True)
-
-    def __unicode__ (self):
-        return 'ChatLine {text:%s}' % (self.text)
-
-
 ''' ============================ [FORM MODELS] ==================================== '''
 ''' These Models nicely organize the model-related data into Django Form objects that 
     have built-in validation functionality and can be passed around via POST requests. 
@@ -576,14 +718,14 @@ class ChatLine (models.Model):
 class PetReportForm (ModelForm):
 
     '''Required Fields'''
-    pet_type = forms.ChoiceField(label = '* Pet Type', choices = PET_TYPE_CHOICES, required = True)
-    status = forms.ChoiceField(label = "* Pet Status", help_text="(Lost/Found)", choices = STATUS_CHOICES, required = True)
-    date_lost_or_found = forms.DateField(label = "* Date Lost/Found", widget = forms.DateInput, required = True)
+    pet_type = forms.ChoiceField(label = 'Pet Type *', choices = PET_TYPE_CHOICES, required = True)
+    status = forms.ChoiceField(label = "Pet Status *", help_text="(Lost/Found)", choices = STATUS_CHOICES, required = True)
+    date_lost_or_found = forms.DateField(label = "Date Lost/Found *", widget = forms.DateInput, required = True)
 
     '''Non-Required Fields'''
     sex = forms.ChoiceField(label = "Sex", choices = SEX_CHOICES, required = False)
     size = forms.ChoiceField(label = "Size of Pet", choices = SIZE_CHOICES, required = False)
-    location = forms.CharField(label = "Location", max_length = PETREPORT_LOCATION_LENGTH , required = False)
+    location = forms.CharField(label = "Location", help_text="(Location where pet was lost/found)", max_length = PETREPORT_LOCATION_LENGTH , required = False)
     geo_location_lat = forms.DecimalField(label = "Geo Location Lat", help_text="(Lattitude coordinate)", max_digits=8, decimal_places=5, widget=forms.TextInput(attrs={'size':'10'}), initial=None, required=False)
     geo_location_long = forms.DecimalField(label = "Geo Location Long", help_text="(Longitude coordinate)", max_digits=8, decimal_places=5, widget=forms.TextInput(attrs={'size':'10'}),  initial=None, required=False)
     microchip_id = forms.CharField(label = "Microchip ID", max_length = PETREPORT_MICROCHIP_ID_LENGTH, required=False)
@@ -601,14 +743,15 @@ class PetReportForm (ModelForm):
 
     class Meta:
         model = PetReport
-        exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by','closed')
+        exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by','closed', 'thumb_path')
 
 #The UserProfile Form - used for editing the user profile
 #edit initial value of each field either in the view or in the template
 class UserProfileForm (forms.Form):
-    '''Required Fields'''
+    #Required Fields
     username = forms.CharField(label="Username*",max_length=30) 
-    '''Non-Required Fields'''
+
+    #Non-Required Fields
     first_name = forms.CharField(label="First Name",max_length=30,required=False)
     last_name = forms.CharField(label="Last Name",max_length=30,required=False)
     email = forms.EmailField(label="Email*",required=False)
@@ -690,7 +833,7 @@ def trigger_PetMatch_verification(sender, instance, action,**kwargs):
 
 ''' Import statements placed at the bottom of the page to prevent circular import dependence '''
 import logger
-from utils import print_info_msg, print_error_msg, print_debug_msg, print_success_msg
+from utils import print_info_msg, print_error_msg, print_debug_msg, print_success_msg, open_image
 
 
 

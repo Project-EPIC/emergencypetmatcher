@@ -22,11 +22,11 @@ from social_auth.views import auth
 #python imports
 from random import choice, uniform
 from utils import *
+from pprint import pprint
 import datetime, re, home.logger
 
 ''' Display the PetMatch object '''
-def display_PetMatch(request, petmatch_id):
-
+def get_PetMatch(request, petmatch_id):
     pm = get_object_or_404(PetMatch, pk=petmatch_id)
     voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
 
@@ -39,12 +39,15 @@ def display_PetMatch(request, petmatch_id):
     num_upvotes = len(pm.up_votes.all())
     num_downvotes = len(pm.down_votes.all())
 
-    return render_to_response(HTML_PMDP, {'petmatch': pm, "voters": voters, "user_has_voted": user_has_voted, "num_upvotes":num_upvotes, "num_downvotes":num_downvotes},
-         RequestContext(request))  
+    pprint("Number of voters: %d" % len(voters))
+    return render_to_response(HTML_PMDP, {  'petmatch': pm, 
+                                            "num_voters": len(voters), 
+                                            "user_has_voted": user_has_voted, 
+                                            "num_upvotes":num_upvotes, 
+                                            "num_downvotes":num_downvotes}, RequestContext(request))  
 
 @login_required
 def vote_PetMatch(request):
-    
     if request.method == "POST":
         userprofile = request.user.get_profile()
         vote = request.POST ['vote']
@@ -92,35 +95,45 @@ def vote_PetMatch(request):
         raise Http404
 
 @login_required
-def match_PetReport(request, petreport_id):
+def match_PetReport(request, petreport_id, page=None):
+    if request.method == "GET":
+        #Get Pet Report objects and organize them into a Paginator Object.
+        target_petreport = get_object_or_404(PetReport, pk=petreport_id)
+        #Are there any candidates?
+        candidates = target_petreport.get_candidate_PetReports()
+        #Add the UserProfile to the PetReport's workers list.
+        target_petreport.workers.add(request.user.get_profile())   
 
-    #Get Pet Report objects and organize them into a Paginator Object.
-    target_petreport = get_object_or_404(PetReport, pk=petreport_id)
+        if candidates == None:
+            messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added as a worker for this pet..")
+            return redirect(URL_HOME)            
 
-    #Add the UserProfile to the PetReport's workers list.
-    target_petreport.workers.add(request.user.get_profile())
+        #Get the candidate count for pagination purposes.
+        candidates_count = len(candidates)
 
-    all_pet_reports = PetReport.objects.all().exclude(pk=petreport_id)
+        #If this was an AJAX GET call, then return the list of candidates as JSON
+        if request.is_ajax() == True:
+            
+            #Get Ranked Candidates based on specified attributes.
+            paged_candidates = target_petreport.get_ranked_PetReports(candidates=candidates, page=page)   
+            paged_candidates = [{  "ID": pr.id, 
+                                    "proposed_by_username": pr.proposed_by.user.username,
+                                    "pet_name": pr.pet_name, 
+                                    "pet_type": pr.pet_type, 
+                                    "img_path": pr.img_path.name } for pr in paged_candidates]
 
-    #Place more PetReport filters here
-    filtered_pet_reports = all_pet_reports.exclude(status = target_petreport.status).filter(pet_type = target_petreport.pet_type, closed = False)   
+            #Serialize the PetReport into JSON for easy accessing.
+            json = simplejson.dumps ({"pet_reports_list":paged_candidates, "count":len(paged_candidates), "total_count": candidates_count})
+            return HttpResponse(json, mimetype="application/json")            
 
-    if len(filtered_pet_reports) == 0:
-        messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added to this pet's working list for future reference.")
-        return redirect(URL_HOME)
-    
-    pet_reports_list = []    
-    matches = {"match6":[], "match5":[],"match4":[],"match3":[],"match2":[],"match1":[],"match0":[]}
-    for candidate in filtered_pet_reports:
-        num_attributes_matched = target_petreport.compare(candidate)
-        #We use the num_attributes_matched to make our dictionary key.
-        matches["match" + str(num_attributes_matched)].append(candidate)
+        #Serialize the PetReport into JSON for easy accessing.
+        target_pr_json = target_petreport.toJSON()
+        return render_to_response (HTML_MATCHING, { 'target_pr_json':target_pr_json, 
+                                                    "target_petreport":target_petreport, 
+                                                    "candidates_count":candidates_count}, RequestContext(request))
 
-    for key in matches.keys():
-        pet_reports_list += matches[key]
-    
-    return render_to_response (HTML_MATCHING, {'target_petreport':target_petreport, 'candidate_matches': pet_reports_list}, RequestContext(request))
-
+    else:
+        raise Http404
 
 @login_required
 def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
@@ -202,7 +215,12 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
         return redirect(URL_HOME)
     
     else:
-        return render_to_response(HTML_PROPOSE_MATCH, {'target':target, 'candidate':candidate}, RequestContext(request))
+        target_json = target.toJSON()
+        candidate_json = candidate.toJSON()
+        return render_to_response(HTML_PROPOSE_MATCH, { 'target':target, 
+                                                        'candidate':candidate,
+                                                        'target_json':target_json, 
+                                                        'candidate_json':candidate_json}, RequestContext(request))
 
 @login_required
 def verify_PetMatch(request, petmatch_id):

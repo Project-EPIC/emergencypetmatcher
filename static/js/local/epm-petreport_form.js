@@ -1,9 +1,42 @@
 
 $(document).ready(function(){
 
+	//Image Size.
+	var img_size = 0.0;
+	var img_rotation = 0;
+
+	//Resize the container.
+	$("#container").css("height", "2200px");
+
+	//If an input image comes through, preview it!
+	$("#id_img_path").change(function(){
+
+		if (this.files && this.files[0]) {
+			var reader = new FileReader();
+
+			reader.onload = function (e) {
+				//Create an image element, tack on the source, fit it into the container for preview, 
+				//and keep tabs on rotation parameter. It will be sent off for POST.
+				var img = document.createElement("img");
+				$(img).attr("src", e.target.result);
+				$(img).width(250);
+				$(img).height(250);
+				$("#preview_img").html("");
+            	$("#preview_img").append(img);
+
+            	//Click handler for rotating image.
+            	$(img).click (function(){
+            		img_rotation= (img_rotation + 90) % 360;
+            		$(this).rotate(img_rotation);
+            		$("#id_img_rotation").attr("value", img_rotation);
+            	});
+        	}
+        	reader.readAsDataURL(this.files[0]);
+    	}
+	});
+
 	$("#id_status").bind('change', function() { 
-		document.getElementsByClassName("id_pet_report_location")[0]
-			.innerHTML="<strong>Location "+$("#id_status").attr("value")+"</strong>";
+		document.getElementsByClassName("id_pet_report_location")[0].innerHTML="<strong>Location "+$("#id_status").attr("value")+"</strong>";
 	});
 
 	//Initialize with today's date
@@ -22,13 +55,13 @@ $(document).ready(function(){
 
 		var count = PETREPORT_TAG_INFO_LENGTH - this.value.length;
 		$("#id_tag_collar_info_count").html(count + " characters remaining");
-	})
+	});
 	
 	$("#id_description").keyup(function(){
 
 		var count = PETREPORT_DESCRIPTION_LENGTH - this.value.length;
 		$("#id_description_count").html(count + " characters remaining");
-	})	
+	});
 
 	$("#petreport_form_microchip_check").click(function(){
 		if($(this).prop("checked") == true)
@@ -60,7 +93,6 @@ $(document).ready(function(){
 			$("#petreport_form_contact_fields").css("display", "none");
 	});		
 
-	var img_size = 0.0;
 	$('#id_img_path').bind('change', function() {
            	img_size = this.files[0].size/1024/1024;
             if (img_size > 3.0) {

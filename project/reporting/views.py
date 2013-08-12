@@ -24,48 +24,35 @@ from django.forms.models import model_to_dict
 from home.models import *
 from utils import *
 from constants import *
-import datetime, re, Image, home.logger
+from pprint import pprint
+from PIL import Image
+import datetime, re, time, home.logger
 
 @login_required
 def submit_PetReport(request):
     if request.method == "POST":
-        
         #Let's make some adjustments to non-textual form fields before converting to a PetReportForm.
         if request.POST ['geo_location_lat'] == 'None' or request.POST ['geo_location_long'] == 'None':
             request.POST ['geo_location_lat'] = None
             request.POST ['geo_location_long'] = None
 
         form = PetReportForm(request.POST, request.FILES)
-        print_info_msg (request.POST)
-        print_info_msg (request.FILES)
 
         if form.is_valid() == True:
             pr = form.save(commit=False)
             #Create (but do not save) the Pet Report Object associated with this form data.
             pr.proposed_by = request.user.get_profile()
+            img_rotation = 0
+
+            if request.POST.get("img_rotation") != None:
+                img_rotation = - int(request.POST ["img_rotation"])
+
             print_info_msg ("Pet Report Image Path: %s" % pr.img_path)
 
-            #If there was no image attached, let's take care of defaults.
-            if pr.img_path == None:
-                if pr.pet_type == PETREPORT_PET_TYPE_DOG:
-                    pr.img_path.name = "images/defaults/dog_silhouette.jpg"
-                elif pr.pet_type == PETREPORT_PET_TYPE_CAT:
-                    pr.img_path.name = "images/defaults/cat_silhouette.jpg"
-                elif pr.pet_type == PETREPORT_PET_TYPE_BIRD:
-                    pr.img_path.name = "images/defaults/bird_silhouette.jpg"                    
-                elif pr.pet_type == PETREPORT_PET_TYPE_HORSE:
-                    pr.img_path.name = "images/defaults/horse_silhouette.jpg"
-                elif pr.pet_type == PETREPORT_PET_TYPE_RABBIT:
-                    pr.img_path.name = "images/defaults/rabbit_silhouette.jpg"
-                elif pr.pet_type == PETREPORT_PET_TYPE_SNAKE:
-                    pr.img_path.name = "images/defaults/snake_silhouette.jpg"                                       
-                elif pr.pet_type == PETREPORT_PET_TYPE_TURTLE:
-                    pr.img_path.name = "images/defaults/turtle_silhouette.jpg"
-                else:
-                    pr.img_path.name = "images/defaults/other_silhouette.jpg"
-    
-            pr.save() #Now save the Pet Report.
-            # add reputation points for submitting a pet report
+            #Make and save images from img_path and thumb_path AND save the PetReport.
+            pr.set_images(pr.img_path, save=True, rotation=img_rotation)
+
+            #Add reputation points for submitting a pet report
             request.user.get_profile().update_reputation(ACTIVITY_PETREPORT_SUBMITTED)
             if pr.status == 'Lost':
                 messages.success (request, 'Thank you for your submission! Your contribution will go a long way towards helping people find your lost pet.')
@@ -81,63 +68,58 @@ def submit_PetReport(request):
             print_error_msg ("Pet Report not submitted successfully")
             print_error_msg (form.errors)
             print_error_msg (form.non_field_errors())
+            #return redirect(URL_SUBMIT_PETREPORT)
     else:
         form = PetReportForm() #Unbound Form
-    return render_to_response(HTML_SUBMIT_PETREPORT, {'form':form, "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
-            "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH}, RequestContext(request))
+    return render_to_response(HTML_SUBMIT_PETREPORT, {  'form':form, "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
+                                                        "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH}, 
+                                                        RequestContext(request))
     
-def disp_PetReport(request, petreport_id):
-
+def get_PetReport(request, petreport_id):
+    #Grab the PetReport.
     pet_report = get_object_or_404(PetReport, pk = petreport_id)
+    user_has_bookmarked = False
 
     #Get all PetMatches made already for this PetReport object.
     if pet_report.status == 'Lost':
         matches = PetMatch.objects.all().filter(lost_pet = pet_report)
     else:
         matches = PetMatch.objects.all().filter(found_pet = pet_report)
+
+    #Grab number of workers for this PetReport
+    num_workers = len(pet_report.workers.all())
+    if request.user.is_authenticated() == True:
+        user_is_worker = pet_report.UserProfile_is_worker(request.user.userprofile)
+    else:
+        user_is_worker = False
     
     if request.user.is_authenticated() == True:
-        user = request.user.get_profile()
-        if(pet_report.UserProfile_has_bookmarked(user)):
-            user_has_bookmarked = "true"
-        else:
-            user_has_bookmarked = "false"    
-    else:
-        user_has_bookmarked = "false"
-        print_info_msg ("Unauthenticated User accessing PetReport %s" % pet_report) 
+        userprofile = request.user.get_profile()
+
+        if pet_report.UserProfile_has_bookmarked(userprofile) == True:
+            user_has_bookmarked = True
 
     #Serialize the PetReport into JSON for easy accessing.
-    pr_json = simplejson.dumps(simplify_PetReport_dict(pet_report))
-    return render_to_response(HTML_PRDP,{'pet_report_json':pr_json, 'pet_report': pet_report, 'matches': matches,'user_has_bookmarked':user_has_bookmarked}, RequestContext(request))
-
-@login_required
-def disp_bookmarks(request):
-
-    if(request.user.is_authenticated() == False):
-        raise Http404
-    user = request.user.get_profile()
-    pet_reports = user.bookmarks_related.all()
-    paginator = Paginator(pet_reports, 100)
-    page = request.GET.get('page') 
-    try:
-        pet_reports_list = paginator.page(page)
-    except PageNotAnInteger:
-        pet_reports_list = paginator.page(1)
-    except EmptyPage:
-        pet_reports_list = paginator.page(paginator.num_pages)        
-    print len(pet_reports_list)
-    return render_to_response('reporting/bookmarks.html', {'version': version, 'pet_reports_list': pet_reports_list, 'last_login': request.session.get('social_auth_last_login_backend')}, RequestContext(request))
-    
-'''AJAX Request to bookmark a PetReport'''
+    pr_json = pet_report.toJSON()
+    return render_to_response(HTML_PRDP, {  'pet_report_json':pr_json, 
+                                            'pet_report': pet_report,
+                                            'num_workers':num_workers,
+                                            'user_is_worker':user_is_worker, 
+                                            'matches': matches,
+                                            'user_has_bookmarked':user_has_bookmarked}, 
+                                            RequestContext(request))
+#AJAX Request to bookmark a PetReport
 @login_required
 def bookmark_PetReport(request):
-
-    if request.method == "POST":
+    if request.method == "POST" and request.is_ajax() == True:
         user = request.user.get_profile()
         petreport_id = request.POST['petreport_id']
-        petreport = get_object_or_404(PetReport, pk = petreport_id)
+        petreport = get_object_or_404(PetReport, pk=petreport_id)
         action = request.POST['action']
         #print "path: "+str(request.META.get('HTTP_REFERER','/'))
+        print_debug_msg("User: %s, Action: %s, petreport: %s" % (request.user.username, action, petreport))
+
+        #If the user has bookmarked this pet and the action is to remove it...
         if ((petreport.UserProfile_has_bookmarked(user)) and (action == "Remove Bookmark")) :
             petreport.bookmarked_by.remove(user)
             petreport.save()
@@ -148,11 +130,12 @@ def bookmark_PetReport(request):
             # Log removing the PetReport bookmark for this UserProfile
             logger.log_activity(ACTIVITY_PETREPORT_REMOVE_BOOKMARK, request.user.get_profile(), petreport=petreport)
 
+        #If the user has NOT bookmarked this pet and the action is to bookmark it...
         elif ((not petreport.UserProfile_has_bookmarked(user)) and (action == "Bookmark this Pet")):
             petreport.bookmarked_by.add(user)
             petreport.save()
             user.update_reputation(ACTIVITY_PETREPORT_ADD_BOOKMARK)
-            print_info_msg ('Bookmarked pet report #'+str(petreport_id)+" for user #"+str(user.id))
+            print_info_msg ('Bookmarked pet report #'+str(petreport_id)+" for user #" + str(user.id))
             message = "You have successfully bookmarked this Pet Report!" 
             text = "Remove Bookmark"
 
@@ -160,7 +143,7 @@ def bookmark_PetReport(request):
             logger.log_activity(ACTIVITY_PETREPORT_ADD_BOOKMARK, request.user.get_profile(), petreport=petreport)
 
         else:
-            print_info_msg ("User has bookmarked the pet: "+str(petreport.UserProfile_has_bookmarked(user)))
+            print_info_msg ("User has bookmarked the pet: " + str(petreport.UserProfile_has_bookmarked(user)))
             message = "Unable to "+action+"!"
             text = action
         json = simplejson.dumps ({"message":message, "text":text})
@@ -168,28 +151,5 @@ def bookmark_PetReport(request):
         return HttpResponse(json, mimetype="application/json")
     else:
         raise Http404
-    
-# '''AJAX Request to retrieve a PetReport object in JSON format'''
-# def get_PetReport_json(request, petreport_id):
-
-#     if request.is_ajax() == True:
-#         print "============== AJAX REQUEST ======================= "
-#         prdp = get_object_or_404(PetReport, pk=petreport_id)
-#         print "Retrieved the PetReport: %s" % prdp
-
-#         #Need this for easy displaying on the Matching Interface workspace detail table.
-#         prdp_dict = simplify_PetReport_dict(prdp) 
-#         print prdp_dict
-#         json = simplejson.dumps(prdp_dict)
-#         print "JSON: " + str(json)
-
-#         return HttpResponse(json, mimetype="application/json")
-
-#     print "Oops,something went wrong"
-#     messages.failure(request, "Oops, something went wrong.")
-#     return matching.match_petreport(request, petreport_id)
-    
-
-
 
 
