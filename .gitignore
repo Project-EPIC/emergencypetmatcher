@@ -1,13 +1,10 @@
-static/images/petreport_images/
 *.pyc
 project/chromedriver.log
-static/images/profile_images/
 project/epm_db
 project/lib
 project/bin
 project/build
 project/share
 project/home/migrations
-logs/
 .Python
 .DS_Store
