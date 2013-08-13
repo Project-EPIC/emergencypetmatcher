@@ -146,10 +146,12 @@ class ModelTesting (unittest.TestCase):
 			user, password = create_random_User(i)
 
 			#Create the essential ingredients for the PetReport object.
-			pr = create_random_PetReport(user)
+			pr = create_random_PetReport(user=user)
 			
+			print_debug_msg (user)
 			# check we can find the PetReport in the database again
-			pet_report = PetReport.objects.get(proposed_by = user)
+			pet_report = PetReport.objects.get(proposed_by=user)
+
 			self.assertEquals(pr.proposed_by, pet_report.proposed_by)
 			self.assertEquals(pr.pet_type, pet_report.pet_type)
 			self.assertEquals(pr.status, pet_report.status)
@@ -169,8 +171,8 @@ class ModelTesting (unittest.TestCase):
 		self.assertTrue (len(User.objects.all()) == NUMBER_OF_TESTS)
 		performance_report(iteration_time)
 
-	def test_updatePetReport(self):
-		print_testing_name("test_updatePetReport")
+	def test_update_PetReport(self):
+		print_testing_name("test_update_PetReport")
 		iteration_time = 0.00
 
 		for i in range (NUMBER_OF_TESTS):
@@ -180,7 +182,7 @@ class ModelTesting (unittest.TestCase):
 			user, password = create_random_User(i)
 
 			#Create the essential ingredients for the PetReport object.
-			pr = create_random_PetReport(user)
+			pr = create_random_PetReport(user=user)
 
 			#UPDATES
 			pr.pet_name = generate_string (PETREPORT_PET_NAME_LENGTH)
@@ -226,7 +228,7 @@ class ModelTesting (unittest.TestCase):
 			user, password = create_random_User(i)
 
 			#Create the essential ingredients for the PetReport object.
-			pr = create_random_PetReport(user)
+			pr = create_random_PetReport(user=user)
 
 			PetReport.objects.get(proposed_by = user).delete()
 			self.assertTrue(len(PetReport.objects.all()) == 0)
@@ -707,20 +709,20 @@ class EditUserProfileTesting (unittest.TestCase):
 
 		for i in range (NUMBER_OF_TESTS):
 			start_time = time.clock()
+
 			#objects
-			(user,password) = create_random_User(i)
+			user, password = create_random_User(i)
 			client = Client (enforce_csrf_checks=False)
 			user_i = user.id
+
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)			
 			print_test_msg("%s logs onto %s to enter the EditUserProfile page..." % (user, client))
-
 			
 			#Navigate to the EditUserProfile_form page
 			response = client.get(URL_EDITUSERPROFILE)
-			#Assert that the page was navigated to.
-			self.assertEquals(response.status_code,200) 
+			self.assertEquals(response.status_code, 200) 
 			self.assertTrue(response.request ['PATH_INFO'] == URL_EDITUSERPROFILE)
 
 			#Change the user's password
@@ -728,18 +730,18 @@ class EditUserProfileTesting (unittest.TestCase):
 			confirm_password = generate_string (User._meta.get_field('password').max_length)
 
 			#send the post request where the new_password & confirm_password do not match
-			post =  {"action":"savePassword","old_password":password,"new_password":new_password,"confirm_password":confirm_password}
-			
-			response = client.post(URL_EDITUSERPROFILE, post,follow=True)
+			post =  {"action":"savePassword", "old_password":password, "new_password":new_password, "confirm_password":confirm_password}
+			response = client.post(URL_EDITUSERPROFILE_PWD, post, follow=True)
 			user = User.objects.get(pk=user_i)
-			#the password shouldn't have changed
-			self.assertEquals(response.status_code,200) 
+
+			#The password shouldn't have changed
+			self.assertEquals(response.status_code, 200) 
 			self.assertFalse(user.check_password(new_password))
 
 			#send the post request where the old password is not correct
 			post =  {"action":"savePassword","old_password":new_password,"new_password":new_password,"confirm_password":confirm_password}
 			
-			response = client.post(URL_EDITUSERPROFILE, post,follow=True)
+			response = client.post(URL_EDITUSERPROFILE_PWD, post,follow=True)
 			user = User.objects.get(pk=user_i)
 			#the password shouldn't have changed
 			self.assertEquals(response.status_code,200) 
@@ -748,7 +750,7 @@ class EditUserProfileTesting (unittest.TestCase):
 			#send the post request to change the password
 			post =  {"action":"savePassword","old_password":password,"new_password":new_password,"confirm_password":new_password}
 			
-			response = client.post(URL_EDITUSERPROFILE, post,follow=True)
+			response = client.post(URL_EDITUSERPROFILE_PWD, post,follow=True)
 			user = User.objects.get(pk=user_i)
 			#the password shouldn't have changed
 			self.assertEquals(response.status_code,200) 
@@ -792,7 +794,7 @@ class EditUserProfileTesting (unittest.TestCase):
 			#the post data
 			post =  {"action":"saveProfile","username":username,"first_name":first_name,"last_name":last_name,"email":email}
 			#send the post request with the changes
-			response = client.post(URL_EDITUSERPROFILE, post,follow=True)
+			response = client.post(URL_EDITUSERPROFILE_INFO, post,follow=True)
 			
 			user = User.objects.get(pk=user_i)
 			
@@ -933,7 +935,6 @@ class LoggerTesting (unittest.TestCase):
 			start_time = time.clock()
 			user = User.objects.create_user(username=generate_string(USER_USERNAME_LENGTH))
 			userprofile = user.get_profile()
-			userprofile.set_activity_log(is_test=True)
 
 			#Now check: Does the userprofile's log file exist where it should?
 			self.assertTrue(logger.log_exists(userprofile) == True)
@@ -950,7 +951,7 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_delete_objects_and_check_log")
 		iteration_time = 0.00
 
-		results  = setup_objects(create_following_lists=True, create_petreports=True, create_petmatches=True)
+		results  = setup_objects(delete_all_objects=False, create_following_lists=True, create_petreports=True, create_petmatches=True)
 		users = results ['users']
 		clients = results ['clients']
 		petreports = results ['petreports']
@@ -976,7 +977,7 @@ class LoggerTesting (unittest.TestCase):
 			print_test_msg ("%s logs onto %s..." % (user, client))
 
 			#We expect the system not to throw errors but to catch them.
-			activities = logger.get_recent_activities_from_log(userprofile=user.userprofile)
+			activities = logger.get_recent_activities_from_log(userprofile=user.userprofile, current_userprofile=user.userprofile)
 			activities += logger.get_bookmark_activities(userprofile=user.userprofile)
 			print_test_msg("%s has an activity feed list of size [%d]" % (user, len(activities)))
 			self.assertTrue(logger.log_exists(user.userprofile))

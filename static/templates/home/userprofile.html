@@ -33,12 +33,8 @@
 
 	<!-- UserProfile information at the top -->
 	<div style="width:500px; max-height:500px; margin-left:auto; margin-right:auto; margin-bottom:20px;">
-		<div style="display:inline-block; margin-right:10px; ">
-			{% if show_profile.img_path %}		
-				<img src="{{ STATIC_URL }}{{ show_profile.img_path }}" style="width:128px; height:128px; vertical-align:baseline; border:1px solid black;"/>	
-			{% else %}
-				<img src="{{ STATIC_URL }}images/userprofile/defaults/anonymous.gif" style="width:128px; height:128px; vertical-align:baseline; border:1px solid black;"/>
-			{% endif %}
+		<div style="display:inline-block; margin-right:10px; ">	
+			<img src="{{ STATIC_URL }}{{ show_profile.img_path }}" style="width:128px; height:128px; vertical-align:baseline; border:1px solid black;"/>	
 		</div>
 
 		<div style="padding: 0px 20px 0px 0px; display:inline-block;">
@@ -94,50 +90,40 @@
 	<!-- Nice-looking horizontal break -->
 	<hr size="10" width="100%" color="white"/>
 
-	{% ifequal user.userprofile.id show_profile.id %}
 	<!-- Following/Follower Section -->
-		{% if following_list %}
-		<!-- Following list -->
-		<h3 style="text-align:center;">Following</h3>
-		<div class="pet_thumb_container" style="width:900px; margin-left:auto; margin-right:auto;">   
-			{% for following in show_profile.following.all %}
-			<div class="user_thumb">
-				<a href="{% url 'get_UserProfile_page' following.id %}"
-					style="text-decoration:none; color:black; font-size:12px;}"
-					title="{% if following.user.first_name %} {{ following.user.first_name }} {% endif %}@{{ following.user.username }}">
-					<strong style="text-align:center; display:block;"> {{ following.user.username }} </strong>
-					{% if following.photo %}
-						<img src="{{ STATIC_URL }}{{ following.photo }}"/>
-					{% else %}
-						<img src="{{ STATIC_URL }}images/defaults/anonymous.gif"/>
-					{% endif %}	
-				</a>
-			</div>
-			{% endfor %}
-		</div>	
-		{% endif %}						
-
-		{% if followers_list %}
-		<!-- Follower list -->
-		<h3 style="text-align:center;">Following You</h3>
-		<div class="pet_thumb_container" style="width:900px; margin-left:auto; margin-right:auto;">    	
-			{% for follower in show_profile.followers.all %}
-			<div class="user_thumb">	
-				<a href="{% url 'get_UserProfile_page' follower.id %}"
-				   	style="text-decoration:none; color:black; font-size:12px;}"
-				   	title="{% if follower.user.first_name %} {{ follower.user.first_name }} {% endif %}@{{ follower.user.username }}">
-				   	<strong style="text-align:center; display:block;"> {{ follower.user.username }} </strong>
-					{% if follower.photo %}
-						<img src="{{ STATIC_URL }}{{ follower.photo }}"/>
-					{% else %}
-						<img src="{{ STATIC_URL }}images/defaults/anonymous.gif"/>
-					{% endif %}	
-				</a>			
-			</div>
-			{% endfor %}
+	{% if following_list %}
+	<!-- Following list -->
+	<h3 style="text-align:center;">Following</h3>
+	<div class="pet_thumb_container" style="width:900px; margin-left:auto; margin-right:auto;">   
+		{% for following in show_profile.following.all %}
+		<div class="user_thumb">
+			<a href="{% url 'get_UserProfile_page' following.id %}"
+				style="text-decoration:none; color:black; font-size:12px;}"
+				title="{% if following.user.first_name %} {{ following.user.first_name }} {% endif %}@{{ following.user.username }}">
+				<strong style="text-align:center; display:block;"> {{ following.user.username }} </strong>
+				<img src="{{ STATIC_URL }}{{ following.img_path }}"/>
+			</a>
 		</div>
-		{% endif %}														
-	{% endifequal %}					
+		{% endfor %}
+	</div>	
+	{% endif %}						
+
+	{% if followers_list %}
+	<!-- Follower list -->
+	<h3 style="text-align:center;">Following You</h3>
+	<div class="pet_thumb_container" style="width:900px; margin-left:auto; margin-right:auto;">    	
+		{% for follower in show_profile.followers.all %}
+		<div class="user_thumb">	
+			<a href="{% url 'get_UserProfile_page' follower.id %}"
+			   	style="text-decoration:none; color:black; font-size:12px;}"
+			   	title="{% if follower.user.first_name %} {{ follower.user.first_name }} {% endif %}@{{ follower.user.username }}">
+			   	<strong style="text-align:center; display:block;"> {{ follower.user.username }} </strong>
+				<img src="{{ STATIC_URL }}{{ follower.img_path }}"/>
+			</a>			
+		</div>
+		{% endfor %}
+	</div>
+	{% endif %}																		
 
 	<!-- Submitted Pet Reports -->
 	{% if proposed_petreports %}

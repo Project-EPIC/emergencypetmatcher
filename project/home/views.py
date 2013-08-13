@@ -438,21 +438,24 @@ def get_social_details(request):
 
 
 @login_required
-def get_UserProfile_page(request, userprofile_id):   
-    u = get_object_or_404(UserProfile, pk=userprofile_id)
+def get_UserProfile_page(request, userprofile_id):
+    #Be aware of what you show other authenticated users in contrast to the *same* authenticated user.
+    request_profile = request.user.get_profile()   
+    show_profile = get_object_or_404(UserProfile, pk=userprofile_id)
+    context = {"show_profile": show_profile}
+
+    if request_profile.id == show_profile.id:
+        #Grab the following list.
+        context["following_list"] = show_profile.following.all()
+        #Grab the followers list.
+        context["followers_list"] = show_profile.followers.all()        
+
     #Grab Proposed PetReports.
-    proposed_petreports = u.proposed_related.all()
+    context["proposed_petreports"] = show_profile.proposed_related.all()
     #Grab Proposed PetMatches.
-    proposed_petmatches = u.proposed_by_related.all()
-    #Grab the following list.
-    following_list = u.following.all()
-    #Grab the followers list.
-    followers_list = u.followers.all()
-    return render_to_response(HTML_USERPROFILE,{    "show_profile":u,
-                                                    "proposed_petreports": proposed_petreports, 
-                                                    "proposed_petmatches":proposed_petmatches,
-                                                    "following_list": following_list,
-                                                    "followers_list": followers_list}, RequestContext(request))
+    context["proposed_petmatches"] = show_profile.proposed_by_related.all()
+
+    return render_to_response(HTML_USERPROFILE, context, RequestContext(request))
 
 @login_required
 def follow_UserProfile(request): 

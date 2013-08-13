@@ -436,7 +436,6 @@ class PetReport(models.Model):
 
 #The Pet Match Object Model
 class PetMatch(models.Model):
-
     '''Required Fields'''
     #Lost Pet
     lost_pet = models.ForeignKey('PetReport', null=False, default=None, related_name='lost_pet_related')
@@ -556,7 +555,7 @@ class PetMatch(models.Model):
     def PetMatch_has_reached_threshold(self):
         #Difference (D) is calculated as the difference between number of upvotes and downvotes.
         #For a PetMatch to be successful, it should satisfy certain constraints. D should exceed a threshold value.
-        difference = self.up_votes.count() - self.down_votes.count()
+        difference = abs(self.up_votes.count() - self.down_votes.count())
 
         #Temporary: If the PetMatch proposer votes on this, and his/her vote is the only vote for this, then verification is triggered.
         if self.up_votes.count() == 1:
@@ -570,71 +569,53 @@ class PetMatch(models.Model):
 
     #Change this to verify_PetMatch
     def verify_petmatch(self):
-        if self.verification_triggered == False:
-            self.is_open = False
-            self.verification_triggered = True
-            self.save()
-            print_info_msg("Verification Triggered: PetMatch is now closed to the crowd.")
-            petmatch_owner = self.proposed_by.user
-            lost_pet_contact = self.lost_pet.proposed_by.user
-            found_pet_contact = self.found_pet.proposed_by.user
+        self.is_open = False
+        self.verification_triggered = True
+        print_info_msg("Verification Triggered: PetMatch is now closed to the crowd.")
+        petmatch_owner = self.proposed_by
+        lost_pet_contact = self.lost_pet.proposed_by
+        found_pet_contact = self.found_pet.proposed_by
 
-            #Grab the Site object for the context variables
-            site = Site.objects.get(pk=1)
+        #Grab the Site object for the context variables
+        site = Site.objects.get(pk=1)
 
-            if petmatch_owner.username == lost_pet_contact.username or petmatch_owner.username == found_pet_contact.username: 
-                Optionally_discuss_with_digital_volunteer = ""
-            else:
-                Optionally_discuss_with_digital_volunteer = "You may also discuss this pet match with %s, the digital volunteer who proposed this pet match. You can reach %s at %s" % (self.proposed_by.user.username,self.proposed_by.user.username,self.proposed_by.user.email)
-
-            '''An email is sent to the lost pet owner'''
-            if email_re.match(lost_pet_contact.email):
-                ctx = {"site":site, 'pet_type':'your lost pet','opposite_pet_type_contact':found_pet_contact,'pet_status':"found",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer,"petmatch_id":self.id}
-                email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH,ctx)
-                email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
-                
-                if not lost_pet_contact.get_profile().is_test:
-                    lost_pet_contact.email_user(email_subject,email_body,from_email=None)
-                #print_info_msg ('Email to lost pet owner: '+email_body)
-
-            elif lost_pet_contact.get_profile().is_test:
-                    print_info_msg('Email not sent to test user %s' %(str(lost_pet_contact.get_profile())))
-            else:
-                print_error_msg ('User %s does not have a valid email address' %(str(lost_pet_contact.get_profile())))
-
-            ''' An email is sent to the found pet owner '''
-            if email_re.match(found_pet_contact.email):
-                ctx = {"site":site, 'pet_type':'the pet you found','opposite_pet_type_contact':lost_pet_contact,'pet_status':"lost",'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer,"petmatch_id":self.id}
-                email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH,ctx)
-                email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
-                if not found_pet_contact.get_profile().is_test:
-                    found_pet_contact.email_user(email_subject,email_body,from_email=None)
-                #print_info_msg ('[INFO]: Email to found pet owner: '+email_body)
-            elif found_pet_contact.get_profile().is_test:
-                    print_info_msg('Email not sent to test user %s' %(str(found_pet_contact.get_profile())))
-            else:
-                print_error_msg ('User %s does not have a valid email address' %(str(found_pet_contact.get_profile())))
-
-            '''If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact,
-            an email will be sent to this person '''
-            if Optionally_discuss_with_digital_volunteer != "":
-                if email_re.match(found_pet_contact.email):
-                    ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
-                    email_body = render_to_string(TEXTFILE_EMAIL_PETMATCH_PROPOSER,ctx)
-                    email_subject =  EMAIL_SUBJECT_PETMATCH_PROPOSER  
-
-                    if not petmatch_owner.get_profile().is_test:
-                        petmatch_owner.email_user(email_subject,email_body,from_email=None)
-                    #print_info_msg ('[INFO]: Email to pet match owner: '+email_body)
-                elif petmatch_owner.get_profile().is_test:
-                        print_info_msg('Email not sent to test user %s' %(str(petmatch_owner.get_profile())))
-                else:
-                    print_error_msg ('User %s does not have a valid email address' %(str(petmatch_owner.get_profile())))
-
+        #If the PetMatch proposer is either the lost or found pet contact...
+        if (petmatch_owner.id == lost_pet_contact.id) or (petmatch_owner.id == found_pet_contact.id): 
+            Optionally_discuss_with_digital_volunteer = ""
         else:
-            print_error_msg("PetMatch.verification_triggered field is %s when it should be %s" % (self.verification_triggered, not self.verification_triggered))
+            Optionally_discuss_with_digital_volunteer = "You may also discuss this pet match with %s, the digital volunteer who proposed this pet match. You can reach %s at %s" % (petmatch_owner.user.username, petmatch_owner.user.username, petmatch_owner.user.email)
 
+        #Emails are sent to both parties iff all email addresses are valid (i.e. not test emails)
+        if email_re.match(lost_pet_contact.user.email) and email_re.match(found_pet_contact.user.email) and email_re.match(petmatch_owner.user.email):
+            ctx = { "site":site, 
+                    "petmatch_id":self.id,
+                    'pet_type':'your lost pet', 
+                    'opposite_pet_type_contact':found_pet_contact.user.username, 
+                    'pet_status':"found", 
+                    'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer }
+            
+            email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH, ctx)
+            email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
+            lost_pet_contact.user.email_user(email_subject, email_body, from_email=None)            
 
+            ctx.update({"pet_type": "the pet you found", 
+                        "opposite_pet_type_contact": lost_pet_contact.user.username, 
+                        "pet_status":"lost", 
+                        "Optionally_discuss_with_digital_volunteer": Optionally_discuss_with_digital_volunteer})
+
+            email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH, ctx)
+            found_pet_contact.user.email_user(email_subject, email_body, from_email=None)
+
+            #If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact, an email will be sent to this person as well.
+            if Optionally_discuss_with_digital_volunteer != "":
+                ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
+                email_body = render_to_string(TEXTFILE_EMAIL_PETMATCH_PROPOSER, ctx)
+                email_subject =  EMAIL_SUBJECT_PETMATCH_PROPOSER  
+                petmatch_owner.user.email_user(email_subject,email_body,from_email=None)
+
+            #Save after successfully sending off pet contact emails.
+            self.save()
+            
     def close_PetMatch(self):
         petmatch_owner = self.proposed_by
         lost_pet_contact = self.lost_pet.proposed_by
@@ -814,7 +795,9 @@ def setup_UserProfile(sender, instance, created, **kwargs):
     if created == True:
         #Create a UserProfile object.
         userprofile = UserProfile.objects.create(user=instance)
+        userprofile.set_activity_log()
         userprofile.update_reputation(ACTIVITY_ACCOUNT_CREATED)
+
     elif instance.is_active:
         if logger.log_exists(instance.get_profile()) == False:
             logger.log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())

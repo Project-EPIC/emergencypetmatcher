@@ -97,7 +97,6 @@ def vote_PetMatch(request):
 @login_required
 def match_PetReport(request, petreport_id, page=None):
     if request.method == "GET":
-        #Get Pet Report objects and organize them into a Paginator Object.
         target_petreport = get_object_or_404(PetReport, pk=petreport_id)
         #Are there any candidates?
         candidates = target_petreport.get_candidate_PetReports()
@@ -105,7 +104,7 @@ def match_PetReport(request, petreport_id, page=None):
         target_petreport.workers.add(request.user.get_profile())   
 
         if candidates == None:
-            messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added as a worker for this pet..")
+            messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added as a worker for this pet.")
             return redirect(URL_HOME)            
 
         #Get the candidate count for pagination purposes.

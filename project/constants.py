@@ -5,7 +5,7 @@ from project.settings import STATIC_URL
 ==================================================================================='''
 
 #Number of Tests
-NUMBER_OF_TESTS = 100
+NUMBER_OF_TESTS = 10
 
 #Lower and Upper bounds for Lost and Found Dates
 DATE_LOWER_BOUND = "2012-01-01"
@@ -81,7 +81,7 @@ PETMATCH_OUTCOME_NEW_PETMATCH = "NEW PETMATCH"
 PETMATCH_OUTCOME_DUPLICATE_PETMATCH = "DUPCLIATE PETMATCH"
 PETMATCH_OUTCOME_UPDATE = "SQL UPDATE"
 PETMATCH_OUTCOME_INSERTED_IMPROPERLY = "INSERTED IMPROPERLY"
-PETMATCH_THRESHOLD = 1
+PETMATCH_THRESHOLD = 100
 
 #General File Path Constants
 PROJECT_WORKSPACE = os.path.dirname(__file__)
@@ -199,10 +199,10 @@ URL_TC = '/tc'
 URL_TC_18 = '/tc_18'
 URL_USERPROFILE = '/UserProfile/'
 URL_SEND_MESSAGE_TO_USERPROFILE = "/UserProfile/message_UserProfile"
-URL_FOLLOW = "/follow"
-URL_UNFOLLOW = "/unfollow"
+URL_FOLLOW = "/UserProfile/follow"
+URL_UNFOLLOW = "/UserProfile/unfollow"
 URL_EDITUSERPROFILE_INFO = "/UserProfile/edituserprofile/update_User_info"
-URL_EDITUSERPROFILE_PWD = "/UserProfile/edituserprofile/update_User_pwd"
+URL_EDITUSERPROFILE_PWD = "/UserProfile/edituserprofile/update_User_password"
 URL_EDITUSERPROFILE = "/UserProfile/edituserprofile"
 URL_PRDP = '/reporting/PetReport/'
 URL_SUBMIT_PETREPORT ='/reporting/submit_PetReport'

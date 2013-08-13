@@ -292,7 +292,7 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 		elif pr.pet_type == PETREPORT_PET_TYPE_TURTLE:
 			pr.img_path = pr.thumb_path = random.choice(PETREPORT_SAMPLE_TURTLE_IMAGES)
 		else:
-			pr.img_path = pr.thumb_path = "images/userprofile/defaults/other_silhouette.jpg"
+			pr.img_path = pr.thumb_path = "images/petreport/defaults/other_silhouette.jpg"
 
 	else:
 		#Set the img and thumb paths.
