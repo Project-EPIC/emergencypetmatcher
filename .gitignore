@@ -3,8 +3,8 @@ static/images/petreport_images/
 project/chromedriver.log
 static/images/profile_images/
 project/epm_db
-project/bin
 project/lib
+project/bin
 project/build
 project/share
 project/home/migrations

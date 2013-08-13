@@ -1,0 +1,10 @@
+django
+lorem-ipsum-generator
+django-registration
+django-social-auth
+South
+PIL
+selenium
+simplejson
+django-tastypie
+mimeparse
