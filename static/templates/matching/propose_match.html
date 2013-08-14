@@ -113,7 +113,7 @@
           <form method="post" style="margin:5px;" action="{% url 'propose_PetMatch' target.id candidate.id %}" >
             {% csrf_token %}
             <strong style="display:block; margin-top:10px; margin-bottom:10px; text-align:center; font-size:16px;"> If you have time, please tell us why you believe these two pets should be matched. </strong>
-            <textarea name='description' rows='2' cols ='100' style="display:block; margin: 0 auto;"> </textarea>
+            <textarea name='description' rows='2' cols ='100' style="width:600px; display:block; margin: 0 auto;"> </textarea>
             <input type="Submit" class="epm_button" value="Propose Match" style="display:block; margin-left:auto; margin-right:auto; margin-top:10px; width:150px; height:40px;"/>
           </form>
         </div>

@@ -3,7 +3,7 @@ lorem-ipsum-generator
 django-registration
 django-social-auth
 South
-PIL
+pillow
 selenium
 simplejson
 django-tastypie
