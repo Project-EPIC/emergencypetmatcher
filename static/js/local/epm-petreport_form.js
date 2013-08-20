@@ -21,8 +21,10 @@ $(document).ready(function(){
 				$(img).attr("src", e.target.result);
 				$(img).width(250);
 				$(img).height(250);
+				$(img).css("cursor", "pointer");
 				$("#preview_img").html("");
             	$("#preview_img").append(img);
+            	$("#rotate_instructions").css("display", "block");
 
             	//Click handler for rotating image.
             	$(img).click (function(){
@@ -33,10 +35,6 @@ $(document).ready(function(){
         	}
         	reader.readAsDataURL(this.files[0]);
     	}
-	});
-
-	$("#id_status").bind('change', function() { 
-		document.getElementsByClassName("id_pet_report_location")[0].innerHTML="<strong>Location "+$("#id_status").attr("value")+"</strong>";
 	});
 
 	//Initialize with today's date

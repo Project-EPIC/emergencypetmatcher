@@ -38,13 +38,7 @@ class UserProfile (models.Model):
     # twitter_cred = models.CharField(max_length=100, null=True)
     #facebook_id = models.IntegerField(blank=True, null=True)
     #twitter_id = models.IntegerField(blank=True, null=True)
-    # terms = models.BooleanField(default=False, NullBooleanField=True)
-
-    #Create the activity log for this user
-    def set_activity_log(self):
-        print_success_msg("A new UserProfile log file was created for {%s} with ID{%d}\n" % (self.user.username, self.id))
-        self.save()
-        logger.log_activity(ACTIVITY_ACCOUNT_CREATED, self)    
+    # terms = models.BooleanField(default=False, NullBooleanField=True)  
 
     def send_email_message_to_UserProfile (self, target_userprofile, message, test_email=True):
         if email_re.match(target_userprofile.user.email) or (test_email == True):
@@ -63,12 +57,14 @@ class UserProfile (models.Model):
         return False        
 
     @staticmethod
-    def get_UserProfile(profile_id=None, username=None):
+    def get_UserProfile(profile_id=None, username=None, email=None):
         try:
             if username != None:
                 existing_profile = UserProfile.objects.get(user__username=username)
             elif profile_id != None:
                 existing_profile = UserProfile.objects.get(pk=profile_id)
+            elif email != None:
+                existing_profile = UserProfile.objects.get(user__email=email)
             else:
                 return None
             return existing_profile
@@ -137,8 +133,13 @@ class UserProfile (models.Model):
         else:
             #Safely open the image.
             img = open_image(img_path)
+            print_debug_msg("UserProfile.set_images(): %s" % img)
 
-            if save == True:
+            #Bad case - just return None.
+            if img == None:
+                return None
+
+            if save == True and img != None:
                 #Save first - we must have the UserProfile ID.
                 self.img_path = None
                 self.thumb_path = None
@@ -150,7 +151,7 @@ class UserProfile (models.Model):
                 #Perform rotation (if it applies)
                 img = img.rotate(rotation)
                 self.img_path = "images/userprofile/" + unique_img_name
-                self.thumb_path = "images/userprofile/test/" + unique_img_name                    
+                self.thumb_path = "images/userprofile/thumbnails/" + unique_img_name                    
                 img.save(USERPROFILE_IMAGES_DIRECTORY + unique_img_name, "JPEG", quality=75)
                 img.thumbnail((USERPROFILE_THUMBNAIL_WIDTH, USERPROFILE_THUMBNAIL_HEIGHT), Image.ANTIALIAS)
                 img.save(USERPROFILE_THUMBNAILS_DIRECTORY + unique_img_name, "JPEG", quality=75)
@@ -355,7 +356,7 @@ class PetReport(models.Model):
 
     #Return a list of candidate PetReports that could potentially be matches for this PetReport.
     def get_candidate_PetReports(self):
-        candidates = PetReport.objects.exclude(status = self.status).filter(pet_type = self.pet_type, closed=False)
+        candidates = PetReport.objects.exclude(proposed_by = self.proposed_by).exclude(status = self.status).filter(pet_type = self.pet_type, closed=False)
 
         if len(candidates) == 0:
             return None
@@ -468,7 +469,7 @@ class PetMatch(models.Model):
     #0 - No response was recorded
     #1 - user clicked on Yes
     #2 - User clicked on No
-    verification_votes = models.CharField(max_length=PETMATCH_VERIFICATION_VOTES_LENGTH,default='00')
+    verification_votes = models.CharField(max_length=PETMATCH_VERIFICATION_VOTES_LENGTH, default='00')
 
     '''Because of the Uniqueness constraint that the PetMatch must uphold, we override the save method'''
     def save(self, *args, **kwargs):
@@ -516,6 +517,17 @@ class PetMatch(models.Model):
         except PetMatch.DoesNotExist:
             return None
 
+    @staticmethod
+    def get_PetMatches_by_page(filtered_petmatches, page):
+        if (page != None and page > 0):
+            page = int(page)
+            filtered_petmatches = filtered_petmatches [((page-1) * NUM_PETMATCHES_HOMEPAGE):((page-1) * NUM_PETMATCHES_HOMEPAGE + NUM_PETMATCHES_HOMEPAGE)]
+            
+        #Just return the list of PetReports.
+        return filtered_petmatches
+
+
+
     ''' Determine if the input UserProfile (user) has up/down-voted on this PetMatch already '''
     def UserProfile_has_voted(self, user_profile):
         assert isinstance(user_profile, UserProfile)
@@ -557,7 +569,7 @@ class PetMatch(models.Model):
         #For a PetMatch to be successful, it should satisfy certain constraints. D should exceed a threshold value.
         difference = abs(self.up_votes.count() - self.down_votes.count())
 
-        #Temporary: If the PetMatch proposer votes on this, and his/her vote is the only vote for this, then verification is triggered.
+        #Temporary: If the PetMatch proposer votes on this match and is the only vote for it, and he/she happens to be either the lost or found pet submitter, then verification is triggered.
         if self.up_votes.count() == 1:
             if self.proposed_by == self.up_votes.all()[0] and (self.proposed_by == self.lost_pet.proposed_by or self.proposed_by == self.found_pet.proposed_by):
                 return True
@@ -581,16 +593,16 @@ class PetMatch(models.Model):
 
         #If the PetMatch proposer is either the lost or found pet contact...
         if (petmatch_owner.id == lost_pet_contact.id) or (petmatch_owner.id == found_pet_contact.id): 
-            Optionally_discuss_with_digital_volunteer = ""
+            Optionally_discuss_with_digital_volunteer = None
         else:
             Optionally_discuss_with_digital_volunteer = "You may also discuss this pet match with %s, the digital volunteer who proposed this pet match. You can reach %s at %s" % (petmatch_owner.user.username, petmatch_owner.user.username, petmatch_owner.user.email)
 
-        #Emails are sent to both parties iff all email addresses are valid (i.e. not test emails)
+        #Emails are sent to all parties iff all email addresses are valid (i.e. not test emails)
         if email_re.match(lost_pet_contact.user.email) and email_re.match(found_pet_contact.user.email) and email_re.match(petmatch_owner.user.email):
             ctx = { "site":site, 
                     "petmatch_id":self.id,
                     'pet_type':'your lost pet', 
-                    'opposite_pet_type_contact':found_pet_contact.user.username, 
+                    'opposite_pet_type_contact':found_pet_contact.user, 
                     'pet_status':"found", 
                     'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer }
             
@@ -599,7 +611,7 @@ class PetMatch(models.Model):
             lost_pet_contact.user.email_user(email_subject, email_body, from_email=None)            
 
             ctx.update({"pet_type": "the pet you found", 
-                        "opposite_pet_type_contact": lost_pet_contact.user.username, 
+                        "opposite_pet_type_contact": lost_pet_contact.user, 
                         "pet_status":"lost", 
                         "Optionally_discuss_with_digital_volunteer": Optionally_discuss_with_digital_volunteer})
 
@@ -607,7 +619,7 @@ class PetMatch(models.Model):
             found_pet_contact.user.email_user(email_subject, email_body, from_email=None)
 
             #If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact, an email will be sent to this person as well.
-            if Optionally_discuss_with_digital_volunteer != "":
+            if Optionally_discuss_with_digital_volunteer != None:
                 ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
                 email_body = render_to_string(TEXTFILE_EMAIL_PETMATCH_PROPOSER, ctx)
                 email_subject =  EMAIL_SUBJECT_PETMATCH_PROPOSER  
@@ -622,9 +634,9 @@ class PetMatch(models.Model):
         found_pet_contact = self.found_pet.proposed_by
 
         if '0' not in self.verification_votes:
-            self.closed_date = datetime_now()         
-            '''If the PetMatch is successful, all related PetMatches will be closed 
-            and is_successful is set to True'''
+            self.closed_date = datetime_now()
+
+            #If the PetMatch is successful, all related PetMatches will be closed and is_successful is set to True.
             if self.verification_votes == '11':
                 self.is_successful = True
 
@@ -647,44 +659,55 @@ class PetMatch(models.Model):
                 # update reputation points for the following users:
                 # petmatch_owner, lost_pet_contact, and found_pet_contact
                 print_info_msg ("PetMatch Verification was a SUCCESS!")
+
                 # Must to update reputation points twice since if updating petmatch_owner and lost_pet_contact
                 # separately for the same user doesn't work
                 if petmatch_owner.id == lost_pet_contact.id:
                     petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL)
                     petmatch_owner.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
                     found_pet_contact.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+
                 # Must to update reputation points twice since if updating petmatch_owner and found_pet_contact
                 # separately for the same user doesn't work
                 elif petmatch_owner.id == found_pet_contact.id:
                     petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL)
                     petmatch_owner.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
                     lost_pet_contact.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+
                 else:
                     petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL)
                     lost_pet_contact.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
                     found_pet_contact.update_reputation(ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL)
+
                  # update reputation points for upvoters
                 for upvoters in self.up_votes.all():
                     upvoters.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
+
                 # Must update reputation manually for petmatch_owner if found in the up_votes list because
                 # the user is not updated in the previous for loop
                 if petmatch_owner in self.up_votes.all():
                     petmatch_owner.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
+
                 # Must update reputation manually for lost_pet_contact if found in the up_votes list because
                 # the user is not updated in the previous for loop
                 elif lost_pet_contact in self.up_votes.all():
                     lost_pet_contact.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
+
                 # Must update reputation manually for ound_pet_contact if found in the up_votes list because
                 # the user is not updated in the previous for loop
                 elif found_pet_contact in self.up_votes.all():
                     found_pet_contact.update_reputation(ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL)
+
+                message = "Thanks for your response, and congratulations on the successful match! The reunited match can be found in the 'Reunited Pets' Tab."
+
             else: 
-                # if self.verification_votes == '22' or self.verification_votes == '12' or self.verification_votes == '21':
-                    print_info_msg ("PetMatch Verification was NOT a success!")
-                    petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE)
+                print_info_msg ("PetMatch Verification was NOT a success!")
+                message = "Thanks for your response. Unfortunately, the match wasn't a success. Keep trying and don't give up!"
+                petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE)
 
             self.save()    
             print_info_msg ("PetMatch %s has been closed" % (self))
+            return message
     
     def __unicode__ (self):
         return '{ID{%s} lost:%s, found:%s, proposed_by:%s}' % (self.id, self.lost_pet, self.found_pet, self.proposed_by)
@@ -795,22 +818,14 @@ def setup_UserProfile(sender, instance, created, **kwargs):
     if created == True:
         #Create a UserProfile object.
         userprofile = UserProfile.objects.create(user=instance)
-        userprofile.set_activity_log()
+        print_success_msg("A new UserProfile log file was created for {%s} with ID{%d}\n" % (userprofile.user.username, userprofile.id))
+        logger.log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)  
         userprofile.update_reputation(ACTIVITY_ACCOUNT_CREATED)
 
     elif instance.is_active:
         if logger.log_exists(instance.get_profile()) == False:
             logger.log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
 
-#Post Add Signal function to check if a PetMatch has reached threshold
-@receiver(m2m_changed, sender=PetMatch.up_votes.through)
-def trigger_PetMatch_verification(sender, instance, action,**kwargs):
-    #Checking condition that will return true once PetMatch reaches a threshold value,
-    #if it returns true, pet match verification work flow is triggered.
-    #print_debug_msg("PetMatch Verification Signal (Upvotes) TRIGGERED: %s" % action)
-    if action == 'post_add':
-        if instance.PetMatch_has_reached_threshold() == True:
-            instance.verify_petmatch()
 
 
 

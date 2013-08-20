@@ -3,7 +3,6 @@ $(document).ready(function(){
 
 	//Retrieve PetMatches to show as tiles.
 	$("#nav_petreports").click(function(){ 
-		//Setup PetReport Pagination here.
 		$(".pagination").pagination({
 			items:PETREPORT_COUNT,
 			itemsOnPage:50,
@@ -22,13 +21,12 @@ $(document).ready(function(){
 
 	//Retrieve PetMatches to show as tiles.
 	$("#nav_petmatches").click(function(){ 
-		//Setup PetMatch Pagination here.
 		$(".pagination").pagination({
 			items:PETMATCH_COUNT,
 			itemsOnPage:25,
 			cssStyle:"light-theme",
 			onPageClick: function(pageNum){
-				fetch_PetMatches(pageNum);
+				fetch_PetMatches(pageNum, false);
 			}
 		});	
 
@@ -36,11 +34,11 @@ $(document).ready(function(){
 		update_pagination();
 
 		//Make the AJAX GET call here.
-		fetch_PetMatches(1); 
+		fetch_PetMatches(1, false); 
 	});	
 
+	//Retrieve Bookmarks to show as tiles.
 	$("#nav_bookmarked").click(function(){
-		//Setup PetMatch Pagination here.
 		$(".pagination").pagination({
 			items:BOOKMARK_COUNT,
 			itemsOnPage:50,
@@ -55,7 +53,25 @@ $(document).ready(function(){
 
 		//Make the AJAX GET call here.
 		fetch_bookmarks(1); 
-	})
+	});
+
+	//Retrieve Successful PetMatches to show as tiles.
+	$("#nav_successful_petmatches").click(function(){
+		$(".pagination").pagination({
+			items:BOOKMARK_COUNT,
+			itemsOnPage:50,
+			cssStyle:"light-theme",
+			onPageClick: function(pageNum){
+				fetch_PetMatches(pageNum, true);
+			}
+		});	
+
+		//Adjust the pagination container for centering
+		update_pagination();
+
+		//Make the AJAX GET call here.
+		fetch_PetMatches(1, true); 
+	})	
 
 	//Update the share buttons on click.
 	$("#facebook_share_epm").click(function(){ share_on_facebook(HOME_URL, HOME_IMAGE, HOME_TITLE, HOME_CAPTION, HOME_SUMMARY); });
@@ -141,35 +157,46 @@ function setup_petreport_item(report){
 	var alink = document.createElement("a");
 	var pet_img = document.createElement("img");
 
-	//Deal with attributes.
+	//Link attributes.
 	$(item).addClass("item");
 	$(alink).attr("name", report.pet_name);
 	$(alink).attr("link", URL_PRDP + report.ID);
 	$(alink).on("click", function(){
-		load_dialog($(this).attr("link"), $(this).attr("name"), SIZE_WIDTH_PRDP, "auto");
+		load_dialog({
+			"link": $(this).attr("link"),
+			"title": $(this).attr("name"),
+			"width": SIZE_WIDTH_PRDP
+		});
 	});
 
+	//Pet Img attributes.
 	$(pet_img).attr("src", STATIC_URL + report.img_path);
-	$(pet_img).width(128);
-	$(pet_img).height(128);
-	$(pet_img).css("border", "white solid 1px");
+	$(pet_img).width(150);
+	$(pet_img).height(150);
+	$(pet_img).css("margin", "5px auto");
+	$(pet_img).css("display", "block");
 
 	//Appends
-	$(alink).append("<strong>" + report.pet_name + "</strong><br/>");
-	$(alink).append("Contact: " + report.proposed_by_username);					
+	$(alink).append("<strong style='display:block; text-align:center;'>" + report.pet_name + "</strong>");
+	$(alink).append("<span style='display:block; text-align:center;'>Contact: " + report.proposed_by_username + "</span>");					
 	$(alink).append(pet_img);
 	$(item).append(alink);					
 	return item;
 }
 
-function fetch_PetMatches(page){
+function fetch_PetMatches(page, successful_petmatches){
 	//First, remove all tile elements (except activity feed)
 	$("#tiles li.item").remove();
-	$("#tiles h3").remove();		
+	$("#tiles h3").remove();
+
+	if (successful_petmatches == true)
+		url = URL_GET_SUCCESSFUL_PETMATCHES + "/" + page;
+	else
+		url = URL_GET_PETMATCHES + "/" + page;
 
 	$.ajax({
 	    type:"GET",
-	    url:URL_GET_PETMATCHES + "/" + page,
+	    url: url,
 		success: function(data){
 			var matches = data.pet_matches_list;
 			var count = data.count;
@@ -186,9 +213,12 @@ function fetch_PetMatches(page){
 				$("#tiles").append(item);		
 			}
 
-			//Toggle the active nav tab inactive, and toggle the petmatches tab active.
+			//Toggle the active nav tab inactive, and toggle the petmatches (or successful PetMatches) tab active.
 			$("#nav li.active").toggleClass("active");
-			$("#nav_petmatches").toggleClass("active");
+			if (successful_petmatches == true)
+				$("#nav_successful_petmatches").toggleClass("active");
+			else
+				$("#nav_petmatches").toggleClass("active");
 
 			if (matches.length == 0)
 				$("#tiles").append("<h3 style='margin:10px; display:block; text-align:center;'> No Pet Matches Available Yet! </h3>");
@@ -214,21 +244,29 @@ function setup_petmatch_item (match){
 	$(alink).attr("name", match.lost_pet_name + " with " + match.found_pet_name);					
 	$(alink).attr("link", URL_PMDP + match.ID);
 	$(alink).on("click", function(){
-		load_dialog($(this).attr("link"), $(this).attr("name"), SIZE_WIDTH_PMDP, "auto");
+		load_dialog({
+			"link": $(this).attr("link"), 
+			"title": $(this).attr("name"), 
+			"width": SIZE_WIDTH_PMDP
+		});
 	});
 
 	$(lost_pet_img).attr("src", STATIC_URL + match.lost_pet_img_path);
 	$(found_pet_img).attr("src", STATIC_URL + match.found_pet_img_path);
-	$(lost_pet_img).width(128);
-	$(lost_pet_img).height(128);
-	$(found_pet_img).width(128);
-	$(found_pet_img).height(128);
+	$(lost_pet_img).width(150);
+	$(lost_pet_img).height(150);
+	$(lost_pet_img).css("margin", "5px auto");
+	$(lost_pet_img).css("display", "block");	
+	$(found_pet_img).width(150);
+	$(found_pet_img).height(150);
+	$(found_pet_img).css("margin", "5px auto");
+	$(found_pet_img).css("display", "block");	
 	$(lost_pet_img).css("border", "white solid 1px");
 	$(found_pet_img).css("border", "white solid 1px");
 
 	//Appends
-	$(alink).append("<strong>" + match.lost_pet_name + " with " + match.found_pet_name + "</strong><br/>");
-	$(alink).append("Contact: " + match.proposed_by_username);					
+	$(alink).append("<strong style='display:block; text-align:center;'>" + match.lost_pet_name + " with " + match.found_pet_name + "</strong>");
+	$(alink).append("<span style='display:block; text-align:center;'>Contact: " + match.proposed_by_username + "</span>");					
 	$(alink).append(lost_pet_img);
 	$(alink).append(found_pet_img);
 	$(item).append(alink);				
@@ -300,7 +338,11 @@ function setup_activity_item (activity_dict){
 				$(a).attr("href", "#");
 				$(a).attr("link", URL_PRDP + activity_dict.petreport_id);
 				$(a).on("click", function(){
-					load_dialog($(this).attr("link"), activity_dict.petreport_name, SIZE_WIDTH_PRDP, "auto");
+					load_dialog({
+						"link": $(this).attr("link"), 
+						"title": activity_dict.petreport_name, 
+						"width": SIZE_WIDTH_PRDP
+					});
 				});
 
 				if (activity_dict.petreport_name != undefined){
@@ -322,7 +364,11 @@ function setup_activity_item (activity_dict){
 				$(a).attr("href", "#");
 				$(a).attr("link", URL_PRDP + activity_dict.petreport_id);
 				$(a).on("click", function(){
-					load_dialog($(this).attr("link"), activity_dict.petreport_name, SIZE_WIDTH_PRDP, "auto");
+					load_dialog({
+						"link": $(this).attr("link"), 
+						"title": activity_dict.petreport_name, 
+						"width": SIZE_WIDTH_PRDP
+					});
 				});
 
 				if (activity_dict.petreport_name != undefined){
@@ -344,7 +390,11 @@ function setup_activity_item (activity_dict){
 				$(a).attr("link", URL_PMDP + activity_dict.petmatch_id);
 				$(a).html("Pet Match");
 				$(a).on("click", function(){
-					load_dialog($(this).attr("link"), activity_dict.lostpet_name + ":" + activity_dict.foundpet_name, SIZE_WIDTH_PMDP, "auto");
+					load_dialog({
+						"link": $(this).attr("link"), 
+						"title": activity_dict.lostpet_name + ":" + activity_dict.foundpet_name, 
+						"width": SIZE_WIDTH_PMDP
+					});
 				});
 
 				$(li).append(userprofile_a);			 				
@@ -358,7 +408,11 @@ function setup_activity_item (activity_dict){
 				$(a).attr("link", URL_PMDP + activity_dict.petmatch_id);
 				$(a).html("Pet Match");
 				$(a).on("click", function(){
-					load_dialog($(this).attr("link"), activity_dict.lostpet_name + ":" + activity_dict.foundpet_name, SIZE_WIDTH_PMDP, "auto");			 					
+					load_dialog({
+						"link": $(this).attr("link"), 
+						"title": activity_dict.lostpet_name + ":" + activity_dict.foundpet_name, 
+						"width": SIZE_WIDTH_PMDP
+					});
 				});
 
 				var a2 = document.createElement("a");
@@ -366,7 +420,11 @@ function setup_activity_item (activity_dict){
 				$(a2).attr("link", URL_PRDP + activity_dict.petreport_id);
 				$(a2).html("Pet Report");
 				$(a2).on("click", function(){
-					load_dialog($(this).attr("link"), activity_dict.petreport_name, SIZE_WIDTH_PRDP, "auto");
+					load_dialog({
+						"link": $(this).attr("link"), 
+						"title": activity_dict.petreport_name, 
+						"width": SIZE_WIDTH_PRDP
+					});
 				});
 
 				$(li).append(userprofile_a);
@@ -382,7 +440,11 @@ function setup_activity_item (activity_dict){
 				$(a).attr("link", URL_PMDP + activity_dict.petmatch_id)
 				$(a).html("Pet Match");
 				$(a).on("click", function(){
-					load_dialog($(this).attr("link"), activity_dict.lostpet_name + ":" + activity_dict.foundpet_name, SIZE_WIDTH_PMDP, "auto");				 					
+					load_dialog({
+						"link": $(this).attr("link"), 
+						"title": activity_dict.lostpet_name + ":" + activity_dict.foundpet_name, 
+						"width": SIZE_WIDTH_PMDP
+					});
 				});
 
 				$(li).append(userprofile_a);
@@ -465,6 +527,7 @@ function fetch_bookmarks(page){
 					$(img).width(30);
 					$(img).height(30);
 					$(img).css("top", "-15px");
+					$(img).css("left", "160px");
 
 					$(img).hover(function mouseenter(){
 						$(this).attr("src", STATIC_URL + "images/icons/button_bookmark_X_hover.png");

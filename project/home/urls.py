@@ -12,6 +12,7 @@ urlpatterns = patterns('home.views',
 	url (r'^get_PetReport/(?P<petreport_id>\d+)/$', 'get_PetReport', name="get_PetReport"),	
 	url (r'^get_PetReports/(?P<page>\d+)/$', 'get_PetReports', name="get_PetReports"),	
 	url (r'^get_PetMatches/(?P<page>\d+)/$', 'get_PetMatches', name="get_PetMatches"),	
+	url (r'^get_successful_PetMatches/(?P<page>\d+)/$','get_successful_PetMatches',name='get_successful_PetMatches'),
 	url (r'^get_bookmarks/(?P<page>\d+)/$','get_bookmarks',name='get_bookmarks'),
 	url(r'^login$', 'login_User', name='login_User'),
 	url(r'^logout$', 'logout_User', name='logout_User'),
@@ -27,14 +28,13 @@ urlpatterns = patterns('home.views',
 	url(r'^about$', 'about', name='about'),
 
 	#Django-Social-Auth
-	url(r'^social_auth_login/([a-z]+)$', 'social_auth_login', name='users_social_auth_login'),
-	url(r'^get_social_details/$', 'get_social_details', name='get_social_details'),
-	url (r'^social_auth_disallowed', 'social_auth_disallowed', name='social_auth_disallowed'),
+	#url(r'^social_auth_login/([a-z]+)$', 'social_auth_login', name='users_social_auth_login'),
+	url(r'^social_auth_get_details/$', 'social_auth_get_details', name='social_auth_get_details'),
 	url(r'^', include('social_auth.urls')),
-
 
 	#registration-related URLs that have been customized.
 	url(r'^activate/complete/$', "registration_activation_complete", name='registration_activation_complete'),
+
 	# Activation keys get matched by \w+ instead of the more specific
 	# [a-fA-F0-9]{40} because a bad activation key should still get to the view;
 	# that way it can return a sensible "invalid key" message instead of a

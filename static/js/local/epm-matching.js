@@ -13,16 +13,26 @@ $(document).ready(function(){
 	//Click Handler for the Propose Match button.
 	$("#button_propose_match").click(function(){
 		var link = URL_PROPOSE_MATCH + TARGET_PETREPORT.id + "/" + CANDIDATE_PETREPORT.id + "/";
-		load_dialog(link, "Propose Match", 900, "auto");
+		load_dialog({
+			"link": link, 
+			"title": "Propose Match", 
+			"width": 900
+		});
 	});
 
 	/***** Start things off. *****/
 
 	//Click Handler for Target.
-	$("#matching_workspace_target_img img").click(function(){ load_dialog(URL_PRDP + TARGET_PETREPORT.id, TARGET_PETREPORT.pet_name, SIZE_WIDTH_PRDP, "auto"); });
+	$("#matching_workspace_target_img img").click(function(){ 
+		load_dialog({
+			"link": URL_PRDP + TARGET_PETREPORT.id, 
+			"title": TARGET_PETREPORT.pet_name, 
+			"width": SIZE_WIDTH_PRDP
+		});
+	});
 
 	//display fields of the target pet report
-	display_PetReport_fields(TARGET_PETREPORT, $("#target_prdpfields"));	
+	display_PetReport_fields({ "petreport": TARGET_PETREPORT, "list": $("#target_prdpfields") });
 
 	//Setup PetReport Pagination here.
 	$(".pagination").pagination({
@@ -52,8 +62,7 @@ function refresh_layout(){
 	var options = {
 		autoResize: true, // This will auto-update the layout when the browser window is resized.
 		container: $('#tiles'), // Optional, used for some extra CSS styling
-		offset:5,
-		itemWidth: 175 // Optional, the width of a grid item
+		offset:10
 	};
 
 	// Get a reference to your grid items.
@@ -120,11 +129,15 @@ function moveImage(item, container) {
 
 			//Create the click handler for this candidate.
 			$("#matching_workspace_candidate_img img").click(function(){ 
-				load_dialog(URL_PRDP + CANDIDATE_PETREPORT.id, CANDIDATE_PETREPORT.pet_name, SIZE_WIDTH_PRDP, "auto"); 
+				load_dialog({
+					"link": URL_PRDP + CANDIDATE_PETREPORT.id, 
+					"title": CANDIDATE_PETREPORT.pet_name, 
+					"width": SIZE_WIDTH_PRDP
+				});
 			});
 
 			//Fill up the field list.
-			display_PetReport_fields(petreport, $("#candidate_prdpfields"));	
+			display_PetReport_fields({ "petreport": petreport, "list":$("#candidate_prdpfields") });	
 
 			//Now, iterate through both lists and highlight the matches!
 			highlight_matches($("#target_prdpfields"), $("#candidate_prdpfields"));		
@@ -134,34 +147,6 @@ function moveImage(item, container) {
 			alert("An unexpected error occurred when trying to get information for this Pet. Please try again."); 
 		}
 	});
-}
-
-function highlight_matches(list1, list2){
-	//First, initialize and clear off pre-existing highlights.
-	var items1 = $(list1).children("li");
-	var items2 = $(list2).children("li");
-	$(items1).each(function(){ $(this).css("color", "black"); });
-	$(items2).each(function(){ $(this).css("color", "black"); });
-
-	//Iterate through each field and check if the value matches in both lists.
-	for (var i = 0; i < items1.length; i++){
-		innerText1 = items1[i].innerText;
-		innerText2 = items2[i].innerText;
-
-		if (innerText1.match("Tag and Collar Information:") != null)
-			continue;
-
-		if (innerText1.match("Description:") != null)
-			continue;
-
-		if (innerText1 == "" || innerText2 == "")
-			continue;
-
-		if (innerText1 == innerText2){
-			$(items1[i]).css("color", "blue");
-			$(items2[i]).css("color", "blue");
-		}
-	}
 }
 
 function fetch_PetReports(page){
@@ -207,25 +192,29 @@ function setup_petreport_item(report){
 
 	//Deal with attributes.
 	$(item).addClass("item");
-	$(item).width(150);
-	$(item).height(150);
-	$(item).css("margin", "10px");
+	//$(item).width(150);
+	//$(item).height(150);
+	//$(item).css("margin", "10px");
 
 	$(alink).attr("name", report.pet_name);
 	$(alink).attr("link", URL_PRDP + report.ID);
 	$(alink).attr("identity", report.ID);
 	$(alink).on("click", function(){
-		load_dialog($(this).attr("link"), $(this).attr("name"), SIZE_WIDTH_PRDP, "auto");
+		load_dialog({
+			"link": $(this).attr("link"), 
+			"title": $(this).attr("name"),
+			"width": SIZE_WIDTH_PRDP
+		});
 	});
 
 	$(pet_img).attr("src", STATIC_URL + report.img_path);
-	$(pet_img).width(120);
-	$(pet_img).height(120);
+	$(pet_img).width(150);
+	$(pet_img).height(150);
 	$(pet_img).css("margin", "0 auto");
 
 	//Appends
-	$(alink).append("<strong>" + report.pet_name + "</strong><br/>");
-	$(alink).append("Contact: " + report.proposed_by_username);					
+	$(alink).append("<strong style='display:block; text-align:center;'>" + report.pet_name + "</strong>");
+	$(alink).append("<span style='display:block; text-align:center;'>Contact: " + report.proposed_by_username + "</span>");					
 	$(alink).append(pet_img);
 	$(item).append(alink);					
 	return item;

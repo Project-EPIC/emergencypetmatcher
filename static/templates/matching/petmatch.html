@@ -54,19 +54,28 @@
     <script type="text/javascript">
         //Must have these django-rendered variables as global javascript variables in order to refer to them!
         var STATIC_URL = "{{ STATIC_URL }}";
-        var VOTED = "{{ user_has_voted }}";
-        var USER_ID = "{{ user.id }}";
+        var USER_ID = "{{ user.id }}";        
+        var USER_HAS_VOTED = "{{ user_has_voted }}";
+        var PETMATCH_IS_OPEN = "{{ petmatch.is_open }}";
+        var PETMATCH_IS_SUCCESSFUL = "{{ petmatch.is_successful }}";
         var PETMATCH_ID = "{{ petmatch.id }}";
         var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
-        var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";    
+        var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";  
         var LOST_PETREPORT = convert_to_javascript_obj("{{ petmatch.lost_pet.toJSON|escapejs }}");
         var FOUND_PETREPORT = convert_to_javascript_obj("{{ petmatch.found_pet.toJSON|escapejs }}");
+        var UPVOTE = "upvote";
+        var DOWNVOTE = "downvote";
+        var DOWNVOTE_BUTTON_ACTIVE_LINK = "{{ STATIC_URL }}images/icons/button_downvote_active.png";
+        var DOWNVOTE_BUTTON_INACTIVE_LINK = "{{ STATIC_URL }}images/icons/button_downvote_inactive.png";
+        var UPVOTE_BUTTON_ACTIVE_LINK = "{{ STATIC_URL }}images/icons/button_upvote_active.png";
+        var UPVOTE_BUTTON_INACTIVE_LINK = "{{ STATIC_URL }}images/icons/button_upvote_inactive.png";  
+
         //Setting up parameters for sharing on facebook and twitter
         var PETMATCH_URL = 'http://epm.cs.colorado.edu/matching/PetMatch/{{  petmatch.id }}';
         var PETMATCH_IMAGE = 'http://epm.cs.colorado.edu{{ STATIC_URL }}{{ petmatch.lost_pet.img_path }}';
-        var PETMATCH_TITLE = 'A Pet Report Matching at EPM';
+        var PETMATCH_TITLE = "#Pet-Matching on #EPM";
         var PETMATCH_CAPTION ='EmergencyPetMatcher';
-        var PETMATCH_SUMMARY = 'A {{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Named: {{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }} through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
+        var PETMATCH_SUMMARY = "{{ petmatch.lost_pet.status }} {{ petmatch.lost_pet.pet_type }} (Name:{{ petmatch.lost_pet.pet_name }}) has been proposed to match a {{ petmatch.found_pet.status }} {{ petmatch.found_pet.pet_type }}. #cuboulder #epic";
     </script>
     {% endblock js %}
 
@@ -85,10 +94,11 @@
 
         <!-- Share Buttons -->
         <div id="sharebuttons" style="height:50px; float:right; padding-top:10px;">
-          <font style="font-size:14px; font-weight:bold;"> Share this pet on </font>
-          <a id="facebook_share_pr" title="Share on Facebook" name="fb_share" type="button_count">
-          <img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a>
-          <a id="twitter_share_pr" title="Share on Twitter">
+          <font style="font-size:14px; font-weight:bold;"> Share this match on </font>
+          <!-- Facebook
+          <a id="facebook_share_pm" title="Share on Facebook" name="fb_share" type="button_count">
+          <img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a> -->
+          <a id="twitter_share_pm" title="Share on Twitter">
           <img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22" /></a>
         </div>
       </div>
@@ -102,7 +112,7 @@
       </ul>
       {% endblock messages %} 
 
-      <div>
+      <div id="pmdp_title">
         <!-- PMDP Title -->
         <strong style="display:block; text-align:center; font-size:24px; margin-bottom:10px;">{{ petmatch.lost_pet.pet_name }} with {{ petmatch.found_pet.pet_name }}</strong>      
 

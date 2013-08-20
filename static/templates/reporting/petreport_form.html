@@ -104,10 +104,11 @@
 							<li><span id="id_description_count"/></span></li>
 							<li><textarea id="id_description" maxlength="{{ PETREPORT_DESCRIPTION_LENGTH }}" rows="10" cols="30" name="description"></textarea></li><br/>
 						{% elif "Upload an Image" in field.label %}
-							<li>
+							<li style="width: 250px;">
 								<div id="preview_img" style="border:2px dashed gray; width:250px; height:250px; margin:10px 10px 10px 0px;">
 									<strong style="width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;"> Pet Picture Preview </strong>
 								</div>
+								<strong id="rotate_instructions" style="display:none; margin:5px auto 5px auto; text-align:center;"> Click on the image to rotate it </strong>
 								<input id="id_img_rotation" name="img_rotation" type="hidden" value="0"/>
 							</li>
 							<li> {{ field }} </li><br/>

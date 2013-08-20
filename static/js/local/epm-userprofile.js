@@ -1,13 +1,23 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
 
-
-
 	//Link to click to open to the PRDP
-	$(".prdp_thumb a").click(function(){ load_dialog($(this).attr("link"), $(this).attr("name"), SIZE_WIDTH_PRDP, "auto"); });
+	$(".prdp_thumb a").click(function(){ 
+        load_dialog({
+            "link": $(this).attr("link"), 
+            "title": $(this).attr("name"), 
+            "width": SIZE_WIDTH_PRDP
+        });
+    });
 
 	//Link to click to open to the PMDP
-    $(".pmdp_dialog a").click(function(){ load_dialog($(this).attr("link"), $(this).attr("name"), SIZE_WIDTH_PMDP, "auto"); });	
+    $(".pmdp_dialog a").click(function(){ 
+        load_dialog({
+            "link": $(this).attr("link"), 
+            "title": $(this).attr("name"), 
+            "width": SIZE_WIDTH_PMDP
+        });
+    });	
 
     $("#userprof_msg_user").click(function(){
 

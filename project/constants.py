@@ -217,8 +217,8 @@ URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/"
 URL_REGISTRATION = "/accounts/register/"
 URL_REGISTRATION_COMPLETE = "/register/complete/"
 URL_ACTIVATION_COMPLETE = "/accounts/activate/complete/"
-URL_SOCIAL_AUTH_GET_DETAILS = "/get_social_details"
-URL_SOCIAL_AUTH_COMPLETE = "/socialauth_complete"
+URL_SOCIAL_AUTH_GET_DETAILS = "/social_auth_get_details"
+URL_SOCIAL_AUTH_COMPLETE = "/complete/"
 
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"

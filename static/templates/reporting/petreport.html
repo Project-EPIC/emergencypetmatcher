@@ -55,9 +55,9 @@
         var URL_BOOKMARK_PETREPORT = "{% url 'bookmark_PetReport' %}";
         var PETREPORT_URL = 'http://epm.cs.colorado.edu/reporting/PetReport/{{ pet_report.id }}';
         var PETREPORT_IMAGE = 'http://epm.cs.colorado.edu{{ STATIC_URL }}{{ pet_report.img_path }}';
-        var PETREPORT_TITLE = 'A Pet Report at EPM';
+        var PETREPORT_TITLE = '#Pet-Reporting on #EPM';
         var PETREPORT_CAPTION ='EmergencyPetMatcher';
-        var PETREPORT_SUMMARY = 'A {{ pet_report.status }} {{ pet_report.pet_type }} Pet Report (Named: {{ pet_report.pet_name }}) has been proposed through EmergencyPetMatcher Website, a part of Project EPIC at University of Colorado at Boulder.';
+        var PETREPORT_SUMMARY = '{{ pet_report.status }} {{ pet_report.pet_type }} (Name: {{ pet_report.pet_name }}) is now listed online. #cuboulder #epic';
       </script>    
     {% endblock js %} 
 
@@ -75,8 +75,9 @@
         <!-- Share Buttons -->
         <div id="sharebuttons" style="height:50px; float:right; padding-top:10px;">
           <font style="font-size:14px; font-weight:bold;"> Share this pet on </font>
+          <!-- Facebook 
           <a id="facebook_share_pr" title="Share on Facebook" name="fb_share" type="button_count">
-          <img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a>
+          <img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a> -->
           <a id="twitter_share_pr" title="Share on Twitter">
           <img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22" /></a>
         </div>
@@ -142,8 +143,8 @@
       <div class="pet_thumb_container" style="margin-left:auto; margin-right:auto;"> 
         {% for pet_match in matches %} 
           <div class="pmdp_thumb">
-              <a href = "{% url 'get_PetMatch' pet_match.id %}" name = "{{ pet_match.found_pet.pet_name }} with {{ pet_match.lost_pet.pet_name }}"
-                style="text-decoration:none; color:#663399; font-size:12px;}"
+              <a link = "{% url 'get_PetMatch' pet_match.id %}" name = "{{ pet_match.lost_pet.pet_name }} with {{ pet_match.found_pet.pet_name }}"
+                style="text-decoration:none; color:#663399; font-size:12px;"
                 title="{{ pet_match.lost_pet.pet_name }}: Lost {{ pet_match.lost_pet.pet_type }} / {{ pet_match.found_pet.pet_name }}: Found {{ pet_match.found_pet.pet_type }}">
               <strong style="text-align:center; display:block;">{{ pet_match.lost_pet.pet_name }} with {{ pet_match.found_pet.pet_name }}</strong>
               <img src="{{ STATIC_URL}}{{ pet_match.lost_pet.img_path }}" width="60" height="60"/>

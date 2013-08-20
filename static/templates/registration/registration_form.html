@@ -27,19 +27,19 @@
 	{% block content_title %} <h2>Register for an Account </h2>{% endblock content_title %}
 	{% block content_subtitle %} <h3>Please register below with username, email, and password. </h3>{% endblock content_subtitle %}
 	<div>
-		<form method = "post" style="padding:5px; width:350px;" enctype="multipart/form-data">
+		<form enctype="multipart/form-data" method = "post" style="padding:5px;">
 			{% csrf_token %}
-			<table>
+			<table style="width:550px;">
 				{% for field in form %}
 				<tr>
-			    	<td><strong>{{ field.label_tag }} </strong></td>
-			    	<td>{{ field }}</td>
+			    	<td style="width:130px; display:inline-block;"><strong>{{ field.label_tag }} </strong></td>
+			    	<td style="display:inline-block; margin-left:20px;">{{ field }}</td>
 				</tr>
 				{% endfor %}
 		
 				<tr>
-					<td><strong>Date of Birth</strong></td>
-					<td><input id="id_date_born" type="text"/></td>
+					<td style="width:130px; display:inline-block;"><strong>Date of Birth</strong></td>
+					<td style="display:inline-block; margin-left:20px;"><input id="id_date_born" type="text"/></td>
 				</tr>
 
 				<!-- File Chooser 
@@ -47,18 +47,21 @@
 					<td><strong>Profile Picture </strong></td>
 					<td><input type="file" accept=".jpg, .png, .tiff"/></td>
 				</tr> -->
-
-				<tr><td colspan=2>	
-				<div style="padding-bottom:15px; padding-top:15px; width:300px;">
-					<input id="id_tc_check" type="checkbox"/>
-					<a id="id_tc_link" name="Terms and Conditions" href= "#" >I accept the terms and conditions.</a>	
-				</div>
-				</td></tr>
+				<!-- Terms and Conditions -->
+				<tr id="terms_id" style="display:none;">
+					<td>						
+						<textarea style="width:550px; height:300px; margin:10px 0px 10px 0px; text-align:center;"> </textarea>
+						<div style="padding-bottom:15px; padding-top:15px; width:300px;">							
+							<input id="id_tc_check" type="checkbox"/>
+							<strong style="text-align:center; margin-top:10px;" id="id_tc_link" name="Terms and Conditions">I accept the terms and conditions.</strong>	
+						</div>
+					</td>
+				</tr>
 			</table>
 
 			<div style="padding-bottom:10px; padding-top:15px; width:300px;">
-	 		<input id="id_register_button" type="submit" formaction="{% url 'registration_register' %}" value="Register" disabled/>
-	 		<input id="id_cancel_button" type="submit" formaction="{% url 'home' %}" value="Cancel">
+	 			<input id="id_register_button" class="epm_button" style="width:100px; height:30px;" type="submit" formaction="{% url 'registration_register' %}" value="Register"/>
+	 			<input id="id_cancel_button" class="epm_button" style="width:100px; height:30px;" type="submit" formaction="{% url 'home' %}" value="Cancel">
 	 		</div>
 		</form>	
 	</div>
@@ -68,9 +71,10 @@
 		<img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22"></img>
 		<a rel="nofollow" href="{% url 'socialauth_begin' 'twitter' %}">Enter using Twitter</a>
 	</div>
+	<!-- Facebook 
 	<div style="margin-top:10px; margin-bottom:10px;">
 		<img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22"></img>
 		<a rel="nofollow" href="{% url 'socialauth_begin' 'facebook' %}">Enter using Facebook</a><br/>
-	</div>
+	</div> -->
 </div>
 {% endblock content %}

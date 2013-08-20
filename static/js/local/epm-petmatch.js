@@ -3,25 +3,6 @@ $(document).ready(function(){
     //Variables to control for upvoting and downvoting and for readability.
     var downvote_button = $("#pmdp_downvote_button");
     var upvote_button = $("#pmdp_upvote_button");
-    var UPVOTE = "upvote";
-    var DOWNVOTE = "downvote";
-    var DOWNVOTE_BUTTON_ACTIVE_LINK = STATIC_URL + "images/icons/button_downvote_active.png";
-    var DOWNVOTE_BUTTON_INACTIVE_LINK = STATIC_URL + "images/icons/button_downvote_inactive.png";
-    var UPVOTE_BUTTON_ACTIVE_LINK = STATIC_URL + "images/icons/button_upvote_active.png";
-    var UPVOTE_BUTTON_INACTIVE_LINK = STATIC_URL + "images/icons/button_upvote_inactive.png";  
-    //alert(VOTED + " " + UPVOTE + " " + DOWNVOTE); //Diagnose problems
-
-    //User has upvoted before
-    if (VOTED == UPVOTE){
-      upvote_button.attr("src", UPVOTE_BUTTON_INACTIVE_LINK);
-      upvote_button.css("cursor", "default");
-    }
-
-    //User has downvoted before
-    else if (VOTED == DOWNVOTE){
-      downvote_button.attr("src", DOWNVOTE_BUTTON_INACTIVE_LINK);
-      downvote_button.css("cursor", "default");
-    }
 
     //When the User clicks on the DOWNVOTE Button...
     downvote_button.click(function(){ 
@@ -70,11 +51,22 @@ $(document).ready(function(){
 
     /***** Start things off. *****/
 
-    //Retrieve and display the lost pet report fields
-    display_PetReport_fields(LOST_PETREPORT, $("#lost_prdpfields"));
+    //User has upvoted before
+    if (USER_HAS_VOTED == UPVOTE){
+      upvote_button.attr("src", UPVOTE_BUTTON_INACTIVE_LINK);
+      upvote_button.css("cursor", "default");
+    }
 
-    //Retrieve and display the found pet report fields
-    display_PetReport_fields(FOUND_PETREPORT, $("#found_prdpfields"));
+    //User has downvoted before
+    else if (USER_HAS_VOTED == DOWNVOTE){
+      downvote_button.attr("src", DOWNVOTE_BUTTON_INACTIVE_LINK);
+      downvote_button.css("cursor", "default");
+    }
+
+    //Retrieve and display pet report fields
+    display_PetReport_fields({ "petreport": LOST_PETREPORT, "list": $("#lost_prdpfields") });
+    display_PetReport_fields({ "petreport": FOUND_PETREPORT, "list": $("#found_prdpfields") });
+    highlight_matches ($("#lost_prdpfields"), $("#found_prdpfields"));
 
     //Use the Zoom plugin to zoom Lost pet pic.
     $("#lost_pet_pic_wrapper img").on("mouseover", function(){
@@ -87,6 +79,19 @@ $(document).ready(function(){
       $(this).parent().zoom();
       $("#found_pet_pic_wrapper img:not(:first)").remove();
     });
+
+    //If the PetMatch is closed, then disallow voting.
+    if (PETMATCH_IS_OPEN == "False"){
+      $("#pmdp_downvote_button").attr("src", DOWNVOTE_BUTTON_INACTIVE_LINK);
+      $("#pmdp_downvote_button").css("cursor", "default");
+      $("#pmdp_upvote_button").attr("src", UPVOTE_BUTTON_INACTIVE_LINK);
+      $("#pmdp_upvote_button").css("cursor", "default");
+
+      if (PETMATCH_IS_SUCCESSFUL == "True")
+        $(".pmdp_messages").html("<li class='success'> This pet match is finally reunited with its owner. Thank you, digital volunteers!</li>");
+      else
+        $(".pmdp_messages").html("<li class='info'> This pet match is now being checked by its pet contacts.</li>");
+    }
 
 });
 
@@ -113,6 +118,15 @@ function vote (user_vote){
       $(".pmdp_messages").html("<li class='success'>" + data.message + "</li>");
       $("#pmdp_downvote_number").html(data.num_downvotes);
       $("#pmdp_upvote_number").html(data.num_upvotes);
+
+      if (data.threshold_reached == true){
+        //Disable the voting buttons - we are done voting on this PMDP.
+        $("#pmdp_downvote_button").attr("src", DOWNVOTE_BUTTON_INACTIVE_LINK);
+        $("#pmdp_downvote_button").css("cursor", "default");
+        $("#pmdp_upvote_button").attr("src", UPVOTE_BUTTON_INACTIVE_LINK);
+        $("#pmdp_upvote_button").css("cursor", "default");
+      }
+
       return true;
     },
     error: function(data){

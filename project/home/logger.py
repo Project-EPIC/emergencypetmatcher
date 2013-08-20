@@ -100,105 +100,114 @@ def get_activity_payload(logline, userprofile, current_userprofile, userprofile2
     #Grab the activity enum.
     log_activity = re.search("\[(.*)\]", logline)
     log_activity = log_activity.group(1)
-    print "ID FOUND: {%d}" % identifier
-    print "ACTIVITY FOUND: {%s}" % log_activity    
+
+    #Debug messages (remove when ready to deploy).
+    #print "get_activity_payload() =========="
+    #print "ID FOUND: {%d}" % identifier
+    #print "ACTIVITY FOUND: {%s}" % log_activity    
 
     #Form the activity payload.
     activity = {"userprofile_username":userprofile.user.username, "userprofile_id":str(userprofile.id)}
 
-    #If we have a current_userprofile (i.e. authenticated user)
-    if current_userprofile != None:
-        activity ["current_userprofile_id"] = str(current_userprofile.id)
+    try:
+        #If we have a current_userprofile (i.e. authenticated user)
+        if current_userprofile != None:
+            activity ["current_userprofile_id"] = str(current_userprofile.id)
 
-    #Begin the *switch* structure for activity payload forming.
-    if log_activity == ACTIVITY_ACCOUNT_CREATED:
-        activity ["activity"] = ACTIVITY_ACCOUNT_CREATED
+        #Begin the *switch* structure for activity payload forming.
+        if log_activity == ACTIVITY_ACCOUNT_CREATED:
+            activity ["activity"] = ACTIVITY_ACCOUNT_CREATED
 
-    elif log_activity == ACTIVITY_PETREPORT_SUBMITTED:
-        if petreport == None:
-            petreport = PetReport.objects.get(pk=identifier)
+        elif log_activity == ACTIVITY_PETREPORT_SUBMITTED:
+            if petreport == None:
+                petreport = PetReport.objects.get(pk=identifier)
 
-        assert isinstance(petreport, PetReport)
-        activity ["activity"] = ACTIVITY_PETREPORT_SUBMITTED
-        activity ["petreport_id"] = str(petreport.id)
-        
-        if petreport.pet_name.strip() == "unknown" or petreport.pet_name.strip() == "":
-            activity ["petreport_name"] = None
-        else:
+            assert isinstance(petreport, PetReport)
+            activity ["activity"] = ACTIVITY_PETREPORT_SUBMITTED
+            activity ["petreport_id"] = str(petreport.id)
+            
+            if petreport.pet_name.strip() == "unknown" or petreport.pet_name.strip() == "":
+                activity ["petreport_name"] = None
+            else:
+                activity ["petreport_name"] = petreport.pet_name
+
+        elif log_activity == ACTIVITY_PETREPORT_ADD_BOOKMARK:
+            if petreport == None:
+                petreport = PetReport.objects.get(pk=identifier)
+
+            assert isinstance(petreport, PetReport)
+            activity ["activity"] = ACTIVITY_PETREPORT_ADD_BOOKMARK
+            activity ["petreport_id"] = str(petreport.id)        
             activity ["petreport_name"] = petreport.pet_name
 
-    elif log_activity == ACTIVITY_PETREPORT_ADD_BOOKMARK:
-        if petreport == None:
-            petreport = PetReport.objects.get(pk=identifier)
+        elif log_activity == ACTIVITY_PETMATCH_PROPOSED:
+            if petmatch == None:
+                petmatch = PetMatch.objects.get(pk=identifier)
 
-        assert isinstance(petreport, PetReport)
-        activity ["activity"] = ACTIVITY_PETREPORT_ADD_BOOKMARK
-        activity ["petreport_id"] = str(petreport.id)        
-        activity ["petreport_name"] = petreport.pet_name
+            assert isinstance(petmatch, PetMatch)
+            activity ["activity"] = ACTIVITY_PETMATCH_PROPOSED
+            activity ["petmatch_id"] = str(petmatch.id)
+            activity ["petmatch_type"] = petmatch.lost_pet.pet_type
+            activity ["lostpet_name"] = petmatch.lost_pet.pet_name
+            activity ["foundpet_name"] = petmatch.found_pet.pet_name
 
-    elif log_activity == ACTIVITY_PETMATCH_PROPOSED:
-        if petmatch == None:
-            petmatch = PetMatch.objects.get(pk=identifier)
+        elif log_activity == ACTIVITY_PETMATCH_PROPOSED_FOR_BOOKMARKED_PETREPORT:
+            if petreport == None:
+                petreport = PetReport.objects.get(pk=identifier)
+            if petmatch == None:
+                petmatch = PetMatch.objects.get(pk=identifier)
 
-        assert isinstance(petmatch, PetMatch)
-        activity ["activity"] = ACTIVITY_PETMATCH_PROPOSED
-        activity ["petmatch_id"] = str(petmatch.id)
-        activity ["petmatch_type"] = petmatch.lost_pet.pet_type
-        activity ["lostpet_name"] = petmatch.lost_pet.pet_name
-        activity ["foundpet_name"] = petmatch.found_pet.pet_name
+            assert isinstance(petmatch, PetMatch)
+            assert isinstance(petreport, PetReport)
+            activity ["activity"] = ACTIVITY_PETMATCH_PROPOSED_FOR_BOOKMARKED_PETREPORT
+            activity ["petmatch_id"] = str(petmatch.id)
+            activity ["lostpet_name"] = petmatch.lost_pet.pet_name
+            activity ["foundpet_name"] = petmatch.found_pet.pet_name        
+            activity ["petreport_id"] = str(petreport.id)
+            activity ["petreport_name"] = petreport.pet_name
 
-    elif log_activity == ACTIVITY_PETMATCH_PROPOSED_FOR_BOOKMARKED_PETREPORT:
-        if petreport == None:
-            petreport = PetReport.objects.get(pk=identifier)
-        if petmatch == None:
-            petmatch = PetMatch.objects.get(pk=identifier)
+        elif log_activity == ACTIVITY_PETMATCH_UPVOTE or log_activity == ACTIVITY_PETMATCH_DOWNVOTE:
+            if petmatch == None:
+                petmatch = PetMatch.objects.get(pk=identifier)
 
-        assert isinstance(petmatch, PetMatch)
-        assert isinstance(petreport, PetReport)
-        activity ["activity"] = ACTIVITY_PETMATCH_PROPOSED_FOR_BOOKMARKED_PETREPORT
-        activity ["petmatch_id"] = str(petmatch.id)
-        activity ["lostpet_name"] = petmatch.lost_pet.pet_name
-        activity ["foundpet_name"] = petmatch.found_pet.pet_name        
-        activity ["petreport_id"] = str(petreport.id)
-        activity ["petreport_name"] = petreport.pet_name
+            assert isinstance(petmatch, PetMatch)
+            activity ["activity"] = "ACTIVITY_PETMATCH_VOTE"
+            activity ["petmatch_id"] = str(petmatch.id)
+            activity ["petmatch_type"] = petmatch.lost_pet.pet_type
+            activity ["lostpet_name"] = petmatch.lost_pet.pet_name
+            activity ["foundpet_name"] = petmatch.found_pet.pet_name        
 
-    elif log_activity == ACTIVITY_PETMATCH_UPVOTE or log_activity == ACTIVITY_PETMATCH_DOWNVOTE:
-        if petmatch == None:
-            petmatch = PetMatch.objects.get(pk=identifier)
+        elif log_activity == ACTIVITY_FOLLOWING:
+            if userprofile2 == None:
+                userprofile2 = UserProfile.objects.get(pk=identifier)
 
-        assert isinstance(petmatch, PetMatch)
-        activity ["activity"] = "ACTIVITY_PETMATCH_VOTE"
-        activity ["petmatch_id"] = str(petmatch.id)
-        activity ["petmatch_type"] = petmatch.lost_pet.pet_type
-        activity ["lostpet_name"] = petmatch.lost_pet.pet_name
-        activity ["foundpet_name"] = petmatch.found_pet.pet_name        
+            assert isinstance(userprofile2, UserProfile)
+            activity ["activity"] = ACTIVITY_FOLLOWING
+            activity ["userprofile2_id"] = str(userprofile2.id)
+            activity ["userprofile2_username"] = userprofile2.user.username
 
-    elif log_activity == ACTIVITY_FOLLOWING:
-        if userprofile2 == None:
-            userprofile2 = UserProfile.objects.get(pk=identifier)
+        elif log_activity == ACTIVITY_FOLLOWER:
+            if userprofile2 == None:
+                userprofile2 = UserProfile.objects.get(pk=identifier)
 
-        assert isinstance(userprofile2, UserProfile)
-        activity ["activity"] = ACTIVITY_FOLLOWING
-        activity ["userprofile2_id"] = str(userprofile2.id)
-        activity ["userprofile2_username"] = userprofile2.user.username
+            assert isinstance(userprofile2, UserProfile)
+            activity ["activity"] = ACTIVITY_FOLLOWER
+            activity ["userprofile2_id"] = str(userprofile2.id)
+            activity ["userprofile2_username"] = userprofile2.user.username
 
-    elif log_activity == ACTIVITY_FOLLOWER:
-        if userprofile2 == None:
-            userprofile2 = UserProfile.objects.get(pk=identifier)
-
-        assert isinstance(userprofile2, UserProfile)
-        activity ["activity"] = ACTIVITY_FOLLOWER
-        activity ["userprofile2_id"] = str(userprofile2.id)
-        activity ["userprofile2_username"] = userprofile2.user.username
-
-    else:
-        return None #We don't want to return payloads for some activities (e.g. ACTIVITY_LOGIN).
+        else:
+            return None #We don't want to return payloads for some activities (e.g. ACTIVITY_LOGIN).
         
+    #Sometimes, we don't get so lucky and the Model object isn't found in the DB. Warn and then return None.
+    except Exception as e:
+        print ("ERROR in Logger.get_activity_payload():[%s]" % e)
+        return None 
+
     return activity
 
 
 '''Helper function to get the most recent activity from an input UserProfile and (optionally) activity type.'''
-def get_recent_activities_from_log(userprofile, current_userprofile, since_date=None, num_activities=100, activity=None):
+def get_activities_from_log(userprofile, current_userprofile, since_date=None, num_activities=10, activity=None):
     # userprofile: the userprofile whose log file is read to get recent activiy feeds
     # current_userprofile: the authenticated user who gets the activity feeds
     # since_date: used to get all log activities that happened before that date 
@@ -251,20 +260,21 @@ def get_recent_activities_from_log(userprofile, current_userprofile, since_date=
 
                 #Grab the activity payload and ship it off to the receiver.
                 feed = get_activity_payload(line, userprofile, current_userprofile=current_userprofile, userprofile2=userprofile2, petreport=petreport, petmatch=petmatch)
-                num_log = num_log + 1
 
+                #If the activity is good, then +1.
                 if feed != None:
+                    num_log += 1
                     activities.append((str(log_date), feed))
 
     except IOError as i:
-        print "[ERROR]: Problem in get_recent_activities_from_log(): {%s}" % i
+        print "[ERROR]: Problem in get_activities_from_log(): {%s}" % i
         return activities
 
     logger.close()
     return activities
 
 
-def get_bookmark_activities(userprofile, since_date=None):
+def get_bookmarking_activities_from_log(userprofile, since_date=None, num_activities=10):
     assert isinstance(userprofile, UserProfile)
 
     if since_date == None:
@@ -274,6 +284,7 @@ def get_bookmark_activities(userprofile, since_date=None):
 
     # Initialize the activity list
     activities = [] 
+    num_log = 0
 
     # Loop through all bookmarked PetReports for this UserProfile
     for bookmarked_petreport in userprofile.bookmarks_related.all():
@@ -286,6 +297,10 @@ def get_bookmark_activities(userprofile, since_date=None):
 
         for related_petmatch in related_petmatches:
 
+            #If we've passed our number of activities limit, stop.
+            if num_log > num_activities:
+                break            
+
             # If the log date is older than the last logout date, or
             # If the pet match proposer is the same as the current UserProfile, 
             # Ignore that activity            
@@ -293,14 +308,18 @@ def get_bookmark_activities(userprofile, since_date=None):
             if proposed_date < since_date or related_petmatch.proposed_by == userprofile:
                 continue
 
-            pprint ("[DEBUG]: bookmarked_petreport: %s" % bookmarked_petreport)
-            pprint ("[DEBUG]: related_petmatch: %s" % related_petmatch)
+            #pprint ("[DEBUG]: bookmarked_petreport: %s" % bookmarked_petreport)
+            #pprint ("[DEBUG]: related_petmatch: %s" % related_petmatch)
 
             # Create a temp log
             log = "%s proposed the PetMatch object with ID{%d} for bookmarked PetReport object with ID{%d} \n" % (related_petmatch.proposed_by.user.username, related_petmatch.id, bookmarked_petreport.id)
             log = ("[%s]: " + log) % ACTIVITY_PETMATCH_PROPOSED_FOR_BOOKMARKED_PETREPORT
             activity_payload = get_activity_payload(log, userprofile=related_petmatch.proposed_by, current_userprofile=related_petmatch.proposed_by, userprofile2=None, petreport=bookmarked_petreport, petmatch=related_petmatch)
-            activities.append([str(proposed_date), activity_payload])
+
+            #If the activity is good, then +1.
+            if activity_payload != None:
+                num_log += 1
+                activities.append([str(proposed_date), activity_payload])
 
     return activities
 

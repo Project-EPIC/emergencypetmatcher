@@ -180,18 +180,21 @@ header p {
 	padding: 3px;
 	background-color:#FFB6C1;
 	border: 2px solid #B22222;
+	text-align:center;
 }
 
 #messages .success {
 	padding: 3px;
 	background-color:#90EE90;
 	border: 2px solid #006400;
+	text-align:center;
 }
 
 #messages .info {
 	padding: 3px;
 	background-color:#87CEFA;
 	border: 2px solid #00008B;
+	text-align:center;
 }
 
 .errorlist {
@@ -273,6 +276,7 @@ header p {
 	border-radius: 2px;
 	z-index:1;
 	display: none; /** Hide items initially to avoid a flicker effect **/
+	width:170px;
 	cursor: pointer;
 	padding: 4px;
 	word-wrap: break-word;
@@ -420,11 +424,11 @@ h1.found {
 /******* About Page *******/
 
 #about_pets {
-
 	margin-left:auto;
 	margin-right:auto;
-	height: 100px;
-	width: 950px;
+	height: 50px;
+	display:block;
+	text-align: center;
 	overflow:hidden;
 
 }
@@ -434,7 +438,6 @@ h1.found {
 }
 
 #about_images {
-	height:300px;
 	width:850px;
 	margin-bottom:20px;
 	margin-left:auto;
@@ -488,10 +491,10 @@ h1.found {
 /*CSS for the edit profile page*/
 
 .edit_profile_input_box{
-
 	margin-top:10px; 
-	margin-bottom:50px; 
+	margin-bottom:20px; 
 	width:400px;
+	height:300px;
 }
 
 .edit_profile_subtitle{
@@ -651,6 +654,7 @@ h1.found {
 
 .prdp_info {
 	list-style-type: none;
+	vertical-align: top;
 	font-size:14px;
 	width:400px;
 	height:350px;
@@ -710,6 +714,8 @@ h1.found {
 .epm_button {
 	border: 1px solid #000000;
 	background-color: #ECF0EC;
+	text-align:center;
+	cursor:pointer;
 	height: auto;
 	width: auto;
 	font-weight: bold;
@@ -924,12 +930,14 @@ img.bookmark_x{
 }
 
 #pmdp_downvote_button {
+	background: url(../images/icons/button_downvote_active.png) no-repeat fixed center;	
 	height:90px;
 	width: 85px;
 	cursor: pointer;
 }
 
 #pmdp_upvote_button {
+	background:url(../images/icons/button_upvote_active.png) no-repeat fixed center;	
 	height:90px;
 	width: 85px;
 	cursor:pointer;
@@ -982,11 +990,6 @@ img.bookmark_x{
 	height:50px; 
 	border: 1px solid black;"
 
-}
-
-p.verification_message {
-	font-size: 20px;
-	margin-left: 27%;
 }
 
 

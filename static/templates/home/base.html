@@ -62,15 +62,13 @@
 			var PETREPORT_COUNT = "{{ petreport_count }}";
 			var PETMATCH_COUNT = "{{ petmatch_count }}";
 			var BOOKMARK_COUNT = "{{ bookmark_count }}";
+			var SUCCESSFUL_PETMATCH_COUNT = "{{ successful_petmatch_count }}";
 	    </script>
 		{% endblock js %}
 
 		{% block headers %} {% endblock headers %} 
 	</head>	
 	<body>
-
-	<!-- Dialogs Go here! -->
-	<div id="dialog"></div>
 
 	<!-- Loading the Facebook SDK -->
 	<script src='http://connect.facebook.net/en_US/all.js'></script>
@@ -84,8 +82,8 @@
 	            status     : true, 
 	            cookie     : true,
 	            xfbml      : true,
-	            oauth      : true 
-	            //channelUrl : '//WWW.YOUR_DOMAIN.COM/channel.html', // Channel File for x-domain communication
+	            oauth      : true,
+	            channelUrl : '//WWW.YOUR_DOMAIN.COM/channel.html', // Channel File for x-domain communication
 	        }); 
 		};
 	</script>	
@@ -106,9 +104,7 @@
 				<ul id="menu">
 					<li><a href="{% url 'home' %}" class="active"> Home</a></li>
 					{% if user.is_authenticated %}
-					<li>
-						<a href="{% url 'get_UserProfile_page' user.get_profile.id %}">{{ user.username }}</a>
-					</li>
+					<li><a href="{% url 'get_UserProfile_page' user.get_profile.id %}">{{ user.username }}</a></li>
 					<li>
 						<form method = "post" action= "{% url 'logout_User' %}">
 							{% csrf_token %} <input id="logout" type="submit" value="Logout"/>
@@ -152,8 +148,11 @@
 				<ul id="nav">
 					<li id="nav_petreports"><a href="#">Pets</a></li>
 					<li id="nav_petmatches"><a href="#">Pet Matches</a></li>
+					{% if successful_petmatch_count > 0 %}
+						<li id="nav_successful_petmatches"><a href="#">Reunited Pets</a></li>
+					{% endif %}
 					{% if user.is_authenticated %}
-					<li id="nav_bookmarked"><a href="#">Bookmarked</a></li>	
+						<li id="nav_bookmarked"><a href="#">Bookmarked</a></li>	
 					{% endif %}
 				</ul>
 				{% endblock navbar %}

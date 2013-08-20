@@ -44,7 +44,7 @@
 			{% if user.userprofile.id == show_profile.user.userprofile.id or show_profile in user.userprofile.following.all %}
 			    <tr align="left"><th>First name:</th> <td>{{ show_profile.user.first_name|default:"" }}</td></tr>
 			    <tr align="left"><th>Last name:</th> <td>{{ show_profile.user.last_name|default:"" }}</td></tr>
-			    <tr align="left"><th>Social Points:</th><td style="font-weight:bold;"> {{ show_profile.reputation }} </td></tr>
+			    <!-- Show when reputation is ready <tr align="left"><th>Social Points:</th><td style="font-weight:bold;"> {{ show_profile.reputation }} </td></tr> -->
 	    	{% endif %}
 	    	{% if show_profile.user.username == user.username %}
 	    		<tr align="left"><th>Email:</th> <td>{{ show_profile.user.email|default:"" }}</td></tr>

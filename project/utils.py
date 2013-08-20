@@ -90,6 +90,7 @@ def simplify_PetReport_dict(petreport):
 #Given an image path, create an Image and return it, catching and ignoring any errors.
 def open_image(img_path):
 	try:
+		img = None
 		img = Image.open(img_path)
 		img.load()
 	except IOError:
@@ -175,7 +176,6 @@ def create_random_User(i, pretty_name=True):
 		print_error_msg (str(e.message))
 
 	userprofile = user.get_profile()
-	userprofile.set_activity_log()
 	return (user, password)
 
 #returns a random list of UserProfiles

@@ -184,7 +184,6 @@ EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
 EMAIL_HOST_PASSWORD = '3m3rgEncY'
 
 AUTHENTICATION_BACKENDS = (
-
     'django.contrib.auth.backends.ModelBackend',
     'social_auth.backends.twitter.TwitterBackend',
     'social_auth.backends.facebook.FacebookBackend',

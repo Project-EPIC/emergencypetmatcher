@@ -2,6 +2,7 @@
 URL_HOME = '/'
 URL_GET_ACTIVITIES = "/get_activities_json"
 URL_GET_PETMATCHES = "/get_PetMatches"
+URL_GET_SUCCESSFUL_PETMATCHES = "/get_successful_PetMatches"
 URL_GET_PETREPORT = "/get_PetReport/"
 URL_GET_PETREPORTS = "/get_PetReports"
 URL_GET_BOOKMARKS = "/get_bookmarks"
@@ -36,10 +37,18 @@ SIZE_WIDTH_PMDP = 770
 /******************************* Utility functions *******************************************/
 
 //GLOBAL JS Functions
-function load_dialog(link, title, width, height){
+function load_dialog(options){
+
+    link = options ["link"] || null;
+    title = options ["title"] || "";
+    width = options ["width"] || "auto";
+    height = options ["height"] || "auto";
+
+    if (link == null)
+        return null;
 
     //Take care of the options first.
-    var options = {
+    var dialog_options = {
         autoOpen: true,
         position: "top",
         closeOnEscape: true,
@@ -55,34 +64,8 @@ function load_dialog(link, title, width, height){
     };
 
     //Launch the dialog.
-    var dialog_box = $("<div></div>").load(link).dialog(options);
+    var dialog_box = $("<div></div>").load(link).dialog(dialog_options);
 }
-
-
-/*function that sends out a synchronous post request by creating an invisible form*/
-function postIt(url, data){
-
-    $('body').append($('<form/>', {
-      id: 'jQueryPostItForm',
-      method: 'POST',
-      action: url
-    }));
-
-    for(var i in data){
-      $('#jQueryPostItForm').append($('<input/>', {
-        type: 'hidden',
-        name: i,
-        value: data[i]
-      }));
-    }
-
-    $('#jQueryPostItForm').submit();
-}
-
-function share_on_facebook_old(url, image, title, summary){
-	window.open('http://www.facebook.com/sharer.php?s=100&p[url]=' + url + '&p[images][0]=' + image + '&p[title]=' + title + '&p[summary]=' + summary,'newWindow', 'width=700, height=430');
-	return false;
-}	
 
 function share_on_facebook(url, image, title, caption, summary) {
  
@@ -110,6 +93,8 @@ function share_on_facebook(url, image, title, caption, summary) {
 
 
 function share_on_twitter(url, image, title, summary){
+    title = escape(title);
+    summary = escape(summary);
 	window.open('http://twitter.com/share?url=' + url + '&text=' + title + ': ' + summary, 'newWindow', 'width=700, height=430');
 }
 
@@ -119,33 +104,67 @@ function convert_to_javascript_obj(json_str){
     return obj;
  }
 
-function display_PetReport_fields(petreport, prdplist){
-    prdplist.html("");
-    prdplist.append("<li><b>Pet Name:</b> " + petreport.pet_name + "</li>");
-    prdplist.append("<li><b>Pet Type:</b> " + petreport.pet_type + "</li>");
-    prdplist.append("<li><b>Lost/Found:</b> " + petreport.status + "</li>");
-    prdplist.append("<li><b>Contact:</b> <a href= '" + URL_USERPROFILE + petreport.proposed_by + "/' >" + petreport.proposed_by_username + "</a></li>");
-    prdplist.append("<li><b>Date " + petreport.status + ":</b> " + petreport.date_lost_or_found + "</li>");
-    prdplist.append("<li><b>Location:</b> " + petreport.location + "</li>");
+
+
+function display_PetReport_fields(options){
+    var petreport = options ["petreport"] || null;
+    var list = options ["list"] || null;
+
+    if (petreport == null || list == null)
+        return null;
+
+    list.html("");
+    list.append("<li><b>Pet Name:</b> " + petreport.pet_name + "</li>");
+    list.append("<li><b>Pet Type:</b> " + petreport.pet_type + "</li>");
+    list.append("<li><b>Lost/Found:</b> " + petreport.status + "</li>");
+    list.append("<li><b>Contact:</b> <a href= '" + URL_USERPROFILE + petreport.proposed_by + "/' >" + petreport.proposed_by_username + "</a></li>");
+    list.append("<li><b>Date " + petreport.status + ":</b> " + petreport.date_lost_or_found + "</li>");
+    list.append("<li><b>Location:</b> " + petreport.location + "</li>");
 
     //Treat the microchip ID specially.
     if (petreport.microchip_id != "")
-        prdplist.append("<li><b>Microchipped: </b>Yes</li>");
+        list.append("<li><b>Microchipped: </b>Yes</li>");
     else
-        prdplist.append("<li><b>Microchipped: </b>No</li>");
+        list.append("<li><b>Microchipped: </b>No</li>");
 
-    prdplist.append("<li><b>Spayed/Neutered:</b> " + petreport.spayed_or_neutered + "</li>");
-    prdplist.append("<li><b>Age:</b> " + petreport.age + "</li>");
-    prdplist.append("<li><b>Sex:</b> " + petreport.sex + "</li>");
-    prdplist.append("<li><b>Breed:</b> " + petreport.breed + "</li>");
-    prdplist.append("<li><b>Color:</b> " + petreport.color + "</li>");
-    prdplist.append("<li><b>Size:</b> " + petreport.size + "</li>");
-    prdplist.append("<li><b>Tag and Collar Information:</b></li>");
-    prdplist.append("<li class='pr_desc'>" + petreport.tag_info + "</li>");
-    prdplist.append("<li><b>Description:</b></li>");
-    prdplist.append("<li class='pr_desc'>" + petreport.description + "</li>");
+    list.append("<li><b>Spayed/Neutered:</b> " + petreport.spayed_or_neutered + "</li>");
+    list.append("<li><b>Age:</b> " + petreport.age + "</li>");
+    list.append("<li><b>Sex:</b> " + petreport.sex + "</li>");
+    list.append("<li><b>Breed:</b> " + petreport.breed + "</li>");
+    list.append("<li><b>Color:</b> " + petreport.color + "</li>");
+    list.append("<li><b>Size:</b> " + petreport.size + "</li>");
+    list.append("<li><b>Tag and Collar Information:</b></li>");
+    list.append("<li class='pr_desc'>" + petreport.tag_info + "</li>");
+    list.append("<li><b>Description:</b></li>");
+    list.append("<li class='pr_desc'>" + petreport.description + "</li>");
 }
 
+function highlight_matches(list1, list2){
+    //First, initialize and clear off pre-existing highlights.
+    var items1 = $(list1).children("li");
+    var items2 = $(list2).children("li");
+    $(items1).each(function(){ $(this).css("color", "black"); });
+    $(items2).each(function(){ $(this).css("color", "black"); });
 
+    //Iterate through each field and check if the value matches in both lists.
+    for (var i = 0; i < items1.length; i++){
+        innerText1 = items1[i].innerText;
+        innerText2 = items2[i].innerText;
+
+        if (innerText1.match("Tag and Collar Information:") != null)
+            continue;
+
+        if (innerText1.match("Description:") != null)
+            continue;
+
+        if (innerText1 == "" || innerText2 == "")
+            continue;
+
+        if (innerText1 == innerText2){
+            $(items1[i]).css("color", "blue");
+            $(items2[i]).css("color", "blue");
+        }
+    }
+}
 
 

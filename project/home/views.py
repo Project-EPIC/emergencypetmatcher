@@ -7,8 +7,8 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect
 from django.contrib.messages.api import get_messages
 from social_auth import __version__ as version
-from social_auth.utils import setting
 from social_auth.views import auth
+from social_auth.utils import setting
 from django.core.mail import EmailMessage
 from django.db import IntegrityError
 from django.http import Http404
@@ -37,22 +37,19 @@ def home (request):
     #Get the petreport and petmatch count for pagination purposes.
     petreport_count = len(PetReport.objects.filter(closed=False))
     petmatch_count = len(PetMatch.objects.filter(is_open=True))
+    successful_petmatch_count = len(PetMatch.objects.filter(is_open=False))
+    context =  {'petreport_count':petreport_count,
+                'petmatch_count':petmatch_count,
+                'successful_petmatch_count': successful_petmatch_count,
+                'version': version}
 
-    if request.user.is_authenticated() == True:
-        #Also get bookmark count for pagination purposes.
+    #Also get bookmark count for pagination purposes.
+    if request.user.is_authenticated() == True:    
         up = request.user.get_profile()
         bookmark_count = len(up.bookmarks_related.all())
-        return render_to_response(HTML_HOME, {  'petreport_count':petreport_count, 
-                                                'petmatch_count':petmatch_count,
-                                                'bookmark_count':bookmark_count,
-                                                'last_login': request.session.get('social_auth_last_login_backend'), 
-                                                'version':version}, 
-                                                RequestContext(request))
-    else:
-        return render_to_response(HTML_HOME, {  'petreport_count':petreport_count,
-                                                'petmatch_count':petmatch_count,
-                                                'version': version}, 
-                                                RequestContext(request))
+        context.update({ "bookmark_count": bookmark_count })
+
+    return render_to_response(HTML_HOME, context, RequestContext(request))
 
 def get_activities_json(request):
     #Let's populate the activity feed based upon whether the user is logged in.
@@ -67,27 +64,28 @@ def get_activities_json(request):
             # Get all activities that are associated with the UserProfiles I follow
             print_info_msg ("Fetching activities related to userprofiles I follow...")
             for following in current_userprofile.following.all().order_by("?")[:ACTIVITY_FEED_LENGTH]:
-                activities += logger.get_recent_activities_from_log(userprofile=following, current_userprofile=current_userprofile,
+                activities += logger.get_activities_from_log(userprofile=following, current_userprofile=current_userprofile,
                     since_date=current_userprofile.last_logout) 
 
             # Get all activities from (my) UserProfile's log file that show who has followed (me).
             print_info_msg ("Fetching activities related to userprofiles who have followed me...")
-            activities += logger.get_recent_activities_from_log(userprofile=current_userprofile, current_userprofile=current_userprofile, 
+            activities += logger.get_activities_from_log(userprofile=current_userprofile, current_userprofile=current_userprofile, 
                  since_date=current_userprofile.last_logout, activity=ACTIVITY_FOLLOWER)
         
             # Get all activities that are associated to the PetReports (I) bookmarked
             print_info_msg ("Fetching activities related to bookmarks...")
-            activities += logger.get_bookmark_activities(userprofile=current_userprofile, since_date=current_userprofile.last_logout)
+            activities += logger.get_bookmarking_activities_from_log(userprofile=current_userprofile, since_date=current_userprofile.last_logout)
 
         else:
             print_info_msg ("get_activities_json(): Anonymous User - random sample of activities...")
             # Get random activities for the anonymous user           
             for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:ACTIVITY_FEED_LENGTH]:
-                activities += logger.get_recent_activities_from_log(userprofile=userprof, current_userprofile=None, num_activities=1)
+                activities += logger.get_activities_from_log(userprofile=userprof, current_userprofile=None, num_activities=1)
 
 
-        # Sort the activity feed list according the log date
-        activities.sort() 
+        # Sort the activity feed list according the log date, and get only ACTIVITY_FEED_LENGTH of those activities back.
+        activities = activities [:ACTIVITY_FEED_LENGTH] 
+        activities.sort()
 
         # Remove log date info and include only feed text 
         temp_activities = []
@@ -102,7 +100,7 @@ def get_activities_json(request):
 
         #Zip it up in JSON and ship it out as an HTTP Response.
         json = simplejson.dumps ({"activities":activities})
-        pprint(activities)
+        #pprint(activities)
         return HttpResponse(json, mimetype="application/json")     
 
     else:
@@ -154,17 +152,32 @@ def get_PetMatch(request, petmatch_id):
 
 def get_PetMatches(request, page=None):
     if request.is_ajax() == True:
-
-        #Check if there's a specified page number.
-        if (page != None and page > 0):
-            page = int(page)
-            pet_matches = PetMatch.objects.filter(is_open = True).order_by("id").reverse()[((page-1) * NUM_PETMATCHES_HOMEPAGE):((page-1) * NUM_PETMATCHES_HOMEPAGE + NUM_PETMATCHES_HOMEPAGE)]
-        else:
-            #Get Pet Match objects and send them off as JSON.
-            pet_matches = PetMatch.objects.filter(is_open = True).order_by("id").reverse()
+        filtered_matches = PetMatch.objects.filter(is_open=True).order_by("id").reverse()
+        pet_matches = PetMatch.get_PetMatches_by_page(filtered_matches, page)
 
         #Get the petmatch count for pagination purposes.
-        petmatch_count = len(PetMatch.objects.filter(is_open=True))
+        petmatch_count = len(filtered_matches)
+
+        #Zip it up in JSON and ship it out as an HTTP Response.
+        pet_matches = [{"ID": pm.id, 
+                        "proposed_by_username": pm.proposed_by.user.username,
+                        "lost_pet_name": pm.lost_pet.pet_name, 
+                        "found_pet_name": pm.found_pet.pet_name, 
+                        "lost_pet_img_path": pm.lost_pet.thumb_path.name,
+                        "found_pet_img_path": pm.found_pet.thumb_path.name } for pm in pet_matches]
+
+        json = simplejson.dumps ({"pet_matches_list":pet_matches, "count":len(pet_matches), "total_count": petmatch_count})
+        return HttpResponse(json, mimetype="application/json")
+    else:
+        raise Http404
+
+def get_successful_PetMatches(request, page=None):
+    if request.is_ajax() == True:
+        filtered_matches = PetMatch.objects.filter(is_successful=True).order_by("id").reverse()
+        pet_matches = PetMatch.get_PetMatches_by_page(filtered_matches, page)
+
+        #Get the petmatch count for pagination purposes.
+        petmatch_count = len(filtered_matches)
 
         #Zip it up in JSON and ship it out as an HTTP Response.
         pet_matches = [{"ID": pm.id, 
@@ -348,10 +361,79 @@ def registration_disallowed (request):
     messages.error (request, "Sorry, we are not accepting registrations at this time. Please try again later.")
     return home(request)
 
-def social_auth_disallowed (request):
-    messages.error (request, "Sorry, we can not accept your social registration. Please try again later.")
-    return home(request)
+def social_auth_get_details (request):
+    print_info_msg("at home.views.social_auth_get_details")
+    name = setting('SOCIAL_AUTH_PARTIAL_PIPELINE_KEY', 'partial_pipeline')
+    details = request.session[name]['kwargs']['details']
+    backend = request.session[name]['backend']
+    link = None
+    username = ""
+    email = ""  
+    
+    #We have retrieved a picture link from Facebook OR from Twitter, otherwise raise Http404.
+    if backend =='facebook':
+        # profile pic
+        pic_url = "http://graph.facebook.com/%s/picture?type=large" % request.session[name]['kwargs']['response']['id']
+        # personal webpage
+        link = request.session[name]['kwargs']['response']['link']
 
+    elif backend == 'twitter':
+        pic_url = request.session[name]['kwargs']['response'].get('profile_image_url', '').replace('_normal', '')
+    else:
+        raise Http404
+
+    #If the first-time user submits the form...
+    if request.method == 'POST':
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")        
+
+        #Grab the username from the POST dict.
+        if request.POST.get("username").strip():
+            existing_profile = UserProfile.get_UserProfile(username = request.POST.get("username"))
+
+            if existing_profile != None:
+                messages.error(request, "Sorry! '%s' already exists. Please try another one." % request.POST.get('username'))
+            else:
+                username = request.POST.get("username")
+        else:
+            messages.error(request, "Username field is required.")
+
+        #Grab the email from the POST dict.
+        if request.POST.get('email').strip() and email_re.match(request.POST.get('email').strip()):
+            existing_profile = UserProfile.get_UserProfile(email = request.POST.get("email"))
+
+            if existing_profile != None:
+                messages.error(request, "Sorry! '%s' already exists. Please try another one." % request.POST.get('email'))
+            else:
+                email = request.POST.get("email")
+        else:
+            messages.error(request, "Email field is invalid. Please try another one.")
+
+        if username != "" and email != "":
+            print_debug_msg("username: %s, email: %s" % (username, email))
+            user_dict = {"username":username, "email":email, "first_name":first_name, "last_name":last_name}
+            request.session["user_dict"] = user_dict
+            return redirect(URL_SOCIAL_AUTH_COMPLETE + backend, backend=backend)
+
+        else:
+            return render_to_response(HTML_SOCIAL_AUTH_FORM, {  'username':username,
+                                                                'first_name':first_name, 
+                                                                'last_name':last_name, 
+                                                                'email':email, 
+                                                                'pic_url':pic_url, 
+                                                                'link':link}, RequestContext(request))
+
+    # If the user has logged in for the first time as facebook or twitter user, get details.
+    else:
+        return render_to_response(HTML_SOCIAL_AUTH_FORM, {  'username':details['username'],
+                                                            'first_name':details['first_name'], 
+                                                            'last_name':details['last_name'], 
+                                                            'email':details['email'], 
+                                                            'pic_url':pic_url, 
+                                                            'link':link}, RequestContext(request))
+
+
+'''
 def social_auth_login(request, backend):
     """
         This view is a wrapper to social_auths auth
@@ -362,6 +444,7 @@ def social_auth_login(request, backend):
     """
     Q: How can I add messages.success(request, 'Welcome, %s!' % (username)) in ths function?
     """
+    print_info_msg("At home.views.social_auth_login()")
     try:
         # if everything is ok, then original view gets returned, no problem
          return auth(request, backend)
@@ -369,73 +452,12 @@ def social_auth_login(request, backend):
         return render_to_response(HTML_SOCIAL_AUTH_FORM, locals(), RequestContext(request))
 
 
-#Used by social auth pipeline to get a username value when authenticate a social user for the first time
-def get_social_details(request):
-    name = setting('SOCIAL_AUTH_PARTIAL_PIPELINE_KEY', 'partial_pipeline')
-    detail = request.session[name]['kwargs']['details']
-    link = ""
-    print request.session[name]['kwargs']
-
-    if request.session[name]['backend'] =='facebook':
-        # profile pic
-        pic_url = "http://graph.facebook.com/%s/picture?type=large" % request.session[name]['kwargs']['response']['id']
-        # personal webpage
-        link = request.session[name]['kwargs']['response']['link']
-        # print link
-    elif request.session[name]['backend'] == 'twitter':
-        pic_url = request.session[name]['kwargs']['response'].get('profile_image_url', '').replace('_normal', '')
-    else:
-        pass
-
-    username_accepted = False
-    email_accepted = False
-    message = []
-
-    if request.method == 'POST':
-        if request.POST.get('username'):
-            request.session['saved_username'] = request.POST['username']
-            backend = request.session[name]['backend']
-
-            try:
-                # Check for a duplicate username
-                existing_user = User.objects.get(username=request.POST.get('username'))
-                message.append("Sorry! '%s' already exists. Please try another one." % request.POST.get('username'))
-            except:
-                username_accepted = True
-
-        else:
-            messages.error(request, "Username field is required.")
-
-        if request.POST.get('email'):
-            request.session[name]['kwargs']['details']['email'] = request.POST['email']
-            backend = request.session[name]['backend']
-
-            try:
-                # Check for a duplicate email
-                existing_email = User.objects.get(email=request.POST.get('email'))
-                message.append("Sorry! '%s' already exists. Please try another one." % request.POST.get('email'))
-            except:
-                email_accepted = True
-
-        else:
-            message.error(request, "Email field is required.")
-
-        request.session[name]['kwargs']['details']['first_name'] = request.POST['first_name']
-        request.session[name]['kwargs']['details']['last_name'] = request.POST['last_name']
-
-        if username_accepted and email_accepted:
-            messages.success(request, 'Welcome, %s!' % (request.POST.get('username')))
-            return redirect(URL_SOCIAL_AUTH_COMPLETE, backend=backend)
-
-        else:
-            return render_to_response(HTML_SOCIAL_AUTH_FORM, {'username':request.POST['username'], 'first_name':request.POST['first_name'], 'last_name':request.POST['last_name'], 'email':request.POST['email'], 'pic_url':pic_url, 'link':link}, RequestContext(request))
-
-    else:
-        # If the user has logged in for the first time as facebook or twitter user
-        # Get details from the associated social account
-        return render_to_response(HTML_SOCIAL_AUTH_FORM, {'username':detail['username'], 'first_name':detail['first_name'], 'last_name':detail['last_name'], 'email':detail['email'], 'pic_url':pic_url, 'link':link}, RequestContext(request))
+def social_auth_disallowed (request):
+    messages.error (request, "Sorry, we can not accept your social registration. Please try again later.")
+    return home(request)
 
 
+'''
 
 @login_required
 def get_UserProfile_page(request, userprofile_id):

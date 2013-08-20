@@ -297,6 +297,52 @@ class MatchingTesting (unittest.TestCase):
 			iteration_time += (end_time - start_time)			
 		performance_report(iteration_time)
 
+	def test_propose_PetMatch_without_same_contacts (self):
+		print_testing_name("test_propose_PetMatch_without_same_contacts")
+		iteration_time = 0.00
+
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		results = setup_objects(delete_all_objects=False, create_petreports=True)
+		users = results["users"]
+		clients = results["clients"]
+		petreports = results["petreports"]
+		num_petmatches = 0
+
+		for i in range (NUMBER_OF_TESTS):
+			start_time = time.clock()
+
+			#objects
+			user, password = random.choice(users)
+			client = random.choice(clients)
+			petreport = random.choice(petreports)
+
+			#Log in First.
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))			
+
+			#Go to the matching interface
+			matching_url = URL_MATCHING + str(petreport.id) + "/"
+			response = client.get(matching_url)
+
+			#Now, initiate the AJAX GET call to grab all pet reports from this filtering/ranking.
+			response = client.get(matching_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
+			context = simplejson.loads(response._container[0])
+			paged_candidates = context ["pet_reports_list"]
+
+			self.assertEquals(len(paged_candidates), context["total_count"])
+			self.assertEquals(len(paged_candidates), context["count"])
+
+			candidate_petreport = random.choice(paged_candidates)
+
+			#This is what we're really testing - that these contact users should NOT be the same!
+			self.assertFalse(candidate_petreport["proposed_by_username"] == petreport.proposed_by.user.username)
+			print_success_msg(candidate_petreport["proposed_by_username"] + "!=" + petreport.proposed_by.user.username)
+			output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)			
+		performance_report(iteration_time)		
+
 '''===================================================================================
 PetMatchTesting: Testing for EPM PetMatch-ing functionality
 ==================================================================================='''

@@ -48,12 +48,13 @@
 		<!-- Social Login Buttons -->
 		<div style="margin-top:10px; margin-bottom:10px;">
 			<img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22"></img>
-			<a rel="nofollow" href="{% url 'socialauth_begin' 'twitter' %}">Enter using Twitter</a>
+			<a href="{% url 'socialauth_begin' 'twitter' %}">Enter using Twitter</a>
 		</div>
+		<!-- Facebook 
 		<div style="margin-top:10px; margin-bottom:10px;">
 			<img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22"></img>
-			<a rel="nofollow" href="{% url 'socialauth_begin' 'facebook' %}">Enter using Facebook</a><br/>
-		</div>
+			<a href="{% url 'socialauth_begin' 'facebook' %}">Enter using Facebook</a><br/>
+		</div> -->
 	</div>
 {% endblock content %}
 

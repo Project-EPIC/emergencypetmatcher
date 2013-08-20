@@ -17,7 +17,7 @@
   <ul id="messages"> {% for message in messages %} <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li> {% endfor %}</ul>
   {% endblock messages %}  
 
-  <form enctype="multipart/form-data" action="{% url 'get_social_details' %}" method="POST">
+  <form enctype="multipart/form-data" action="" method="POST">
       {% csrf_token %}
     	<table cellpadding=5>
     		<tr>
@@ -37,30 +37,31 @@
        		<td><input type="text" name="last_name" id="last_name_id" value="{{last_name}}" /></td>
        	</tr>
        	<tr>
-	    		<td><label>Link:</label></td>
-	    		<td><label>{{ link }}</label></td>
-       	</tr>
-       	<tr>
-       		<td>Profile Picture:</td>
-          <td><img src='{{ pic_url }}' width=200 height=200/></td>
+       		<td><label for="profile_pic_id">Profile Picture:</label></td>
+          <td><img id="profile_pic_id" src='{{ pic_url }}' width=200 height=200/></td>
        	</tr>
         <tr>
-          <td>Date of Birth:</td>
+          <td><label for="id_date_born">Date of Birth:</label></td>
           <td><input id="id_date_born" type="text"/></td>
         </tr>
 
         <!-- T&C -->
         <tr>
-          <div style="padding-bottom:15px; padding-top:15px; width:300px;">
-            <input id="id_tc_check" type="checkbox"/>
-            <a id="id_tc_link" name="Terms and Conditions" href= "#" > I accept the terms and conditions.</a> 
-          </div>
+          <td></td>
+          <td>
+            <div style="padding-bottom:15px; padding-top:15px; width:300px;">
+              <input id="id_tc_check" type="checkbox"/>
+              <a id="id_tc_link" name="Terms and Conditions" href= "#" > I accept the terms and conditions.</a> 
+            </div>
+          </td>
         </tr>
 
         <tr>
           <td>
-            <input id="id_register_button" type="submit" value="Submit" disabled/>
-            <input id="id_cancel_button" type="submit" formaction="{% url 'home' %}" value="Cancel">
+              <input id="id_register_button" class="epm_button" type="submit" style="width:100px; height:30px;" value="Submit" disabled/>
+          </td>
+          <td>
+              <input id="id_cancel_button" class="epm_button" type="submit" style="width:100px; height:30px;" formaction="{% url 'home' %}" value="Cancel"/>     
           </td>
         </tr> 
       </table>

@@ -13,8 +13,8 @@
 	      </Directory>
 
 	      LogLevel warn
-	      ErrorLog /srv/epm/logs/apache_error.log
-	      CustomLog /srv/epm/logs/apache_access.log combined
+	      ErrorLog /srv/epm/static/logs/apache_error.log
+	      CustomLog /srv/epm/static/logs/apache_access.log combined
 	      WSGIDaemonProcess emergencypetmatcher.com user=www-data group=www-data threads=25
 	      WSGIProcessGroup emergencypetmatcher.com
 

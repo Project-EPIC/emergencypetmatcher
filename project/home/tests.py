@@ -609,7 +609,7 @@ class UserProfileTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords in order to simulate accessing UserProfile pages.
-		results = setup_objects()
+		results = setup_objects(delete_all_objects=False)
 		users = results ['users']
 		clients = results['clients']
 
@@ -643,7 +643,7 @@ class UserProfileTesting (unittest.TestCase):
 		iteration_time = 0.00
 
 		#Need to setup clients, users, and their passwords.
-		results = setup_objects()
+		results = setup_objects(delete_all_objects=False)
 		users = results ['users']
 		clients = results ['clients']
 
@@ -977,8 +977,8 @@ class LoggerTesting (unittest.TestCase):
 			print_test_msg ("%s logs onto %s..." % (user, client))
 
 			#We expect the system not to throw errors but to catch them.
-			activities = logger.get_recent_activities_from_log(userprofile=user.userprofile, current_userprofile=user.userprofile)
-			activities += logger.get_bookmark_activities(userprofile=user.userprofile)
+			activities = logger.get_activities_from_log(userprofile=user.userprofile, current_userprofile=user.userprofile)
+			activities += logger.get_bookmarking_activities_from_log(userprofile=user.userprofile)
 			print_test_msg("%s has an activity feed list of size [%d]" % (user, len(activities)))
 			self.assertTrue(logger.log_exists(user.userprofile))
 
@@ -999,7 +999,7 @@ class LoggerTesting (unittest.TestCase):
 		for i in range(NUMBER_OF_TESTS):
 			start_time = time.clock()
 			(user, password) = create_random_User(i)
-			user_log_filename = TEST_ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
 
 			with open(user_log_filename, 'r') as logging:
 
@@ -1022,7 +1022,7 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_log_submit_PetReport")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects()
+		results = setup_objects(delete_all_objects=False)
 		users = results ['users']
 		clients = results ['clients']
 
@@ -1082,7 +1082,7 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_log_propose_PetMatch")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(create_petreports=True)
+		results = setup_objects(delete_all_objects=False, create_petreports=True)
 		users = results ['users']
 		clients = results ['clients']
 		petreports = results ['petreports']
@@ -1154,7 +1154,7 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_log_following_UserProfile")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects()
+		results = setup_objects(delete_all_objects=False)
 		users = results ['users']
 		clients = results ['clients']
 
@@ -1203,7 +1203,7 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_log_unfollowing_UserProfile")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects()
+		results = setup_objects(delete_all_objects=False)
 		users = results ['users']
 		clients = results ['clients']
 
@@ -1256,7 +1256,7 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_log_add_PetReport_bookmark")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(create_petreports=True)
+		results = setup_objects(delete_all_objects=False, create_petreports=True)
 		users = results ["users"]
 		clients = results ["clients"]
 		petreports = results ["petreports"]
@@ -1273,7 +1273,7 @@ class LoggerTesting (unittest.TestCase):
 			#Log in First.
 			loggedin = client.login(username = user.username, password = password)
 			self.assertTrue(loggedin == True)
-			print_test_msg("%s logs onto %s to enter the prdp interface to add a bookmark." % (user, client))		
+			print_test_msg("%s logs onto %s to enter the PRDP to add a bookmark." % (user, client))		
 
 			# Go to the PRDP (Pet Report Detailed Page) interface
 			response = client.get(URL_PRDP + str(petreport.id) + "/")
@@ -1289,7 +1289,7 @@ class LoggerTesting (unittest.TestCase):
 			# Add a bookmark
 			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Bookmark this Pet"}
-			response = client.post(add_bookmark_url, post, follow=True)
+			response = client.post(add_bookmark_url, post, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
 			self.assertEquals(response.status_code, 200)
 			client.logout()	
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
@@ -1312,7 +1312,7 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_log_remove_PetReport_bookmark")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(create_petreports=True)
+		results = setup_objects(delete_all_objects=False, create_petreports=True)
 		users = results ["users"]
 		clients = results ["clients"]
 		petreports = results ["petreports"]
@@ -1338,14 +1338,14 @@ class LoggerTesting (unittest.TestCase):
 			# Add a bookmark
 			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Bookmark this Pet"}
-			response = client.post(add_bookmark_url, post, follow=True)	
+			response = client.post(add_bookmark_url, post, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)	
 			self.assertEquals(response.status_code, 200)
 			old_bookmarks_count = user.get_profile().bookmarks_related.count()
 
 			# Remove the bookmark
 			remove_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Remove Bookmark"}
-			response = client.post(remove_bookmark_url, post, follow=True)
+			response = client.post(remove_bookmark_url, post, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
 			self.assertEquals(response.status_code, 200)
 			new_bookmarks_count = user.get_profile().bookmarks_related.count()
 			client.logout()	
@@ -1367,7 +1367,7 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_get_activities_json")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(create_petreports=True, create_petmatches=True)
+		results = setup_objects(delete_all_objects=False, create_following_lists=True, create_petreports=True, create_petmatches=True)
 		users = results ["users"]
 		clients = results ["clients"]
 		petreports = results ["petreports"]
@@ -1378,6 +1378,7 @@ class LoggerTesting (unittest.TestCase):
 
 			#objects
 			user, password = random.choice(users)
+			userprofile = user.get_profile()			
 			client = random.choice(clients)
 
 			#Log in First.
@@ -1395,24 +1396,15 @@ class LoggerTesting (unittest.TestCase):
 
 			#But now, let's test to get and assert those actual activities
 			activities = []
-			random_activity_range = random.randrange(0, len(UserProfile.objects.all()))
-			for following in user.get_profile().following.all().order_by("?")[:random_activity_range]:
-				log = logger.get_recent_activities_from_log(following)
-				if log != None:
-					activities.append(log)
+			for following in userprofile.following.all().order_by("?")[:ACTIVITY_FEED_LENGTH]:
+				activities += logger.get_activities_from_log(userprofile=following, current_userprofile=userprofile, since_date=userprofile.last_logout)				
 
-			num_following = len(user.get_profile().following.all())
+			num_following = len(userprofile.following.all())
 			num_activities = len(activities)
-			print_test_msg("%s has %d followers and got an activity feed list of size %d when ACTIVITY_FEED_LENGTH = %d" % (user, num_following, num_activities, random_activity_range))
+			print_test_msg("%s has %d followers and got an activity feed list of size %d when ACTIVITY_FEED_LENGTH = %d" % (user, num_following, num_activities, ACTIVITY_FEED_LENGTH))
 
 			#Bounds checking
-			self.assertTrue(num_activities >= 0 and num_activities <= random_activity_range)
-
-			if random_activity_range < num_following:
-				self.assertTrue(num_activities == random_activity_range)
-			else:
-				self.assertTrue(num_activities <= num_following)
-
+			self.assertTrue(num_activities >= 0)
 			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
@@ -1423,7 +1415,7 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_get_activities_json_for_anonymous_user")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects()
+		results = setup_objects(delete_all_objects=False, create_following_lists=True, create_petreports=True, create_petmatches=True)
 		users = results ["users"]
 		clients = results ["clients"]
 
@@ -1442,14 +1434,13 @@ class LoggerTesting (unittest.TestCase):
 
 			#But now, let's test to get and assert those actual activities
 			activities = []
-			max_num_activities = ACTIVITY_FEED_LENGTH
-			for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:max_num_activities]:
-				activities += logger.get_recent_activities_from_log(userprofile=userprof, num_activities=1)			
+			for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:ACTIVITY_FEED_LENGTH]:
+				activities += logger.get_activities_from_log(userprofile=userprof, current_userprofile=None, num_activities=1)			
 			num_activities = len(activities)
-			print_test_msg("The anonymous user got an activity feed list of size %d when the maximum length = %d" % (num_activities, max_num_activities))
+			print_test_msg("The anonymous user got an activity feed list of size %d when the maximum length = %d" % (num_activities, ACTIVITY_FEED_LENGTH))
 
 			#Bounds checking
-			self.assertTrue(num_activities >= 0 and num_activities <= max_num_activities)
+			self.assertTrue(num_activities >= 0 and num_activities <= ACTIVITY_FEED_LENGTH)
 
 			output_update(i + 1)
 			end_time = time.clock()
@@ -1461,7 +1452,7 @@ class LoggerTesting (unittest.TestCase):
 		print_testing_name("test_get_activities_json_for_authenticated_user")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(create_petreports=True, create_petmatches=True)
+		results = setup_objects(delete_all_objects=False, create_following_lists=True, create_petreports=True, create_petmatches=True)
 		users = results ["users"]
 		clients = results ["clients"]
 		petreports = results ["petreports"]
@@ -1472,6 +1463,7 @@ class LoggerTesting (unittest.TestCase):
 
 			#objects
 			user, password = random.choice(users)
+			userprofile = user.get_profile()
 			another_user, another_user_password = random.choice(users)
 			petreport = random.choice(petreports)
 			client = random.choice(clients)
@@ -1498,14 +1490,11 @@ class LoggerTesting (unittest.TestCase):
 			response = client.post(URL_FOLLOW, post, follow=True)
 			self.assertEquals(response.status_code, 200)
 
-			# Make the POST request Call for user to add a bookmark for a random petreport
-			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Bookmark this Pet"}
-			response = client.post(URL_BOOKMARK_PETREPORT, post, follow=True)
-			self.assertEquals(response.status_code, 200)
-
 			#Summing up the minimum value of user's activity feeds
-			min_num_activities = len(user.get_profile().followers.all()) + len(user.get_profile().following.all())
+			min_num_activities = len(userprofile.followers.all()) + len(userprofile.following.all())
 
+			print_test_msg("Grabbing activities for %s with ID [%d]" % (userprofile.user.username, userprofile.id))
+			
 			#Request the get_activities_json view function()
 			response = client.get(URL_GET_ACTIVITIES, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 			client.logout()	
@@ -1518,22 +1507,38 @@ class LoggerTesting (unittest.TestCase):
 			activities = []
 
 			# Get all activities from this UserProfile's log file that show who has followed this UserProfile 
-			activities += logger.get_recent_activities_from_log(userprofile=user.get_profile(), current_userprofile=user.get_profile(), since_date=user.get_profile().last_logout, activity=ACTIVITY_FOLLOWER)
+			follower_activities = logger.get_activities_from_log(userprofile=userprofile, current_userprofile=userprofile, activity=ACTIVITY_FOLLOWER, num_activities=10)
+
+			for activity in activities:
+				self.assertTrue(activity[1]["activity"] == ACTIVITY_FOLLOWER)
+				self.assertTrue(activity[1]["current_userprofile_id"] == userprofile.id)		
+			print_success_msg("Follower activities are good!")
 
 			# Get all activities that associated to the PetReports I bookmarked
-			activities += logger.get_bookmark_activities(userprofile=user.get_profile(), since_date=user.get_profile().last_logout)
+			bookmarked_activities = logger.get_bookmarking_activities_from_log(userprofile=userprofile, since_date=userprofile.last_logout, num_activities=10)
 
-            # Get all activities that are associated with the UserProfiles I follow
-			for following in user.get_profile().following.all():
-				activities += logger.get_recent_activities_from_log(userprofile=following, current_userprofile=user.get_profile(), since_date=user.get_profile().last_logout)
+			for activity in bookmarked_activities:
+				self.assertTrue(activity[1]["activity"] == ACTIVITY_PETREPORT_ADD_BOOKMARK or activity[0]["activity"] == ACTIVITY_PETREPORT_ADD_BOOKMARK)
+				self.assertTrue(activity[1]["current_userprofile_id"] == userprofile.id)
+			print_success_msg("Bookmarked activities are good!")	
 
-			num_following = len(user.get_profile().following.all())
+			# Get all activities that are associated with the UserProfiles I follow
+			following_activities = []
+			for following in userprofile.following.all():
+				following_activities += logger.get_activities_from_log(userprofile=following, current_userprofile=userprofile, since_date=userprofile.last_logout)
+
+			for activity in following_activities:
+				self.assertTrue(activity[1]["current_userprofile_id"] == str(userprofile.id))
+			print_success_msg("Following activities are good!")				
+
+			activities += follower_activities + following_activities + bookmarked_activities
+			activities.sort()
+			num_following = len(userprofile.following.all())
 			num_activities = len(activities)
 			print_test_msg ("%s has %d followers and got an activity feed list of size %d when the minimum length = %d" % (user, num_following, num_activities, min_num_activities))
 
 			#Bounds checking
-			# self.assertTrue(num_activities >= min_num_activities)
-
+			self.assertTrue(num_activities >= min_num_activities)
 			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)		

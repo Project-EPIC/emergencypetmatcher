@@ -25,7 +25,7 @@ from utils import *
 from pprint import pprint
 import datetime, re, home.logger
 
-''' Display the PetMatch object '''
+#Display the PetMatch object
 def get_PetMatch(request, petmatch_id):
     pm = get_object_or_404(PetMatch, pk=petmatch_id)
     voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
@@ -40,12 +40,13 @@ def get_PetMatch(request, petmatch_id):
     num_downvotes = len(pm.down_votes.all())
 
     pprint("Number of voters: %d" % len(voters))
-    return render_to_response(HTML_PMDP, {  'petmatch': pm, 
+    return render_to_response(HTML_PMDP, {  'petmatch': pm,
                                             "num_voters": len(voters), 
                                             "user_has_voted": user_has_voted, 
                                             "num_upvotes":num_upvotes, 
                                             "num_downvotes":num_downvotes}, RequestContext(request))  
 
+#Vote on the PetMatch    
 @login_required
 def vote_PetMatch(request):
     if request.method == "POST":
@@ -69,8 +70,10 @@ def vote_PetMatch(request):
             
             pm.up_votes.add(userprofile)
             pm.down_votes.remove(userprofile)
+
             logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, userprofile, petmatch=pm)
             message = "You have successfully upvoted this PetMatch!"
+
         elif vote == "downvote":
             # If the user is voting for the 1st time, add reputation points
             if pm.UserProfile_has_voted(userprofile) is False:
@@ -80,14 +83,16 @@ def vote_PetMatch(request):
             pm.up_votes.remove(userprofile)
             logger.log_activity(ACTIVITY_PETMATCH_DOWNVOTE, userprofile, petmatch=pm)
             message = "You have successfully downvoted this PetMatch!"
-        else:
-            message = "There was something wrong with this vote. Please let us know by emailing us at emergencypetmatcher@gmail.com"
+
+        #Was the petmatch triggered for verification? Check here.
+        threshold_reached = pm.PetMatch_has_reached_threshold() 
+        if threshold_reached == True:
+            pm.verify_petmatch()
+            message =  "Congratulations! These two pets have now been triggered for verification!"
 
         num_upvotes = len(pm.up_votes.all())
         num_downvotes = len(pm.down_votes.all())
-
-        
-        json = simplejson.dumps ({"vote":vote, "message":message, "num_downvotes":num_downvotes, "num_upvotes":num_upvotes})
+        json = simplejson.dumps ({"vote":vote, "message":message, "threshold_reached": threshold_reached, "num_downvotes":num_downvotes, "num_upvotes":num_upvotes})
         print_info_msg ("JSON: " + str(json))
         return HttpResponse(json, mimetype="application/json")
 
@@ -101,7 +106,7 @@ def match_PetReport(request, petreport_id, page=None):
         #Are there any candidates?
         candidates = target_petreport.get_candidate_PetReports()
         #Add the UserProfile to the PetReport's workers list.
-        target_petreport.workers.add(request.user.get_profile())   
+        target_petreport.workers.add(request.user.get_profile())
 
         if candidates == None:
             messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added as a worker for this pet.")
@@ -144,11 +149,6 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
 
     if request.method == "POST":
         description = request.POST ["description"].strip()
-
-        # if description == "":
-        #     messages.error (request, "Please fill out a description for this PetMatch proposal.")
-        #     return render_to_response(HTML_PROPOSE_MATCH, {'target':target, 'candidate':candidate}, RequestContext(request))
-
         proposed_by = request.user.get_profile()
 
         if target.status == "Lost":
@@ -224,51 +224,69 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
 @login_required
 def verify_PetMatch(request, petmatch_id):
     pm = get_object_or_404(PetMatch, pk=petmatch_id)
-    user= request.user.get_profile()    
-    '''This page is only accessible by either the found pet contact or the lost pet contact'''
-    if  (user == pm.lost_pet.proposed_by) or (user == pm.found_pet.proposed_by):
-        '''this page cannot be rendered if the threshold has not been reached'''
-        if pm.verification_triggered == True:
-            if request.method == "GET":
-                voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
-                num_upvotes = len(pm.up_votes.all())
-                num_downvotes = len(pm.down_votes.all())
-                pos = 0 if (user == pm.lost_pet.proposed_by) else 1
-                if pm.verification_votes[pos] != '0':
-                    user_has_verified = "true"
-                else:
-                    user_has_verified = "false"
-                ctx = {'petmatch': pm, "voters": voters, "num_upvotes":num_upvotes, "num_downvotes":num_downvotes,"user_has_verified":user_has_verified}
-                return render_to_response(HTML_VERIFY_PETMATCH,ctx, RequestContext(request))
+    profile = request.user.get_profile()    
 
-            elif request.method == "POST":
-                pm = get_object_or_404(PetMatch, pk=petmatch_id)
-                action = request.POST['message']    
-                bit = 1 if (action == 'yes') else 2 if (action == 'no') else 0
-                pos = 0 if (user == pm.lost_pet.proposed_by) else 1
+    #This page cannot be rendered if the threshold has not been reached and is only accessible by either the found pet contact or the lost pet contact.
+    if  (pm.verification_triggered == True) and ((profile == pm.lost_pet.proposed_by) or (profile == pm.found_pet.proposed_by)):
 
-                #User cannot change his/her response once it has been submitted
-                if pm.verification_votes[pos] != '0':
-                    messages.error(request, "You have already submitted a response for this PetMatch!")
-                    return redirect(URL_HOME)
-                if pos == 0:
-                    pm.verification_votes = str(bit)+pm.verification_votes[1]
-                else:
-                    pm.verification_votes = pm.verification_votes[0]+str(bit)
+        #GET Verification Page.
+        if request.method == "GET":
+            voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
+            num_upvotes = len(pm.up_votes.all())
+            num_downvotes = len(pm.down_votes.all())
+            user_has_voted = pm.UserProfile_has_voted(profile)
+            user_is_owner = (profile == pm.lost_pet.proposed_by) or False
+            pos = 0 if (profile == pm.lost_pet.proposed_by) else 1
+            if pm.verification_votes[pos] != '0':
+                user_has_verified = True
+            else:
+                user_has_verified = False
 
-                pm.save() 
-                if '0' not in pm.verification_votes:
-                    pm.close_PetMatch()
-                    message = "Thank you, your input has been recorded. This pet match is now closed."
-                else:
-                    message = "Thank you, your input has been recorded. Once your peer verifies this petmatch, it will be closed."
-                messages.success(request,message)
+            return render_to_response(HTML_VERIFY_PETMATCH,{'petmatch': pm,
+                                                            "voters": voters, 
+                                                            "num_upvotes":num_upvotes, 
+                                                            "user_is_owner":user_is_owner,
+                                                            "user_has_voted":user_has_voted, 
+                                                            "num_downvotes":num_downvotes, 
+                                                            "user_has_verified":user_has_verified}, RequestContext(request))
+        #POST for Verification.    
+        elif request.method == "POST":
+            action = request.POST['choice']
+            bit = 1 if (action == 'Yes') else 2 if (action == 'No') else 0
+            pos = 0 if (profile == pm.lost_pet.proposed_by) else 1
+
+            #User cannot change his/her response once it has been submitted
+            if pm.verification_votes[pos] != '0':
+                messages.error(request, "You have already submitted a response for this PetMatch!")
                 return redirect(URL_HOME)
+            if pos == 0:
+                pm.verification_votes = str(bit) + pm.verification_votes[1]
+            else:
+                pm.verification_votes = pm.verification_votes[0] + str(bit)
+
+            pm.save()
+
+            #Have we completed verification? 
+            if '0' not in pm.verification_votes:
+                message = pm.close_PetMatch()
+                messages.success(request, message)
+            else:
+                messages.success(request, "Thanks for your response! Once the other pet contact verifies this petmatch, it will be closed.")
+            return redirect(URL_HOME)
+
         else: 
             messages.error(request,"This pet match is not yet eligible for verification, please wait for an email from us. Thank you.")
             return redirect(URL_HOME)
-    
-
     else:
-        messages.error(request,"You do not have access to the verification page for that pet match!")
+        messages.error(request, "Sorry, you don't have access to this page.")
         return redirect(URL_HOME)
+
+
+
+
+
+
+
+
+
+
