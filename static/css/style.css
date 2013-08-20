@@ -323,7 +323,7 @@ h1.found {
 	left:0px;
 	top:25%;
 	width: 200px;
-	height:60%;
+	max-height: 600px;
 	background-color: #E8E8E8;
 	border: 1px solid gray;
 	-moz-border-radius: 1px;
@@ -344,11 +344,12 @@ h1.found {
 }
 
 #feedlist {
+	max-height:500px;
 	list-style-type: none;
 	margin: 2px 0px 2px 0px;
 	padding: 0px 0px 0px 0px;
 	overflow-y:auto;
-	height:90%;
+
 }
 
 #feedlist li {

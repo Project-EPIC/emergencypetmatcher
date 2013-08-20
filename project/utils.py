@@ -54,38 +54,10 @@ def generate_lipsum_paragraph(max_length):
 		return result
 
 #Keep the user/tester updated.
-def output_update (i):	
-	output = "%d of %d iterations complete\n\n" % (i, NUMBER_OF_TESTS)
+def output_update (i, iterations=NUMBER_OF_TESTS):	
+	output = "%d of %d iterations complete\n\n" % (i, iterations)
 	sys.stdout.write("\r\x1b[K"+output.__str__())
 	sys.stdout.flush()
-
-#Helper function for cleaning up the modeldict passed in for simple displaying
-def simplify_PetReport_dict(petreport):
-	assert isinstance (petreport, PetReport)
-	modeldict = model_to_dict(petreport)
-
-	#iterate through all fields in the model_dict
-	for field in modeldict:
-		value = modeldict[field]
-		if isinstance(value, datetime.datetime) or isinstance(value, datetime.date):
-			# modeldict[field] = value.isoformat()
-			# modeldict[field] = value.strftime("%A %d. %B %Y")
-			modeldict[field] = value.strftime("%B %d, %Y")
-		elif isinstance(value, ImageFile):
-			modeldict[field] = value.name
-		elif field == "sex":
-			modeldict[field] = petreport.get_sex_display()
-		elif field == "size":
-			modeldict[field] = petreport.get_size_display()
-		elif field == "geo_location_lat" and str(value).strip() == "":
-			modeldict[field] = None
-		elif field == "geo_location_long" and str(value).strip() == "":
-			modeldict[field] = None
-
-	#Just add a couple of nice attributes.
-	modeldict ["proposed_by_username"] = petreport.proposed_by.user.username		
-	return modeldict
-
 
 #Given an image path, create an Image and return it, catching and ignoring any errors.
 def open_image(img_path):
@@ -192,6 +164,9 @@ def create_random_Userlist(num_users = None):
 def create_random_following_list (userprofile, num_following=None):
 	allusers = UserProfile.objects.exclude(pk = userprofile.user.id)
 
+	#Remember to initialize this list first before adding.
+	userprofile.following = []
+
 	if num_following == None:
 		num_following = random.randint(0, len(allusers)/2)
 
@@ -201,19 +176,25 @@ def create_random_following_list (userprofile, num_following=None):
 		userprofile.following.add(followed)
 		logger.log_activity(ACTIVITY_FOLLOWING, userprofile, userprofile2=followed)
 
+	print_success_msg("following list created for %s" % userprofile)
 	return userprofile
 
 #creates a list of PetReports being bookmarked by the input UserProfile
 def create_random_bookmark_list (userprofile, num_bookmark=None):
 	allpetreports = PetReport.objects.all()
 
+	#Remember to initialize this list before adding.
+	userprofile.bookmarks_related = []
+
 	if num_bookmark == None:
-		num_bookmark = random.randint(0, len(allpetreports)/3)
+		num_bookmark = random.randint(0, len(allpetreports))
 
 	bookmark_list = random.sample(allpetreports, num_bookmark)
 
 	for bookmark in bookmark_list:
 		userprofile.bookmarks_related.add(bookmark)
+
+	print_success_msg("bookmark list created for %s" % userprofile)
 	return userprofile
 
 #Create Random Object for: PetReport
@@ -331,7 +312,7 @@ def get_potential_PetMatch_PetReport_pairs(pet_type=None):
 
 
 #Create Random Object for: PetMatch
-def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None, threshold_bias=False):
+def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=None, threshold_bias=False, success_bias=False):
 	#If the lost or found pet (or both) wasn't supplied, then search for potential PetMatch PetReport pairs
 	if lost_pet == None or found_pet == None:
 
@@ -377,9 +358,19 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 				up_votes = create_random_Userlist(num_users=random.randint(0, user_count))
 				down_votes = create_random_Userlist(num_users=random.randint(0, user_count))
 				petmatch.down_votes = set(down_votes) - set(up_votes)
-				#petmatch.up_votes = set(up_votes) - set(down_votes)
+				petmatch.up_votes = set(up_votes) - set(down_votes)
 
 			logger.log_activity(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=petmatch, )
+
+			#If there is a successful bias, let's vote on verification for this new PetMatch.
+			if success_bias == True:
+				if random.random() >= 0.50:
+					petmatch.verification_votes = "11"
+				else:
+					petmatch.verification_votes = "22"
+
+				#Close the PetMatch after verification votes have been generated.	
+				petmatch.close_PetMatch()
 		
 		elif outcome == "SQL UPDATE":
 			petmatch.up_votes.add(user.get_profile())
@@ -404,8 +395,8 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 
 
 ''' Function for setting up User (with passwords and optionally following lists), Client, PetReport, and PetMatch objects for testing purposes.'''
-def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_OF_TESTS, create_following_lists=False, create_clients=True, 
-	num_clients=NUMBER_OF_TESTS, create_petreports=False, num_petreports=NUMBER_OF_TESTS, create_petmatches=False, num_petmatches=NUMBER_OF_TESTS):
+def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_OF_TESTS, create_following_lists=False, create_bookmark_lists = False, create_clients=True, 
+	num_clients=NUMBER_OF_TESTS, create_petreports=False, num_petreports=NUMBER_OF_TESTS, create_petmatches=False, num_petmatches=NUMBER_OF_TESTS, allow_closed_matches=False):
 
 	#Check if there's anything to do.
 	if create_users == False and create_clients == False and create_petreports == False and create_petmatches == False:
@@ -430,13 +421,13 @@ def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_O
 		for i in range (num_users):
 			(user, password) = create_random_User(i, pretty_name=True)
 			users [i] = (user, password)
+		results ["users"] = users	
 
 		#Then, create the Users' following lists (if specified)
 		if create_following_lists == True:
-			for user in users:
+			for user in results ["users"]:
 				userprofile = user[0].get_profile()
 				create_random_following_list(userprofile)
-		results ["users"] = users
 
 	#Then, create the Client objects (if specified)
 	if create_clients == True:
@@ -451,14 +442,24 @@ def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_O
 			petreports [i] = create_random_PetReport(user=user)
 		results ["petreports"] = petreports
 
+		#Then, create the Users' bookmarks lists (if specified)
+		if create_bookmark_lists == True:
+			for user in results["users"]:
+				userprofile = user[0].get_profile()
+				create_random_bookmark_list(userprofile)
+
 	#Finally, create PetMatch objects (if specified)
 	if create_petmatches == True:
 		for i in range (num_petmatches):
-			petmatch = create_random_PetMatch(threshold_bias=False)
+			if allow_closed_matches == True:
+				petmatch = create_random_PetMatch(threshold_bias=False, success_bias=True)
+			else:
+				petmatch = create_random_PetMatch(threshold_bias=False)
 
 			#If we get back None, try again.
 			if petmatch == None:
 				continue
+
 			petmatches.append(petmatch)
 		results ["petmatches"] = petmatches
 

@@ -4,6 +4,7 @@ from django.forms.models import model_to_dict
 from home.models import *
 from utils import *
 from constants import *
+from pprint import pprint
 import unittest, string, random, sys, time
 from django.contrib.messages import constants as messages
 
@@ -323,21 +324,27 @@ class MatchingTesting (unittest.TestCase):
 
 			#Go to the matching interface
 			matching_url = URL_MATCHING + str(petreport.id) + "/"
-			response = client.get(matching_url)
+			response = client.get(matching_url, follow=True)
+			print_debug_msg(response.request ["PATH_INFO"])
 
 			#Now, initiate the AJAX GET call to grab all pet reports from this filtering/ranking.
-			response = client.get(matching_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
-			context = simplejson.loads(response._container[0])
-			paged_candidates = context ["pet_reports_list"]
+			if response.request ["PATH_INFO"] == matching_url:
+				response = client.get(matching_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
+				context = simplejson.loads(response._container[0])
+				paged_candidates = context ["pet_reports_list"]
 
-			self.assertEquals(len(paged_candidates), context["total_count"])
-			self.assertEquals(len(paged_candidates), context["count"])
+				#Asserts
+				self.assertEquals(len(paged_candidates), context["total_count"])
+				self.assertEquals(len(paged_candidates), context["count"])
+				candidate_petreport = random.choice(paged_candidates)
 
-			candidate_petreport = random.choice(paged_candidates)
+				#This is what we're really testing - that these contact users should NOT be the same!
+				self.assertFalse(candidate_petreport["proposed_by_username"] == petreport.proposed_by.user.username)
+				print_success_msg(candidate_petreport["proposed_by_username"] + "!=" + petreport.proposed_by.user.username)
 
-			#This is what we're really testing - that these contact users should NOT be the same!
-			self.assertFalse(candidate_petreport["proposed_by_username"] == petreport.proposed_by.user.username)
-			print_success_msg(candidate_petreport["proposed_by_username"] + "!=" + petreport.proposed_by.user.username)
+			else:
+				self.assertEquals(response.request["PATH_INFO"], URL_HOME)	
+
 			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			

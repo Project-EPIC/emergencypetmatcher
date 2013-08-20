@@ -6,9 +6,10 @@ from home.models import *
 from utils import *
 from time import sleep
 from selenium import webdriver
+from pprint import pprint
 from django.template.loader import render_to_string
 from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD, TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD, TEST_DOMAIN, EMAIL_FILE_PATH, EMAIL_BACKEND
-import unittest, string, random, sys, time, urlparse, project.settings, logger
+import unittest, string, random, sys, time, urlparse, project.settings, logger, math
 
 '''===================================================================================
 home.tests.py: Testing for Home App Functionality:
@@ -827,13 +828,11 @@ class FollowingTesting (unittest.TestCase):
 
     # Get rid of all objects in the QuerySet.
     def setUp(self):
-        User.objects.all().delete()
-        UserProfile.objects.all().delete()
+       delete_all(leave_Users=False)
 
     # Get rid of all objects in the QuerySet.
     def tearDown(self):
-        User.objects.all().delete()
-        UserProfile.objects.all().delete()
+    	delete_all(leave_Users=False)
 
     def test_following_and_unfollowing_a_UserProfile(self):
     	print_testing_name("test_following_and_unfollowing_a_UserProfile")
@@ -1105,6 +1104,7 @@ class LoggerTesting (unittest.TestCase):
 			response = client.get(matching_url)
 			#Generate the PetReport filters for this target PetReport so we take care of the case where there are NO PetReports to match! (causes a 302)
 			filtered_pet_reports = PetReport.objects.all().exclude(pk=petreport.id).exclude(status = petreport.status).filter(pet_type = petreport.pet_type)
+
 			if len(filtered_pet_reports) == 0:
 				self.assertEquals(response.status_code, 302)
 				print_test_msg ("Oh! There are no PetReports to match this PetReport with - Back to the Home Page!")
@@ -2285,36 +2285,203 @@ class HomePageTesting (unittest.TestCase):
 	def tearDown(self):
 		delete_all(leave_Users=False)	
 
-	def test_homepage_newlyadded(self):
-		print_testing_name("test_homepage_newlyadded")
+	#Testing if the list of PetReports in the home page are ordered in reverse chronological fashion
+	def test_get_PetReports(self):
+		print_testing_name("test_homepage_get_PetReports")
 		iteration_time = 0.00
 		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
 		results = setup_objects(create_petreports=True)
 		users = results ['users']
 		clients = results ['clients']
-		petreports = results ['petreports']
 
-		for i in range (NUMBER_OF_TESTS):
+		#Need to compute the number of "pages" (at least 1) that we can support given NUMBER_OF_TESTS.
+		num_iterations = int(math.ceil(float(NUMBER_OF_TESTS)/NUM_PETREPORTS_HOMEPAGE))
+
+		#Let's iterate through generated PetReports in pages
+		for i in range (num_iterations):
 			start_time = time.clock()
 
 			#objects
+			page = i + 1
 			user, password = random.choice(users)
 			client = random.choice(clients)
-			petreport = random.choice(petreports)
 
 			response = client.get(URL_HOME)
-			self.assertEquals(response.status_code,200)
-			#Testing if the list of pets in the home page are ordered in reverse chronological fashion
-			# print response.context
-			pet_reports_list = response.context['pet_reports_list']
+			self.assertEquals(response.status_code, 200)
+			url = URL_GET_PETREPORTS + "/" + str(page) + "/"
+			response = client.get(url, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ["PATH_INFO"], url)
+			
 			pet_reports = PetReport.objects.filter(closed = False).order_by("id").reverse()
-			self.assertEquals(str(pet_reports_list.object_list.all()),str(pet_reports))
+			total_petreport_count = len(pet_reports)
+			pet_reports = PetReport.get_PetReports_by_page(pet_reports, page)
+
+			#Iterate through each paged PetReport and assert that it's ID is indeed the right one.
+			for j in range(len(pet_reports)):
+				petreport = pet_reports[j]
+				expected_id = total_petreport_count - ((page-1) * NUM_PETREPORTS_HOMEPAGE) - j
+				self.assertEquals(petreport.id, expected_id)
+				print_success_msg("PetReport: %s == %d" % (petreport, expected_id))
+
+			output_update(i + 1, iterations=num_iterations)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		performance_report(iteration_time)
+
+	#Testing if the list of PetMatches in the home page are ordered in reverse chronological fashion
+	def test_get_PetMatches(self):
+		print_testing_name("test_get_PetMatches")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		results = setup_objects(create_petreports=True, create_petmatches=True)
+		users = results ['users']
+		clients = results ['clients']
+		petmatches = results ["petmatches"]
+
+		#Need to compute the number of "pages" (at least 1) that we can support given NUMBER_OF_TESTS.
+		num_iterations = int(math.ceil(float(NUMBER_OF_TESTS)/NUM_PETMATCHES_HOMEPAGE))
+
+		#Let's iterate through generated PetReports in pages
+		for i in range (num_iterations):
+			start_time = time.clock()
+
+			#objects
+			page = i + 1
+			user, password = random.choice(users)
+			client = random.choice(clients)
+
+			response = client.get(URL_HOME)
+			self.assertEquals(response.status_code, 200)
+			url = URL_GET_PETMATCHES + "/" + str(page) + "/"
+			response = client.get(url, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ["PATH_INFO"], url)
+			
+			total_pet_matches = PetMatch.objects.filter(is_open = True).order_by("id").reverse()
+			total_petmatch_count = len(total_pet_matches)
+			paged_pet_matches = PetMatch.get_PetMatches_by_page(total_pet_matches, page)
+
+			#Iterate through each paged PetReport and assert that its ID is indeed the right one.
+			for j in range(len(paged_pet_matches)):
+				petmatch = paged_pet_matches[j]
+				expected_id = total_petmatch_count - ((page-1) * NUM_PETMATCHES_HOMEPAGE) - j
+				self.assertEquals(petmatch.id, expected_id)
+				print_success_msg("%s =[id equals]= %d" % (petmatch, expected_id))
 
 			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)
 
 		performance_report(iteration_time)
+
+	#Testing if the list of PetMatches in the home page are ordered in reverse chronological fashion
+	def test_get_successful_PetMatches(self):
+		print_testing_name("test_get_successful_PetMatches")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		results = setup_objects(create_petreports=True, create_petmatches=True, allow_closed_matches=True)
+		users = results ['users']
+		clients = results ['clients']
+		petmatches = results ["petmatches"]
+
+		#Need to compute the number of "pages" (at least 1) that we can support given NUMBER_OF_TESTS.
+		num_iterations = int(math.ceil(float(NUMBER_OF_TESTS)/NUM_PETMATCHES_HOMEPAGE))
+		print_debug_msg("num_iterations: %s" % num_iterations)
+
+		#Let's iterate through generated PetReports in pages
+		for i in range (num_iterations):
+			start_time = time.clock()
+
+			#objects
+			page = i + 1
+			user, password = random.choice(users)
+			client = random.choice(clients)
+
+			response = client.get(URL_HOME)
+			self.assertEquals(response.status_code, 200)
+			url = URL_GET_SUCCESSFUL_PETMATCHES + "/" + str(page) + "/"
+			response = client.get(url, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
+			self.assertEquals(response.status_code, 200)
+			self.assertEquals(response.request ["PATH_INFO"], url)
+			
+			total_pet_matches = PetMatch.objects.filter(is_successful = True).order_by("id").reverse()
+			total_petmatch_count = len(total_pet_matches)
+			paged_pet_matches = PetMatch.get_PetMatches_by_page(total_pet_matches, page)
+
+			#If the total num of successful petmatches is smaller than the number for each page, then assert we have the exact number in our paged petmatches.
+			if total_petmatch_count <= NUM_PETMATCHES_HOMEPAGE:
+				self.assertEquals(len(paged_pet_matches), total_petmatch_count)
+				print_success_msg("paged_petmatch_count: %d == total_petmatch_count: %d" % (len(paged_pet_matches), total_petmatch_count))
+				break
+
+			#Otherwise, for each paged petmatch, assert that it's within paged boundaries
+			else:
+				for petmatch in paged_pet_matches:
+						self.assertTrue(petmatch in total_pet_matches [((page-1) * NUM_PETMATCHES_HOMEPAGE):((page-1) * NUM_PETMATCHES_HOMEPAGE + NUM_PETMATCHES_HOMEPAGE)])
+						print_success_msg("successful PetMatch within paged boundaries")				
+
+			output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		performance_report(iteration_time)			
+
+	#Cannot test reverse chronological order, but we can test exclusivity.
+	def test_get_bookmarks(self):
+		print_testing_name("test_get_bookmarks")
+		iteration_time = 0.00
+		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
+		results = setup_objects(create_bookmark_lists=True, create_petreports=True)
+		users = results ['users']
+		clients = results ['clients']
+		pet_reports = results ["petreports"]
+
+		#Here, we iterate through each user and his/her bookmarks list, every page of it.
+		for i in range(NUMBER_OF_TESTS):
+			user, password = random.choice(users)
+			client = random.choice(clients)
+
+			response = client.get(URL_HOME)
+			self.assertEquals(response.status_code, 200)
+			loggedin = client.login(username = user.username, password = password)
+			self.assertTrue(loggedin == True)
+
+			#Need to compute the number of "pages" (at least 1) that we can support given NUMBER_OF_TESTS.
+			num_iterations = int(math.ceil(float(NUMBER_OF_TESTS)/NUM_BOOKMARKS_HOMEPAGE))
+
+			#Let's iterate through generated PetReports in pages
+			for j in range (num_iterations):
+				start_time = time.clock()
+				page = j + 1
+
+				url = URL_GET_BOOKMARKS + "/" + str(page) + "/"
+				response = client.get(url, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
+				self.assertEquals(response.status_code, 200)
+				self.assertEquals(response.request ["PATH_INFO"], url)
+
+				all_bookmarks = user.get_profile().bookmarks_related.all()
+				total_bookmark_count = len(all_bookmarks)
+				paged_bookmarks = PetReport.get_bookmarks_by_page(all_bookmarks, page)
+
+				#If the total num of bookmarks is smaller than the number for each page, then assert we have the exact number in our paged_bookmarks.
+				if total_bookmark_count <= NUM_BOOKMARKS_HOMEPAGE:
+					self.assertEquals(len(paged_bookmarks), total_bookmark_count)
+					print_success_msg("paged_bookmark_count: %d == total_bookmark_count: %d" % (len(paged_bookmarks), total_bookmark_count))
+					break
+
+				#Otherwise, for each paged_bookmark, assert that it's within paged boundaries
+				else:
+					for bookmark in paged_bookmarks:
+						self.assertTrue(bookmark in all_bookmarks [((page-1) * NUM_BOOKMARKS_HOMEPAGE):((page-1) * NUM_BOOKMARKS_HOMEPAGE + NUM_BOOKMARKS_HOMEPAGE)])
+						print_success_msg("bookmarked PetReport within paged boundaries")
+
+			output_update(i + 1)
+			end_time = time.clock()
+			iteration_time += (end_time - start_time)
+
+		performance_report(iteration_time)		
 
 
 '''===================================================================================

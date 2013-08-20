@@ -1,8 +1,9 @@
+import os
+os.environ['DJANGO_SETTINGS_MODULE']='project.settings'
 from home.models import *
 from utils import *
 from django.contrib.auth import authenticate
-import string, random, sys, os
-os.environ['DJANGO_SETTINGS_MODULE']='project.settings'
+import string, random, sys
 
 '''===================================================================================
 setup_model_fixture.py: Setup sample (random) data for your dev env.
@@ -10,7 +11,7 @@ setup_model_fixture.py: Setup sample (random) data for your dev env.
 
 #Control Variables
 NUM_PETREPORTS = 300
-NUM_USERS = 15
+NUM_USERS = 50
 NUM_PETMATCHES = 100
 
 #When Executed: Setup our fixture

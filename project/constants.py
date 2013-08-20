@@ -5,7 +5,7 @@ from project.settings import STATIC_URL
 ==================================================================================='''
 
 #Number of Tests
-NUMBER_OF_TESTS = 10
+NUMBER_OF_TESTS = 50
 
 #Lower and Upper bounds for Lost and Found Dates
 DATE_LOWER_BOUND = "2012-01-01"
@@ -188,12 +188,14 @@ REWARD_USER_VERIFY_PETMATCH_SUCCESSFUL = 15
 REWARD_NEW_ACCOUNT = 10
 
 #Represents how many activities to fetch per request.
-ACTIVITY_FEED_LENGTH = 25
+ACTIVITY_FEED_LENGTH = 50
 
 #URLS - use for redirect calls
 URL_HOME = '/'
 URL_GET_ACTIVITIES = "/get_activities_json"
+URL_GET_PETREPORTS = "/get_PetReports"
 URL_GET_PETMATCHES = "/get_PetMatches"
+URL_GET_SUCCESSFUL_PETMATCHES = "/get_successful_PetMatches"
 URL_GET_BOOKMARKS = "/get_bookmarks"
 URL_LOGIN = '/login'
 URL_TC = '/tc'

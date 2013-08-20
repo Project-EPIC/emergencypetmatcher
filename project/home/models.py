@@ -70,7 +70,7 @@ class UserProfile (models.Model):
             return existing_profile
 
         except UserProfile.DoesNotExist:
-            return None        
+            return None           
 
     #Update the current user's reputation points based on an activity
     def update_reputation(self, activity):
@@ -352,7 +352,17 @@ class PetReport(models.Model):
             filtered_petreports = filtered_petreports [((page-1) * NUM_PETREPORTS_HOMEPAGE):((page-1) * NUM_PETREPORTS_HOMEPAGE + NUM_PETREPORTS_HOMEPAGE)]
 
         #Just return the list of PetReports.
-        return filtered_petreports
+        return filtered_petreports 
+
+    @staticmethod
+    def get_bookmarks_by_page(filtered_bookmarks, page):
+        if (page != None and page > 0):
+            page = int(page)
+            filtered_bookmarks = filtered_bookmarks [((page-1) * NUM_BOOKMARKS_HOMEPAGE):((page-1) * NUM_BOOKMARKS_HOMEPAGE + NUM_BOOKMARKS_HOMEPAGE)]
+
+        #Just return the list of bookmarks.
+        return filtered_bookmarks   
+
 
     #Return a list of candidate PetReports that could potentially be matches for this PetReport.
     def get_candidate_PetReports(self):
@@ -662,7 +672,7 @@ class PetMatch(models.Model):
                 # --------Reputation points--------
                 # update reputation points for the following users:
                 # petmatch_owner, lost_pet_contact, and found_pet_contact
-                print_info_msg ("PetMatch Verification was a SUCCESS!")
+                print_info_msg ("PetMatch Verification for %s was a SUCCESS!" % self)
 
                 # Must to update reputation points twice since if updating petmatch_owner and lost_pet_contact
                 # separately for the same user doesn't work
@@ -705,12 +715,12 @@ class PetMatch(models.Model):
                 message = "Thanks for your response, and congratulations on the successful match! The reunited match can be found in the 'Reunited Pets' Tab."
 
             else: 
-                print_info_msg ("PetMatch Verification was NOT a success!")
+                print_info_msg ("PetMatch Verification for %s was NOT a success!" % self) 
                 message = "Thanks for your response. Unfortunately, the match wasn't a success. Keep trying and don't give up!"
                 petmatch_owner.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE)
 
             self.save()    
-            print_info_msg ("PetMatch %s has been closed" % (self))
+            print_info_msg ("PetMatch %s is now closed" % (self))
             return message
     
     def __unicode__ (self):

@@ -196,18 +196,13 @@ def get_successful_PetMatches(request, page=None):
 def get_bookmarks(request, page=None):
     if request.is_ajax() == True:
         up = request.user.get_profile()
+        bookmarks = up.bookmarks_related.all()
 
-        #Check if there's a specified page number.
-        if (page != None and page > 0):
-            page = int(page)
-            bookmarks = up.bookmarks_related.all()[((page-1) * NUM_BOOKMARKS_HOMEPAGE):((page-1) * NUM_BOOKMARKS_HOMEPAGE + NUM_BOOKMARKS_HOMEPAGE)]
+        #Get the bookmark count for pagination purposes.
+        bookmarks_count = len(bookmarks)
 
-        else:
-            #Get Pet Match objects and send them off as JSON.
-            bookmarks = up.bookmarks_related.all()
-
-        #Get the petreport count for pagination purposes.
-        bookmarks_count = len(up.bookmarks_related.all())
+        #Now get just a page of bookmarks if page # is available.
+        bookmarks = PetReport.get_bookmarks_by_page(bookmarks, page)
 
         #Zip it up in JSON and ship it out as an HTTP Response.
         bookmarks = [{"ID": pr.id, 
