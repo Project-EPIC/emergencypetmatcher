@@ -568,10 +568,14 @@ class PetMatch(models.Model):
         #Difference (D) is calculated as the difference between number of upvotes and downvotes.
         #For a PetMatch to be successful, it should satisfy certain constraints. D should exceed a threshold value.
         difference = abs(self.up_votes.count() - self.down_votes.count())
+        lost_pet_contact = self.lost_pet.proposed_by
+        found_pet_contact = self.found_pet.proposed_by
+        petmatch_owner = self.proposed_by
 
-        #Temporary: If the PetMatch proposer votes on this match and is the only vote for it, and he/she happens to be either the lost or found pet submitter, then verification is triggered.
-        if self.up_votes.count() == 1:
-            if self.proposed_by == self.up_votes.all()[0] and (self.proposed_by == self.lost_pet.proposed_by or self.proposed_by == self.found_pet.proposed_by):
+        #Temporary: If the PetMatch proposer votes on this match and is the only vote for it, and he/she happens to be either the lost or found pet submitter,
+        #AND if all email addresses are valid for these contacts, then verification is triggered.
+        if self.up_votes.count() == 1 and (self.proposed_by == self.up_votes.all()[0]):
+            if (self.proposed_by == lost_pet_contact or self.proposed_by == found_pet_contact) and email_re.match(lost_pet_contact.user.email) and email_re.match(found_pet_contact.user.email) and email_re.match(petmatch_owner.user.email):
                 return True
 
         if difference >= PETMATCH_THRESHOLD:
@@ -593,7 +597,7 @@ class PetMatch(models.Model):
 
         #If the PetMatch proposer is either the lost or found pet contact...
         if (petmatch_owner.id == lost_pet_contact.id) or (petmatch_owner.id == found_pet_contact.id): 
-            Optionally_discuss_with_digital_volunteer = None
+            Optionally_discuss_with_digital_volunteer = ""
         else:
             Optionally_discuss_with_digital_volunteer = "You may also discuss this pet match with %s, the digital volunteer who proposed this pet match. You can reach %s at %s" % (petmatch_owner.user.username, petmatch_owner.user.username, petmatch_owner.user.email)
 
@@ -619,7 +623,7 @@ class PetMatch(models.Model):
             found_pet_contact.user.email_user(email_subject, email_body, from_email=None)
 
             #If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact, an email will be sent to this person as well.
-            if Optionally_discuss_with_digital_volunteer != None:
+            if Optionally_discuss_with_digital_volunteer != "":
                 ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
                 email_body = render_to_string(TEXTFILE_EMAIL_PETMATCH_PROPOSER, ctx)
                 email_subject =  EMAIL_SUBJECT_PETMATCH_PROPOSER  

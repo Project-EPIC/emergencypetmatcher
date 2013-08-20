@@ -1,4 +1,3 @@
-'''django imports'''
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect, get_object_or_404
@@ -88,8 +87,11 @@ def vote_PetMatch(request):
         threshold_reached = pm.PetMatch_has_reached_threshold() 
         if threshold_reached == True:
             pm.verify_petmatch()
-            message =  "Congratulations! These two pets have now been triggered for verification!"
-
+            if userprofile.id in [pm.proposed_by.id, pm.lost_pet.proposed_by.id, pm.found_pet.proposed_by.id]:
+                message =  "Congratulations! These two pets have now been triggered for verification! Check your email to make the next step in reuniting this pet!"
+            else:
+                message =  "Congratulations! These two pets have now been triggered for verification! All votes are closed."
+            
         num_upvotes = len(pm.up_votes.all())
         num_downvotes = len(pm.down_votes.all())
         json = simplejson.dumps ({"vote":vote, "message":message, "threshold_reached": threshold_reached, "num_downvotes":num_downvotes, "num_upvotes":num_upvotes})

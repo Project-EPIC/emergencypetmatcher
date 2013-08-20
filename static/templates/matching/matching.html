@@ -34,6 +34,11 @@
 {% block content %}
 <div id="content" style="padding:10px 10px 40px 10px; margin-top:10px; width:1200px; height:90%;">
 
+	<!-- Messages -->
+	{% block messages %}
+	<ul id="messages"> {% for message in messages %} <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li> {% endfor %}</ul>
+	{% endblock messages %} 
+
 	<!-- Workspace for Placing Pet Report Candidate Matches-->
 	<div id="matching_workspace">
 		{% block content_title %} <strong style="display:block; margin-bottom:10px; font-size:18px; text-align:center;">Match this Pet</strong>{% endblock content_title %}
