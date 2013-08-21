@@ -2,12 +2,12 @@
 {% load url from future %}
 
 {% block headers %}
-	<link rel="stylesheet" href="{{ STATIC_URL }}css/CalendarControl.css" type="text/css"></link>
+	<link rel="stylesheet" href="{{ STATIC_URL }}css/calendarControl.min.css" type="text/css"></link>
 {% endblock headers %}
 
 {% block js %}
-   <script src = "{{ STATIC_URL }}js/local/epm-registration_form.js" type = 'text/javascript'></script> 
-   <script src="{{ STATIC_URL }}js/CalendarControl.js" type='text/javascript'></script>
+   <script src = "{{ STATIC_URL }}js/local/epm-registration_form.min.js" type = 'text/javascript'></script> 
+   <script src="{{ STATIC_URL }}js/calendarControl.min.js" type='text/javascript'></script>
 {% endblock js %}
 
 {% block head_title %} EPM - Register for an Account{% endblock head_title %}

@@ -1,15 +1,6 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
 
-	/*Sticky - Make sure the workspace is fixed when scrolling down the page.
-	$.waypoints.settings.scrollThrottle = 30;
-	$('#workspace').waypoint(function(event, direction){
-		$(this).parent().toggleClass('sticky', direction === "down");
-		event.stopPropagation();
-	}); */
-
-	//Make the workspace dotted boxed divs droppable.
-
 	//Click Handler for the Propose Match button.
 	$("#button_propose_match").click(function(){
 		var link = URL_PROPOSE_MATCH + TARGET_PETREPORT.id + "/" + CANDIDATE_PETREPORT.id + "/";
