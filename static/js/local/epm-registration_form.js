@@ -1,7 +1,11 @@
 $(document).ready(function(){
 
 	var curYear = new Date().getUTCFullYear();
-	$("#id_date_born").datepicker({changeMonth: true, changeYear: true, yearRange: '1900:curYear'});
+	$("#id_date_born").datepicker({
+		changeMonth: true,
+		changeYear: true, 
+		yearRange: '1900:curYear'
+	});
 
 	//Calculate the user's age
 	$("#id_date_born").bind('change', function() {

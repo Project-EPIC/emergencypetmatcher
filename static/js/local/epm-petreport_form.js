@@ -1,9 +1,19 @@
-
 $(document).ready(function(){
 
 	//Image Size.
 	var img_size = 0.0;
 	var img_rotation = 0;
+
+	//Initialize with today's date
+	var today = new Date();
+	var curYear = new Date().getUTCFullYear();
+	$("#id_date_lost_or_found").datepicker({
+		changeMonth: true, 
+		showOn:"focus",
+		changeYear: true, 
+		yearRange: '1900:curYear'
+	});
+	$("#id_date_lost_or_found").attr("value", today.getMonth()+1 + '/' + today.getDate() + '/' + today.getFullYear());
 
 	//Resize the container.
 	$("#container").css("height", "2200px");
@@ -37,17 +47,7 @@ $(document).ready(function(){
     	}
 	});
 
-	//Initialize with today's date
-	var today = new Date();
-	document.getElementById("id_date_lost_or_found").value = today.getMonth()+1 + '/' + today.getDate() + '/' + today.getFullYear()
 
-	// $("#id_date_lost_or_found").bind('mouseleave', function() { 
-	// 	if ($("#id_date_lost_or_found").attr("value")=="")
-	// 		alert("Date Lost/Found is a required field.");
- // 		if ((new Date($("#id_date_lost_or_found").attr("value"))) > (new Date()) )
-	// 		alert("Date Lost/Found is invalid.");
-	// 	this.focus();			
-	// });
 
 	$("#id_tag_collar_info").keyup(function(){
 

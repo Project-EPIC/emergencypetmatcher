@@ -1,19 +1,13 @@
 {% extends 'home/index.html' %}
 {% load url from future %}
 
-{% block headers %}
-	<link rel="stylesheet" href="{{ STATIC_URL }}css/calendarControl.min.css" type="text/css"></link>
-{% endblock headers %}
-
 {% block js %}
-	<script src="{{ STATIC_URL }}js/calendarControl.min.js" type='text/javascript'></script>
 	<script src="{{ STATIC_URL }}js/local/epm-petreport_form.min.js" type='text/javascript'></script>
 	<script src="{{ STATIC_URL }}js/jquery-rotate.min.js" type='text/javascript'></script>
 	<script type="text/javascript">
 		var PETREPORT_TAG_INFO_LENGTH = {{ PETREPORT_TAG_INFO_LENGTH }}
 		var PETREPORT_DESCRIPTION_LENGTH = {{ PETREPORT_DESCRIPTION_LENGTH }}
 	</script>
-
 {% endblock js %}
 
 <div style="height:2200px;">
@@ -88,7 +82,7 @@
 						<!-- Special cases for these fields -->
 						{% if "Date Lost/Found" in field.label %}
 							<li>
-								<input name="date_lost_or_found" id="id_date_lost_or_found" onfocus="showCalendarControl(this);" type="text"/>
+								<input name="date_lost_or_found" id="id_date_lost_or_found" type="text"/>
 							</li><br/>
 						{% elif "Microchip ID" in field.label %}
 							<div id="petreport_form_microchip" style="padding-bottom:15px;">
