@@ -9,10 +9,10 @@ command = sys.argv[1]
 print "%sing Nginx and Apache Servers..." % command
 
 if command == "start":
-	subprocess.call("sudo nginx -s start")
-	subprocess.call("sudo service apache2 start")
+	subprocess.call(["sudo", "service", "nginx"])
+	subprocess.call(["sudo", "service", "apache2", "start"])
 
 elif command == "stop":
-	subprocess.call("sudo nginx -s stop")
-	subprocess.call("sudo service apache2 stop")
+	subprocess.call(["sudo", "nginx", "-s stop"])
+	subprocess.call(["sudo", "service", "apache2", "stop"])
 
