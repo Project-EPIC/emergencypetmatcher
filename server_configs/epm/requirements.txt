@@ -3,6 +3,7 @@ lorem-ipsum-generator
 django-registration
 django-social-auth
 South
+pscyopg2
 pillow
 selenium
 simplejson

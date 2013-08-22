@@ -600,7 +600,7 @@ function remove_bookmark(petreport_id, parent){
 	              },
 
 	              error: function(data){
-	              	alert("An unexpected error occurred when trying to bookmark this Pet Report. Please try again."); 
+	              	alert("An unexpected error occurred when trying to bookmark this Pet. Please try again."); 
 	              	return false;
 	              }
 		        });

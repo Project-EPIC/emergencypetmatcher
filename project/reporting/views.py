@@ -1,4 +1,3 @@
-# Create your views here.
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, login, authenticate 
@@ -116,7 +115,6 @@ def bookmark_PetReport(request):
         petreport_id = request.POST['petreport_id']
         petreport = get_object_or_404(PetReport, pk=petreport_id)
         action = request.POST['action']
-        #print "path: "+str(request.META.get('HTTP_REFERER','/'))
         print_debug_msg("User: %s, Action: %s, petreport: %s" % (request.user.username, action, petreport))
 
         #If the user has bookmarked this pet and the action is to remove it...
@@ -124,7 +122,7 @@ def bookmark_PetReport(request):
             petreport.bookmarked_by.remove(user)
             petreport.save()
             user.update_reputation(ACTIVITY_PETREPORT_REMOVE_BOOKMARK)
-            message = "You have successfully removed the bookmark for this Pet Report." 
+            message = "You have successfully removed the bookmark for this pet." 
             text = "Bookmark this Pet"
 
             # Log removing the PetReport bookmark for this UserProfile
@@ -135,8 +133,8 @@ def bookmark_PetReport(request):
             petreport.bookmarked_by.add(user)
             petreport.save()
             user.update_reputation(ACTIVITY_PETREPORT_ADD_BOOKMARK)
-            print_info_msg ('Bookmarked pet report #'+str(petreport_id)+" for user #" + str(user.id))
-            message = "You have successfully bookmarked this Pet Report!" 
+            print_info_msg ('Bookmarked pet report %s for %s' % (petreport, user))
+            message = "You have successfully bookmarked this pet!" 
             text = "Remove Bookmark"
 
             # Log adding the PetReport bookmark for this UserProfile
