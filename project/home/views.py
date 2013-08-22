@@ -302,29 +302,39 @@ def registration_register (request):
 
     #Submitting Regisration Form Data
     elif request.method == "POST":
-        #Need to check if data is OK for continuing registration.        
         form = RegistrationForm(request.POST)
         email = request.POST ["email"]
         username = request.POST ["username"]
-        password = password1 = request.POST ["password1"]
+        password1 = request.POST ["password1"]
         password2 = request.POST ["password2"]
 
+        #Check Passwords.
         if password1 != password2:
             print_info_msg("Passwords do not match. Registration failed for user.")
             messages.error(request, "Passwords do not match. Please try again.")
             return redirect (URL_REGISTRATION)
 
-        #Does the input username exist already in another user?
-        if User.objects.filter(username=username).exists() == True:
-            print_info_msg("Existing Username - Registration failed for user.")
-            messages.error(request, "The username you provided already exists. Try another username.")
-            return redirect (URL_REGISTRATION)
+        #Check Username.
+        if username.strip():
+            existing_profile = UserProfile.get_UserProfile(username = username)
 
-        #Does the input email exist already in another user?
-        if User.objects.filter(email=email).exists() == True:
-            print_info_msg("Existing Email - Registration failed for user.")
-            messages.error(request, "The email address you provided already exists. Try another email.")
-            return redirect (URL_REGISTRATION)
+            if existing_profile != None:
+                messages.error(request, "Sorry! Username '%s' already exists. Please try another one." % username)
+                return redirect(URL_REGISTRATION)
+        else:
+            messages.error(request, "Username field is required.")
+            return redirect(URL_REGISTRATION)
+
+        #Check Email.
+        if email.strip() and email_re.match(email):
+            existing_profile = UserProfile.get_UserProfile(email = email)
+
+            if existing_profile != None:
+                messages.error(request, "Sorry! Email '%s' already exists. Please try another one." % email)
+                return redirect(URL_REGISTRATION)
+        else:
+            messages.error(request, "Email field is invalid. Please try another one.")
+            return redirect(URL_REGISTRATION)
 
         #Did this user (or any other user) already try to register before with this username?
         if RegistrationProfile.objects.filter(user__username=username).exists() == True:
@@ -339,7 +349,7 @@ def registration_register (request):
             return redirect (URL_REGISTRATION)
 
         #else, create the new inactive users here.
-        new_user = RegistrationProfile.objects.create_inactive_user(username, email, password, Site.objects.get_current())
+        new_user = RegistrationProfile.objects.create_inactive_user(username, email, password1, Site.objects.get_current())
         print_info_msg ("RegistrationProfile now created for inactive user %s" % new_user)
 
         #Redirect back to Home

@@ -1,5 +1,3 @@
-{% load url from future %} <!-- Need this for forward (future) compatibility with django 1.5 and beyond. -->
-
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang = "en">
 	<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
@@ -60,25 +58,7 @@
 		{% block headers %} {% endblock headers %} 
 	</head>	
 	<body>
-
-	<!-- Loading the Facebook SDK -->
-	<!-- <script src='http://connect.facebook.net/en_US/all.js'></script>
-	<div id="fb-root"></div>
-	<script>
-	    // when Facebook's SDK is loaded, it calls "window.fbAsyncInit"
-	    window.fbAsyncInit = function() {
-	    	// init the FB JS SDK
-	        FB.init({
-	            appId      : '315409715220911', // App ID
-	            status     : true, 
-	            cookie     : true,
-	            xfbml      : true,
-	            oauth      : true,
-	            channelUrl : '//WWW.YOUR_DOMAIN.COM/channel.html', // Channel File for x-domain communication
-	        }); 
-		};
-	</script> -->
-
+	
 		{% block container %}
 		<!-- container for main divs: 1) header, 2) body, 3) footer-->
 		<div id="container">
