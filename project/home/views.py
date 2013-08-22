@@ -37,7 +37,7 @@ def home (request):
     #Get the petreport and petmatch count for pagination purposes.
     petreport_count = len(PetReport.objects.filter(closed=False))
     petmatch_count = len(PetMatch.objects.filter(is_open=True))
-    successful_petmatch_count = len(PetMatch.objects.filter(is_open=False))
+    successful_petmatch_count = len(PetMatch.objects.filter(is_successful=True))
     context =  {'petreport_count':petreport_count,
                 'petmatch_count':petmatch_count,
                 'successful_petmatch_count': successful_petmatch_count,

@@ -33,6 +33,10 @@ project_folder = os.path.dirname(project_settings_folder)
 #This is the EPM workspace directory path (root directory) of the entire EPM project. One of its children should be the project directory.
 workspace = os.path.dirname(project_folder)
 
+#Need to execute virtualenv.                                                                                                                                                                                                                                                                                                  
+activate_this = os.path.join(project_folder, "bin/activate_this.py")
+execfile(activate_this, dict(__file__=activate_this))
+
 #We append the EPM directory path to SYS PATH.
 sys.path.append(project_folder)
 sys.path.append(project_settings_folder)

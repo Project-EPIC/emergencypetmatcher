@@ -14,8 +14,10 @@ import unittest, string, random, sys, time, urlparse, project.settings, logger, 
 '''===================================================================================
 home.tests.py: Testing for Home App Functionality:
 
-Test classes: home.ModelTesting home.LoginTesting home.loggerTesting home.UserProfileTesting 
-home.EditUserProfileTesting home.FollowingTesting home.SocialAuthTesting
+Test classes: home.ModelTesting home.LoginTesting home.LoggerTesting home.UserProfileTesting home.EditUserProfileTesting home.FollowingTesting home.HomePageTesting home.RegistrationTesting
+
+Still need work:
+home.SocialAuthTesting home.ReputationTesting
 ==================================================================================='''
 
 '''===================================================================================

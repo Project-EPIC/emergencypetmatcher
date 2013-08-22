@@ -1,21 +1,22 @@
 <VirtualHost emergencypetmatcher.com:8080>
 
-	      ServerAdmin emergencypetmatcher@gmail.com
-	      ServerName www.emergencypetmatcher.com
-	      ServerAlias emergencypetmatcher.com
-	      WSGIScriptAlias / /srv/epm/project/project/wsgi.py
+              ServerAdmin emergencypetmatcher@gmail.com
+              ServerName www.emergencypetmatcher.com
+              ServerAlias emergencypetmatcher.com
+              WSGIScriptAlias / /srv/epm/project/project/wsgi.py
+              WSGIPassAuthorization On
 
-	      <Directory /srv/epm/project/project>
-	       <Files wsgi.py>
-	        Order deny,allow
-	        Allow from all
-	       </Files>
-	      </Directory>
+              <Directory /srv/epm/project >
+                Order deny,allow
+                Allow from all
+              </Directory>
 
-	      LogLevel warn
-	      ErrorLog /srv/epm/static/logs/apache_error.log
-	      CustomLog /srv/epm/static/logs/apache_access.log combined
-	      WSGIDaemonProcess emergencypetmatcher.com user=www-data group=www-data threads=25
-	      WSGIProcessGroup emergencypetmatcher.com
+              LogLevel info
+              ErrorLog /srv/epm/static/logs/apache_error.log
+              #CustomLog /srv/epm/static/logs/apache_access.log combined
+              LogFormat "%h %l %u %t \"%r\" %>s %b %{X-Remote-User-Name}o %{X-Remote-User-Id}o" withsession
+              CustomLog /srv/epm/static/logs/apache_access.log withsession
+              WSGIDaemonProcess emergencypetmatcher.com user=www-data group=www-data threads=25
+              WSGIProcessGroup emergencypetmatcher.com
 
 </VirtualHost>
