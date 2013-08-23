@@ -73,6 +73,44 @@ def submit_PetReport(request):
     return render_to_response(HTML_SUBMIT_PETREPORT, {  'form':form, "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
                                                         "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH}, 
                                                         RequestContext(request))
+
+@login_required
+def get_pet_breeds(request, pet_type=0):
+    if request.is_ajax() == True:
+        
+        #Load Dog Breeds
+        if pet_type == "0":
+            f = PETREPORT_BREED_DOG_FILE
+        #Load Cat Breeds
+        elif pet_type == "1":
+            f = PETREPORT_BREED_CAT_FILE
+        #Load Horse Breeds            
+        elif pet_type == "2":
+            f = PETREPORT_BREED_HORSE_FILE
+        #Load Bird Breeds            
+        elif pet_type == "3":
+            f = PETREPORT_BREED_BIRD_FILE
+        #Load Rabbit Breeds    
+        elif pet_type == "4":
+            f = PETREPORT_BREED_RABBIT_FILE
+        #Load Turtle Breeds
+        elif pet_type == "5":
+            f = PETREPORT_BREED_TURTLE_FILE
+        #Load Snake Breeds
+        elif pet_type == "6":
+            f = PETREPORT_BREED_SNAKE_FILE
+        else:
+            return HttpResponse("", mimetype="application/json") #nothing to return.
+
+        with open(f) as read_file:
+            breeds = read_file.readlines()
+
+        json = simplejson.dumps ({"breeds":breeds})
+        return HttpResponse(json, mimetype="application/json")
+
+    else:
+        raise Http404
+
     
 def get_PetReport(request, petreport_id):
     #Grab the PetReport.

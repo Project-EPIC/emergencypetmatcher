@@ -13,10 +13,8 @@ $(document).ready(function(){
 		changeYear: true, 
 		yearRange: '1900:curYear'
 	});
-	$("#id_date_lost_or_found").attr("value", today.getMonth()+1 + '/' + today.getDate() + '/' + today.getFullYear());
 
-	//Resize the container.
-	$("#container").css("height", "2200px");
+	$("#id_date_lost_or_found").attr("value", today.getMonth()+1 + '/' + today.getDate() + '/' + today.getFullYear());
 
 	//If an input image comes through, preview it!
 	$("#id_img_path").change(function(){
@@ -46,8 +44,6 @@ $(document).ready(function(){
         	reader.readAsDataURL(this.files[0]);
     	}
 	});
-
-
 
 	$("#id_tag_collar_info").keyup(function(){
 
@@ -91,7 +87,7 @@ $(document).ready(function(){
 			$("#petreport_form_contact_fields").css("display", "none");
 	});		
 
-	$('#id_img_path').bind('change', function() {
+	$('#id_img_path').change(function(){
            	img_size = this.files[0].size/1024/1024;
             if (img_size > 3.0) {
             	alert("Image size exceeds 3MB, please upload an image that is within 3MB.");
@@ -128,6 +124,63 @@ $(document).ready(function(){
 				alert(issues);
 	});
 
+	//Listen for a change in the pet type. If the user selects a pet type, load the breeds for that pet type!
+	$("#id_pet_type").change(function(){
+		var pet_type = this.value;
+		load_pet_breeds(pet_type);
+	});	
+
+	/******** Kick Things Off *********/
+	load_pet_breeds("Dog");
 
 });
+
+//Load up the pet breeds here.
+function load_pet_breeds (pet_type){
+
+	id = 0;
+	if (pet_type == "Dog")
+		id = 0;
+	else if (pet_type == "Cat")
+		id = 1;
+	else if (pet_type == "Horse")
+		id = 2;
+	else if (pet_type == "Bird")
+		id = 3;
+	else if (pet_type == "Rabbit")
+		id = 4;
+	else if (pet_type == "Turtle")
+		id = 5;
+	else if (pet_type == "Snake")
+		id = 6;
+	else
+		id = 7; //Other
+
+	$.ajax ({
+		type:"GET",
+		url: URL_GET_PET_BREEDS + id, 
+		success: function(data){
+			$("#id_breed").autocomplete({ source:data.breeds });
+		},
+		error: function (data){
+			return [];
+		}
+	});
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

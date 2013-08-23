@@ -18,6 +18,7 @@ URL_FOLLOW = "/UserProfile/follow"
 URL_UNFOLLOW = "/UserProfile/unfollow"
 URL_PRDP = '/reporting/PetReport/'
 URL_SUBMIT_PETREPORT ='/reporting/submit_PetReport'
+URL_GET_PET_BREEDS = "/reporting/get_pet_breeds/"
 URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
 URL_SHARE_PETREPORT = "/sharing/share_PetReport"
 URL_PMDP = '/matching/PetMatch/'

@@ -30,7 +30,7 @@
 	{% block activity_feed %}{% endblock activity_feed %}
 
 	{% block content %}
-		<div id="content" style="padding:10px 10px 40px 10px; margin-top:40px; border:2px solid gray; width:850px; height:1750px; background-color: #E8E8E8">
+		<div id="content" style="padding:10px 10px 40px 10px; margin-top:40px; border:2px solid gray; width:850px; background-color: #E8E8E8">
 			{% block messages %} 
 				<ul id="messages"> {% for message in messages %}<li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>{% endfor %}</ul>
 			{% endblock messages %}
@@ -45,6 +45,7 @@
 				{% csrf_token %}
 				<ul style="list-style-type:none; padding: 0px 0px 0px 20px;">
 				{% for field in form %}
+
 					<!-- Geo Location Field set -->
 					{% if "Geo Location Lat" in field.label %}
 						<li> <strong> Geolocation </strong> </li>
@@ -111,7 +112,7 @@
 					{% endif %}
 				{% endfor %}
 				</ul><br/>
-				<input id = "id_submit" class="epm_button" type="button" value="Submit" style= "margin: 10px 0px 10px 0px; width:150px; height:50px; font-size:13pt;float:right;"/>
+				<input id = "id_submit" class="epm_button" type="button" value="Submit" style= "margin: 10px 0px 10px 20px; width:150px; height:50px; font-size:18px;"/>
 			</form>
 		</div>
 	{% endblock content %}

@@ -736,11 +736,15 @@ class PetMatch(models.Model):
 class PetReportForm (ModelForm):
 
     '''Required Fields'''
-    pet_type = forms.ChoiceField(label = 'Pet Type *', choices = PET_TYPE_CHOICES, required = True)
+    pet_type = forms.ChoiceField(label = 'Pet Type *', choices = PET_TYPE_CHOICES, required = True)  
     status = forms.ChoiceField(label = "Pet Status *", help_text="(Lost/Found)", choices = STATUS_CHOICES, required = True)
     date_lost_or_found = forms.DateField(label = "Date Lost/Found *", widget = forms.DateInput, required = True)
 
     '''Non-Required Fields'''
+    pet_name = forms.CharField(label = "Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False) 
+    age = forms.ChoiceField(label = "Age", choices=AGE_CHOICES,required = False)
+    breed = forms.CharField(label = "Breed", max_length = PETREPORT_BREED_LENGTH, required = False)
+    color = forms.CharField(label = "Coat Color(s)", max_length = PETREPORT_COLOR_LENGTH, required = False)    
     sex = forms.ChoiceField(label = "Sex", choices = SEX_CHOICES, required = False)
     size = forms.ChoiceField(label = "Size of Pet", choices = SIZE_CHOICES, required = False)
     location = forms.CharField(label = "Location", help_text="(Location where pet was lost/found)", max_length = PETREPORT_LOCATION_LENGTH , required = False)
@@ -752,16 +756,13 @@ class PetReportForm (ModelForm):
     contact_number = forms.CharField(label = "Contact Phone Number", max_length=PETREPORT_CONTACT_NUMBER_LENGTH, required=False)
     contact_email = forms.CharField(label = "Contact Email Address", max_length=PETREPORT_CONTACT_EMAIL_LENGTH, required=False)
     img_path = forms.ImageField(label = "Upload an Image", help_text="(*.jpg, *.png, *.bmp), 3MB maximum", widget = forms.ClearableFileInput, required = False)
-    spayed_or_neutered = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False)    
-    pet_name = forms.CharField(label = "Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False) 
-    age = forms.ChoiceField(label = "Age", choices=AGE_CHOICES,required = False)
-    breed = forms.CharField(label = "Breed", max_length = PETREPORT_BREED_LENGTH, required = False)
-    color = forms.CharField(label = "Coat Color(s)", max_length = PETREPORT_COLOR_LENGTH, required = False)
+    spayed_or_neutered = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False)
     description  = forms.CharField(label = "Pet Description", help_text="(Please describe the pet as accurately as possible)", max_length = PETREPORT_DESCRIPTION_LENGTH, widget = forms.Textarea, required = False)
 
     class Meta:
         model = PetReport
-        exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by','closed', 'thumb_path')
+        #exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by','closed', 'thumb_path')
+        fields = ("status", "date_lost_or_found", "pet_name", "pet_type", "breed", "age", "color", "sex", "spayed_or_neutered", "size", "img_path", "description", "location", "geo_location_lat", "geo_location_long", "microchip_id", "tag_info", "contact_name", "contact_number", "contact_email")
 
 #The UserProfile Form - used for editing the user profile
 #edit initial value of each field either in the view or in the template
