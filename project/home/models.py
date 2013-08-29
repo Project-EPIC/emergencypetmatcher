@@ -5,6 +5,7 @@ from django.forms import ModelForm, Textarea
 from django.db.models.signals import post_save, pre_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
 from django.core.validators import email_re
+from django.core.mail import send_mail
 from django.core.files.storage import FileSystemStorage
 from django import forms
 from django.template.loader import render_to_string
@@ -165,7 +166,6 @@ class UserProfile (models.Model):
 
 
 class PetReport(models.Model):
-
     '''Required Fields'''
     #Type of Pet
     pet_type = models.CharField(max_length=PETREPORT_PET_TYPE_LENGTH, choices = PET_TYPE_CHOICES, null=False, default=None)
@@ -196,6 +196,8 @@ class PetReport(models.Model):
     contact_number = models.CharField(max_length=PETREPORT_CONTACT_NUMBER_LENGTH, null=True)
     #Contact Email Address of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
     contact_email = models.CharField(max_length=PETREPORT_CONTACT_EMAIL_LENGTH, null=True)        
+    #Contact Link for cross-referencing pet report.
+    contact_link = models.CharField(max_length=PETREPORT_CONTACT_LINK_LENGTH, null=True)
     #Img of Pet
     img_path = models.ImageField(upload_to='images/petreport', null=True)
     #Thumbnail Img of Pet
@@ -366,7 +368,7 @@ class PetReport(models.Model):
 
     #Return a list of candidate PetReports that could potentially be matches for this PetReport.
     def get_candidate_PetReports(self):
-        candidates = PetReport.objects.exclude(proposed_by = self.proposed_by).exclude(status = self.status).filter(pet_type = self.pet_type, closed=False)
+        candidates = PetReport.objects.exclude(status = self.status).filter(pet_type = self.pet_type, closed=False)
 
         if len(candidates) == 0:
             return None
@@ -593,54 +595,181 @@ class PetMatch(models.Model):
         else:
             return False
 
-    #Change this to verify_PetMatch
-    def verify_petmatch(self):
+    def verify_PetMatch(self):
+        print_info_msg("Verification Triggered: PetMatch is now closed to the crowd.")
+
+        #Set some important attributes.
         self.is_open = False
         self.verification_triggered = True
-        print_info_msg("Verification Triggered: PetMatch is now closed to the crowd.")
+        lost_pet = self.lost_pet
+        found_pet = self.found_pet
         petmatch_owner = self.proposed_by
-        lost_pet_contact = self.lost_pet.proposed_by
-        found_pet_contact = self.found_pet.proposed_by
 
         #Grab the Site object for the context variables
-        site = Site.objects.get(pk=1)
+        site = Site.objects.get(pk=1) 
 
-        #If the PetMatch proposer is either the lost or found pet contact...
-        if (petmatch_owner.id == lost_pet_contact.id) or (petmatch_owner.id == found_pet_contact.id): 
-            Optionally_discuss_with_digital_volunteer = ""
+        #Craft the message that you'll send back to receiver (voting on PetMatch view)
+        message = "Congratulations - These two pets have now been triggered for verification! All votes are closed."        
+
+        #Crossposted will tell us whether or not there exist contact preferences.
+        lost_pet_crossposted = False
+        found_pet_crossposted = False
+
+        #LOST PET CONTACT: We might have contact preferences, so we need to use their emails (only if available).
+        if (lost_pet.contact_email or lost_pet.contact_name or lost_pet.contact_number or lost_pet.contact_link):
+            lost_pet_contact = {"name":lost_pet.contact_name, "email": lost_pet.contact_email, "phone": lost_pet.contact_number, "link": lost_pet.contact_link}
+            lost_pet_contact_name = lost_pet_contact.get("name") or "the other contact (we do not have his/her name on file)"
+            lost_pet_contact_email = lost_pet_contact.get("email")
+            lost_pet_contact_phone = lost_pet_contact.get("phone")
+            lost_pet_crossposted = True
+
+        #Just use the lost pet contact.
         else:
-            Optionally_discuss_with_digital_volunteer = "You may also discuss this pet match with %s, the digital volunteer who proposed this pet match. You can reach %s at %s" % (petmatch_owner.user.username, petmatch_owner.user.username, petmatch_owner.user.email)
+            lost_pet_contact = lost_pet.proposed_by
+            lost_pet_contact_name = lost_pet_contact.user.username
+            lost_pet_contact_email = lost_pet_contact.user.email    
+            lost_pet_contact_phone = None        
 
-        #Emails are sent to all parties iff all email addresses are valid (i.e. not test emails)
-        if email_re.match(lost_pet_contact.user.email) and email_re.match(found_pet_contact.user.email) and email_re.match(petmatch_owner.user.email):
-            ctx = { "site":site, 
-                    "petmatch_id":self.id,
-                    'pet_type':'your lost pet', 
-                    'opposite_pet_type_contact':found_pet_contact.user, 
-                    'pet_status':"found", 
-                    'Optionally_discuss_with_digital_volunteer':Optionally_discuss_with_digital_volunteer }
-            
+        #FOUND PET CONTACT: We might have contact preferences, so we need to use their emails (only if available).
+        if (found_pet.contact_email or found_pet.contact_name or found_pet.contact_number or found_pet.contact_link):
+            found_pet_contact = {"name":found_pet.contact_name, "email": found_pet.contact_email, "phone": found_pet.contact_number, "link":found_pet.contact_link}
+            found_pet_contact_name = found_pet_contact.get("name") or "the other contact (we do not have his/her name on file)"
+            found_pet_contact_email = found_pet_contact.get("email")
+            found_pet_contact_phone = found_pet_contact.get("phone")
+            found_pet_crossposted = True
+
+        #Just use the found pet contact.                        
+        else:
+            found_pet_contact = found_pet.proposed_by
+            found_pet_contact_name = found_pet_contact.user.username
+            found_pet_contact_email = found_pet_contact.user.email
+            found_pet_contact_phone = None
+
+        #By default, the petmatch proposer should be involved in the pet match verification discussion.
+        optionally_discuss_with_digital_volunteer = " You may also discuss this pet match with %s (%s), the digital volunteer who proposed this pet match." % (petmatch_owner.user.username, petmatch_owner.user.email)
+
+        #But if the PetMatch proposer is either the lost or found pet contact...
+        if (lost_pet_crossposted == False and found_pet_crossposted == False) and ((petmatch_owner.id == lost_pet_contact.id) or (petmatch_owner.id == found_pet_contact.id)):
+            optionally_discuss_with_digital_volunteer = ""
+        
+        #Create email for regular or crossposted lost pet contact.
+        if lost_pet_contact_email and email_re.match(lost_pet_contact_email):
+
+            #How to reach the opposite contact.
+            if found_pet_contact_email != None:
+                ability_to_reach_opposite_contact = "You can reach him/her at %s" % found_pet_contact_email
+            elif found_pet_contact_phone != None:
+                ability_to_reach_opposite_contact = "Since no email is given for this contact, you can reach him/her at: %s" % found_pet_contact_phone
+            else:
+                ability_to_reach_opposite_contact =  "Unfortunately, there is no information to use to reach this contact, but if you help share this PetMatch online, more people can help trace him/her back."  
+
+            #Reaching Verification Page (when not crossposted).
+            if lost_pet_crossposted == False:
+                verification_page = "http://%s%s" % (site.domain, URL_VERIFY_PETMATCH + str(self.id))
+                access_verification = "Please let us know if this pet match was successful by visiting the following link: %s" % verification_page
+            else:
+                access_verification = ""
+
+            ctx = { "site": site,
+                    "petmatch_id": self.id,
+                    "pet_type": "your lost pet",
+                    "opposite_pet_type_contact_name": found_pet_contact_name,
+                    "pet_status": "found",
+                    "ability_to_reach_opposite_contact": ability_to_reach_opposite_contact,
+                    "optionally_discuss_with_digital_volunteer": optionally_discuss_with_digital_volunteer,
+                    "access_verification": access_verification }
+
             email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH, ctx)
             email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
-            lost_pet_contact.user.email_user(email_subject, email_body, from_email=None)            
+            send_mail(email_subject, email_body, None,[lost_pet_contact_email])
 
-            ctx.update({"pet_type": "the pet you found", 
-                        "opposite_pet_type_contact": lost_pet_contact.user, 
-                        "pet_status":"lost", 
-                        "Optionally_discuss_with_digital_volunteer": Optionally_discuss_with_digital_volunteer})
+        #Create email for regular or crossposted found pet contact.
+        if found_pet_contact_email and email_re.match(found_pet_contact_email):
+
+            #How to reach the opposite contact.
+            if lost_pet_contact_email != None:
+                ability_to_reach_opposite_contact = "You can reach him/her at %s" % lost_pet_contact_email
+            elif lost_pet_contact_phone != None:
+                ability_to_reach_opposite_contact = "Since no email is given for this contact, you can reach him/her at: %s" % lost_pet_contact_phone
+            else:
+                ability_to_reach_opposite_contact =  "Unfortunately, there is no information to use to reach this contact, but if you help share this PetMatch online, more people can help trace him/her back."  
+
+            #Reaching Verification Page (when not crossposted).
+            if found_pet_crossposted == False:
+                verification_page = "http://%s%s" % (site.domain, URL_VERIFY_PETMATCH + str(self.id))
+                access_verification = "Please let us know if this pet match was successful by visiting the following link: %s" % verification_page
+            else:
+                access_verification = ""
+
+            ctx = { "site": site,
+                    "petmatch_id": self.id,
+                    "pet_type": "the pet you found",
+                    "opposite_pet_type_contact_name": lost_pet_contact_name,
+                    "pet_status": "lost",
+                    "ability_to_reach_opposite_contact": ability_to_reach_opposite_contact,
+                    "optionally_discuss_with_digital_volunteer": optionally_discuss_with_digital_volunteer,
+                    "access_verification": access_verification }
 
             email_body = render_to_string(TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH, ctx)
-            found_pet_contact.user.email_user(email_subject, email_body, from_email=None)
+            email_subject = EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH
+            send_mail(email_subject, email_body, None, [found_pet_contact_email], ctx)
 
-            #If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact, an email will be sent to this person as well.
-            if Optionally_discuss_with_digital_volunteer != "":
-                ctx = { 'lost_pet_contact':lost_pet_contact,'found_pet_contact':found_pet_contact }
-                email_body = render_to_string(TEXTFILE_EMAIL_PETMATCH_PROPOSER, ctx)
-                email_subject =  EMAIL_SUBJECT_PETMATCH_PROPOSER  
-                petmatch_owner.user.email_user(email_subject,email_body,from_email=None)
+        #If the lost/found pet contact emails exist, then add that emails have been sent.
+        if lost_pet_contact_email != None and found_pet_contact_email != None:
+            message = message + " Emails have been sent to the original contacts of these pets."
+        else:
+            message = message + " Help us get in contact with the original owners about this potential match by sharing it!"
 
-            #Save after successfully sending off pet contact emails.
-            self.save()
+
+        #If the pet match was proposed by a person other than the lost_pet_contact/found_pet_contact, an email will be sent to this person as well.
+        if optionally_discuss_with_digital_volunteer != "" and email_re.match(petmatch_owner.user.email):
+
+            #If at least one pet contact is being crossposted, mention that pet match proposer is responsible for managing yes/no for that contact.
+            if lost_pet_crossposted == True or found_pet_crossposted == True:
+                manage_answer = "Since at least one pet contact is not on EmergencyPetMatcher, we are relying on you and the EPM users who submitted these pets to acquire the responses from the original pet owner and finder. Please work together and communicate a final response for this pet!"
+            else:
+                manage_answer = ""
+
+            #How to reach lost pet contact.
+            if lost_pet_contact_email != None:
+                reach_lost_pet_contact = "You can reach him/her at %s" % lost_pet_contact_email
+            elif lost_pet_contact_phone != None:
+                reach_lost_pet_contact = "Since no email is given for this contact, you can reach him/her at: %s" % lost_pet_contact_phone
+            else:
+                reach_lost_pet_contact =  "Unfortunately, there is no information to use to reach this contact, but if you help share this PetMatch online, more people can help trace him/her back."  
+
+            #How to reach found pet contact.
+            if found_pet_contact_email != None:
+                reach_found_pet_contact = "You can reach him/her at %s" % found_pet_contact_email
+            elif found_pet_contact_phone != None:
+                reach_found_pet_contact = "Since no email is given for this contact, you can reach him/her at: %s" % found_pet_contact_phone
+            else:
+                reach_found_pet_contact =  "Unfortunately, there is no information to use to reach this contact, but if you help share this PetMatch online, more people can help trace him/her back."  
+
+            #Reaching Verification Page (when not crossposted).
+            if petmatch_owner.id == lost_pet.proposed_by.id or petmatch_owner.id == found_pet.proposed_by.id:
+                verification_page = "http://%s%s" % (site.domain, URL_VERIFY_PETMATCH + str(self.id))
+                access_verification = "Please let us know if this pet match was successful by visiting the following link: %s" % verification_page
+            else:
+                access_verification = ""
+
+
+            ctx = { "site": site,
+                    "petmatch_id": self.id,
+                    'lost_pet_contact_name':lost_pet_contact_name,
+                    'reach_lost_pet_contact':reach_lost_pet_contact,
+                    'found_pet_contact_name':found_pet_contact_name,
+                    'reach_found_pet_contact':reach_found_pet_contact,
+                    "access_verification": access_verification,
+                    "manage_answer": manage_answer }
+
+            email_body = render_to_string(TEXTFILE_EMAIL_PETMATCH_PROPOSER, ctx)
+            email_subject =  EMAIL_SUBJECT_PETMATCH_PROPOSER  
+            send_mail (email_subject, email_body, None, [petmatch_owner.user.email])
+
+        #Save after successfully sending off pet contact emails.
+        self.save()
+        return message
             
     def close_PetMatch(self):
         petmatch_owner = self.proposed_by
@@ -755,6 +884,7 @@ class PetReportForm (ModelForm):
     contact_name = forms.CharField(label = "Contact Name", max_length=PETREPORT_CONTACT_NAME_LENGTH, required=False)
     contact_number = forms.CharField(label = "Contact Phone Number", max_length=PETREPORT_CONTACT_NUMBER_LENGTH, required=False)
     contact_email = forms.CharField(label = "Contact Email Address", max_length=PETREPORT_CONTACT_EMAIL_LENGTH, required=False)
+    contact_link = forms.CharField(label = "Contact Alternative link to Pet Posting", max_length=PETREPORT_CONTACT_LINK_LENGTH, required=False)
     img_path = forms.ImageField(label = "Upload an Image", help_text="(*.jpg, *.png, *.bmp), 3MB maximum", widget = forms.ClearableFileInput, required = False)
     spayed_or_neutered = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False)
     description  = forms.CharField(label = "Pet Description", help_text="(Please describe the pet as accurately as possible)", max_length = PETREPORT_DESCRIPTION_LENGTH, widget = forms.Textarea, required = False)
@@ -762,13 +892,13 @@ class PetReportForm (ModelForm):
     class Meta:
         model = PetReport
         #exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by','closed', 'thumb_path')
-        fields = ("status", "date_lost_or_found", "pet_name", "pet_type", "breed", "age", "color", "sex", "spayed_or_neutered", "size", "img_path", "description", "location", "geo_location_lat", "geo_location_long", "microchip_id", "tag_info", "contact_name", "contact_number", "contact_email")
+        fields = ("status", "date_lost_or_found", "pet_name", "pet_type", "breed", "age", "color", "sex", "spayed_or_neutered", "size", "img_path", "location", "description", "geo_location_lat", "geo_location_long", "microchip_id", "tag_info", "contact_name", "contact_number", "contact_email", "contact_link")
 
 #The UserProfile Form - used for editing the user profile
 #edit initial value of each field either in the view or in the template
 class UserProfileForm (forms.Form):
     #Required Fields
-    username = forms.CharField(label="Username*",max_length=30) 
+    username = forms.CharField(label="Username*", max_length=30) 
 
     #Non-Required Fields
     first_name = forms.CharField(label="First Name",max_length=30,required=False)

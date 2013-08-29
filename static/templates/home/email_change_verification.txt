@@ -9,8 +9,6 @@ The link is valid for {{ expiration_days }} day(s).
 If you did not change your email on our system please ignore this email.
 
 Thank you,
-
 ---------------------
 The EPM Team
-Project EPIC
-(http://epic.cs.colorado.edu)
+(http://www.emergencypetmatcher.com)

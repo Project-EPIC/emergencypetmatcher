@@ -7,8 +7,6 @@ http://{{ site.domain }}{% url 'registration_activate' activation_key %}
 The link is valid for {{ expiration_days }} day(s).
 
 Thank you,
-
 ---------------------
 The EPM Team
-Project EPIC
-(http://epic.cs.colorado.edu)
+(http://www.emergencypetmatcher.com)

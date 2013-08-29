@@ -1,7 +1,7 @@
 {% extends 'home/index.html' %}
 
 {% block js %}
-<script src = "{{ STATIC_URL }}/js/local/epm-userprofile.min.js" type = 'text/javascript'></script>
+<script src = "{{ STATIC_URL }}js/local/epm-userprofile.js" type = 'text/javascript'></script>
 {% endblock js %}
 {% block head_title %}EPM - User Profile: {{ show_profile.user.username }} {% endblock head_title %}
 
@@ -144,10 +144,10 @@
 	<!-- Proposed Pet Matches -->	
 	{% if proposed_petmatches %}		
 	<h3 style="text-align:center;"> Proposed Pet Matches</h3>
-	<div class="pet_thumb_container" style="width:900px; margin-left:auto; margin-right:auto;">         
+	<div id="userprofile_pet_thumb_container" class="pet_thumb_container" style="width:900px; margin-left:auto; margin-right:auto;">         
 		{% for pet_match in show_profile.proposed_by_related.all %}	
 			<div class="pmdp_thumb">
-	            <a link = "{% url 'get_PetMatch' pet_match.id %}" name = "{{ pet_match.found_pet.pet_name }} with {{ pet_match.lost_pet.pet_name }}"
+	            <a link = "{% url 'get_PetMatch' pet_match.id %}" name = "{{ pet_match.lost_pet.pet_name }} with {{ pet_match.found_pet.pet_name }}"
 	            	style="text-decoration:none; color:#663399; font-size:12px;}"
 	           		title="{{ pet_match.lost_pet.pet_name }}: Lost {{ pet_match.lost_pet.pet_type }} / {{ pet_match.found_pet.pet_name }}: Found {{ pet_match.found_pet.pet_type }}">
 					<strong style="text-align:center; display:block;">{{ pet_match.lost_pet.pet_name }} with {{ pet_match.found_pet.pet_name }}</strong>

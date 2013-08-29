@@ -7,10 +7,11 @@ from registration.models import RegistrationProfile
 from social_auth.models import UserSocialAuth
 from django.db import IntegrityError
 from PIL import Image
+from random import randint
 import random, string, sys, time, datetime, lipsum, traceback
 
 '''===================================================================================
-epm_utils.py: Utility Functions for EPM Utility and Testing
+utils.py: Utility Functions for EPM Utility and Testing
 
 When writing your test file (tests.py), make sure to have the following import:
 
@@ -42,8 +43,19 @@ def print_error_msg (string):
 	print "[ERROR]: %s" % string
 
 #Generate a random alpha-numeric string.
-def generate_string (size, chars = string.ascii_uppercase + string.digits):
-	return ''.join(random.choice(chars) for i in range(size))
+def generate_string (size, phone=False, url=False, chars = string.ascii_uppercase + string.digits):
+	if phone == True:
+		number = "(" + str(randint(10**(3-1), (10**3)-1)) + ")-"
+		number = number + str(randint(10**(3-1), (10**3)-1)) + "-"
+		number = number + str(randint(10**(4-1), (10**4)-1))
+		return number
+
+	elif url == True:
+		return "http://" + ''.join(random.choice(chars) for i in range(size))
+
+	else: 
+		return ''.join(random.choice(chars) for i in range(size))
+
 
 def generate_lipsum_paragraph(max_length):
 	result =  LIPSUM.generate_paragraph()
@@ -128,14 +140,14 @@ def delete_UserProfile_images(target_dir=USERPROFILE_IMAGES_DIRECTORY, from_list
 #Create Random Object for: User
 def create_random_User(i, pretty_name=True):
 	if pretty_name == True:
-		username = random.choice(USERNAMES) + str(i)
+		username = random.choice(USER_NAMES) + str(i)
 	else:
 		username = generate_string(10) + str(i)
 
 	#To prevent duplicate usernames
 	while(UserProfile.username_exists(username)):
 		if pretty_name == True:
-			username = random.choice(USERNAMES) + str(i)
+			username = random.choice(USER_NAMES) + str(i)
 		else:
 			username = generate_string(10) + str(i)
 
@@ -199,13 +211,12 @@ def create_random_bookmark_list (userprofile, num_bookmark=None):
 
 #Create Random Object for: PetReport
 def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
-
 	#Bias the distribution towards (in order): [Dog, Cat, Bird, Horse, Rabbit, Snake, Turtle]
 	if pet_type == None:
 		random_var = random.random()
-		if random_var < 0.80:
+		if random_var < 0.60:
 			pet_type = PETREPORT_PET_TYPE_DOG
-		elif random_var >= 0.80 and random_var < 0.93:
+		elif random_var >= 0.60 and random_var < 0.93:
 			pet_type = PETREPORT_PET_TYPE_CAT
 		elif random_var >= 0.93 and random_var < 0.95:
 			pet_type = PETREPORT_PET_TYPE_BIRD
@@ -233,6 +244,14 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 	pr.location = generate_string(PETREPORT_LOCATION_LENGTH) 
 	pr.color = generate_string(PETREPORT_COLOR_LENGTH)
 	pr.age = random.choice(AGE_CHOICES)[0]
+
+	#Majority of PetReports are cross-posted, so let's add contact information in.
+	random_var = random.random()
+	if random_var < 0.60:
+		pr.contact_name = random.choice(USER_NAMES)
+		pr.contact_email = generate_string(6) + '(at)' + 'test.com'
+		pr.contact_number = generate_string(10, phone=True)
+		pr.contact_link = generate_string(100, url=True)
 
 	#Randomly generate attributes, or not.
 	if status == "Found":

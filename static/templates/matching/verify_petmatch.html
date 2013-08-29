@@ -12,7 +12,7 @@
 
     <!-- CSS -->
     <!-- EPM Style CSS -->
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/style.min.css" type="text/css"></link>
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css" type="text/css"></link>
     <!-- Include the JQuery UI Style CSS -->
     <link rel="stylesheet" href="{{ STATIC_URL }}css/epm-theme/jquery-ui-1.10.3.custom.min.css" type="text/css"></link>
     <!-- Include the Reset CSS -->
@@ -20,17 +20,17 @@
     
     <!-- Javascript & JQuery -->
     <!-- jquery original source -->
-    <script src="{{ STATIC_URL }}js/jquery-1.9.1.min.js" type="text/javascript"></script>
+    <script src="{{ STATIC_URL }}js/jquery-1.10.2.min.js" type="text/javascript"></script>
     <!-- jquery UI original source -->
     <script src="{{ STATIC_URL }}js/jquery-ui-1.10.3.custom.min.js" type="text/javascript"></script>
     <!-- Include the Zooming plugin -->
     <script src="{{ STATIC_URL }}js/jquery-zoom.min.js" type="text/javascript"></script>    
     <!-- General, inheritable JS goes here -->
-    <script src = "{{ STATIC_URL }}js/epm.min.js" type = 'text/javascript'></script>
+    <script src = "{{ STATIC_URL }}js/epm.js" type = 'text/javascript'></script>
 
     {% block js %}
     <!-- Page-specific JS goes in this block -->
-    <script src = "{{ STATIC_URL }}js/local/epm-verify_petmatch.min.js" type="text/javascript"></script>
+    <script src = "{{ STATIC_URL }}js/local/epm-verify_petmatch.js" type="text/javascript"></script>
 
     <script type="text/javascript">
         //Must have these django-rendered variables as global javascript variables in order to refer to them!

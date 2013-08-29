@@ -13,12 +13,9 @@ from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import model_to_dict
 from django.utils import simplejson
-#django project imports
-#django plugin imports
 from social_auth import __version__ as version
 from social_auth.utils import setting
 from social_auth.views import auth
-#python imports
 from random import choice, uniform
 from utils import *
 from pprint import pprint
@@ -85,12 +82,9 @@ def vote_PetMatch(request):
 
         #Was the petmatch triggered for verification? Check here.
         threshold_reached = pm.PetMatch_has_reached_threshold() 
+        
         if threshold_reached == True:
-            pm.verify_petmatch()
-            if userprofile.id in [pm.proposed_by.id, pm.lost_pet.proposed_by.id, pm.found_pet.proposed_by.id]:
-                message =  "Congratulations! These two pets have now been triggered for verification! Check your email to make the next step in reuniting this pet!"
-            else:
-                message =  "Congratulations! These two pets have now been triggered for verification! All votes are closed."
+            message = pm.verify_PetMatch()
             
         num_upvotes = len(pm.up_votes.all())
         num_downvotes = len(pm.down_votes.all())
@@ -182,11 +176,11 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
 
                 result.up_votes.add(proposed_by)
                 result.save()
-                messages.success(request, "Nice job! Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
+                messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match. Help spread the word about this match!")
                 logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, proposed_by, petmatch=result)
 
             elif outcome == PETMATCH_OUTCOME_NEW_PETMATCH:
-                messages.success(request, "Congratulations - The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
+                messages.success(request, "Congratulations - The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile. Help spread the word about your match!")
                 logger.log_activity(ACTIVITY_PETMATCH_PROPOSED, proposed_by, petmatch=result)
                 # add reputation points for proposing a new petmatch
                 proposed_by.update_reputation(ACTIVITY_PETMATCH_PROPOSED)
@@ -207,7 +201,7 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
 
                 result.up_votes.add(proposed_by)
                 result.save()          
-                messages.success(request, "Nice job! Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match.\nHelp spread the word about your match by sharing it on Facebook and on Twitter!")
+                messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match. Help spread the word about this match!")
                 logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, proposed_by, petmatch=result)
             else:                
                 messages.error(request, "A Problem was found when trying to propose the PetMatch. We have been notified of the issue and will fix it as soon as possible.")            

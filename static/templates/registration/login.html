@@ -19,7 +19,7 @@
 {% endblock menu %}				
 
 {% block content %}	
-	<div id="content" style="padding:0px 10px 0px 10px; border:2px solid gray; width:500px; background-color: #E8E8E8">
+	<div id="content" style="padding:0px 10px 10px 10px; border:2px solid gray; width:500px; background-color: #E8E8E8">
 		{% block messages %}<ul id="messages">{% for message in messages %}<li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>{% endfor %}</ul>{% endblock messages %}
 
 		{% block content_title %} <h2 style="">Login</h2>{% endblock content_title %}

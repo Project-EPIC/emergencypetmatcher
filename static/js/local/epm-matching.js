@@ -7,7 +7,7 @@ $(document).ready(function(){
 		load_dialog({
 			"link": link, 
 			"title": "Propose Match", 
-			"width": 900
+			"width": 800
 		});
 	});
 

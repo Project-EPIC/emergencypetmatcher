@@ -11,7 +11,7 @@ $(document).ready(function(){
     });
 
 	//Link to click to open to the PMDP
-    $(".pmdp_dialog a").click(function(){ 
+    $("#userprofile_pet_thumb_container .pmdp_thumb a").click(function(){ 
         load_dialog({
             "link": $(this).attr("link"), 
             "title": $(this).attr("name"), 

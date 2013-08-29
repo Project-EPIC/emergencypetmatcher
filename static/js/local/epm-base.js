@@ -115,7 +115,7 @@ function update_pagination(){
 function fetch_PetReports(page){
 	//First, remove all tile elements
 	$("#tiles li.item").remove();
-	$("#tiles h3").remove();
+	$("#tile_container span").remove();
 	$.ajax({
 	    type:"GET",
 	    url:URL_GET_PETREPORTS + "/" + page,
@@ -140,10 +140,13 @@ function fetch_PetReports(page){
 			$("#nav_petreports").toggleClass("active");
 
 			if (petreports.length == 0)
-				$("#tiles").append("<h3 style='margin:10px; display:block; text-align:center;'> No Pets Available Yet! </h3>");
-			
+				$("#tile_container").prepend("<span style='margin:10px; display:block; font-size:24px; color:gray; text-align:center;'> No Pets Available Yet! </span>");
+			else
+				$("#tile_container").prepend("<span style='margin:10px; display:block; font-size:24px; color:gray; text-align:center;'> Select a Pet to Begin Matching.</span>");
+
 			//Don't forget to refresh the grid layout.
-			refresh_layout();
+			refresh_layout();			
+			
 		},
 		error: function(data){
 			alert("An unexpected error occurred when trying to get Pet Reports. Please try again."); 
@@ -187,7 +190,7 @@ function setup_petreport_item(report){
 function fetch_PetMatches(page, successful_petmatches){
 	//First, remove all tile elements (except activity feed)
 	$("#tiles li.item").remove();
-	$("#tiles h3").remove();
+	$("#tile_container span").remove();
 
 	if (successful_petmatches == true)
 		url = URL_GET_SUCCESSFUL_PETMATCHES + "/" + page;
@@ -220,8 +223,11 @@ function fetch_PetMatches(page, successful_petmatches){
 			else
 				$("#nav_petmatches").toggleClass("active");
 
+
 			if (matches.length == 0)
-				$("#tiles").append("<h3 style='margin:10px; display:block; text-align:center;'> No Pet Matches Available Yet! </h3>");
+				$("#tile_container").prepend("<span style='margin:10px; display:block; font-size:24px; color:gray; text-align:center;'> No Pet Matches Available Yet! </span>");
+			else
+				$("#tile_container").prepend("<span style='margin:10px; display:block; font-size:24px; color:gray; text-align:center;'> Select a Pet Match to Vote on it.</span>");			
 
 			//Don't forget to refresh the grid layout.
 			refresh_layout();
@@ -502,7 +508,7 @@ function setup_activity_item (activity_dict){
 function fetch_bookmarks(page){
 	//First, remove all tile elements
 	$("#tiles li.item").remove();
-	$("#tiles h3").remove();
+	$("#tile_container span").remove();
 	$.ajax({
 	    type:"GET",
 	    url:URL_GET_BOOKMARKS + "/" + page,
@@ -555,10 +561,12 @@ function fetch_bookmarks(page){
 
 			//Toggle the active nav tab inactive, and toggle the pets tab active.
 			$("#nav li.active").toggleClass("active");
-			$("#nav_bookmarks").toggleClass("active");
+			$("#nav_bookmarked").toggleClass("active");
 
 			if (bookmarks.length == 0)
-				$("#tiles").append("<h3 style='margin:10px; display:block; text-align:center;'> No Bookmarks Available Yet! </h3>");
+				$("#tile_container").prepend("<span style='margin:10px; display:block; font-size:24px; color:gray; text-align:center;'> No Pets Available Yet! </span>");
+			else
+				$("#tile_container").prepend("<span style='margin:10px; display:block; font-size:24px; color:gray; text-align:center;'> Select a Pet to Begin Matching.</span>");			
 			
 			//Don't forget to refresh the grid layout.
 			refresh_layout();

@@ -30,11 +30,16 @@ import datetime, re, time, home.logger
 @login_required
 def submit_PetReport(request):
     if request.method == "POST":
-        #Let's make some adjustments to non-textual form fields before converting to a PetReportForm.
-        if request.POST ['geo_location_lat'] == 'None' or request.POST ['geo_location_long'] == 'None':
-            request.POST ['geo_location_lat'] = None
-            request.POST ['geo_location_long'] = None
 
+        #Let's make some adjustments to non-textual form fields before converting to a PetReportForm.
+        geo_lat = request.POST ["geo_location_lat"] or ""
+        geo_long = request.POST ["geo_location_long"] or ""
+
+        if (geo_lat == "" or geo_lat == "None") or (geo_long == "" or geo_long == "None"):
+            request.POST ['geo_location_lat'] = 0.00
+            request.POST ['geo_location_long'] = 0.00
+
+        pprint(request.POST)
         form = PetReportForm(request.POST, request.FILES)
 
         if form.is_valid() == True:
@@ -42,6 +47,19 @@ def submit_PetReport(request):
             #Create (but do not save) the Pet Report Object associated with this form data.
             pr.proposed_by = request.user.get_profile()
             img_rotation = 0
+
+            #if email_re.match(pr.contact_email) == None:
+            
+            #Deal with Contact Information.
+            if pr.contact_name.strip() == "":
+                pr.contact_name = None
+            if pr.contact_email.strip() == "":
+                pr.contact_email = None
+            if pr.contact_number.strip() == "":
+                pr.contact_number = None
+            if pr.contact_link.strip() == "":
+                pr.contact_link = None
+
 
             if request.POST.get("img_rotation") != None:
                 img_rotation = - int(request.POST ["img_rotation"])
@@ -70,9 +88,13 @@ def submit_PetReport(request):
             #return redirect(URL_SUBMIT_PETREPORT)
     else:
         form = PetReportForm() #Unbound Form
-    return render_to_response(HTML_SUBMIT_PETREPORT, {  'form':form, "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
-                                                        "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH}, 
-                                                        RequestContext(request))
+    return render_to_response(HTML_SUBMIT_PETREPORT, {  'form':form,
+                                                        "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
+                                                        "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
+                                                        "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
+                                                        "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
+                                                        "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
+                                                        "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH }, RequestContext(request))
 
 @login_required
 def get_pet_breeds(request, pet_type=0):

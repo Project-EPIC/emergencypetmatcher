@@ -10,9 +10,9 @@ setup_model_fixture.py: Setup sample (random) data for your dev env.
 ==================================================================================='''
 
 #Control Variables
-NUM_PETREPORTS = 300
-NUM_USERS = 50
-NUM_PETMATCHES = 100
+NUM_PETREPORTS = 100
+NUM_USERS = 25
+NUM_PETMATCHES = 50
 
 #When Executed: Setup our fixture
 if (len(sys.argv) < 2) == True or (len(sys.argv) > 3) == True:
@@ -26,8 +26,7 @@ if (len(sys.argv) < 2) == True or (len(sys.argv) > 3) == True:
 argument = sys.argv[1]
 
 if argument == "setup":
-	results = setup_objects(create_users=True, num_users=NUM_USERS, create_petreports=True, 
-		num_petreports=NUM_PETREPORTS, create_petmatches=True, num_petmatches=NUM_PETMATCHES)
+	results = setup_objects(create_users=True, create_bookmark_lists=True, create_following_lists=True, num_users=NUM_USERS, create_petreports=True, num_petreports=NUM_PETREPORTS, create_petmatches=True, num_petmatches=NUM_PETMATCHES)
 
 	print_info_msg("%d PetMatches generated" % NUM_PETMATCHES)
 	print_info_msg("%d PetReports generated" % NUM_PETREPORTS)

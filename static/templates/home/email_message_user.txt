@@ -7,8 +7,6 @@ You have a new message from {{ from_user.username }}:
 You can visit this user's profile page here: http://{{ site.domain }}{{ from_user_profile_URL }}
 
 Thank you,
-
 ---------------------
 The EPM Team
-Project EPIC
-(http://epic.cs.colorado.edu)
+(http://www.emergencypetmatcher.com)

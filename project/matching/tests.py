@@ -8,7 +8,6 @@ from pprint import pprint
 import unittest, string, random, sys, time
 from django.contrib.messages import constants as messages
 
-
 '''===================================================================================
 MatchingTesting: Testing for EPM Matching
 ==================================================================================='''
@@ -297,58 +296,6 @@ class MatchingTesting (unittest.TestCase):
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
 		performance_report(iteration_time)
-
-	def test_propose_PetMatch_without_same_contacts (self):
-		print_testing_name("test_propose_PetMatch_without_same_contacts")
-		iteration_time = 0.00
-
-		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(delete_all_objects=False, create_petreports=True)
-		users = results["users"]
-		clients = results["clients"]
-		petreports = results["petreports"]
-		num_petmatches = 0
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-
-			#objects
-			user, password = random.choice(users)
-			client = random.choice(clients)
-			petreport = random.choice(petreports)
-
-			#Log in First.
-			loggedin = client.login(username = user.username, password = password)
-			self.assertTrue(loggedin == True)
-			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))			
-
-			#Go to the matching interface
-			matching_url = URL_MATCHING + str(petreport.id) + "/"
-			response = client.get(matching_url, follow=True)
-			print_debug_msg(response.request ["PATH_INFO"])
-
-			#Now, initiate the AJAX GET call to grab all pet reports from this filtering/ranking.
-			if response.request ["PATH_INFO"] == matching_url:
-				response = client.get(matching_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
-				context = simplejson.loads(response._container[0])
-				paged_candidates = context ["pet_reports_list"]
-
-				#Asserts
-				self.assertEquals(len(paged_candidates), context["total_count"])
-				self.assertEquals(len(paged_candidates), context["count"])
-				candidate_petreport = random.choice(paged_candidates)
-
-				#This is what we're really testing - that these contact users should NOT be the same!
-				self.assertFalse(candidate_petreport["proposed_by_username"] == petreport.proposed_by.user.username)
-				print_success_msg(candidate_petreport["proposed_by_username"] + "!=" + petreport.proposed_by.user.username)
-
-			else:
-				self.assertEquals(response.request["PATH_INFO"], URL_HOME)	
-
-			output_update(i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)			
-		performance_report(iteration_time)		
 
 '''===================================================================================
 PetMatchTesting: Testing for EPM PetMatch-ing functionality
@@ -655,14 +602,11 @@ class VerificationTesting (unittest.TestCase):
 
 			if difference >= PETMATCH_THRESHOLD:
 				self.assertTrue(petmatch.PetMatch_has_reached_threshold())
-				self.assertTrue(petmatch.verification_triggered)
-				self.assertFalse(petmatch.is_open)
 			else:
 				self.assertFalse(petmatch.PetMatch_has_reached_threshold())
-				self.assertFalse(petmatch.verification_triggered)
-				self.assertTrue(petmatch.is_open)			
-
-			print_success_msg("Pet Match has passed the test: test_function_verify_PetMatch\n")
+				
+			self.assertFalse(petmatch.verification_triggered)
+			self.assertTrue(petmatch.is_open)			
 			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)			
@@ -680,13 +624,13 @@ class VerificationTesting (unittest.TestCase):
 			petmatch = random.choice(petmatches)
 
 			if petmatch.PetMatch_has_reached_threshold() == True:
+				message = petmatch.verify_PetMatch()
 				self.assertTrue(petmatch.verification_triggered)
 				self.assertFalse(petmatch.is_open)
 			else:
 				self.assertFalse(petmatch.verification_triggered)
 				self.assertTrue(petmatch.is_open)
 
-			print_success_msg("Pet Match has passed the test: test_function_verify_PetMatch\n")
 			output_update(i + 1)
 			end_time = time.clock()
 			iteration_time += (end_time - start_time)

@@ -366,6 +366,14 @@ def registration_disallowed (request):
     messages.error (request, "Sorry, we are not accepting registrations at this time. Please try again later.")
     return home(request)
 
+def password_reset_complete (request):
+    messages.success (request, "Great, your password has been changed. You can log in now.")
+    return login_User(request)
+
+def password_reset_done (request):
+    messages.success (request, "We've e-mailed you instructions for setting your password to the e-mail address you submitted. You should be receiving it shortly.")
+    return home(request)
+
 def social_auth_get_details (request):
     print_info_msg("at home.views.social_auth_get_details")
     name = setting('SOCIAL_AUTH_PARTIAL_PIPELINE_KEY', 'partial_pipeline')

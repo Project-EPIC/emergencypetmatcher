@@ -12,7 +12,6 @@ html, body {
 	color: #787878;
 }
 
-
 #container {
 	position:relative;
 	overflow:auto;
@@ -450,45 +449,6 @@ h1.found {
 	display:inline-block;
 }
 
-.tc_title {
-
-	margin: 10px 10px 10px 10px;
-	height: 60px;
-	width: 100%;
-	padding: 20px 0 0 0px;
-	letter-spacing: -1px;
-	font-size: 2em;
-	font-weight: bold;
-	color: red;
-	padding-top:20px;
-}
-
-.tc_text {
-	
-	margin: 10px 10px 10px 10px;
-	height: 300px;
-	width: 100%;
-	overflow-x: scroll;
-	overflow-y:visible;
-	overflow-x:hidden;
-	border:1px dotted;
-}
-
-.tc_buttons {
-	border: 1px solid #000000;
-	background-color: yellow;
-	height: 16px;
-	width: auto;
-	font-color: #000000;
-	padding-top:3px;
-	padding-left:3px;
-	padding-right:3px;
-	padding-bottom:3px;
-	text-decoration:none;
-	float:center;
-}
-
-
 /*CSS for the edit profile page*/
 
 .edit_profile_input_box{
@@ -655,8 +615,9 @@ h1.found {
 
 .prdp_info {
 	list-style-type: none;
+	word-wrap: break-word;
 	vertical-align: top;
-	font-size:14px;
+	font-size:16px;
 	width:400px;
 	height:350px;
 	margin: 0 auto;
@@ -943,57 +904,6 @@ img.bookmark_x{
 	width: 85px;
 	cursor:pointer;
 }
-
-#pmdp_action_container {
-
-	height:230px;
-	border-style: outset;
-	border-width: 2px;
-	border-color: black;
-}
-
-
-#pmdp_userbox_container {
-
-	padding-left: 2px;
-	padding-right: 2px;
-	margin-top: 2px;
-	margin-bottom: 2px;
-	margin-left:5px;
-	display:inline-block;
-	border: 1px dotted black;
-	height: 100px;
-	width: 630px;
-	overflow: auto;
-	overflow-x: scroll;
-}
-
-
-#pmdp_user_box{
-
-	display:inline-block;
-	background: white;
-	border: 1px solid gray;
-	width: 100px;
-	height: 60px;
-	margin:5px 20px 5px 20px;
-	padding-top:5px;
-	padding-left:5px;
-	padding-right:2px;
-	padding-bottom:5px;
-}
-
-#pmdp_user_box img {
-
-	display:block;
-	float:left;
-	width:45px;
-	height:50px; 
-	border: 1px solid black;"
-
-}
-
-
 
 
 

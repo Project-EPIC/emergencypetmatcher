@@ -40,9 +40,10 @@ PETREPORT_LOCATION_LENGTH = 100
 PETREPORT_PET_NAME_LENGTH = 15 
 PETREPORT_MICROCHIP_ID_LENGTH = 40
 PETREPORT_TAG_INFO_LENGTH = 500
-PETREPORT_CONTACT_NAME_LENGTH = 20
-PETREPORT_CONTACT_NUMBER_LENGTH = 15
-PETREPORT_CONTACT_EMAIL_LENGTH = 30
+PETREPORT_CONTACT_NAME_LENGTH = 50
+PETREPORT_CONTACT_NUMBER_LENGTH = 30
+PETREPORT_CONTACT_EMAIL_LENGTH = 50
+PETREPORT_CONTACT_LINK_LENGTH = 300
 PETREPORT_AGE_LENGTH = 10
 PETREPORT_COLOR_LENGTH =30
 PETREPORT_BREED_LENGTH = 30
@@ -53,10 +54,8 @@ PETMATCH_VERIFICATION_VOTES_LENGTH = 2
 CHATLINE_TEXT_LENGTH = 10000
 
 #Small List of Names
-USERNAMES = ['Jacob', 'Emily', 'Joshua', 'Madison', 'Kenneth', 'Mark', 'Dave', 'Angela', '' 'Matthew', 'Olivia', 'Daniel', 'Hannah', 
-'Chris', 'Abby', 'Andrew', 'Isabella', 'Mario', 'Sahar', 'Amrutha', 'Leysia', 'Ken', 'Abe']
-PETREPORT_NAMES = ['Sparky', 'Nugget', 'Sydney', 'Missy', 'Marley', 'Fousey', 'Daisy', 'Libby', 'Apollo', 'Bentley', 'Scruffy',
-'Dandy', 'Candy', 'Mark', 'Baby', 'Toodle', 'Princess' ,'Prince', 'Guss']
+USER_NAMES = ['Jacob', 'Emily', 'Joshua', 'Madison', 'Kenneth', 'Mark', 'Dave', 'Angela', 'Matthew', 'Olivia', 'Daniel', 'James', 'Nicholas', 'Greg', 'Robert', 'Hannah', 'Chris', 'Abby', 'Andrew', 'Isabella', 'Mario', 'Sahar', 'Amrutha', 'Leysia', 'Ken', 'Abe']
+PETREPORT_NAMES = ['Sparky', 'Nugget', 'Sydney', 'Missy', 'Marley', 'Fousey', 'Daisy', 'Libby', 'Apollo', 'Buster', 'Izzy', 'Bentley', 'Scruffy', 'Dandy', 'Candy', 'Mark', 'Baby', 'Toodle', 'Princess' ,'Prince', 'Guss', 'Rocket', 'Darling']
 
 #PetReport Image constants
 PETREPORT_THUMBNAIL_WIDTH = 128
@@ -195,7 +194,7 @@ REWARD_USER_VERIFY_PETMATCH_SUCCESSFUL = 15
 REWARD_NEW_ACCOUNT = 10
 
 #Represents how many activities to fetch per request.
-ACTIVITY_FEED_LENGTH = 50
+ACTIVITY_FEED_LENGTH = 20
 
 #URLS - use for redirect calls
 URL_HOME = '/'
@@ -251,7 +250,7 @@ HTML_VERIFY_PETMATCH = "matching/verify_petmatch.html"
 
 TEXTFILE_EMAIL_ACTIVATION_SUBJECT="registration/activation_email_subject.txt"
 TEXTFILE_EMAIL_CHANGE_VERICATION="home/email_change_verification.txt"
-TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH = "matching/verification_email_to_pet_owner.txt"
+TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH = "matching/verification_email_to_pet_contact.txt"
 TEXTFILE_EMAIL_PETMATCH_PROPOSER = "matching/verification_email_to_digital_volunteer.txt"
 TEXTFILE_EMAIL_USERPROFILE_MESSAGE = "home/email_message_user.txt"
 

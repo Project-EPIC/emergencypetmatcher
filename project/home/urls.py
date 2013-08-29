@@ -42,6 +42,8 @@ urlpatterns = patterns('home.views',
 	url(r'^register/closed/$', "registration_disallowed", name='registration_disallowed'),
  	url(r'^accounts/register/$', "registration_register",  name='registration_register' ),
  	url(r'^accounts/activate/complete/$', "registration_activation_complete"),
+ 	url(r'^accounts/password/reset/complete/$', 'password_reset_complete', name="password_reset_complete"),
+ 	url(r'^accounts/password/reset/done/$', 'password_reset_done', name="password_reset_done"),
 	url (r'^accounts/', include('registration.backends.default.urls')),
 
 	#email verification URL

@@ -106,13 +106,18 @@ function convert_to_javascript_obj(json_str){
  }
 
 
-
 function display_PetReport_fields(options){
     var petreport = options ["petreport"] || null;
     var list = options ["list"] || null;
+    var showContactInfo = false;
 
+    //If PetReport is not available, exit.
     if (petreport == null || list == null)
         return null;
+
+    //Is there contact information to show? Need to check.
+    if (petreport.contact_name != null || petreport.contact_email != null || petreport.contact_number != null || petreport.contact_link != null)
+        showContactInfo = true;
 
     list.html("");
     list.append("<li><b>Pet Name:</b> " + petreport.pet_name + "</li>");
@@ -135,30 +140,52 @@ function display_PetReport_fields(options){
     list.append("<li><b>Color:</b> " + petreport.color + "</li>");
     list.append("<li><b>Size:</b> " + petreport.size + "</li>");
     list.append("<li><b>Tag and Collar Information:</b></li>");
-    list.append("<li class='pr_desc'>" + petreport.tag_info + "</li>");
+    list.append("<li>" + petreport.tag_info + "</li>");
     list.append("<li><b>Description:</b></li>");
-    list.append("<li class='pr_desc'>" + petreport.description + "</li>");
+    list.append("<li>" + petreport.description + "</li>");
+
+    //Show Contact information.
+    if (showContactInfo == true){
+        list.append("<hr size='0' width='100%' color='white'/>")
+        list.append("<li><b>Contact Information</b></li>");
+        list.append("<li style='margin:10px;'><b>Name:</b> " + (petreport.contact_name || "") + "</li>");
+        list.append("<li style='margin:10px;'><b>Email:</b> " + (petreport.contact_email || "") + "</li>");
+        list.append("<li style='margin:10px;'><b>Phone Number:</b> " + (petreport.contact_number || "") + "</li>");
+
+        //Alternative Link should not be shown if it doesn't exist.
+        if (petreport.contact_link)
+            list.append("<li style='margin:10px;'><a href='" + petreport.contact_link +  "'> Alternative Link for this Pet </a></li>");
+    }    
 }
 
 function highlight_matches(list1, list2){
     //First, initialize and clear off pre-existing highlights.
+    var items = null;
     var items1 = $(list1).children("li");
     var items2 = $(list2).children("li");
     $(items1).each(function(){ $(this).css("color", "black"); });
     $(items2).each(function(){ $(this).css("color", "black"); });
 
-    //Iterate through each field and check if the value matches in both lists.
-    for (var i = 0; i < items1.length; i++){
-        innerText1 = items1[i].innerText;
-        innerText2 = items2[i].innerText;
+    if (items1.length < items2.length)
+        items = items1;
+    else
+        items = items2;
 
-        if (innerText1.match("Tag and Collar Information:") != null)
+    //Iterate through each field and check if the value matches in both lists.
+    for (var i = 0; i < items.length; i++){
+        var innerText1 = items1[i].innerText;
+        var innerText2 = items2[i].innerText;
+
+        if (innerText1.match("Tag and Collar Information") != null)
             continue;
 
-        if (innerText1.match("Description:") != null)
+        if (innerText1.match("Description") != null)
             continue;
 
         if (innerText1 == "" || innerText2 == "")
+            continue;
+
+        if (innerText1.match("Contact Information") != null)
             continue;
 
         if (innerText1 == innerText2){
