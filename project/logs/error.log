@@ -1,0 +1,80 @@
+2014-04-10 20:40:30 [1746] [INFO] Starting gunicorn 18.0
+2014-04-10 20:40:30 [1746] [INFO] Listening at: http://0.0.0.0:8000 (1746)
+2014-04-10 20:40:30 [1746] [INFO] Using worker: sync
+2014-04-10 20:40:30 [1751] [INFO] Booting worker with pid: 1751
+2014-04-10 20:47:12 [1746] [INFO] Handling signal: term
+2014-04-10 15:47:12 [1751] [INFO] Worker exiting (pid: 1751)
+2014-04-10 20:47:12 [1746] [INFO] Shutting down: Master
+2014-04-10 20:48:07 [1840] [INFO] Starting gunicorn 18.0
+2014-04-10 20:48:07 [1840] [INFO] Listening at: http://0.0.0.0:8000 (1840)
+2014-04-10 20:48:07 [1840] [INFO] Using worker: sync
+2014-04-10 20:48:07 [1845] [INFO] Booting worker with pid: 1845
+2014-04-10 20:52:16 [1840] [INFO] Handling signal: term
+2014-04-10 15:52:16 [1845] [INFO] Worker exiting (pid: 1845)
+2014-04-10 20:52:16 [1840] [INFO] Shutting down: Master
+2014-04-10 20:52:56 [1538] [INFO] Starting gunicorn 18.0
+2014-04-10 20:52:56 [1538] [INFO] Listening at: http://0.0.0.0:8000 (1538)
+2014-04-10 20:52:56 [1538] [INFO] Using worker: sync
+2014-04-10 20:52:56 [1572] [INFO] Booting worker with pid: 1572
+2014-04-10 21:08:20 [1538] [INFO] Handling signal: term
+2014-04-10 16:08:20 [1572] [INFO] Worker exiting (pid: 1572)
+2014-04-10 21:08:20 [1538] [INFO] Shutting down: Master
+2014-04-10 21:08:26 [1822] [INFO] Starting gunicorn 18.0
+2014-04-10 21:08:26 [1822] [INFO] Listening at: http://0.0.0.0:8000 (1822)
+2014-04-10 21:08:26 [1822] [INFO] Using worker: sync
+2014-04-10 21:08:26 [1827] [INFO] Booting worker with pid: 1827
+2014-04-10 21:08:53 [1822] [INFO] Handling signal: term
+2014-04-10 16:08:53 [1827] [INFO] Worker exiting (pid: 1827)
+2014-04-10 21:08:53 [1822] [INFO] Shutting down: Master
+2014-04-10 21:48:18 [1946] [INFO] Starting gunicorn 18.0
+2014-04-10 21:48:18 [1946] [INFO] Listening at: http://0.0.0.0:8000 (1946)
+2014-04-10 21:48:18 [1946] [INFO] Using worker: sync
+2014-04-10 21:48:18 [1951] [INFO] Booting worker with pid: 1951
+2014-04-10 22:06:37 [1946] [INFO] Handling signal: term
+2014-04-10 17:06:37 [1951] [INFO] Worker exiting (pid: 1951)
+2014-04-10 22:06:37 [1946] [INFO] Shutting down: Master
+2014-04-10 22:06:42 [2139] [INFO] Starting gunicorn 18.0
+2014-04-10 22:06:42 [2139] [INFO] Listening at: http://0.0.0.0:8000 (2139)
+2014-04-10 22:06:42 [2139] [INFO] Using worker: sync
+2014-04-10 22:06:42 [2144] [INFO] Booting worker with pid: 2144
+2014-04-10 22:09:35 [2175] [INFO] Starting gunicorn 18.0
+2014-04-10 22:09:35 [2175] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-04-10 22:09:35 [2175] [ERROR] Retrying in 1 second.
+2014-04-10 22:09:36 [2175] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-04-10 22:09:36 [2175] [ERROR] Retrying in 1 second.
+2014-04-10 22:09:37 [2175] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-04-10 22:09:37 [2175] [ERROR] Retrying in 1 second.
+2014-04-10 22:09:38 [2175] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-04-10 22:09:38 [2175] [ERROR] Retrying in 1 second.
+2014-04-10 22:09:40 [2175] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-04-10 22:09:40 [2175] [ERROR] Retrying in 1 second.
+2014-04-10 22:09:41 [2175] [ERROR] Can't connect to ('0.0.0.0', 8000)
+2014-04-10 22:13:41 [2139] [INFO] Handling signal: term
+2014-04-10 17:13:41 [2144] [INFO] Worker exiting (pid: 2144)
+[INFO]: get_activities_json(): Anonymous User - random sample of activities...
+[OK]: A new UserProfile log file was created for {mario} with ID{1}
+
+[ERROR]: problem in logger.log_activity([Errno 2] No such file or directory: '/vagrant/static/logs/activity_logs/1.log').
+[INFO]: RegistrationProfile now created for inactive user mario
+[ERROR]: problem in logger.log_activity([Errno 2] No such file or directory: '/vagrant/static/logs/activity_logs/1.log').
+[INFO]: get_activities_json(): Anonymous User - random sample of activities...
+[ERROR]: Problem in get_activities_from_log(): {[Errno 2] No such file or directory: '/vagrant/static/logs/activity_logs/1.log'}
+2014-04-10 22:13:41 [2139] [INFO] Shutting down: Master
+2014-04-10 22:13:45 [2248] [INFO] Starting gunicorn 18.0
+2014-04-10 22:13:45 [2248] [DEBUG] Arbiter booted
+2014-04-10 22:13:45 [2248] [INFO] Listening at: http://0.0.0.0:8000 (2248)
+2014-04-10 22:13:45 [2248] [INFO] Using worker: sync
+2014-04-10 22:13:45 [2253] [INFO] Booting worker with pid: 2253
+2014-04-10 22:14:02 [2253] [DEBUG] GET /
+2014-04-10 17:14:08 [2253] [DEBUG] GET /get_PetReports/1
+2014-04-10 17:14:08 [2253] [DEBUG] GET /get_activities_json
+2014-04-10 17:16:50 [2253] [DEBUG] GET /
+2014-04-10 17:16:50 [2253] [DEBUG] GET /get_PetReports/1
+2014-04-10 17:16:50 [2253] [DEBUG] GET /get_activities_json
+2014-04-10 22:17:48 [2248] [INFO] Handling signal: term
+2014-04-10 17:17:48 [2253] [INFO] Worker exiting (pid: 2253)
+[INFO]: get_activities_json(): Anonymous User - random sample of activities...
+[ERROR]: Problem in get_activities_from_log(): {[Errno 2] No such file or directory: '/vagrant/static/logs/activity_logs/1.log'}
+[INFO]: get_activities_json(): Anonymous User - random sample of activities...
+[ERROR]: Problem in get_activities_from_log(): {[Errno 2] No such file or directory: '/vagrant/static/logs/activity_logs/1.log'}
+2014-04-10 22:17:48 [2248] [INFO] Shutting down: Master

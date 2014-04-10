@@ -1,0 +1,32 @@
+upstream backend {
+  server  emergencypetmatcher.com:8080;
+}
+
+server {        
+
+ listen emergencypetmatcher.com:80; 
+ server_name www.emergencypetmatcher.com;
+ access_log /srv/epm/static/logs/nginx_access.log; 
+ error_log /srv/epm/static/logs/nginx_error.log;
+
+ location / {
+
+  if (-f /usr/share/nginx/html/maintenance.html){
+     return 503;
+  }
+
+  auth_basic "Restricted";
+  auth_basic_user_file htpasswd_file;
+  proxy_pass http://emergencypetmatcher.com:8080; 
+  include /etc/nginx/proxy.conf; 
+ }
+
+ error_page 503 @maintenance;
+ location @maintenance {
+  rewrite ^(.*)$ /maintenance.html break;
+ }
+
+ location /srv/epm/static/ { 
+  alias /srv/epm/static/;
+ } 
+}

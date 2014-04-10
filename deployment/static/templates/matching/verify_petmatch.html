@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html class = 'no-js' lang = "en">
+  <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+  <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+  <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+  <!--[if gt IE 8]> <html class="no-js" lang="en"> <![endif]-->
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>{% block head_title %}Pet Match Detailed Page-- Hello{% endblock head_title %}</title>
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+
+    <!-- CSS -->
+    <!-- EPM Style CSS -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css" type="text/css"></link>
+    <!-- Include the JQuery UI Style CSS -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/epm-theme/jquery-ui-1.10.3.custom.min.css" type="text/css"></link>
+    <!-- Include the Reset CSS -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/reset.min.css" type="text/css"></link>
+    
+    <!-- Javascript & JQuery -->
+    <!-- jquery original source -->
+    <script src="{{ STATIC_URL }}js/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <!-- jquery UI original source -->
+    <script src="{{ STATIC_URL }}js/jquery-ui-1.10.3.custom.min.js" type="text/javascript"></script>
+    <!-- Include the Zooming plugin -->
+    <script src="{{ STATIC_URL }}js/jquery-zoom.min.js" type="text/javascript"></script>    
+    <!-- General, inheritable JS goes here -->
+    <script src = "{{ STATIC_URL }}js/epm.js" type = 'text/javascript'></script>
+
+    {% block js %}
+    <!-- Page-specific JS goes in this block -->
+    <script src = "{{ STATIC_URL }}js/local/epm-verify_petmatch.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        //Must have these django-rendered variables as global javascript variables in order to refer to them!
+        var STATIC_URL = "{{ STATIC_URL }}";
+        var USER_ID = "{{ user.id }}";
+        var PETMATCH_ID = "{{ petmatch.id }}"
+        var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
+        var USER_HAS_VERIFIED = "{{ user_has_verified }}";
+        var USER_HAS_VOTED = "{{ user_has_voted }}";
+        var NUM_DOWNVOTES = "{{ num_downvotes }}";
+        var NUM_UPVOTES = "{{ num_upvotes }}";
+        var USER_IS_OWNER = "{{ user_is_owner }}";
+        var LOST_PETREPORT = convert_to_javascript_obj("{{ petmatch.lost_pet.toJSON|escapejs }}");
+        var FOUND_PETREPORT = convert_to_javascript_obj("{{ petmatch.found_pet.toJSON|escapejs }}");
+    </script>
+    {% endblock js %}
+
+  </head>
+
+  <body>
+    <div id="pmdp_back" style="width:800px; padding:20px;">
+
+      <!-- PMDP Header -->
+      <div id="header" style="height:100px; padding:0px;">
+        <!-- Title -->
+        <div id="logo" style="padding:0px;">
+          <h1><a href="{% url 'home' %}">Emergency<strong>PetMatcher</strong></a></h1>
+          <p><a href = "http://epic.cs.colorado.edu">Project EPIC</a></p>
+        </div>  
+
+        <!-- Share Buttons
+        <div id="sharebuttons" style="height:50px; float:right; padding-top:10px;">
+          <font style="font-size:14px; font-weight:bold;"> Share this match on </font>
+          Facebook
+          <a id="facebook_share_pm" title="Share on Facebook" name="fb_share" type="button_count">
+          <img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22" /></a> 
+          <a id="twitter_share_pm" title="Share on Twitter">
+          <img src="{{ STATIC_URL }}/images/icons/icn-twitter.png" width="22" height="22" /></a>
+        </div> -->
+      </div>
+
+      <!-- Messages -->
+      {% block messages %}
+      <ul id="messages" class="pmdp_messages"> 
+        {% for message in messages %} 
+        <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li> 
+        {% endfor %}
+      </ul>
+      {% endblock messages %} 
+
+      <div id="pmdp_title">
+        <!-- PMDP Title -->
+        <strong style="display:block; text-align:center; font-size:24px; margin-bottom:10px;">{{ petmatch.lost_pet.pet_name }} with {{ petmatch.found_pet.pet_name }}</strong>      
+
+        <!-- Proposed_by link -->
+        <span style="text-align:center; display:block">
+          Proposed by <a href="{% url 'get_UserProfile_page' petmatch.proposed_by.id %}">{{ petmatch.proposed_by.user.username }}</a>
+        </span>   
+
+        <!-- Some logic to give nice header for number of voters -->
+        <span style="display:block; text-align:center; margin-bottom:10px; color:gray;"> 
+          {% if num_voters > 1 %}
+            {% if user_has_voted %}
+              You and <strong style="font-size:18px;">{{ num_voters|add:"-1" }}</strong> people have voted on this match.
+            {% else %}
+              <strong style="font-size:18px;">{{ num_voters }}</strong> people have voted on this match.
+            {% endif %}
+          {% elif num_voters == 1 %}
+            {% if user_has_voted %}
+              You have voted for this match.
+            {% else %}
+              <strong style="font-size:18px;">{{ num_voters }}</strong> person has voted on this match.
+            {% endif %}
+          {% else %}
+            Nobody has voted on this match yet.
+          {% endif %}  
+        </span>        
+      </div>      
+
+      <!-- PMDP Match Container - contains PMDP Images and Attributes -->
+      <div id="pmdp_match_container">
+
+        <!-- Buttons and pictures -->
+        <div style="width:750px; text-align:center; margin-left:auto; margin-right:auto;">            
+          <!-- Pet Pictures -->
+          <div style="display:inline-block; text-align:center; margin-left:auto; margin-right:auto;">
+            <div id="lost_pet_pic_wrapper" class="pet_picwrapper" style="margin:0px;">  
+              <img class="pet_pic" src="{{ STATIC_URL }}{{ petmatch.lost_pet.img_path }}"/>
+            </div>
+            <div id="found_pet_pic_wrapper" class="pet_picwrapper" style="margin:0px;">  
+              <img class="pet_pic" src="{{ STATIC_URL }}{{ petmatch.found_pet.img_path }}"/>
+            </div>                  
+          </div>
+        </div>
+
+        <!-- Verification Message -->
+        <strong style="margin-top:10px; text-align:center; display:block; font-size:18px;"> 
+          {% if user_is_owner %}
+            Is this your pet?
+          {% else %}
+            Has the rightful pet owner found his or her pet?
+          {% endif %}
+        </strong>                         
+
+        <!-- Buttons -->
+        <form method="post" style="width:480px; height:50px; text-align:center; margin:10px auto 10px auto;" action="{% url 'verify_PetMatch' petmatch.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="user_is_owner" value="{{ user_is_owner }}"/>
+          <input class = "epm_button" type="submit" style="display:inline-block; width:100px; height:40px;" name="choice" value="Yes"/>
+          <input class = "epm_button" type="submit" style="display:inline-block; width:100px; height:40px;" name="choice" value="No"/>
+        </form>
+
+        <!-- Nice-looking horizontal break -->
+        <hr size="10" width="100%" color="white"/>        
+
+        <!-- Pet Info -->
+        <div style="width:750px; text-align:center; margin-left:auto; margin-right:auto;">
+          <ul id="lost_prdpfields" class="prdp_info" style="width:350px;"></ul>
+          <ul id="found_prdpfields" class="prdp_info" style="width:350px;" ></ul>
+        </div>
+
+      </div> 
+    </div>
+  </body>
+</html>
+

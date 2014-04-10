@@ -1,0 +1,556 @@
+{$ extends 'base.html' %}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+
+Title      : Simpleton 
+Version    : 1.0
+Released   : 20110315
+Description: A two-column web design, best for your personal and business blogging.
+
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<title>Project EPIC PetMatch</title>
+	<meta name="keywords" content="" />
+	<meta name="description" content="" />
+	<link href="static/default.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/trontastic/jquery-ui.css" type="text/css" />	
+	<link rel="stylesheet" href="css/lionbars.css" type="text/css" />	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
+	<script type="text/javascript">
+
+$(document).ready(function() {
+	$("#filters").accordion({
+		active: false,
+		collapsible: true,
+		change: function(event, ui) {
+			/*if ($("#lostscroll").height() == 450) {
+				//scrolls were at full height, make them smaller
+				$("#lostscroll").height(300);
+				$("#foundscroll").height(300);
+			}
+			else {
+				$("#lostscroll").height(450);
+				$("#foundscroll").height(450);
+			}*/
+		}
+	});
+	$(".date").datepicker();
+	$(".petentrylock").live('click', function() {
+		alert('You have locked this pet entry in place.  In the real application this would make it so this entry is always visible.');
+		return false;
+	});
+	$(".petentryfavorite").live('click', function() {
+		alert('You have favorited this pet entry.  In the real application this would allow you to look up this pet entry later.');
+		return false;
+	});
+	/*$(".petentry").draggable({
+		revert: true,
+		containment: "parent",
+		axis: "y",
+		zIndex: 2700
+	});*/
+	/*$("#lostscroll").lionbars({
+		reachedBottom: function(callback) {
+			var children = $(this).children().clone();
+			$(this).append(children);
+		}
+	});
+	$("#foundscroll").lionbars();*/
+	var foundScroll = 0;
+	function manufacturePet(lost) {
+		var names = ["Bilton", "Vert", "Willayne", "Aler", "Corge", "Gabrian", "Kurisco", "Donie", "Garthony", "Lerryl", "Ashleary", "Chrian", "Jillistin", "Bril", "Ellis", "Jeanetta", "Julistie", "Lissa", "Sonie", "Nathrine"];
+		var name = names[Math.floor(Math.random()*names.length)];
+		var pics = ["cat1.jpg", "cat2.jpg", "cat3.jpg", "dog1.jpg", "dog2.jpg", "dog3.jpg", "dog4.jpg", "dog5.jpg"];
+		var pic = pics[Math.floor(Math.random()*pics.length)];
+		var css1 = lost ? "petentrylost" : "petentryfound";
+		var css2 = lost ? "petentrylostlink" : "petentryfoundlink";
+		var petHTML = '<div class=" ui-widget-content ui-corner-all petentry ' + css1 + '"><a href="#" class="' + css2 + '" id="f1"><table><tr><td style="width:70%"><span>' + name + '</span></td><td style="width:20%" rowspan="2"><img src="images/' + pic + '" width="96" height="96"/></td><td style="width:10%"><a href="#" class="petentrylock"><img src="images/lock_unlock.png" /></a></td></tr><tr><td><p>nondescript animal</p></td><td><a href="#" class="petentryfavorite"><img src="images/icon_favorite.png" /></a></td></tr></table></a></div>';
+		return petHTML;
+	}
+	var foundPet = '<div class=" ui-widget-content ui-corner-all petentry petentryfound"><a href="#" class="petentryfoundlink" id="fR"><table><tr><td style="width:70%"><span>Bob / Rob</span></td><td style="width:20%" rowspan="2"><img src="images/bailey2.jpg" width="96" height="96"/></td><td style="width:10%"><a href="#" class="petentrylock"><img src="images/lock_unlock.png" /></a></td></tr><tr><td><p>found this dog west of emergency zone, tags say bob or rob. corgi dog.</p></td><td><a href="#" class="petentryfavorite"><img src="images/icon_favorite.png" /></a></td></tr></table></a></div>';
+	$("#foundscroll").scroll(function() {
+		if (isBottom($("#foundscroll"))) {
+			if (foundScroll != 5) {
+				$(this).append(manufacturePet(false));
+			}
+			else {
+				$(this).append(foundPet);
+			}
+			foundScroll = foundScroll + 1;
+		}
+	});
+	$("#lostscroll").scroll(function() {
+		if (isBottom($("#lostscroll"))) {	
+			$(this).append(manufacturePet(true));
+		}
+	});
+
+	function isBottom(elem) {
+		return elem[0].scrollHeight - elem.scrollTop() == elem.outerHeight();
+	}
+
+	var curLostSelection = null;
+	var curFoundSelection = null;	
+	$(".petentrylostlink").live('click', function() {
+		var selID = $(this).attr('id');
+		if (curLostSelection != selID) {
+			$(this).parent().css('border', '3px solid #FFFF00 !important');
+			if (curLostSelection != null) {
+				$("#"+curLostSelection).parent().css('border', '3px solid #ED4747 !important');
+			}
+			curLostSelection = selID;
+		}
+		else {
+			curLostSelection = null;
+			$(this).parent().css('border', '3px solid #ED4747 !important');
+		}
+		checkMatchButton();
+		return false;
+	});
+	$(".petentryfoundlink").live('click', function() {
+		var selID = $(this).attr('id');
+		if (curFoundSelection != selID) {
+			$(this).parent().css('border', '3px solid #FFFF00 !important');
+			if (curFoundSelection != null) {
+				$("#"+curFoundSelection).parent().css('border', '3px solid #0099FF !important');
+			}
+			curFoundSelection = selID;
+		}
+		else {
+			curFoundSelection = null;
+			$(this).parent().css('border', '3px solid #0099FF !important');
+		}
+		checkMatchButton();
+		return false;
+	});
+
+	function checkMatchButton() {
+		$("#matchButton").attr('disabled', !(curLostSelection != null && curFoundSelection != null));
+	}
+
+	$("#matchButton").click(function() {
+		if (curFoundSelection == "fR" && curLostSelection == "lB") {
+			alert("congrats, you matched Bob!");
+		}
+		else {
+			alert("This match is not for Bob the Dog.  Please try again...");
+		}
+	});
+
+	$("#filtersubmit").click(function() {
+		//do something here to fake search
+		$("#foundscroll").fadeOut('slow', function() {
+			$(this).html(manufacturePet(false));
+			$(this).append(manufacturePet(false));
+			$(this).append(foundPet);
+			$(this).append(manufacturePet(false));
+			$(this).fadeIn(1400);
+			
+		});
+	});
+
+	$(".lockColumn").click(function() {
+		alert("You have locked this column.  In the real application this would preserve the listings you are currently viewing.");
+		return false;
+	});
+});
+
+
+</script>
+</head>
+<body>
+<!-- start header -->
+<div id="header">
+	<div id="logo">
+		<h1><a href="#">Project EPIC PetMatch </a></h1>
+		<p>There's No Place Like Home</p>
+	</div>
+	<div id="menu">
+		{% block menu %}
+
+		{% if user.is_authenticated %}
+		<ul>
+			<li class="active"><a href="#">Home</a></li>
+			<li><a href="#">My Profile</a></li>
+			<li><a href="#">About</a></li>
+			<li><a href="#">Contact </a></li>
+		</ul>
+		{% else %}
+		<ul>
+			<li class="active"><a href="#">Home</a></li>
+			<li><a href="#">Sign in/Sign up</a></li>
+			<li><a href="#">About</a></li>
+			<li><a href="#">Contact </a></li>
+		</ul>
+		{% endif $%}
+
+
+		{% endblock menu %}
+	</div>
+</div>
+<hr />
+<!-- end header -->
+<!-- start page -->
+<div id="wrapper">
+	<div id="page">
+		<!-- start content -->
+		<div id="content">
+			<div id="filters">
+				<h3><a href="#">Filters</a></h3>
+				<div>
+					<table style="width:100%">
+						<tr>
+							<td style="width:25%">Description:</td>
+							<td style="width:75%">
+								<input style="width:100%" type="text" name="description" />
+							</td>
+						</tr>
+						<tr>
+							<td style="width:25%">Contact Information:</td>
+							<td style="width:75%">
+								<input style="width:100%" type="text" name="contact" />
+							</td>
+						</tr>
+						<tr>
+							<td style="width:25%">Report Date:</td>
+							<td style="width:75%">
+								<input class="date" style="width:40%" type="text" name="reportfrom" /> to 
+								<input class="date" style="width:40%" type="text" name="reportto" />	
+							</td>
+						</tr>
+						<tr>
+							<td style="width:25%">Location:</td>
+							<td style="width:75%">
+								<input style="width:40%" type="text" name="location" /> within  
+								<select>
+									<option value="5">5 miles</option>
+									<option value="10">5 miles</option>	
+									<option value="15">15 miles</option>	
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td style="width:25%">List Order:</td>
+							<td style="width:75%">
+								<input type="radio" name="listtype" checked="true" value="top" />&nbsp; Top Matches 
+								<input type="radio" name="listtype" value="latest" /> &nbsp; Latest Reports
+							</td>
+						</tr>
+						<tr>
+							<td rowspan="2"><input type="submit" id="filtersubmit" name="submit"/></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div id="listings">
+				<div id="lost" class="lostfound lost">
+					<h2>Lost Pets</h2>
+					<div id="lostscroll" style="height:450px;overflow:auto;">
+						
+						<div class=" ui-widget-content ui-corner-all petentry petentrylost">
+						<a href="#" class="petentrylostlink" id="lB">
+							<table>
+								<tr>
+									<td style="width:70%">
+										<span>Bob the Dog</span>
+									</td>
+									<td style="width:20%" rowspan="2">
+										<img src="images/bailey1.jpg" width="96" height="96"/>
+									</td>
+									<td style="width:10%">
+										<a href="#" class="petentrylock"><img src="static/images/lock_unlock.png" /></a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<p>lost corgi in west fire zone!</p>
+									</td>
+									<td>
+										<a href="#" class="petentryfavorite"><img src="static/images/icon_favorite.png" /></a>
+									</td>
+								</tr>
+							</table>
+						</a>
+						</div>
+
+
+						<div class=" ui-widget-content ui-corner-all petentry petentrylost">
+						<a href="#" class="petentrylostlink" id="l2">
+							<table>
+								<tr>
+									<td style="width:70%">
+										<span>Gerry</span>
+									</td>
+									<td style="width:20%" rowspan="2">
+										<img src="images/dog1.jpg" width="96" height="96"/>
+									</td>
+									<td style="width:10%">
+										<a href="#" class="petentrylock"><img src="images/lock_unlock.png" /></a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<p>black labrador found west side of fire zone</p>
+									</td>
+									<td>
+										<a href="#" class="petentryfavorite"><img src="images/icon_favorite.png" /></a>
+									</td>
+								</tr>
+							</table>
+						</a>
+						</div>
+
+						<div class=" ui-widget-content ui-corner-all petentry petentrylost">
+						<a href="#" class="petentrylostlink" id="l3">
+							<table>
+								<tr>
+									<td style="width:70%">
+										<span>Joe</span>
+									</td>
+									<td style="width:20%" rowspan="2">
+										<img src="images/cat1.jpg" width="96" height="96"/>
+									</td>
+									<td style="width:10%">
+										<a href="#" class="petentrylock"><img src="images/lock_unlock.png" /></a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<p>kitty cat</p>
+									</td>
+									<td>
+										<a href="#" class="petentryfavorite"><img src="images/icon_favorite.png" /></a>
+									</td>
+								</tr>
+							</table>
+						</a>
+						</div>
+
+						<div class=" ui-widget-content ui-corner-all petentry petentrylost">
+						<a href="#" class="petentrylostlink" id="l4">
+							<table>
+								<tr>
+									<td style="width:70%">
+										<span>Steve</span>
+									</td>
+									<td style="width:20%" rowspan="2">
+										<img src="images/dog4.jpg" width="96" height="96"/>
+									</td>
+									<td style="width:10%">
+										<a href="#" class="petentrylock"><img src="images/lock_unlock.png" /></a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<p>dog</p>
+									</td>
+									<td>
+										<a href="#" class="petentryfavorite"><img src="images/icon_favorite.png" /></a>
+									</td>
+								</tr>
+							</table>
+						</a>
+						</div>
+
+						<div class=" ui-widget-content ui-corner-all petentry petentrylost">
+						<a href="#" class="petentrylostlink" id="l5">
+							<table>
+								<tr>
+									<td style="width:70%">
+										<span>Mr. Pooch</span>
+									</td>
+									<td style="width:20%" rowspan="2">
+										<img src="images/cat2.jpg" width="96" height="96"/>
+									</td>
+									<td style="width:10%">
+										<a href="#" class="petentrylock"><img src="images/lock_unlock.png" /></a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<p>lost cat goes by the name of mr. pooch</p>
+									</td>
+									<td>
+										<a href="#" class="petentryfavorite"><img src="images/icon_favorite.png" /></a>
+									</td>
+								</tr>
+							</table>
+						</a>
+						</div>
+					</div>
+					<div style="text-align:center">
+						<a href="#" id="lockLost" class="lockColumn">Lock Lost Listings</a>
+					</div>
+				</div>
+				<div id="found" class="lostfound found">
+					<h2>Found Pets</h2>
+					<div id="foundscroll" style="height:450px;overflow:auto;">
+						<div class=" ui-widget-content ui-corner-all petentry petentryfound">
+							<a href="#" class="petentryfoundlink" id="f1">
+							<table>
+								<tr>
+									<td style="width:70%">
+										<span>no name</span>
+									</td>
+									<td style="width:20%" rowspan="2">
+										<img src="images/dog5.jpg" width="96" height="96"/>
+									</td>
+									<td style="width:10%">
+										<a href="#" class="petentrylock"><img src="images/lock_unlock.png" /></a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<p>Golden retriever puppy.</p>
+									</td>
+									<td>
+										<a href="#" class="petentryfavorite"><img src="images/icon_favorite.png" /></a>
+									</td>
+								</tr>
+							</table>
+							</a>
+						</div>
+						<div class=" ui-widget-content ui-corner-all petentry petentryfound">
+							<a href="#" class="petentryfoundlink" id="f2">
+							<table>
+								<tr>
+									<td style="width:70%">
+										<span>Gerry</span>
+									</td>
+									<td style="width:20%" rowspan="2">
+										<img src="images/dog1.jpg" width="96" height="96"/>
+									</td>
+									<td style="width:10%">
+										<a href="#" class="petentrylock"><img src="images/lock_unlock.png" /></a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<p>black labrador found west side of fire zone</p>
+									</td>
+									<td>
+										<a href="#" class="petentryfavorite"><img src="images/icon_favorite.png" /></a>
+									</td>
+								</tr>
+							</table>
+							</a>
+						</div>
+						<div class=" ui-widget-content ui-corner-all petentry petentryfound">
+							<a href="#" class="petentryfoundlink" id="f3">
+							<table>
+								<tr>
+									<td style="width:70%">
+										<span>Joe</span>
+									</td>
+									<td style="width:20%" rowspan="2">
+										<img src="images/dog1.jpg" width="96" height="96"/>
+									</td>
+									<td style="width:10%">
+										<a href="#" class="petentrylock"><img src="images/lock_unlock.png" /></a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<p>black labrador found west side of fire zone</p>
+									</td>
+									<td>
+										<a href="#" class="petentryfavorite"><img src="images/icon_favorite.png" /></a>
+									</td>
+								</tr>
+							</table>
+							</a>
+						</div>
+						<div class=" ui-widget-content ui-corner-all petentry petentryfound">
+							<a href="#" class="petentryfoundlink" id="f4">
+							<table>
+								<tr>
+									<td style="width:70%">
+										<span>Mr. Pooch</span>
+									</td>
+									<td style="width:20%" rowspan="2">
+										<img src="images/dog1.jpg" width="96" height="96"/>
+									</td>
+									<td style="width:10%">
+										<a href="#" class="petentrylock"><img src="images/lock_unlock.png" /></a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<p>black labrador found west side of fire zone</p>
+									</td>
+									<td>
+										<a href="#" class="petentryfavorite"><img src="images/icon_favorite.png" /></a>
+									</td>
+								</tr>
+							</table>
+							</a>
+						</div>
+					</div>
+					<div style="text-align:center">
+						<a href="#" id="lockFound" class="lockColumn">Lock Found Listings</a>
+					</div>
+				</div>
+			</div>
+			<div id="matchbar">
+				<input type="button" id="matchButton" name="match" value="Suggest Match" disabled="true" style="margin-left:41%" />
+			</div>
+		</div>
+		<!-- end content -->
+		<!-- start sidebar -->
+		<div id="sidebar">
+			<ul>
+				<li id="categories">
+					<h2>Pet Match Feed</h2>
+					<script src="http://widgets.twimg.com/j/2/widget.js"></script>
+<script>
+new TWTR.Widget({
+  version: 2,
+  type: 'profile',
+  rpp: 6,
+  interval: 20000,
+  width: 240,
+  height: 500,
+  theme: {
+    shell: {
+      background: '#333333',
+      color: '#ffffff'
+    },
+    tweets: {
+      background: '#000000',
+      color: '#ffffff',
+      links: '#4aed05'
+    }
+  },
+  features: {
+    scrollbar: true,
+    loop: true,
+    live: true,
+    behavior: 'default'
+  }
+}).render().setUser('barronsoftware').start();
+</script>
+				</li>
+			</ul>
+		</div>
+		<!-- end sidebar -->
+		<br style="clear: both;" />
+	</div>
+</div>
+<div id="chat">
+
+</div>
+<!-- end page -->
+<!-- start footer -->
+<div id="footer">
+<p id="legal"> &copy;2011 Project EPIC . All Rights Reserved.
+</div>
+</body>
+</html>

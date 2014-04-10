@@ -15,13 +15,12 @@ ALLOWED_HOSTS = ["*"]
 
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.  
-        'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.  
         'NAME': 'epm_db',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'USER': 'epm_login',                      # Not used with sqlite3.
+        'PASSWORD': '3m3rgEncY',                  # Not used with sqlite3.
+        'HOST': '192.168.50.6',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -29,8 +28,8 @@ DATABASES = {
 NOSQL_DATABASES = {
     'mongodb': {
         'NAME':'epm_db',
-        "HOST":"localhost",
-        'PORT':27017,
+        "HOST":"192.168.50.6",
+        'PORT':27018,
         'MAX_POOL_SIZE':10
     }
 }
@@ -61,34 +60,34 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = False
 
+#Absolute filesystem path to the project directory. Use for creating relative paths.
+PROJECT_ROOT = "/vagrant/project"
+
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = '/srv/epm/static/'
-
-#Absolute filesystem path to the project directory. Use for creating relative paths.
-PROJECT_ROOT = "/srv/epm/project"
+MEDIA_ROOT = '/vagrant/media/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = '/static/'
+MEDIA_URL = '/media/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = '/vagrant/deployment/static/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/srv/epm/static/' 
+STATIC_URL = '/vagrant/static/' 
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '/srv/epm/static',
+    '/vagrant/static',
 )
 
 # List of finder classes that know how to find static files in
@@ -106,7 +105,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '/srv/epm/static/templates'
+    '/vagrant/static/templates'
 )
 
 # List of callables that know how to import templates from various sources.

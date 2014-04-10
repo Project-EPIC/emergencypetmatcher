@@ -1,0 +1,88 @@
+{% extends "home/index.html" %}
+
+{% block js %}
+    <!-- Page-specific JS goes in this block -->
+	<script src = "{{ STATIC_URL }}js/local/epm-matching.js" type = 'text/javascript'></script>
+	<script type='text/javascript'>
+	    //Define this django-rendered petreport variable as a global javascript variable
+		var TARGET_PETREPORT = convert_to_javascript_obj(("{{ target_pr_json|escapejs }}").replace(/&(l|g|quo)t;/g));		
+		var CANDIDATE_PETREPORT = null;
+		var CANDIDATE_COUNT = "{{ candidates_count }}";
+		var STATIC_URL = "{{ STATIC_URL }}";
+	</script>
+{% endblock js %}
+
+{% block menu %}
+<!-- Navigation Menu -->
+<ul id="menu">
+	<li><a href="{% url 'home' %}">Home</a></li>
+	<li> <a href="{% url 'get_UserProfile_page' user.get_profile.id %}">{{ user.username }}</a></li>
+	<li>
+		<form method = "post" action= "{% url 'logout_User' %}">
+			{% csrf_token %} <input id="logout" type="submit" value="Logout"/>
+		</form>
+	</li>
+	<li><a href= "{% url 'submit_PetReport' %}">New Pet Report</a></li>
+	<li><a href="{% url 'about' %}">About</a></li>
+	<li><a href="https://docs.google.com/spreadsheet/viewform?formkey=dG9XTzRzNlB3Nl9KWGRMb2Jnd2tObnc6MQ#gid=0">Feedback</a></li>
+</ul>				
+{% endblock menu %}	
+{% block head_title %}EPM - Matching {% endblock head_title %}
+{% block activity_feed %}{% endblock activity_feed %}
+
+{% block content %}
+<div id="content" style="padding:10px 10px 40px 10px; margin-top:10px; width:1200px; height:90%;">
+
+	<!-- Messages -->
+	{% block messages %}
+	<ul id="messages"> {% for message in messages %} <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li> {% endfor %}</ul>
+	{% endblock messages %} 
+
+	<!-- Workspace for Placing Pet Report Candidate Matches-->
+	<div id="matching_workspace">
+		{% block content_title %} <strong style="display:block; margin-bottom:10px; font-size:18px; text-align:center;">Match this Pet</strong>{% endblock content_title %}
+		<!-- PetReport Target and Candidates -->
+		<div id="matching_workspace_images">
+			<div id="matching_workspace_target_img" class="pet_img"> <img src="{{ STATIC_URL }}{{ target_petreport.img_path }}"/></div>
+			<div id="matching_workspace_candidate_img" class="droppable pet_img">
+				<strong style="width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;"> Click and Drag a Pet Here </strong>		
+			</div>
+		</div>
+
+		<!--Buttons -->
+		<div style="text-align:center">
+	   		<button id="button_propose_match" class="epm_button" style="width:150px; height:40px; margin:0 auto; display:inline-block;"disabled>Propose Match</button>		
+	   		<button id="button_clear_candidate" class="epm_button" style="width:150px; height:40px; margin:0 auto; display:inline-block;" disabled>Clear Pet </button>
+	   	</div>
+
+	   	<!-- Nice-looking horizontal break -->
+	   	<hr size="10" width="100%" color="white"/>		
+
+		<!-- Target PetReport info -->	
+		<ul id="target_prdpfields" style="margin-right:0px;" class="prdp_info"></ul>
+		<!-- PetReport info -->
+		<ul id="candidate_prdpfields" style="margin-right:0px;" class="prdp_info"></ul>
+	</div>
+
+	<!-- Container for ML-Ranked Pet Reports -->
+	<div id="matching_candidates_container">
+
+		<strong style="text-align:center; display:block; margin-bottom:10px; font-size:18px;"> Click and Drag from these Ranked Pets to Match </strong>
+
+		<!-- Pagination Placeholder -->
+		<div class="pagination_container"><div class="pagination"></div></div>	
+
+	   	<!-- Nice-looking horizontal break -->
+   		<hr size="10" width="100%" color="white"/>		
+
+   		<!-- Candidate Pet Reports -->
+		<div style="overflow-y:scroll; overflow-x:hidden; height:650px;"><ul id="tiles" style="display:inline-block; width:100%;"></ul></div>
+
+	   	<!-- Nice-looking horizontal break -->
+   		<hr size="10" width="100%" color="white"/>			
+	</div>
+
+	{% block chat %}
+	{% endblock chat %}
+</div>
+{% endblock content %}

@@ -1,9 +1,10 @@
-django
+django==1.5.1
 lorem-ipsum-generator
 django-registration
 django-social-auth
+pymongo
 South
-pscyopg2
+psycopg2
 pillow
 selenium
 simplejson

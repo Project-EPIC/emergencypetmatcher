@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html class = 'no-js' lang = "en">
+  <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+  <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+  <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+  <!--[if gt IE 8]> <html class="no-js" lang="en"> <![endif]-->
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  </head>
+  <body>
+    {% block tc_content %}
+
+           
+        <div class="tc_title">
+          <!--  <div style="float:left"> 
+          </div> -->
+          <div style="float:left;"> EPM Terms and Conditions</div>
+        </div>
+       
+        <!-- Information pertaining to the T&C -->
+        <div id="id_TC_Content" class="tc_text">
+        </div> 
+      
+         <form>
+          <div style="text-align:center; margin:10px 0px 0px 0px;">
+            <input id ="id_agree_button" type="submit" formaction="" value="I accept these terms and conditions" /></br></br>
+            <input id ="id_cancel_button" type="submit" formaction="" value="Cancel" />
+          </div> 
+        </form>
+       
+  
+    {%  endblock tc_content %}
+  </body>
+</html>
