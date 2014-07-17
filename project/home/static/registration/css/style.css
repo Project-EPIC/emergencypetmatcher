@@ -1,0 +1,35 @@
+#register-preview-pic {
+	border: 2px dashed gray;
+	width: 255px;
+	height: 255px;
+	margin: 10px 10px 10px 0px;
+}
+
+#register-preview-pic-title {
+	width:100%;
+	margin-top:50%;
+	display:inline-block;
+	text-align:center;
+	color:gray;
+}
+
+#register-preview-pic-rotate-instructions {
+	display: none;
+	margin: 5px auto 5px auto;
+}
+
+#register-age {
+	height:20px;
+	color:green;
+}
+
+#profile_pic {
+	display:block;
+	width:200px;
+	height:200px;
+}
+
+.tos {
+	margin:20px 0px;
+	min-height:300px;
+}

@@ -1,0 +1,95 @@
+{% extends "home/index.html" %}
+
+{% block nav-choices %}
+<ul id="epm-nav-links" class="nav navbar-nav navbar-right">
+	<li><a href="{% url 'home' %}"> Home</a></li>
+	{% if user.is_authenticated %}
+		<li><a href="{% url 'get_UserProfile_page' user.get_profile.id %}">{{ user.username }}</a></li>
+		<li><form id="epm-logout" class="navbar-form" method = "post" action= "{% url 'logout_User' %}">
+			{% csrf_token %} 
+			<input class="btn" type="submit" value="Logout"/>
+			</form></li>	
+		<li><a href= "{% url 'submit_PetReport' %}">New Pet Report</a></li>
+	{% else %}
+		<li><a href= "{% url 'login_User' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
+	{% endif %}
+
+	<li><a href="{% url 'about' %}">About</a></li>
+	<li><a href="https://docs.google.com/spreadsheet/viewform?formkey=dG9XTzRzNlB3Nl9KWGRMb2Jnd2tObnc6MQ#gid=0">Feedback</a></li>
+</ul>
+{% endblock nav-choices %}
+
+{% block head_title %}EPM - Match a Pet{% endblock head_title %}
+
+{% block content %}
+
+	{% block messages %}
+	<ul id="messages">
+		{% for message in messages %}
+	    <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
+	    {% endfor %}
+	</ul>
+	{% endblock messages %}	
+
+	<!-- Workspace for Placing Pet Report Candidate Matches-->
+	<div id="matching-workspace">
+		{% block content_title %} <strong style="display:block; margin-bottom:10px; font-size:18px; text-align:center;">Match this Pet</strong>{% endblock content_title %}
+
+		<!-- PetReport Target and Candidates -->
+		<div id="matching-workspace-images">
+			<div id="matching-workspace-target-img" class="pet_img"> <img src="{{ MEDIA_URL }}{{ target_petreport.img_path }}"/></div>
+			<div id="matching-workspace-candidate-img" class="pet_img">
+				<strong style="width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;"> Click and Drag a Pet Here </strong>		
+			</div>
+		</div>
+
+		<!--Buttons -->
+		<div id="matching-workspace-actions">
+	   		<button id="button_propose_match" class="btn btn-primary" disabled>Propose Match</button>
+	   		<button id="button_clear_candidate" class="btn btn-default" disabled>Clear Pet </button>
+	   	</div>	
+
+		<!-- Target PetReport info -->	
+		<ul id="target_prdpfields" class="prdp_info"></ul>
+		<!-- PetReport info -->
+		<ul id="candidate_prdpfields" class="prdp_info"></ul>
+	</div>
+
+	<!-- Container for ML-Ranked Pet Reports -->
+	<div id="matching-candidates-container">
+
+		<strong style="text-align:center; display:block; margin-bottom:10px; font-size:18px;"> Click and Drag from these Ranked Pets to Match </strong>
+
+		<!-- Pagination Placeholder -->
+		<div class="pagination_container"><div class="pagination"></div></div>	
+
+   		<!-- Candidate Pet Reports -->
+		<div style="overflow-y:scroll; overflow-x:hidden; max-height:580px;">
+			<ul id="tiles" style="display:inline-block; width:100%;"></ul>
+		</div>
+	</div>
+
+	{% block chat %}
+	{% endblock chat %}
+{% endblock content %}
+
+<!-- Static Stuff -->
+{% load staticfiles %}
+
+{% block css %}
+	<link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>
+	<link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
+{% endblock css %}
+
+{% block js %}
+    <!-- Page-specific JS goes in this block -->
+	<script src = {% static "matching/js/epm-matching.js" %} type = 'text/javascript'></script>
+	<script type='text/javascript'>
+	    //Define this django-rendered petreport variable as a global javascript variable
+		var TARGET_PETREPORT = convert_to_javascript_obj(("{{ target_pr_json|escapejs }}").replace(/&(l|g|quo)t;/g));		
+		var CANDIDATE_PETREPORT = null;
+		var CANDIDATE_COUNT = "{{ candidates_count }}";
+		var STATIC_URL = "{{ STATIC_URL }}";
+		var MEDIA_URL = "{{ MEDIA_URL }}";
+	</script>
+{% endblock js %}

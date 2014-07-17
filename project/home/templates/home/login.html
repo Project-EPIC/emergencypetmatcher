@@ -1,0 +1,85 @@
+{% extends "home/index.html" %}
+
+{% block nav-choices %}
+<ul id="epm-nav-links" class="nav navbar-nav navbar-right">
+	<li><a href="{% url 'home' %}"> Home</a></li>
+	{% if user.is_authenticated %}
+		<li><a href="{% url 'get_UserProfile_page' user.get_profile.id %}">{{ user.username }}</a></li>
+		<li><form id="epm-logout" class="navbar-form" method = "post" action= "{% url 'logout_User' %}">
+			{% csrf_token %} <input id="logout" type="submit" value="Logout"/>
+		</form></li>
+		<li><a href= "{% url 'submit_PetReport' %}">New Pet Report</a></li>
+	{% else %}
+		<li class="active" ><a href= "{% url 'login_User' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
+	{% endif %}
+
+	<li><a href="{% url 'about' %}">About</a></li>
+	<li><a href="https://docs.google.com/spreadsheet/viewform?formkey=dG9XTzRzNlB3Nl9KWGRMb2Jnd2tObnc6MQ#gid=0">Feedback</a></li>
+</ul>
+{% endblock nav-choices %}
+
+{% block head_title %} EPM - Login {% endblock head_title %}
+{% block activity_feed %}{% endblock activity_feed %}
+{% block share %} {% endblock share %}
+
+{% block content %}	
+	<div id="content" style="width:800px;">
+
+		{% block content_subtitle %} 
+			<h3> Login below, or use Twitter to login. If you haven't signed up for an account yet, please register below.</h3>
+		{% endblock content_subtitle %}
+
+		{% block messages %}
+		<ul id="messages">
+			{% for message in messages %}
+		    <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
+		    {% endfor %}
+		</ul>
+		{% endblock messages %}			
+
+		<form id="login-form" role="form" method="post" action= "{% url 'login_User' %}">
+			{% csrf_token %}	
+
+			<div class="form-group" style="width:400px;">
+				<label for="username">Username</label>
+				<input class="form-control" autofocus="true" name="username" placeholder="Enter Username">
+			</div>
+
+			<div class="form-group" style="width:400px;">
+				<label for="password">Password</label>
+				<input type="password" class="form-control" name="password" placeholder="Enter Password">
+			</div>		
+			
+			<div class ="form-actions">
+				<input type="hidden" name="next" value="{{ next }}">
+				<input type="submit" class="btn btn-primary" value="Login">
+				<p style="margin-top:10px;"><a href = "{% url 'auth_password_reset' %}"> Forgot your Password? </a>
+			</div>
+
+			<hr>
+			<div class="form-actions">	
+				<a href="{% url 'registration_register' %}" class="btn btn-default">Register Here</a>
+				<a href="{% url 'socialauth_begin' 'twitter' %}" class="btn btn-info">Enter using Twitter</a>
+			</div>
+		</form>
+		                	
+		<!-- Social Login Buttons -->
+		<div style="margin-top:10px; margin-bottom:10px;">
+			
+			
+		</div>
+		<!-- Facebook 
+		<div style="margin-top:10px; margin-bottom:10px;">
+			<img src="{{ STATIC_URL }}/images/icons/icn-facebook.png" width="22" height="22"></img>
+			<a href="{% url 'socialauth_begin' 'facebook' %}">Enter using Facebook</a><br/>
+		</div> -->
+	</div>
+{% endblock content %}
+
+<!-- Static Stuff -->
+{% load staticfiles %}
+
+{% block js %}
+<script src={% static "home/js/epm-login.js" %} type='text/javascript'></script>
+{% endblock js %}
+

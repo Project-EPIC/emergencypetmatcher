@@ -20,12 +20,17 @@ from django.contrib import messages
 from django.utils import simplejson
 from matching.views import *
 from django.forms.models import model_to_dict
-from home.models import *
-from utils import *
-from constants import *
+from django.contrib.sites.models import Site
+from social.models import UserProfile
+from reporting.models import PetReport, PetReportForm
+from matching.models import PetMatch
 from pprint import pprint
 from PIL import Image
-import datetime, re, time, home.logger
+from utilities import logger
+from utilities.utils import *
+from constants import *
+from home.constants import *
+import datetime, re, time
 
 @login_required
 def submit_PetReport(request):
@@ -60,7 +65,6 @@ def submit_PetReport(request):
             if pr.contact_link.strip() == "":
                 pr.contact_link = None
 
-
             if request.POST.get("img_rotation") != None:
                 img_rotation = - int(request.POST ["img_rotation"])
 
@@ -85,7 +89,13 @@ def submit_PetReport(request):
             print_error_msg ("Pet Report not submitted successfully")
             print_error_msg (form.errors)
             print_error_msg (form.non_field_errors())
-            #return redirect(URL_SUBMIT_PETREPORT)
+            return render_to_response(HTML_SUBMIT_PETREPORT, {  'form':form,
+                                                                "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
+                                                                "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
+                                                                "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
+                                                                "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
+                                                                "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
+                                                                "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH }, RequestContext(request))
     else:
         form = PetReportForm() #Unbound Form
     return render_to_response(HTML_SUBMIT_PETREPORT, {  'form':form,
@@ -99,35 +109,34 @@ def submit_PetReport(request):
 @login_required
 def get_pet_breeds(request, pet_type=0):
     if request.is_ajax() == True:
-        
-        #Load Dog Breeds
         if pet_type == "0":
             f = PETREPORT_BREED_DOG_FILE
-        #Load Cat Breeds
         elif pet_type == "1":
             f = PETREPORT_BREED_CAT_FILE
-        #Load Horse Breeds            
         elif pet_type == "2":
             f = PETREPORT_BREED_HORSE_FILE
-        #Load Bird Breeds            
         elif pet_type == "3":
             f = PETREPORT_BREED_BIRD_FILE
-        #Load Rabbit Breeds    
         elif pet_type == "4":
             f = PETREPORT_BREED_RABBIT_FILE
-        #Load Turtle Breeds
         elif pet_type == "5":
             f = PETREPORT_BREED_TURTLE_FILE
-        #Load Snake Breeds
         elif pet_type == "6":
             f = PETREPORT_BREED_SNAKE_FILE
+        #If Other, Load Other Breeds (Nothing)
+        elif pet_type == "7":
+            f = PETREPORT_BREED_OTHER_FILE
         else:
             return HttpResponse("", mimetype="application/json") #nothing to return.
 
         with open(f) as read_file:
-            breeds = read_file.readlines()
+            data = read_file.readlines()
 
-        json = simplejson.dumps ({"breeds":breeds})
+        breeds = []
+        for index, breed in enumerate(data):
+            breeds.append({"id":breed, "text":breed})
+
+        json = simplejson.dumps({"breeds":breeds})
         return HttpResponse(json, mimetype="application/json")
 
     else:
@@ -162,6 +171,7 @@ def get_PetReport(request, petreport_id):
     pr_json = pet_report.toJSON()
     return render_to_response(HTML_PRDP, {  'pet_report_json':pr_json, 
                                             'pet_report': pet_report,
+                                            'site_domain': Site.objects.get_current().domain,
                                             'num_workers':num_workers,
                                             'user_is_worker':user_is_worker, 
                                             'matches': matches,

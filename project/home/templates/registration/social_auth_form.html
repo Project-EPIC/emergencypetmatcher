@@ -1,0 +1,103 @@
+{% extends "home/index.html" %}
+{% load staticfiles %}
+
+{% block head_title %} EPM - Fill out Social Account {% endblock head_title %}
+{% block activity_feed %}{% endblock activity_feed %}
+
+{% block content %}
+<div id="content" style="width:700px;">
+  {% block content_subtitle %} <h3>Please give us some information for your social media account so that we can create a full profile for you.</h3> {% endblock content_subtitle %} 
+  <p> Fields Marked with (<b style="margin:0;" class="required-field-symbol">*</b>) are required. </p>
+
+  <form enctype="multipart/form-data" action="" method="POST">
+    {% csrf_token %}
+
+    {% block messages %}
+    <ul id="messages">
+      {% for message in messages %}
+        <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+
+    {% endblock messages %}  
+    <div style="margin-bottom:20px;">
+      {% for error in form.non_field_errors %} <span class="field-error-message"> {{ error }} </span>{% endfor %}
+    </div>
+
+    <!-- Username -->
+    <div class="form-group" style="width:300px;">
+      <label for="username_id">Username<b class="required-field-symbol">*</b></label>
+      <input type="text" name="username" id="username_id" class="form-control" autofocus="true" value="{{ username }}" placeholder="Enter New Username"/>
+    </div>
+    
+    <!-- Email -->  
+    <div class="form-group" style="width:300px;">
+      <label for="email_id">Email<b class="required-field-symbol">*</b></label>
+      <input type="email" name="email" id="email_id" class="form-control" value="{{ email }}" placeholder="Enter Email Address"/>
+    </div>
+
+    <!-- First Name -->
+    <div class="form-group" style="width:300px;">
+      <label for="first_name_id">First Name</label>
+      <input type="text" name="first_name" id="first_name_id" class="form-control" value="{{ first_name }}" />
+    </div>
+
+    <!-- Last Name -->
+    <div class="form-group" style="width:300px">
+      <label for="last_name_id">Last Name</label>
+      <input type="text" name="last_name" id="last_name_id" class="form-control" value="{{ last_name }}" />
+    </div>
+
+    <!-- Date of Birth -->
+    <div class="form-group" style="width:400px;">
+      <label for="date_of_birth_id">Date of Birth<b class="required-field-symbol">*</b></label>
+      <p id="register-age"></p>
+      <input name="date_of_birth" id="register-dob" class="form-control" placeholder="(MM/DD/YYYY)">
+    </div>
+
+    <!-- Profile Picture -->
+    <div class="form-group" style="width:400px;">
+      <label for="profile_pic_id"> Profile Picture </label>
+      <img id="profile_pic" src="{{ pic_url }}"/>
+    </div>
+
+    <!-- TOS -->
+    <div class="form-group" style="margin-top:30px;">
+      <div id="tos-container" class="hidden">
+        <strong>Please Read Our Terms of Service (Required)<b class="required-field-symbol">*</b></strong>
+
+        <!-- TOS Minor Container -->
+        <div id="tos-minor-container" class="hidden">
+          <textarea disabled="true" class="tos form-control" id="tos_minor_text">{{ tos_minor_text }}</textarea>
+          <div class="form-group" style="width:300px;">
+            <label for="guardian-email">Parent/Guardian Email Address<b class="required-field-symbol">*</b></label>
+            <input type="email" class="form-control" name="guardian_email" placeholder="Enter Parent/Guardian's Email Address">
+          </div>
+        </div>
+
+        <!-- TOS Adult Container -->
+        <div id="tos-adult-container" class="hidden">
+          <textarea disabled="true" class="tos form-control" id="tos_adult_text">{{ tos_adult_text }}</textarea>
+        </div>
+
+        <label for="tos" style="display:block;">I Agree to the Terms of Service<b class="required-field-symbol">*</b></label>
+        <input id="register-toc" type="checkbox" name="tos">
+      </div>
+    </div>    
+
+    <div class="form-actions">
+      <input id="register-submit" class="btn btn-primary" type="submit" value="Sign Me Up!" disabled/>
+      <a href="{% url 'login_User' %}" id="id_cancel_button" class="btn btn-default" value="Cancel">Cancel</a>    
+    </div>
+
+  </form>
+</div>
+{% endblock content %}
+
+{% block css %}
+  <link rel="stylesheet" href={% static "registration/css/style.css" %} type="text/css"></link>
+{% endblock css %}
+
+{% block js %}
+  <script src = {% static "registration/js/epm-register.js" %} type='text/javascript'></script> 
+{% endblock js %}

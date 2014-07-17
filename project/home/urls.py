@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.views.generic import DetailView, ListView
 from django.views.generic import RedirectView
-from home.models import * 
+from social.models import UserProfile 
 #from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth import views as auth_views
 
@@ -16,13 +16,6 @@ urlpatterns = patterns('home.views',
 	url (r'^get_bookmarks/(?P<page>\d+)/$','get_bookmarks',name='get_bookmarks'),
 	url (r'^login$', 'login_User', name='login_User'),
 	url (r'^logout$', 'logout_User', name='logout_User'),
-	url (r'^UserProfile/(?P<userprofile_id>\d+)/$', 'get_UserProfile_page', name='get_UserProfile_page'),
-	url (r'^UserProfile/message_UserProfile$', "message_UserProfile", name="message_UserProfile"),
-	url (r'^UserProfile/follow$','follow_UserProfile',name='follow_UserProfile'),
-	url (r'^UserProfile/unfollow$','unfollow_UserProfile',name='unfollow_UserProfile'),	
-	url (r'^UserProfile/edituserprofile/update_User_info$', "update_User_info", name="update_User_info"),
-	url (r'^UserProfile/edituserprofile/update_User_password$', "update_User_password", name="update_User_password"),	
-	url (r'^UserProfile/edituserprofile', 'editUserProfile_page', name='editUserProfile_page'),	
 	url (r'^about$', 'about', name='about'),
 
 	#Django-Social-Auth
@@ -37,17 +30,15 @@ urlpatterns = patterns('home.views',
 	# [a-fA-F0-9]{40} because a bad activation key should still get to the view;
 	# that way it can return a sensible "invalid key" message instead of a
 	# confusing 404.
-	url(r'^activate/(?P<activation_key>\w+)/$', "registration_activate", {'backend':'registration.backends.default.DefaultBackend'}, name='registration_activate'),
+	url(r'^accounts/register/$', "registration_register",  name='registration_register' ),
 	url(r'^register/complete/$', "registration_complete", name='registration_complete'),
-	url(r'^register/closed/$', "registration_disallowed", name='registration_disallowed'),
- 	url(r'^accounts/register/$', "registration_register",  name='registration_register' ),
- 	url(r'^accounts/activate/complete/$', "registration_activation_complete"),
+	url(r'^register/closed/$', "registration_disallowed", name='registration_disallowed'),	
+ 	url(r'^accounts/activate/complete/$', "registration_activation_complete"),	
+	url(r'^accounts/activate/(?P<activation_key>\w+)/$', "registration_activate", {'backend':'registration.backends.default.DefaultBackend'}, name='registration_activate'),
+	url(r'^accounts/activate/guardian/(?P<guardian_activation_key>\w+)/$', "registration_guardian_activate", name="registration_guardian_activate"),
  	url(r'^accounts/password/reset/complete/$', 'password_reset_complete', name="password_reset_complete"),
  	url(r'^accounts/password/reset/done/$', 'password_reset_done', name="password_reset_done"),
-	url (r'^accounts/', include('registration.backends.default.urls')),
-
-	#email verification URL
-	url(r'^email_verification_complete/(?P<activation_key>\w+)/$', "email_verification_complete", name='email_verification_complete'),
+	url (r'^accounts/', include('registration.backends.default.urls'))
 	
 )
 

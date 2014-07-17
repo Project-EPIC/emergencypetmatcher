@@ -1,9 +1,9 @@
 from django.contrib.auth import authenticate
 from django.test.client import Client
 from django.forms.models import model_to_dict
-from constants import *
-from utils import *
-from home.models import *
+from utilities.constants import *
+from utilities.utils import *
+from social.models import UserProfile
 from pprint import pprint
 import unittest, string, random, sys, time
 

@@ -1,6 +1,6 @@
-from home.models import *
-from utils import *
-from constants import *
+from social.models import UserProfile
+from utilities.utils import *
+from utilities.constants import *
 from django.contrib.auth import authenticate
 import string, random, sys, os, random
 

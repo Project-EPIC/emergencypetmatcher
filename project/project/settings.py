@@ -15,7 +15,7 @@ ALLOWED_HOSTS = ["*"]
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.  
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',     # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.  
         'NAME': 'epm_db',                      # Or path to database file if using sqlite3.
         'USER': 'epm_login',                      # Not used with sqlite3.
         'PASSWORD': '3m3rgEncY',                  # Not used with sqlite3.
@@ -27,7 +27,7 @@ DATABASES = {
 #NoSQL Databases being used.
 NOSQL_DATABASES = {
     'mongodb': {
-        'NAME':'epm_db',
+        'NAME':'epm_activity_db',
         "HOST":"192.168.50.6",
         'PORT':27018,
         'MAX_POOL_SIZE':10
@@ -80,14 +80,13 @@ STATIC_ROOT = '/vagrant/deployment/static/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/vagrant/static/' 
+STATIC_URL = '/vagrant/project/' 
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '/vagrant/static',
 )
 
 # List of finder classes that know how to find static files in
@@ -105,7 +104,6 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '/vagrant/static/templates'
 )
 
 # List of callables that know how to import templates from various sources.
@@ -148,8 +146,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'home',
+    'social',
     'matching',
     'reporting',
+    'verifying',
     'registration',
     'social_auth',
     'analysis',
@@ -169,7 +169,7 @@ LOGIN_URL = '/login'
 LOGOUT_URL = '/'
 
 #Variable that specifies the exact model representing the user profile for the auth.User model.
-AUTH_PROFILE_MODULE = 'home.UserProfile'
+AUTH_PROFILE_MODULE = 'social.UserProfile'
 
 ACCOUNT_ACTIVATION_DAYS = 1 # One-week activation window; you may, of course, use a different value.
 

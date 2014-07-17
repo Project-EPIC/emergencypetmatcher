@@ -11,8 +11,8 @@ from home.models import UserProfile, PetReport
 from django.db import IntegrityError
 from datetime import datetime
 from django.core.exceptions import ValidationError
-from utils import *
-import logger
+from utilities.utils import *
+from utilities import logger
 
 class UserResource(ModelResource):
     class Meta:

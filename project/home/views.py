@@ -13,9 +13,10 @@ from django.core.mail import EmailMessage
 from django.db import IntegrityError
 from django.http import Http404
 from django.core import mail
-from django.core.validators import email_re
+from django.core.validators import validate_email
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
+from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.timezone import now as datetime_now
@@ -24,13 +25,16 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.utils import simplejson
 from registration.models import RegistrationProfile
-from registration.forms import RegistrationForm
+from registration.forms import RegistrationFormTermsOfService
 from datetime import datetime
-from utils import *
-from home.models import *
+from social.models import UserProfile
+from reporting.models import PetReport
+from matching.models import PetMatch
 from constants import *
+from utilities.utils import *
 from pprint import pprint
-import oauth2 as oauth, logger, random, urllib, hashlib, random, re, project.settings, registration
+from utilities import logger
+import oauth2 as oauth, random, urllib, hashlib, random, re, project.settings, registration
 
 #Home view
 def home (request):
@@ -52,55 +56,23 @@ def home (request):
     return render_to_response(HTML_HOME, context, RequestContext(request))
 
 def get_activities_json(request):
-    #Let's populate the activity feed based upon whether the user is logged in.
     if request.is_ajax() == True:
-        # Initialize the activity list
         activities = []
 
+        #Let's populate the activity feed based upon whether the user is logged in.
         if request.user.is_authenticated() == True:
             print_info_msg ("get_activities_json(): Authenticated User - recent activities...")
             current_userprofile = request.user.get_profile()      
-
-            # Get all activities that are associated with the UserProfiles I follow
-            print_info_msg ("Fetching activities related to userprofiles I follow...")
-            for following in current_userprofile.following.all().order_by("?")[:ACTIVITY_FEED_LENGTH]:
-                activities += logger.get_activities_from_log(userprofile=following, current_userprofile=current_userprofile,
-                    since_date=current_userprofile.last_logout) 
-
-            # Get all activities from (my) UserProfile's log file that show who has followed (me).
-            print_info_msg ("Fetching activities related to userprofiles who have followed me...")
-            activities += logger.get_activities_from_log(userprofile=current_userprofile, current_userprofile=current_userprofile, 
-                 since_date=current_userprofile.last_logout, activity=ACTIVITY_FOLLOWER)
-        
-            # Get all activities that are associated to the PetReports (I) bookmarked
-            print_info_msg ("Fetching activities related to bookmarks...")
-            activities += logger.get_bookmarking_activities_from_log(userprofile=current_userprofile, since_date=current_userprofile.last_logout)
+            activities += logger.get_activities_from_log(userprofile=current_userprofile, since_date=current_userprofile.last_logout, num_activities=ACTIVITY_FEED_LENGTH)            
 
         else:
             print_info_msg ("get_activities_json(): Anonymous User - random sample of activities...")
-            # Get random activities for the anonymous user           
+            # Get random activities for the anonymous user
             for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:ACTIVITY_FEED_LENGTH]:
-                activities += logger.get_activities_from_log(userprofile=userprof, current_userprofile=None, num_activities=1)
-
-
-        # Sort the activity feed list according the log date, and get only ACTIVITY_FEED_LENGTH of those activities back.
-        activities = activities [:ACTIVITY_FEED_LENGTH] 
-        activities.sort()
-
-        # Remove log date info and include only feed text 
-        temp_activities = []
-        activities_length = len(activities)
-
-        for x in range(0, activities_length):
-            activities [x] = activities[x][1]
-
-        #ERROR message print to flag for potential problem in the log directory.
-        #if request.user.is_authenticated() == False and activities_length != ACTIVITY_FEED_LENGTH:
-         #   print_error_msg ("Length of activity list is %d when it should be ACTIVITY_FEED_LENGTH = %d" % (activities_length, ACTIVITY_FEED_LENGTH))
+                activities += logger.get_activities_from_log(userprofile=userprof, num_activities=1)
 
         #Zip it up in JSON and ship it out as an HTTP Response.
         json = simplejson.dumps ({"activities":activities})
-        #pprint(activities)
         return HttpResponse(json, mimetype="application/json")     
 
     else:
@@ -258,9 +230,9 @@ def logout_User(request):
     print_info_msg ("logger out UserProfile {%s}" % request.user.get_profile())
 
     # Update to last_logout date field
-    u = get_object_or_404(UserProfile, pk=request.user.get_profile().id)
-    u.last_logout = datetime.datetime.now()
-    u.save()
+    user = get_object_or_404(UserProfile, pk=request.user.get_profile().id)
+    user.last_logout = datetime.now()
+    user.save()
  
     logger.log_activity(ACTIVITY_LOGOUT, request.user.get_profile())
     messages.success(request, "You have successfully logged out.")
@@ -270,18 +242,34 @@ def logout_User(request):
 def registration_activate (request, activation_key=None, backend=None):
     print_info_msg ("Activation Key: %s" % activation_key)
 
-    #Does the activation key exist within a RegistrationProfile? (i.e. is somebody actually trying to activate an account or resurrect an old activation link?)
+    #Does the activation key exist within a RegistrationProfile? 
+    #(i.e. is somebody actually trying to activate an account or resurrect an old activation link?)
     try:
         rp = RegistrationProfile.objects.get(activation_key=activation_key)
+        profile = rp.user.get_profile()
 
     except RegistrationProfile.DoesNotExist:
         messages.error(request, "This account has already been activated!")
         return redirect(URL_HOME)
 
-    #Specify the django-registration default backend for activating this account. 
-    activated_user = RegistrationProfile.objects.activate_user(activation_key)
-    print_info_msg ("RegistrationProfile now activated for active user %s" % activated_user)
-    return redirect (URL_ACTIVATION_COMPLETE)
+    #Need to check if user is a minor and if parent/guardian consented.
+    pprint(profile.__dict__)
+    if profile.is_minor == False or profile.guardian_consented == True:
+        activated_user = RegistrationProfile.objects.activate_user(activation_key)
+        print_info_msg ("RegistrationProfile now activated for active user %s" % activated_user)
+        return redirect (URL_ACTIVATION_COMPLETE)
+    else:
+        messages.error(request, "Your Parent/Guardian has not yet verified your account.")
+        return redirect(URL_HOME)
+
+def registration_guardian_activate (request, guardian_activation_key):
+    profile = UserProfile.get_UserProfile(guardian_activation_key=guardian_activation_key)
+    if profile != None and profile.is_minor == True:
+        profile.guardian_consented = True
+        profile.save()
+
+    messages.success(request, "All done! Thank you for supporting your child in participating in EmergencyPetMatcher!")
+    return redirect(URL_HOME)
 
 def registration_activation_complete (request):
     messages.success (request, "Alright, you are all set registering! You may now login to EPM.")
@@ -298,63 +286,53 @@ def disp_TC_18(request):
 def registration_register (request):
     #Requesting the Registration Form Page
     if request.method == "GET":
-        return render_to_response (HTML_REGISTRATION_FORM, {"form":RegistrationForm()}, RequestContext (request))
+        return render_to_response (HTML_REGISTRATION_FORM, 
+            {   "form":RegistrationFormTermsOfService(),
+                "tos_minor_text":TOS_MINOR_TEXT,
+                "tos_adult_text":TOS_ADULT_TEXT,
+            }, RequestContext (request))
 
-    #Submitting Regisration Form Data
+    #Submitting Registration Form Data
     elif request.method == "POST":
-        form = RegistrationForm(request.POST)
-        email = request.POST ["email"]
-        username = request.POST ["username"]
-        password1 = request.POST ["password1"]
-        password2 = request.POST ["password2"]
+        form = RegistrationFormTermsOfService(request.POST)
+        pprint(request.POST)
+        success, message = UserProfile.check_registration(form, request.POST)
 
-        #Check Passwords.
-        if password1 != password2:
-            print_info_msg("Passwords do not match. Registration failed for user.")
-            messages.error(request, "Passwords do not match. Please try again.")
-            return redirect (URL_REGISTRATION)
+        if success == False:
+            messages.error(request, message)
+            return render_to_response(HTML_REGISTRATION_FORM, 
+                {   "form": form,
+                    "tos_minor_text":TOS_MINOR_TEXT,
+                    "tos_adult_text":TOS_ADULT_TEXT
+                }, RequestContext (request))
+        
+        #Create a RegistrationProfile object, populate the potential User object, and be ready for activation.
+        user = RegistrationProfile.objects.create_inactive_user(request.POST["username"], 
+                                                                request.POST["email"], 
+                                                                request.POST["password1"], 
+                                                                Site.objects.get_current())
 
-        #Check Username.
-        if username.strip():
-            existing_profile = UserProfile.get_UserProfile(username = username)
+        #If this user truly is a minor, save some extra information to be checked during activation.
+        if is_minor(request.POST["date_of_birth"]) == True:
+            profile = user.get_profile()
+            profile.is_minor = True
+            profile.guardian_email = request.POST.get("guardian_email")
+            profile.guardian_activation_key = create_sha1_hash(user.username)
+            profile.save()
 
-            if existing_profile != None:
-                messages.error(request, "Sorry! Username '%s' already exists. Please try another one." % username)
-                return redirect(URL_REGISTRATION)
-        else:
-            messages.error(request, "Username field is required.")
-            return redirect(URL_REGISTRATION)
+            #Send an email to the guardian with activation key.
+            email_body = render_to_string(TEXTFILE_EMAIL_GUARDIAN_BODY, 
+                {   "participant_email": request.POST["email"], 
+                    "guardian_activation_key": profile.guardian_activation_key,
+                    "site": Site.objects.get_current() })
+            email_subject = render_to_string(TEXTFILE_EMAIL_GUARDIAN_SUBJECT, {})
+            send_mail(email_subject, email_body, None, [profile.guardian_email])                        
 
-        #Check Email.
-        if email.strip() and email_re.match(email):
-            existing_profile = UserProfile.get_UserProfile(email = email)
-
-            if existing_profile != None:
-                messages.error(request, "Sorry! Email '%s' already exists. Please try another one." % email)
-                return redirect(URL_REGISTRATION)
-        else:
-            messages.error(request, "Email field is invalid. Please try another one.")
-            return redirect(URL_REGISTRATION)
-
-        #Did this user (or any other user) already try to register before with this username?
-        if RegistrationProfile.objects.filter(user__username=username).exists() == True:
-            print_info_msg("Existing Username in Registration - Registration failed for user.")
-            messages.error(request, "The username you provided already exists. Try another email.")
-            return redirect (URL_REGISTRATION)
-
-        #Did this user (or any other user) already try to register before with this email?
-        if RegistrationProfile.objects.filter(user__email=email).exists() == True:
-            print_info_msg("Existing Email - Registration failed for user.")
-            messages.error(request, "The email address you provided already exists. Try another email.")
-            return redirect (URL_REGISTRATION)
-
-        #else, create the new inactive users here.
-        new_user = RegistrationProfile.objects.create_inactive_user(username, email, password1, Site.objects.get_current())
-        print_info_msg ("RegistrationProfile now created for inactive user %s" % new_user)
-
-        #Redirect back to Home
+        user.first_name = request.POST.get("first_name")
+        user.last_name = request.POST.get("last_name")
+        user.save()
+        print_info_msg ("RegistrationProfile now created for inactive user %s" % user)
         return redirect (URL_REGISTRATION_COMPLETE)
-
     else:
         raise Http404
 
@@ -380,8 +358,7 @@ def social_auth_get_details (request):
     details = request.session[name]['kwargs']['details']
     backend = request.session[name]['backend']
     link = None
-    username = ""
-    email = ""  
+    print_debug_msg(details)
     
     #We have retrieved a picture link from Facebook OR from Twitter, otherwise raise Http404.
     if backend =='facebook':
@@ -389,7 +366,6 @@ def social_auth_get_details (request):
         pic_url = "http://graph.facebook.com/%s/picture?type=large" % request.session[name]['kwargs']['response']['id']
         # personal webpage
         link = request.session[name]['kwargs']['response']['link']
-
     elif backend == 'twitter':
         pic_url = request.session[name]['kwargs']['response'].get('profile_image_url', '').replace('_normal', '')
     else:
@@ -397,44 +373,56 @@ def social_auth_get_details (request):
 
     #If the first-time user submits the form...
     if request.method == 'POST':
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")        
+        form = RegistrationFormTermsOfService(request.POST)
+        success, message = UserProfile.check_registration(form)
 
-        #Grab the username from the POST dict.
-        if request.POST.get("username").strip():
-            existing_profile = UserProfile.get_UserProfile(username = request.POST.get("username"))
-
-            if existing_profile != None:
-                messages.error(request, "Sorry! '%s' already exists. Please try another one." % request.POST.get('username'))
-            else:
-                username = request.POST.get("username")
-        else:
-            messages.error(request, "Username field is required.")
-
-        #Grab the email from the POST dict.
-        if request.POST.get('email').strip() and email_re.match(request.POST.get('email').strip()):
-            existing_profile = UserProfile.get_UserProfile(email = request.POST.get("email"))
-
-            if existing_profile != None:
-                messages.error(request, "Sorry! '%s' already exists. Please try another one." % request.POST.get('email'))
-            else:
-                email = request.POST.get("email")
-        else:
-            messages.error(request, "Email field is invalid. Please try another one.")
-
-        if username != "" and email != "":
-            print_debug_msg("username: %s, email: %s" % (username, email))
-            user_dict = {"username":username, "email":email, "first_name":first_name, "last_name":last_name}
-            request.session["user_dict"] = user_dict
-            return redirect(URL_SOCIAL_AUTH_COMPLETE + backend, backend=backend)
-
-        else:
-            return render_to_response(HTML_SOCIAL_AUTH_FORM, {  'username':username,
-                                                                'first_name':first_name, 
-                                                                'last_name':last_name, 
-                                                                'email':email, 
+        if success == False:
+            messages.error(request, message)
+            return render_to_response(HTML_SOCIAL_AUTH_FORM,{   'username':details['username'],
+                                                                'first_name':details['first_name'], 
+                                                                'last_name':details['last_name'], 
+                                                                'email':details['email'], 
                                                                 'pic_url':pic_url, 
-                                                                'link':link}, RequestContext(request))
+                                                                "tos_minor_text":TOS_MINOR_TEXT,
+                                                                "tos_adult_text":TOS_ADULT_TEXT,
+                                                                'link':link
+                                                            }, RequestContext(request))            
+
+
+        #Create a RegistrationProfile object, populate the potential User object, and be ready for activation.
+        user = RegistrationProfile.objects.create_inactive_user(request.POST["username"], 
+                                                                request.POST["email"], 
+                                                                request.POST["password1"], 
+                                                                Site.objects.get_current())
+
+        #If this user truly is a minor, save some extra information to be checked during activation.
+        if is_minor(request.POST["date_of_birth"]) == True:
+            profile = user.get_profile()
+            profile.is_minor = True
+            profile.guardian_email = request.POST.get("guardian_email")
+            profile.guardian_activation_key = create_sha1_hash(user.username)
+            profile.save()
+
+            #Send an email to the guardian with activation key.
+            email_body = render_to_string(TEXTFILE_EMAIL_GUARDIAN_BODY, 
+                {   "participant_email": request.POST["email"], 
+                    "guardian_activation_key": profile.guardian_activation_key,
+                    "site": Site.objects.get_current() })
+            email_subject = render_to_string(TEXTFILE_EMAIL_GUARDIAN_SUBJECT, {})
+            send_mail(email_subject, email_body, None, [profile.guardian_email])   
+
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+
+        user.first_name = request.POST.get("first_name")
+        user.last_name = request.POST.get("last_name")
+        user.save()
+        print_info_msg ("(SOCIAL AUTH): RegistrationProfile now created for inactive user %s" % user)
+        user_dict = {"username":username, "email":email, "first_name":first_name, "last_name":last_name}
+        request.session["user_dict"] = user_dict
+        return redirect(URL_SOCIAL_AUTH_COMPLETE + backend, backend=backend)
 
     # If the user has logged in for the first time as facebook or twitter user, get details.
     else:
@@ -443,6 +431,8 @@ def social_auth_get_details (request):
                                                             'last_name':details['last_name'], 
                                                             'email':details['email'], 
                                                             'pic_url':pic_url, 
+                                                            "tos_minor_text":TOS_MINOR_TEXT,
+                                                            "tos_adult_text":TOS_ADULT_TEXT,
                                                             'link':link}, RequestContext(request))
 
 
@@ -472,290 +462,12 @@ def social_auth_disallowed (request):
 
 '''
 
-@login_required
-def get_UserProfile_page(request, userprofile_id):
-    #Be aware of what you show other authenticated users in contrast to the *same* authenticated user.
-    request_profile = request.user.get_profile()   
-    show_profile = get_object_or_404(UserProfile, pk=userprofile_id)
-    context = {"show_profile": show_profile}
-
-    if request_profile.id == show_profile.id:
-        #Grab the following list.
-        context["following_list"] = show_profile.following.all()
-        #Grab the followers list.
-        context["followers_list"] = show_profile.followers.all()        
-
-    #Grab Proposed PetReports.
-    context["proposed_petreports"] = show_profile.proposed_related.all()
-    #Grab Proposed PetMatches.
-    context["proposed_petmatches"] = show_profile.proposed_by_related.all()
-
-    return render_to_response(HTML_USERPROFILE, context, RequestContext(request))
-
-@login_required
-def follow_UserProfile(request): 
-    if request.method == "POST":
-        userprofile = request.user.userprofile
-        target_userprofile_id = request.POST["target_userprofile_id"]
-        target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
-
-        #If the userprofile IDs do not match...
-        if userprofile.id != target_userprofile.id:
-            #Has this UserProfile already followed this target UserProfile?
-            if target_userprofile in userprofile.following.all():
-                messages.error(request, "You are already following " + str(target_userprofile.user.username) + ".")
-
-            else:
-                userprofile.following.add(target_userprofile)
-                # add points to the user who is being followed (i.e. the target_userprofile) 
-                target_userprofile.update_reputation(ACTIVITY_USER_BEING_FOLLOWED)
-                messages.success(request, "You are now following " + str(target_userprofile.user.username) + ".")     
-
-                # Log the following activity for this UserProfile
-                logger.log_activity(ACTIVITY_FOLLOWING, userprofile, target_userprofile)
-
-            return redirect (URL_USERPROFILE + str(target_userprofile.id))
-
-    else:
-        raise Http404
-
-@login_required
-def unfollow_UserProfile(request): 
-    if request.method == "POST":
-        userprofile = request.user.userprofile
-        target_userprofile_id = request.POST["target_userprofile_id"]
-        target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
-
-        #If the userprofile IDs do not match...
-        if userprofile.id != target_userprofile.id:
-
-            #If this UserProfile is actually following the target UserProfile...
-            if target_userprofile in userprofile.following.all():
-                userprofile.following.remove(target_userprofile)
-                # remove points to the use who has been unfollowed (i.e. the target_userprofile)
-                target_userprofile.update_reputation(ACTIVITY_USER_BEING_UNFOLLOWED)
-                messages.success(request, "You are no longer following " + str(target_userprofile.user.username) + ".") 
-                # Log the unfollowing activity for this UserProfile
-                logger.log_activity(ACTIVITY_UNFOLLOWING, userprofile, target_userprofile)
-                return redirect(URL_USERPROFILE + str(target_userprofile.id))
-
-            else:
-                raise Http404
-        else:
-            raise Http404
-    else:
-        raise Http404
-
-@login_required
-def message_UserProfile(request):
-    if request.method == "POST":
-        #Collect Text of Message
-        message = request.POST ["message"]
-        target_userprofile_id = request.POST ["target_userprofile_id"]
-        target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
-        from_userprofile = request.user.get_profile()
-
-        #You cannot send a message to yourself!
-        if from_userprofile.id == target_userprofile.id:
-            messages.error (request, "You cannot send a message to yourself.")
-            return redirect(URL_USERPROFILE + str(from_userprofile.id))
-
-        print_info_msg ("Sending an email message from %s to %s" % (from_userprofile.user.username, target_userprofile.user.username))
-
-        #Send message to UserProfile
-        completed = from_userprofile.send_email_message_to_UserProfile(target_userprofile, message, test_email=False)
-
-        if completed == True:
-            messages.success(request, "You have successfully sent your message to %s" % target_userprofile.user.username + ".") 
-        else:
-            messages.error(request, "Sorry, your message could not be sent because this user's email address is invalid.")
-
-        return redirect(URL_USERPROFILE + str(target_userprofile_id))
-    
-
-@login_required
-def editUserProfile_page(request):
-    if request.method=='GET':
-        user = request.user
-        form = UserProfileForm(initial={'first_name': user.first_name,'last_name': user.last_name,'username':user.username,'email':user.email})
-        update_User_info_form = []
-        update_User_pwd_form = []
-        photo = str(user.get_profile().img_path)
-
-        for field in form:
-            if 'password' in field.name:
-                update_User_pwd_form.append(field)
-            else:
-                update_User_info_form.append(field)
-
-        # 'update_User_pwd_form' shouldn't be shown to social_auth users because they can't change their passwords.
-        if user.social_auth.count() == 0:
-            return render_to_response(HTML_EDITUSERPROFILE_FORM, {"update_User_info_form": update_User_info_form, "update_User_pwd_form": update_User_pwd_form, "profile_picture":photo}, RequestContext(request))
-        else:
-            return render_to_response(HTML_EDITUSERPROFILE_FORM, {"update_User_info_form": update_User_info_form, "profile_picture":photo}, RequestContext(request))
-    else:
-        raise Http404
-
-
-@login_required
-def update_User_info(request):
-    if request.method == "POST":
-        user = request.user
-        user_changed = False
-        email_changed = False
-        userprofile_form = UserProfileForm(request.POST, request.FILES)
-
-        #Check if the form is valid.
-        if userprofile_form.is_valid() == True:
-            pprint(request.POST)
-            pprint (request.FILES)
-
-            #Change the photo 
-            if "photo" in request.FILES:
-                user_changed = True
-                photo = request.FILES ["photo"]
-                pprint(photo.__dict__)
-                user.userprofile.set_images(photo)
-
-            #Check if username has changed.
-            if request.POST ["username"] != user.username:
-                try:
-                    #Does a UserProfile with the input username exist already?
-                    existing_userprofile = UserProfile.objects.get(user__username=request.POST["username"])
-
-                    if existing_userprofile != None:
-                        messages.error(request, "Sorry, that username is already being used. Try another one.")
-                        return redirect(URL_EDITUSERPROFILE)
-
-                except UserProfile.DoesNotExist:
-                    user.username = request.POST ["username"]
-                    user_changed = True
-
-            #Check if email has changed.
-            if request.POST["email"] != user.email:
-
-                if email_re.match(request.POST["email"]):
-                    subject = render_to_string(TEXTFILE_EMAIL_ACTIVATION_SUBJECT)
-                    salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-                    activation_key = hashlib.sha1(salt + user.username).hexdigest()
-                    print_info_msg ('user: %s \tactivation-key: %s' % (user, activation_key))
-
-                    try:
-                        edit_userprofile = EditUserProfile.objects.get(user=user)
-                        edit_userprofile.activation_key = activation_key
-
-                    except EditUserProfile.DoesNotExist:
-                        edit_userprofile = EditUserProfile.objects.create(user=user, activation_key = activation_key)
-
-                    edit_userprofile.new_email = request.POST ["email"]
-                    edit_userprofile.date_of_change = datetime_now()
-                    edit_userprofile.save()
-
-                    if isinstance(user.username, unicode):
-                        user.username = user.username.encode('utf-8')
-
-                    #Grab the Site object for the context
-                    site = Site.objects.get(pk=1)
-                    ctx = {"site":site, "activation_key":activation_key, "expiration_days":settings.ACCOUNT_ACTIVATION_DAYS}
-                    message = render_to_string(TEXTFILE_EMAIL_CHANGE_VERICATION, ctx)
-                    #Keep the old email - we don't want to change the email address until it is verified, but we still send the verification email to new email address.
-                    old_email = user.email
-                    user.email = request.POST ["email"]
-                    user.email_user(subject, message, from_email = None)
-                    user.email = old_email
-                    print_info_msg ("Sent email verification for %s" % user)
-                    user_changed = True
-                    email_changed = True
-
-                else:
-                    messages.error(request, "Sorry, the email address you provided is invalid. Try another one.")
-                    return redirect (URL_EDITUSERPROFILE)
-
-            #Check if first name has changed.
-            if request.POST ["first_name"] != user.first_name:
-                user.first_name = request.POST["first_name"]
-                user_changed = True
-
-            #Check if last name has changed.    
-            if request.POST ["last_name"] != user.last_name:
-                user.last_name = request.POST["last_name"]
-                user_changed = True
-
-            #If something about the user (or userprofile) has changed...
-            if user_changed == True:
-                user.save()
-                user.userprofile.save()
-
-                if email_changed == True:
-                    messages.success(request, "Your changes have been saved. Please check your email to find an email from us asking to verify your new email address.")
-                else:
-                    messages.success(request, "Your changes have been saved.")
-
-            return redirect(URL_USERPROFILE + str(user.userprofile.id))
-
-        else:
-            messages.error(request, "Form is not valid. Please put in properly formatted values so that EPM can update your profile.")
-            return redirect(URL_EDITUSERPROFILE)
-    else:
-        raise Http404
-
-@login_required
-def update_User_password(request):
-    if request.method == "POST":
-        user = request.user
-        old_password = request.POST ["old_password"]
-        new_password = request.POST ["new_password"]
-        confirm_password = request.POST ["confirm_password"]
-
-        #First, check old password.
-        if user.check_password(old_password) == False:
-            messages.error(request, "Sorry, your old password was incorrect. Try again.")
-            return redirect(URL_EDITUSERPROFILE)
-
-        if new_password != confirm_password:
-            messages.error(request, "Please confirm your new password. Your new passwords don't match.")
-            return redirect(URL_EDITUSERPROFILE)
-
-        else:
-            user.set_password(new_password)
-            messages.success(request, "Your password has been changed successfully.")
-            user.save()
-            return redirect (URL_EDITUSERPROFILE)
-
-    else:
-        raise Http404
-
-
-def email_verification_complete (request, activation_key):
-    '''SHA1_RE compiles the regular expression '^[a-f0-9]{40}$' 
-    to search for the activation key got from the GET request'''
-    SHA1_RE = re.compile('^[a-f0-9]{40}$')
-
-    if SHA1_RE.search(activation_key):
-        try:
-            edituserprofile = EditUserProfile.objects.get(activation_key=activation_key)
-        except:
-            messages.error (request, "Sorry, that's an invalid activation key. Please try to verify your email address again.")
-            return redirect(URL_USERPROFILE)
-
-        #If OK, then save the new email for the user.
-        if not edituserprofile.activation_key_expired():
-            edituserprofile.user.email = edituserprofile.new_email
-            edituserprofile.user.save()      
-            messages.success (request, "You have successfully updated your email address!")
-            edituserprofile.activation_key = "ACTIVATED"
-            edituserprofile.save()
-
-        else:
-            messages.error (request, "Sorry, Your activation key has expired.")
-    else:
-        messages.error (request, "Your request cannot be processed at the moment, invalid activation key!")
-    return redirect (URL_HOME)
-
 
 def about (request):
     petreports = PetReport.objects.filter(closed = False).order_by("?")[:50]
     return render_to_response(HTML_ABOUT, {'petreports':petreports}, RequestContext(request))
+
+
 
 class RemoteUserMiddleware(object):
     def process_response(self, request, response):

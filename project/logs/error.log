@@ -78,3 +78,87 @@
 [INFO]: get_activities_json(): Anonymous User - random sample of activities...
 [ERROR]: Problem in get_activities_from_log(): {[Errno 2] No such file or directory: '/vagrant/static/logs/activity_logs/1.log'}
 2014-04-10 22:17:48 [2248] [INFO] Shutting down: Master
+2014-05-06 17:38:52 [1630] [INFO] Starting gunicorn 18.0
+2014-05-06 17:38:52 [1630] [DEBUG] Arbiter booted
+2014-05-06 17:38:52 [1630] [INFO] Listening at: http://0.0.0.0:8000 (1630)
+2014-05-06 17:38:52 [1630] [INFO] Using worker: sync
+2014-05-06 17:38:52 [1695] [INFO] Booting worker with pid: 1695
+2014-05-06 18:44:40 [1695] [DEBUG] GET /
+2014-05-06 13:44:45 [1695] [DEBUG] GET /favicon.ico
+2014-05-06 21:36:54 [21610] [INFO] Starting gunicorn 18.0
+2014-05-06 21:36:54 [21610] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-05-06 21:36:54 [21610] [ERROR] Retrying in 1 second.
+2014-05-06 21:36:55 [21610] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-05-06 21:36:55 [21610] [ERROR] Retrying in 1 second.
+2014-05-06 21:36:56 [21610] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-05-06 21:36:56 [21610] [ERROR] Retrying in 1 second.
+2014-05-06 21:36:57 [21610] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-05-06 21:36:57 [21610] [ERROR] Retrying in 1 second.
+2014-05-06 21:36:58 [21610] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-05-06 21:36:58 [21610] [ERROR] Retrying in 1 second.
+2014-05-06 21:36:59 [21610] [ERROR] Can't connect to ('0.0.0.0', 8000)
+2014-05-08 20:04:13 [3540] [INFO] Starting gunicorn 18.0
+2014-05-08 20:04:13 [3540] [DEBUG] Arbiter booted
+2014-05-08 20:04:13 [3540] [INFO] Listening at: http://0.0.0.0:8000 (3540)
+2014-05-08 20:04:13 [3540] [INFO] Using worker: sync
+2014-05-08 20:04:13 [3613] [INFO] Booting worker with pid: 3613
+2014-05-08 22:17:40 [3540] [INFO] Handling signal: term
+2014-05-08 22:17:40 [3613] [INFO] Worker exiting (pid: 3613)
+2014-05-08 22:17:40 [3540] [INFO] Shutting down: Master
+2014-05-09 22:47:23 [1582] [INFO] Starting gunicorn 18.0
+2014-05-09 22:47:23 [1582] [DEBUG] Arbiter booted
+2014-05-09 22:47:23 [1582] [INFO] Listening at: http://0.0.0.0:8000 (1582)
+2014-05-09 22:47:23 [1582] [INFO] Using worker: sync
+2014-05-09 22:47:23 [1627] [INFO] Booting worker with pid: 1627
+2014-05-10 07:16:40 [1582] [CRITICAL] WORKER TIMEOUT (pid:1627)
+2014-05-10 07:16:40 [1879] [INFO] Booting worker with pid: 1879
+2014-05-10 16:11:54 [1582] [CRITICAL] WORKER TIMEOUT (pid:1879)
+2014-05-10 16:11:54 [1884] [INFO] Booting worker with pid: 1884
+2014-05-11 20:03:22 [1582] [CRITICAL] WORKER TIMEOUT (pid:1884)
+2014-05-11 20:03:22 [1895] [INFO] Booting worker with pid: 1895
+2014-05-11 23:52:21 [1582] [CRITICAL] WORKER TIMEOUT (pid:1895)
+2014-05-11 23:52:22 [1949] [INFO] Booting worker with pid: 1949
+2014-05-12 05:23:00 [1582] [CRITICAL] WORKER TIMEOUT (pid:1949)
+2014-05-12 05:23:00 [1974] [INFO] Booting worker with pid: 1974
+2014-05-12 14:37:03 [1582] [CRITICAL] WORKER TIMEOUT (pid:1974)
+2014-05-12 14:37:03 [1978] [INFO] Booting worker with pid: 1978
+2014-05-12 16:37:11 [1582] [CRITICAL] WORKER TIMEOUT (pid:1978)
+2014-05-12 16:37:11 [1993] [INFO] Booting worker with pid: 1993
+2014-05-12 18:01:26 [1582] [CRITICAL] WORKER TIMEOUT (pid:1993)
+2014-05-12 18:01:26 [1997] [INFO] Booting worker with pid: 1997
+2014-05-12 21:23:30 [1582] [CRITICAL] WORKER TIMEOUT (pid:1997)
+2014-05-12 21:23:30 [2022] [INFO] Booting worker with pid: 2022
+2014-06-20 20:42:25 [13214] [INFO] Starting gunicorn 18.0
+2014-06-20 20:42:25 [13214] [DEBUG] Arbiter booted
+2014-06-20 20:42:25 [13214] [INFO] Listening at: http://0.0.0.0:8000 (13214)
+2014-06-20 20:42:25 [13214] [INFO] Using worker: sync
+2014-06-20 20:42:25 [13249] [INFO] Booting worker with pid: 13249
+2014-06-20 20:59:34 [13249] [DEBUG] GET /
+2014-06-20 16:00:16 [13249] [DEBUG] GET /
+2014-06-20 16:00:40 [13249] [DEBUG] GET /
+2014-06-20 16:00:59 [13249] [DEBUG] GET /
+2014-06-20 16:01:11 [13249] [DEBUG] GET /
+2014-06-20 16:01:46 [13249] [DEBUG] GET /
+2014-06-20 16:01:48 [13249] [DEBUG] GET /
+2014-06-20 21:02:45 [13214] [INFO] Handling signal: term
+2014-06-20 16:02:45 [13249] [INFO] Worker exiting (pid: 13249)
+[OK]: The MongoDB instance is running at [192.168.50.6].
+
+2014-06-20 21:02:45 [13214] [INFO] Shutting down: Master
+2014-06-20 21:02:51 [13434] [INFO] Starting gunicorn 18.0
+2014-06-20 21:02:51 [13434] [DEBUG] Arbiter booted
+2014-06-20 21:02:51 [13434] [INFO] Listening at: http://0.0.0.0:8000 (13434)
+2014-06-20 21:02:51 [13434] [INFO] Using worker: sync
+2014-06-20 21:02:51 [13439] [INFO] Booting worker with pid: 13439
+2014-06-20 21:02:58 [13434] [INFO] Handling signal: term
+2014-06-20 21:02:58 [13439] [INFO] Worker exiting (pid: 13439)
+2014-06-20 21:02:58 [13434] [INFO] Shutting down: Master
+2014-07-07 13:22:17 [1507] [INFO] Starting gunicorn 18.0
+2014-07-07 13:22:17 [1507] [INFO] Listening at: http://0.0.0.0:8000 (1507)
+2014-07-07 13:22:17 [1507] [INFO] Using worker: sync
+2014-07-07 13:22:17 [1512] [INFO] Booting worker with pid: 1512
+2014-07-07 13:22:49 [1507] [INFO] Handling signal: term
+2014-07-07 08:22:49 [1512] [INFO] Worker exiting (pid: 1512)
+[OK]: The MongoDB instance is running at [192.168.50.6].
+
+2014-07-07 13:22:49 [1507] [INFO] Shutting down: Master

@@ -6,11 +6,12 @@ from social_auth.backends.twitter import TwitterBackend
 from urllib import urlopen
 from StringIO import StringIO
 from django.forms.models import model_to_dict
-from constants import HTML_SOCIAL_AUTH_FORM, URL_SOCIAL_AUTH_GET_DETAILS, URL_LOGIN, URL_SOCIAL_AUTH_COMPLETE
-from home.models import UserProfile
-from utils import print_error_msg, print_debug_msg, print_info_msg
+from home.constants import HTML_SOCIAL_AUTH_FORM, URL_SOCIAL_AUTH_GET_DETAILS, URL_LOGIN, URL_SOCIAL_AUTH_COMPLETE
+from social.models import UserProfile
+from utilities.utils import print_error_msg, print_debug_msg, print_info_msg
+from utilities import logger
 from pprint import pprint
-import settings, logger
+import settings
 
 #Used by social auth pipeline to get a username value when authenticate a social user for the first time
 def redirect_to_form(backend, details, request, social_user, is_new, uid, user, *args, **kwargs):

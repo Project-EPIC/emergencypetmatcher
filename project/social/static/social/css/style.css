@@ -1,0 +1,44 @@
+/*CSS for the edit profile page*/
+
+
+#userprofile-dashboard {
+	margin: 10px auto;
+	width: 720px;
+}
+
+#userprofile-dashboard-info {
+	display:inline-block;
+	vertical-align:top;
+}
+
+#userprofile-dashboard-actions {
+	
+}
+
+.userprofile-thumb-container {
+	margin:10px auto 30px auto;
+	border: 2px solid white;
+	min-width: 200px;
+	height: 125px;
+	overflow: auto;
+	overflow-y:hidden;
+	white-space: nowrap;	
+}
+
+.edit-userprofile-form {
+	margin-bottom:30px;
+}
+
+.userprofile-thumb {
+	height:70px;
+}
+
+.userprofile-img-wrapper {
+	height: 250px;
+	display:inline-block;
+}
+
+.userprofile-img-wrapper img {
+	height:245px;
+	width:225px;
+}
