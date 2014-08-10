@@ -9,6 +9,7 @@ URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
 
 HTML_SUBMIT_PETREPORT = "reporting/petreport_form.html"
 HTML_PRDP = "reporting/petreport.html"
+HTML_PRDP_FULL = "reporting/petreport_full.html"
 
 #Number of Tests
 NUMBER_OF_TESTS = 50

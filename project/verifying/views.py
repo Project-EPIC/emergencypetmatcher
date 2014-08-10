@@ -20,70 +20,81 @@ from social_auth.views import auth
 from random import choice, uniform
 from pprint import pprint
 from reporting.models import PetReport
+from verifying.models import PetCheck
 from matching.models import PetMatch
 from utilities.utils import *
 from utilities import logger
-from matching.constants import *
+from verifying.constants import *
 from home.constants import *
 import datetime, re
 
-@login_required
-def verify_PetMatch(request, petmatch_id):
-    pm = get_object_or_404(PetMatch, pk=petmatch_id)
-    profile = request.user.get_profile()    
+def verify_PetCheck(request, petcheck_id):
+    petcheck = get_object_or_404(PetCheck, pk=petcheck_id)
+    petmatch = petcheck.petmatch
+    lost_pet = petmatch.lost_pet
+    found_pet = petmatch.found_pet
+    pet_fields = lost_pet.pack_PetReport_fields(other_pet=found_pet)
 
-    #This page cannot be rendered if the threshold has not been reached and is only accessible by either the found pet contact or the lost pet contact.
-    if  (pm.verification_triggered == True) and ((profile == pm.lost_pet.proposed_by) or (profile == pm.found_pet.proposed_by)):
-
-        #GET Verification Page.
-        if request.method == "GET":
-            voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
-            num_upvotes = len(pm.up_votes.all())
-            num_downvotes = len(pm.down_votes.all())
-            user_has_voted = pm.UserProfile_has_voted(profile)
-            user_is_owner = (profile == pm.lost_pet.proposed_by) or False
-            pos = 0 if (profile == pm.lost_pet.proposed_by) else 1
-            if pm.verification_votes[pos] != '0':
-                user_has_verified = True
-            else:
-                user_has_verified = False
-
-            return render_to_response(HTML_VERIFY_PETMATCH,{'petmatch': pm,
-                                                            "voters": voters, 
-                                                            "num_upvotes":num_upvotes, 
-                                                            "user_is_owner":user_is_owner,
-                                                            "user_has_voted":user_has_voted, 
-                                                            "num_downvotes":num_downvotes, 
-                                                            "user_has_verified":user_has_verified}, RequestContext(request))
-        #POST for Verification.    
-        elif request.method == "POST":
-            action = request.POST['choice']
-            bit = 1 if (action == 'Yes') else 2 if (action == 'No') else 0
-            pos = 0 if (profile == pm.lost_pet.proposed_by) else 1
-
-            #User cannot change his/her response once it has been submitted
-            if pm.verification_votes[pos] != '0':
-                messages.error(request, "You have already submitted a response for this PetMatch!")
-                return redirect(URL_HOME)
-            if pos == 0:
-                pm.verification_votes = str(bit) + pm.verification_votes[1]
-            else:
-                pm.verification_votes = pm.verification_votes[0] + str(bit)
-
-            pm.save()
-
-            #Have we completed verification? 
-            if '0' not in pm.verification_votes:
-                message = pm.close_PetMatch()
-                messages.success(request, message)
-            else:
-                messages.success(request, "Thanks for your response! Once the other pet contact verifies this petmatch, it will be closed.")
-            return redirect(URL_HOME)
-
-        else: 
-            messages.error(request,"This pet match is not yet eligible for verification, please wait for an email from us. Thank you.")
-            return redirect(URL_HOME)
+    if request.user.is_anonymous() == True:
+        profile = None
     else:
-        messages.error(request, "Sorry, you don't have access to this page.")
+        profile = request.user.get_profile()
+
+    if request.method == "GET":
+        num_upvotes = len(petmatch.up_votes.all())
+        num_downvotes = len(petmatch.down_votes.all())        
+        user_has_verified = False
+        user_has_voted = False
+        user_is_owner = False
+        
+        if profile != None:
+            user_has_voted = petmatch.UserProfile_has_voted(profile)
+            user_has_verified = petcheck.UserProfile_has_verified(profile)
+
+            #Need to determine if lost pet proposer truly is owner or just crossposter.
+            if profile == lost_pet.proposed_by:
+                if lost_pet.is_crossposted() == True:
+                    user_is_owner = False #just crossposter.
+                else: 
+                    user_is_owner = True #owner.
+
+        return render_to_response(HTML_VERIFY_PETCHECK, {   "petcheck": petcheck,
+                                                            "petmatch": petmatch,
+                                                            "pet_fields": pet_fields,
+                                                            "lost_petreport_id": lost_pet.id,
+                                                            "found_petreport_id": found_pet.id,
+                                                            "profile": profile,
+                                                            "contacts": [lost_pet.proposed_by, found_pet.proposed_by],
+                                                            "num_voters": num_upvotes + num_downvotes,
+                                                            "user_is_owner": user_is_owner,
+                                                            "user_has_voted": user_has_voted,
+                                                            "user_has_verified": user_has_verified}, RequestContext(request))
+    #POST for Verification.
+    elif request.method == "POST":
+        pprint(request.POST)
+        choice = request.POST['verify-choice']
+
+        if profile == lost_pet.proposed_by:
+            petcheck.verification_votes = choice + petcheck.verification_votes[1]
+        else:
+            petcheck.verification_votes = petcheck.verification_votes[0] + choice
+
+        petcheck.save()
+
+        #Have we completed verification? 
+        if petcheck.verification_complete() == True:
+            message = petcheck.close_PetMatch()
+            messages.success(request, message)
+        else:
+            messages.success(request, "Thanks for your response! Once the other pet contact verifies this petmatch, it will be closed.")
         return redirect(URL_HOME)
+
+    else: 
+        messages.error(request,"This pet match is not yet eligible for verification, please wait for an email from us. Thank you.")
+        return redirect(URL_HOME)
+
+
+
+
+
 

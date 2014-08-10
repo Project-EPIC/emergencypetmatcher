@@ -8,12 +8,33 @@
 
 #userprofile-dashboard-info {
 	display:inline-block;
+	margin-left:10px;
 	vertical-align:top;
 }
 
 #userprofile-dashboard-actions {
 	
 }
+
+#user-info-table {
+	width: 480px;
+	height:200px;
+	display:inline-block;
+}
+
+#user-info-table .user-info-header {
+	display:inline-block;
+	width:150px;
+	font-weight:bold;
+	text-align: right;
+}
+
+#user-info-table .user-info-data {
+	display:inline-block;
+	width:300px;
+	text-align: left;
+}
+
 
 .userprofile-thumb-container {
 	margin:10px auto 30px auto;
@@ -34,11 +55,11 @@
 }
 
 .userprofile-img-wrapper {
-	height: 250px;
+	max-height: 250px;
 	display:inline-block;
 }
 
 .userprofile-img-wrapper img {
-	height:245px;
+	max-height:245px;
 	width:225px;
 }

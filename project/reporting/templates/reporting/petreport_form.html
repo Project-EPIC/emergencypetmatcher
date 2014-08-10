@@ -112,7 +112,7 @@
 
 				{% elif "Pet Description" in field.label %}
 					<label for="{{ field.id }}"> {{ field.label }} </label>
-					<textarea id="id_description" class="form-control" name="{{ field.html_name }}"maxlength="{{ PETREPORT_DESCRIPTION_LENGTH }}" rows="5" cols="20" style="width:400px;"></textarea>
+					<textarea id="id_description" class="form-control" name="{{ field.html_name }}" maxlength="{{ PETREPORT_DESCRIPTION_LENGTH }}" rows="5" cols="20" style="width:400px;"></textarea>
 
 				{% elif "Location" == field.label %}
 					<label for="{{ field.id }}"> {{ field.label }} </label>
@@ -147,7 +147,7 @@
 				{% elif "Tag and Collar Information" in field.label %}
 					<label for="{{ field.id }}"> {{ field.label }} </label>				
 					<span id="id_tag_collar_info_count"/></span>
-					<textarea id="id_tag_collar_info" class="form-control" name="{{ field.html_name }}" maxlength="{{ PETREPORT_TAG_INFO_LENGTH }}" rows="5" cols="20" style="width:300px;"></textarea>
+					<textarea id="id_tag_collar_info" class="form-control" name="{{ field.html_name }}" maxlength="{{ PETREPORT_TAG_INFO_LENGTH }}" rows="5" cols="20" style="width:300px; max-width:400px; max-height:300px;"></textarea>
 
 
 				<!-- Contact Field set -->
@@ -155,26 +155,23 @@
 				{% elif "Contact Email Address" in field.label %}
 				{% elif "Contact Alternative link to Pet Posting" in field.label %} 
 				{% elif "Contact Name" in field.label %}			
-					<label for="{{ field.id }}"> Pet Contact Preference </label>	
+					<label for="{{ field.id }}"> Pet Contact Details </label>	
 					<div id = "petreport_form_contact" style="padding-bottom:15px;">
-						Do you have a contact person for this pet (if other than yourself)? <input id="petreport_form_contact_check" type="checkbox"/>
+						If you're not the pet owner or pet finder, do you have the original pet contact details? <input id="petreport_form_contact_check" type="checkbox"/>
 						<div id="petreport_form_contact_fields" style="display:none; margin:10px;">
 
 							<div style="margin:10px;">
-								<strong>Name</strong>
+								<strong>Contact Name</strong>
 								<input id='id_contact_name' class="form-control" name='contact_name' maxlength="{{ PETREPORT_CONTACT_NAME_LENGTH }}" type='text' style="width:200px;"/>
 							</div>
-
 							<div style="margin:10px;">
 								<strong>Phone Number</strong>
 								<input id='id_contact_number' class="form-control" name='contact_number' maxlength="{{ PETREPORT_CONTACT_NUMBER_LENGTH }}" type='text' style="width:250px;"/>
 							</div>
-
 							<div style="margin:10px;">
 								<strong>Email Address</strong>
 								<input id='id_contact_email' class="form-control" name='contact_email' maxlength="{{ PETREPORT_CONTACT_EMAIL_LENGTH }}" type='text' style="width:200px;"/>
 							</div>
-
 							<div style="margin:10px;">
 								<strong>Alternative Link to Pet Posting</strong>
 								<input id='id_contact_link' class="form-control" name='contact_link' maxlength="{{ PETREPORT_CONTACT_LINK_LENGTH }}" type='text' style="font-family: monospace; width:250px;"/>
@@ -188,7 +185,6 @@
 			<div class="form-actions">
 				<input id = "id_submit" class="btn btn-primary" type="button" value="Submit"/>
 			</div>
-			
 		</form>
 	</div>
 {% endblock content %}

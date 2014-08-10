@@ -1,24 +1,21 @@
 from django.db import models
-from reporting.models import PetReport
 from social.models import UserProfile
+from reporting.models import PetReport, PetReportForm
 from utilities.utils import *
-from verifying.contants import *
+from verifying.constants import *
 from constants import *
 
 #The Pet Match Object Model
 class PetMatch(models.Model):
-    '''Required Fields'''
-    #Lost Pet
-    lost_pet = models.ForeignKey(PetReport, null=False, default=None, related_name='lost_pet_related')
-    #Found Pet
-    found_pet = models.ForeignKey(PetReport, null=False, default=None, related_name='found_pet_related')
+    lost_pet = models.ForeignKey("reporting.PetReport", null=False, default=None, related_name='lost_pet_related')
+    found_pet = models.ForeignKey("reporting.PetReport", null=False, default=None, related_name='found_pet_related')
     #UserProfile who proposed the PetMatch object.
-    proposed_by = models.ForeignKey(UserProfile, null=False, related_name='proposed_by_related')
+    proposed_by = models.ForeignKey("social.UserProfile", null=False, related_name='proposed_by_related')
     #Date when PetMatch was proposed (created).
     proposed_date = models.DateTimeField(null=False, auto_now_add=True)
     is_successful = models.BooleanField(default=False)
-    up_votes = models.ManyToManyField(UserProfile, null=True, related_name='up_votes_related')
-    down_votes = models.ManyToManyField(UserProfile, null=True, related_name='down_votes_related')
+    up_votes = models.ManyToManyField("social.UserProfile", null=True, related_name='up_votes_related')
+    down_votes = models.ManyToManyField("social.UserProfile", null=True, related_name='down_votes_related')
 
     '''Because of the Uniqueness constraint that the PetMatch must uphold, we override the save method'''
     def save(self, *args, **kwargs):
@@ -76,6 +73,15 @@ class PetMatch(models.Model):
         return filtered_petmatches
 
 
+    def is_being_checked(self):
+        try:
+            if self.petcheck:
+                return True
+        except:
+            return False
+
+    def pack_PetReport_fields(self):
+        return self.lost_pet.pack_PetReport_fields(other_pet=self.found_pet)
 
     # Determine (return UPVOTE/DOWNVOTE) if the input UserProfile (user) has up/down-voted on this PetMatch already
     def UserProfile_has_voted(self, user_profile):
@@ -113,7 +119,7 @@ class PetMatch(models.Model):
         json = simplejson.dumps(self.toDICT())
         return json        
 
-    def PetMatch_has_reached_threshold(self):
+    def has_reached_threshold(self):
         #Difference (D) is calculated as the difference between number of upvotes and downvotes.
         #For a PetMatch to be successful, it should satisfy certain constraints. D should exceed a threshold value.
         difference = abs(self.up_votes.count() - self.down_votes.count())
@@ -125,9 +131,11 @@ class PetMatch(models.Model):
         #AND if all email addresses are valid for these contacts, then verification is triggered.
         if self.up_votes.count() == 1 and (self.proposed_by == self.up_votes.all()[0]):
             if (self.proposed_by == lost_pet_contact or self.proposed_by == found_pet_contact) and email_is_valid(lost_pet_contact.user.email) and email_is_valid(found_pet_contact.user.email) and email_is_valid(petmatch_owner.user.email):
+                print_info_msg("PetMatch %s has reached threshold!")
                 return True
 
         if difference >= VERIFICATION_DEFAULT_THRESHOLD:
+            print_info_msg("PetMatch %s has reached threshold!")
             return True
         else:
             return False

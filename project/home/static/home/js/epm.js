@@ -41,6 +41,14 @@ $(document).ready(function(){
 });
 
 
+function launch_dialog(modal_element, url){
+    $(modal_element).modal({
+        "remote": url,
+        "data": "dialog"
+    });
+    $(".modal-backdrop:not(:first)").remove();
+}
+
 //GLOBAL JS Functions
 function share_on_facebook(url, image, title, caption, summary) {
     var obj = {
@@ -87,11 +95,7 @@ function setup_petreport_item(report, modal_element){
     //Link attributes.
     $(item).addClass("item");
     $(alink).attr("identity", report.ID);    
-    $(alink).on("click", function(){
-        $(modal_element).modal({
-            "remote": URL_PRDP + report.ID
-        });
-    });
+    $(alink).on("click", function(){ launch_dialog(modal_element, URL_PRDP + report.ID); });
 
     //Pet Img attributes.
     $(pet_img).attr("src", MEDIA_URL + report.img_path);
@@ -117,11 +121,7 @@ function setup_petmatch_item (match, modal_element){
 
     //Deal with Attributes.
     $(item).addClass("item");
-    $(alink).on("click", function(){
-        $(modal_element).modal({
-            "remote": URL_PMDP + match.ID
-        });        
-    });
+    $(alink).on("click", function(){ launch_dialog(modal_element, URL_PMDP + match.ID); });
 
     $(lost_pet_img).attr("src", MEDIA_URL + match.lost_pet_img_path);
     $(found_pet_img).attr("src", MEDIA_URL + match.found_pet_img_path);
@@ -146,93 +146,38 @@ function setup_petmatch_item (match, modal_element){
 }
 
 
-function display_PetReport_fields(options){
-    var petreport = options ["petreport"] || null;
-    var list = options ["list"] || null;
-    var showContactInfo = false;
+//This function takes a petreport fields list, its index, and the table in which the attributes will be written.
+function set_PetReport_fields_to_table(petreport, index_offset, table){
+    if(index_offset != 0 && index_offset != 1)
+        return null
 
-    //If PetReport is not available, exit.
-    if (petreport == null || list == null)
-        return null;
-
-    //Is there contact information to show? Need to check.
-    if (petreport.contact_name != null || petreport.contact_email != null || petreport.contact_number != null || petreport.contact_link != null)
-        showContactInfo = true;
-
-    list.html("");
-    list.append("<li><b>Pet Name:</b> " + petreport.pet_name + "</li>");
-    list.append("<li><b>Pet Type:</b> " + petreport.pet_type + "</li>");
-    list.append("<li><b>Lost/Found:</b> " + petreport.status + "</li>");
-    list.append("<li><b>Contact:</b> <a href= '" + URL_USERPROFILE + petreport.proposed_by + "/' >" + petreport.proposed_by_username + "</a></li>");
-    list.append("<li><b>Date " + petreport.status + ":</b> " + petreport.date_lost_or_found + "</li>");
-    list.append("<li><b>Location:</b> " + petreport.location + "</li>");
-
-    //Treat the microchip ID specially.
-    if (petreport.microchip_id != "")
-        list.append("<li><b>Microchipped: </b>Yes</li>");
-    else
-        list.append("<li><b>Microchipped: </b>No</li>");
-
-    list.append("<li><b>Spayed/Neutered:</b> " + petreport.spayed_or_neutered + "</li>");
-    list.append("<li><b>Age:</b> " + petreport.age + "</li>");
-    list.append("<li><b>Sex:</b> " + petreport.sex + "</li>");
-    list.append("<li><b>Breed:</b> " + petreport.breed + "</li>");
-    list.append("<li><b>Color:</b> " + petreport.color + "</li>");
-    list.append("<li><b>Size:</b> " + petreport.size + "</li>");
-    list.append("<li><b>Tag and Collar Information:</b></li>");
-    list.append("<li>" + petreport.tag_info + "</li>");
-    list.append("<li><b>Description:</b></li>");
-    list.append("<li>" + petreport.description + "</li>");
-
-    //Show Contact information.
-    if (showContactInfo == true){
-        list.append("<hr size='0' width='100%' color='white'/>")
-        list.append("<li><b>Contact Information</b></li>");
-        list.append("<li style='margin:10px;'><b>Name:</b> " + (petreport.contact_name || "") + "</li>");
-        list.append("<li style='margin:10px;'><b>Email:</b> " + (petreport.contact_email || "") + "</li>");
-        list.append("<li style='margin:10px;'><b>Phone Number:</b> " + (petreport.contact_number || "") + "</li>");
-
-        //Alternative Link should not be shown if it doesn't exist.
-        if (petreport.contact_link)
-            list.append("<li style='margin:10px;'><a href='" + petreport.contact_link +  "'> Alternative Link for this Pet </a></li>");
-    }    
+    var rows = $(table).find("tbody tr");
+    $(rows).each(function(index, row){
+        var pet_rows = $(row).find(".pet-info-data");
+        field = petreport[index]
+        pet_rows[index_offset].innerText = field[Object.keys(field)[0]] 
+    })
 }
 
-function highlight_matches(list1, list2){
+function clear_PetReport_fields_to_table(index_offset, table){
+    petreport = []
+    for (var i = 0; i < 20; i++)
+        petreport.push({"":""})
+    set_PetReport_fields_to_table(petreport, index_offset, table)
+}
+
+function highlight_field_matches(table){
     //First, initialize and clear off pre-existing highlights.
-    var items = null;
-    var items1 = $(list1).children("li");
-    var items2 = $(list2).children("li");
-    $(items1).each(function(){ $(this).css("color", "black"); });
-    $(items2).each(function(){ $(this).css("color", "black"); });
-
-    if (items1.length < items2.length)
-        items = items1;
-    else
-        items = items2;
-
-    //Iterate through each field and check if the value matches in both lists.
-    for (var i = 0; i < items.length; i++){
-        var innerText1 = items1[i].innerText;
-        var innerText2 = items2[i].innerText;
-
-        if (innerText1.match("Tag and Collar Information") != null)
-            continue;
-
-        if (innerText1.match("Description") != null)
-            continue;
-
-        if (innerText1 == "" || innerText2 == "")
-            continue;
-
-        if (innerText1.match("Contact Information") != null)
-            continue;
-
-        if (innerText1 == innerText2){
-            $(items1[i]).css("color", "blue");
-            $(items2[i]).css("color", "blue");
+    var rows = $(table).find("tbody tr")
+    $(rows).each(function(index, row){
+        var pet_rows = $(row).find(".pet-info-data")
+        var first_pet_info = pet_rows[0]
+        var second_pet_info = pet_rows[1]
+        if (first_pet_info.innerText == second_pet_info.innerText){
+            $(first_pet_info).css("color", "#428bca")
+            $(second_pet_info).css("color", "#428bca")
         }
-    }
+    });
 }
 
 

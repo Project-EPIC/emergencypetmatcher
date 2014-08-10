@@ -42,9 +42,21 @@ def get_PetMatch(request, petmatch_id):
     num_upvotes = len(pm.up_votes.all())
     num_downvotes = len(pm.down_votes.all())
 
-    pprint("Number of voters: %d" % len(voters))
-    return render_to_response(HTML_PMDP, {  "petmatch": pm,
+    if pm.is_successful == True:
+        messages.success(request, "These pet reports have been matched! Thank you digital volunteers!")
+    elif pm.is_being_checked() == True:
+        messages.info(request, "These pet reports are currently being checked by their owners! Votes are closed.")
+
+    fields = pm.pack_PetReport_fields()
+
+    if request.is_ajax() == True:
+        html = HTML_PMDP
+    else:
+        html = HTML_PMDP_FULL    
+
+    return render_to_response(html, {  "petmatch": pm,
                                             "site_domain":Site.objects.get_current().domain,
+                                            "pet_fields": fields,
                                             "num_voters": len(voters), 
                                             "user_has_voted": user_has_voted, 
                                             "num_upvotes":num_upvotes, 
@@ -89,11 +101,12 @@ def vote_PetMatch(request):
             message = "You have successfully downvoted this PetMatch!"
 
         #Was the petmatch triggered for verification? Check here.
-        threshold_reached = pm.PetMatch_has_reached_threshold() 
+        threshold_reached = pm.has_reached_threshold() 
         
+        #If the votes reach the threshold, prepare for pet checking!
         if threshold_reached == True:
             new_check = PetCheck.objects.create(petmatch=pm)
-            message = pm.verify_PetMatch()
+            message = new_check.verify_PetMatch()
             
         num_upvotes = len(pm.up_votes.all())
         num_downvotes = len(pm.down_votes.all())
@@ -137,7 +150,8 @@ def match_PetReport(request, petreport_id, page=None):
 
         #Serialize the PetReport into JSON for easy accessing.
         target_pr_json = target_petreport.toJSON()
-        return render_to_response (HTML_MATCHING, { 'target_pr_json':target_pr_json, 
+        pet_fields = target_petreport.pack_PetReport_fields()
+        return render_to_response (HTML_MATCHING, { 'pet_fields': pet_fields,
                                                     "target_petreport":target_petreport, 
                                                     "candidates_count":candidates_count}, RequestContext(request))
     else:
@@ -217,12 +231,10 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
         return redirect(URL_HOME)
     
     else:
-        target_json = target.toJSON()
-        candidate_json = candidate.toJSON()
+        pet_fields = target.pack_PetReport_fields(other_pet=candidate)
         return render_to_response(HTML_PROPOSE_MATCH, { 'target':target, 
                                                         'candidate':candidate,
-                                                        'target_json':target_json, 
-                                                        'candidate_json':candidate_json}, RequestContext(request))
+                                                        'pet_fields': pet_fields }, RequestContext(request))
 
 
 

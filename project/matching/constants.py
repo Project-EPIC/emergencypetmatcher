@@ -8,13 +8,13 @@ URL_PMDP = '/matching/PetMatch/'
 URL_VOTE_MATCH = '/matching/vote_PetMatch'
 URL_MATCHING = "/matching/match_PetReport/"
 URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
-URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
+
 
 HTML_PETMATCHES = "home/petmatches.html"
 HTML_PMDP = "matching/petmatch.html"
+HTML_PMDP_FULL = "matching/petmatch_full.html"
 HTML_MATCHING = "matching/matching.html"
 HTML_PROPOSE_MATCH = "matching/propose_match.html"
-HTML_VERIFY_PETMATCH = "matching/verify_petmatch.html"
 
 #PetMatch Constants
 PETMATCH_OUTCOME_NEW_PETMATCH = "NEW PETMATCH"

@@ -2,8 +2,7 @@
 $(document).ready(function(){
 
     //Retrieve and display pet report fields
-    display_PetReport_fields({ "petreport":TARGET_PETREPORT, "list": $("#target_petreport_fields") });
-    display_PetReport_fields({ "petreport":CANDIDATE_PETREPORT, "list": $("#candidate_petreport_fields") });
+    highlight_field_matches($("#pmdp-info-table"));
 
     //Use the Zoom plugin to zoom Lost pet pic.
     $("#target-pic img").on("mouseover", function(){

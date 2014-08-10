@@ -46,7 +46,7 @@
 					<label for="{{ field.label }}" style="display:block;">{{ field.label }}</label>	
 					{% for error in field.errors %} <span class="field-error-message">{{ error }}</span>{% endfor %}					
 					<div class="userprofile-img-wrapper">	
-						<img class="userprofile-thumb" src="{{ MEDIA_URL }}{{ user.get_profile.img_path }}"/>	
+						<img src="{{ MEDIA_URL }}{{ user.get_profile.img_path }}"/>	
 					</div>				
 					<input id="img_path" name="{{ field.name }}" type="file"/>
 					{{ field.help_text }}	

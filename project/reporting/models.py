@@ -5,6 +5,7 @@ from django.forms import ModelForm, Textarea
 from django import forms
 from django.core.files.images import ImageFile
 from constants import *
+from pprint import pprint
 from utilities.utils import *
 import simplejson, datetime
 
@@ -17,7 +18,7 @@ class PetReport(models.Model):
     #Date Lost/Found
     date_lost_or_found = models.DateField(null=False)
     #The UserProfile who is submitting this PetReport (ForeignKey: Many-to-one relationship with User)
-    proposed_by = models.ForeignKey(UserProfile, null=False, default=None, related_name='proposed_related')
+    proposed_by = models.ForeignKey("social.UserProfile", null=False, default=None, related_name='proposed_related')
 
     '''Non-Required Fields'''
     #Sex of the Pet
@@ -46,21 +47,21 @@ class PetReport(models.Model):
     #Thumbnail Img of Pet
     thumb_path = models.ImageField(upload_to=PETREPORT_THUMBNAIL_PATH, null=True)
     #Spayed or Neutered?
-    spayed_or_neutered = models.CharField(max_length=PETREPORT_SPAYED_OR_NEUTERED_LENGTH, choices=SPAYED_OR_NEUTERED_CHOICES, null=True, default="Not Known")
+    spayed_or_neutered = models.CharField(max_length=PETREPORT_SPAYED_OR_NEUTERED_LENGTH, choices=SPAYED_OR_NEUTERED_CHOICES, null=True, default="Unknown")
     #Pet Name (if available)
-    pet_name = models.CharField(max_length=PETREPORT_PET_NAME_LENGTH, null=True, default='unknown') 
+    pet_name = models.CharField(max_length=PETREPORT_PET_NAME_LENGTH, null=True, default='Name unknown') 
     #Pet Age (if known/available)
-    age = models.CharField(max_length=PETREPORT_AGE_LENGTH, null=True, choices=AGE_CHOICES,default="Not Known")
+    age = models.CharField(max_length=PETREPORT_AGE_LENGTH, null=True, choices=AGE_CHOICES,default="Age unknown")
     #Color(s) of Pet
-    color = models.CharField(max_length=PETREPORT_COLOR_LENGTH, null=True,default='unknown')
+    color = models.CharField(max_length=PETREPORT_COLOR_LENGTH, null=True,default='Color(s) unknown')
     #Breed of Pet
-    breed = models.CharField(max_length=PETREPORT_BREED_LENGTH, null=True,default='unknown')
+    breed = models.CharField(max_length=PETREPORT_BREED_LENGTH, null=True,default='Breed unknown')
     #Description of Pet
-    description   = models.CharField(max_length=PETREPORT_DESCRIPTION_LENGTH, null=True, default=" ")
+    description   = models.CharField(max_length=PETREPORT_DESCRIPTION_LENGTH, null=True, default="")
     #The UserProfiles who are working on this PetReport (Many-to-Many relationship with User)
-    workers = models.ManyToManyField(UserProfile, null=True, related_name='workers_related')
+    workers = models.ManyToManyField("social.UserProfile", null=True, related_name='workers_related')
     #The UserProfiles who have bookmarked this PetReport
-    bookmarked_by = models.ManyToManyField(UserProfile, null=True, related_name='bookmarks_related')
+    bookmarked_by = models.ManyToManyField("social.UserProfile", null=True, related_name='bookmarks_related')
     #A pet report is closed once it has been successfully matched
     closed = models.BooleanField(default=False)
     revision_number = models.IntegerField(null=True) #update revision using view
@@ -87,6 +88,27 @@ class PetReport(models.Model):
         else:
             return False
         return False
+
+    def is_crossposted(self):
+        if self.contact_email and email_is_valid(self.contact_email):
+            return True
+        return False
+
+    #This function returns True if any marked-successful PetCheck object has been set involving this PetReport, False otherwise.
+    def has_been_successfully_matched(self):
+        for pm in self.get_all_PetMatches():
+            if pm.is_being_checked() == True:
+                if pm.petcheck.is_successful == True:
+                    return True
+        return False
+
+    def get_all_PetMatches(self):
+        if self.status == "Lost":
+            return list(models.get_model("matching", "PetMatch").objects.filter(lost_pet=self))
+        elif self.status == "Found":
+            return list(models.get_model("matching", "PetMatch").objects.filter(found_pet=self))
+        else:
+            return None
 
     '''this function compares 6 attributes of both pets and returns the number of matching attributes.
     the attributes compared are: age, sex, size, spayed_or_neutered, pet_name, and breed'''
@@ -260,15 +282,103 @@ class PetReport(models.Model):
         string = str(self.date_lost_or_found)
         return str
 
+
+    @staticmethod
+    def get_field_label(field_name):
+        if field_name == "status":
+            return "Pet Status"
+        elif field_name == "pet_type":
+            return "Pet Type"
+        elif field_name == "date_lost_or_found":
+            return "Date Lost/Found"
+        elif field_name == "proposed_by_username":
+            return "Contact"
+        elif field_name == "proposed_by":
+            return "Contact ID"
+        elif field_name == "pet_name":
+            return "Pet Name"
+        elif field_name == "location":
+            return "Location"
+        elif field_name == "microchip_id":
+            return "Microchipped"
+        elif field_name == "spayed_or_neutered":
+            return "Spayed/Neutered"
+        elif field_name == "age":
+            return "Age"
+        elif field_name == "sex":
+            return "Sex"
+        elif field_name == "breed":
+            return "Breed"
+        elif field_name == "color":
+            return "Coat Color(s)"
+        elif field_name == "size":
+            return "Size"
+        elif field_name == "tag_info":
+            return "Tag and Collar Information"
+        elif field_name == "description":
+            return "Description"
+        elif field_name == "contact_name":
+            return "Contact Name"
+        elif field_name == "contact_number":
+            return "Contact Phone Number"
+        elif field_name == "contact_link":
+            return "Contact Link"
+        elif field_name == "contact_email":
+            return "Contact Email"
+        else:
+            return None
+
+    def to_array(self):
+        result = []
+        result.append({"ID": self.id })
+        result.append({"Pet Name": self.pet_name })
+        result.append({"Pet Type": self.pet_type })
+        result.append({"Lost/Found": self.status })
+        result.append({"Contact": self.proposed_by.user.username })
+        result.append({"Date Lost/Found": self.date_lost_or_found.strftime("%B %d, %Y") })
+        result.append({"Location": self.location })
+        result.append({"Microchipped": "Yes" if (self.microchip_id != "") else "No" })
+        result.append({"Spayed/Neutered": self.spayed_or_neutered })
+        result.append({"Age": self.age })
+        result.append({"Sex": self.sex })
+        result.append({"Breed": self.breed })
+        result.append({"Color": self.color })
+        result.append({"Size": self.size })
+        result.append({"Tag and Collar Information": self.tag_info })
+        result.append({"Description": self.description })
+        result.append({"Contact Name": self.contact_name })
+        result.append({"Contact Phone Number": self.contact_number })
+        result.append({"Contact Email Address": self.contact_email })
+        result.append({"Alternative Link to Pet": self.contact_link })
+        return result
+
+    def pack_PetReport_fields(self, other_pet=None):
+        fields = []
+        pet = self.to_array()
+        if isinstance(other_pet, PetReport):
+            other_pet = other_pet.to_array()
+
+        for i in range(len(pet)):
+            field = []
+            label = pet[i].keys()[0]
+            field.append(label)
+            field.append(pet[i][label])
+
+            if other_pet != None:
+                field.append(other_pet[i][label])
+            fields.append(field)
+        return fields       
+
     def toDICT(self):
         #A customized version of django model function "model_to_dict"
         #to convert a PetReport model object to a dictionary object
         modeldict = model_to_dict(self)
+
         #Iterate through all fields in the model_dict
         for field in modeldict:
             value = modeldict[field]
             if isinstance(value, datetime.date) or isinstance(value, datetime.datetime):
-                print_debug_msg(value)
+                # print_debug_msg(value)
                 modeldict[field] = value.strftime("%B %d, %Y")
             elif isinstance(value, ImageFile):
                 modeldict[field] = value.name
@@ -282,8 +392,9 @@ class PetReport(models.Model):
                 modeldict[field] = None
         #Just add a couple of nice attributes.
         modeldict ["proposed_by_username"] = self.proposed_by.user.username  
-        print_debug_msg(modeldict)     
+        pprint(modeldict)     
         return modeldict
+
 
     def toJSON(self):
         #Convert a PetReport model object to a json object
@@ -296,9 +407,9 @@ class PetReport(models.Model):
 class PetReportForm (ModelForm):
 
     '''Required Fields'''
-    pet_type = forms.ChoiceField(label = 'Pet Type *', choices = PET_TYPE_CHOICES, required = True)  
-    status = forms.ChoiceField(label = "Pet Status *", help_text="(Lost/Found)", choices = STATUS_CHOICES, required = True)
-    date_lost_or_found = forms.DateField(label = "Date Lost/Found *", widget = forms.DateInput, required = True)
+    pet_type = forms.ChoiceField(label = 'Pet Type', choices = PET_TYPE_CHOICES, required = True)  
+    status = forms.ChoiceField(label = "Pet Status", help_text="(Lost/Found)", choices = STATUS_CHOICES, required = True)
+    date_lost_or_found = forms.DateField(label = "Date Lost/Found", widget = forms.DateInput, required = True)
 
     '''Non-Required Fields'''
     pet_name = forms.CharField(label = "Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False) 
@@ -324,6 +435,4 @@ class PetReportForm (ModelForm):
         model = PetReport
         #exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by','closed', 'thumb_path')
         fields = ("status", "date_lost_or_found", "pet_type", "pet_name",  "breed", "age", "color", "sex", "spayed_or_neutered", "size", "img_path", "description", "location", "geo_location_lat", "geo_location_long", "microchip_id", "tag_info", "contact_name", "contact_number", "contact_email", "contact_link")
-
-
 

@@ -4,7 +4,7 @@ $(document).ready(function(){
 	//Click Handler for the Propose Match button.
 	$("#button_propose_match").click(function(){
 		$("#epm-modal").modal({
-			"remote": URL_PROPOSE_MATCH + TARGET_PETREPORT.id + "/" + CANDIDATE_PETREPORT.id + "/"
+			"remote": URL_PROPOSE_MATCH + TARGET_PETREPORT_ID + "/" + CANDIDATE_PETREPORT_ID + "/"
 		});
 	});
 
@@ -13,7 +13,7 @@ $(document).ready(function(){
 	//Click Handler for Target.
 	$("#matching-workspace-target-img img").click(function(){
 		$("#epm-modal").modal({
-			"remote": URL_PRDP + TARGET_PETREPORT.id
+			"remote": URL_PRDP + TARGET_PETREPORT_ID
 		}); 
 	});
 
@@ -22,9 +22,6 @@ $(document).ready(function(){
 	$("#matching-workspace-candidate-img").on("dragover", handleDragOver);
 	$("#matching-workspace-candidate-img").on("drop", handleDrop);
 	$("#matching-workspace-candidate-img").on("dragleave", handleDragLeave);		
-
-	//display fields of the target pet report
-	display_PetReport_fields({ "petreport": TARGET_PETREPORT, "list": $("#target_prdpfields") });
 
 	//Setup PetReport Pagination here.
 	$(".pagination").pagination({
@@ -108,7 +105,8 @@ function moveImage(item, container) {
 		url: URL_GET_PETREPORT + petreport_id,
 		success: function(data){
 			//Show the details of a candidate petreport after dropping its image to the droppable container
-			var petreport = CANDIDATE_PETREPORT = data.petreport;
+			var petreport = data.petreport;
+			CANDIDATE_PETREPORT_ID = data.petreport[0]["ID"];
 
 			//Animate the drop!
 			var w = container.width();
@@ -125,7 +123,7 @@ function moveImage(item, container) {
 				//Bring Workspace state back to initial state.
 				$(container).html("");
 				$(container).append("<strong style='width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;'> Click and Drag a Pet Here </strong>");
-				$("#candidate_prdpfields").html("");
+				clear_PetReport_fields_to_table(1, $("#matching-info-table"));
 				$("#target_prdpfields li").each(function(){ $(this).css("color", "black"); });
 				$("#button_propose_match").prop("disabled", true);
 				$(this).prop("disabled", true);
@@ -134,15 +132,15 @@ function moveImage(item, container) {
 			//Create the click handler for this candidate.
 			$("#matching-workspace-candidate-img img").click(function(){ 
 				$("#epm-modal").modal({
-					"remote": URL_PRDP + CANDIDATE_PETREPORT.id
+					"remote": URL_PRDP + CANDIDATE_PETREPORT_ID
 				});				
 			});
 
 			//Fill up the field list.
-			display_PetReport_fields({ "petreport": petreport, "list":$("#candidate_prdpfields") });	
+			set_PetReport_fields_to_table(petreport, 1, $("#matching-info-table"));	
 
 			//Now, iterate through both lists and highlight the matches!
-			highlight_matches($("#target_prdpfields"), $("#candidate_prdpfields"));		
+			highlight_field_matches($("#matching-info-table"));		
 	
 		},
 		error: function(data){
@@ -157,7 +155,7 @@ function fetch_PetReports(page){
 	$("#tiles h3").remove();
 	$.ajax({
 	    type:"GET",
-	    url:URL_MATCHING + TARGET_PETREPORT.id + "/" + page,
+	    url:URL_MATCHING + TARGET_PETREPORT_ID + "/" + page,
 	    success: function(data){
 	    	var petreports = data.pet_reports_list;
 	    	var count = data.count;

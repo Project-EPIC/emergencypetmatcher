@@ -158,41 +158,18 @@ function display_PetReport_fields(options){
     }    
 }
 
-function highlight_matches(list1, list2){
+function highlight_field_matches(table){
     //First, initialize and clear off pre-existing highlights.
-    var items = null;
-    var items1 = $(list1).children("li");
-    var items2 = $(list2).children("li");
-    $(items1).each(function(){ $(this).css("color", "black"); });
-    $(items2).each(function(){ $(this).css("color", "black"); });
+    var rows = $(table).find("tbody tr")
+    $(rows).each(function(row){
+        var pet_rows = $(row).find(".pet-info")
+        first_pet_info = pet_rows[0]
+        second_pet_info = pet_rows[1]
+        if (first_pet_info.text.match(second_pet_info.text != null)
+            $(first_pet_info).css("color", "blue")
+            $(second_pet_info).css("color", "blue")
 
-    if (items1.length < items2.length)
-        items = items1;
-    else
-        items = items2;
-
-    //Iterate through each field and check if the value matches in both lists.
-    for (var i = 0; i < items.length; i++){
-        var innerText1 = items1[i].innerText;
-        var innerText2 = items2[i].innerText;
-
-        if (innerText1.match("Tag and Collar Information") != null)
-            continue;
-
-        if (innerText1.match("Description") != null)
-            continue;
-
-        if (innerText1 == "" || innerText2 == "")
-            continue;
-
-        if (innerText1.match("Contact Information") != null)
-            continue;
-
-        if (innerText1 == innerText2){
-            $(items1[i]).css("color", "blue");
-            $(items2[i]).css("color", "blue");
-        }
-    }
+    });
 }
 
 

@@ -158,7 +158,7 @@ function display_PetReport_fields(options){
     }    
 }
 
-function highlight_matches(list1, list2){
+function highlight_field_matches(list1, list2){
     //First, initialize and clear off pre-existing highlights.
     var items = null;
     var items1 = $(list1).children("li");

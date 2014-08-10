@@ -32,6 +32,54 @@ from constants import *
 from home.constants import *
 import datetime, re, time
 
+def get_PetReport(request, petreport_id):
+    #Grab the PetReport.
+    pet_report = get_object_or_404(PetReport, pk = petreport_id)
+    user_has_bookmarked = False
+
+    #Get all PetMatches made already for this PetReport object.
+    if pet_report.status == 'Lost':
+        matches = PetMatch.objects.all().filter(lost_pet = pet_report)
+    else:
+        matches = PetMatch.objects.all().filter(found_pet = pet_report)
+
+    #Grab number of workers for this PetReport
+    num_workers = len(pet_report.workers.all())
+    if request.user.is_authenticated() == True:
+        user_is_worker = pet_report.UserProfile_is_worker(request.user.userprofile)
+    else:
+        user_is_worker = False
+    
+    if request.user.is_authenticated() == True:
+        userprofile = request.user.get_profile()
+
+        if pet_report.UserProfile_has_bookmarked(userprofile) == True:
+            user_has_bookmarked = True
+
+    pet_has_been_successfully_matched = pet_report.has_been_successfully_matched()
+    if pet_has_been_successfully_matched == True:
+        messages.success(request, "This pet has been successfully matched! Thank you digital volunteers!")
+
+    #Serialize the PetReport into JSON for easy accessing.
+    pr_json = pet_report.toJSON()
+    pet_fields = pet_report.pack_PetReport_fields()
+
+    if request.is_ajax() == True:
+        html = HTML_PRDP
+    else:
+        html = HTML_PRDP_FULL
+
+    return render_to_response(html, {   'pet_report_json':pr_json, 
+                                        'pet_report': pet_report,
+                                        'pet_fields': pet_fields,
+                                        'pet_has_been_successfully_matched': pet_has_been_successfully_matched,
+                                        'site_domain': Site.objects.get_current().domain,
+                                        'num_workers':num_workers,
+                                        'user_is_worker':user_is_worker, 
+                                        'matches': matches,
+                                        'user_has_bookmarked':user_has_bookmarked}, RequestContext(request))
+
+
 @login_required
 def submit_PetReport(request):
     if request.method == "POST":
@@ -143,40 +191,6 @@ def get_pet_breeds(request, pet_type=0):
         raise Http404
 
     
-def get_PetReport(request, petreport_id):
-    #Grab the PetReport.
-    pet_report = get_object_or_404(PetReport, pk = petreport_id)
-    user_has_bookmarked = False
-
-    #Get all PetMatches made already for this PetReport object.
-    if pet_report.status == 'Lost':
-        matches = PetMatch.objects.all().filter(lost_pet = pet_report)
-    else:
-        matches = PetMatch.objects.all().filter(found_pet = pet_report)
-
-    #Grab number of workers for this PetReport
-    num_workers = len(pet_report.workers.all())
-    if request.user.is_authenticated() == True:
-        user_is_worker = pet_report.UserProfile_is_worker(request.user.userprofile)
-    else:
-        user_is_worker = False
-    
-    if request.user.is_authenticated() == True:
-        userprofile = request.user.get_profile()
-
-        if pet_report.UserProfile_has_bookmarked(userprofile) == True:
-            user_has_bookmarked = True
-
-    #Serialize the PetReport into JSON for easy accessing.
-    pr_json = pet_report.toJSON()
-    return render_to_response(HTML_PRDP, {  'pet_report_json':pr_json, 
-                                            'pet_report': pet_report,
-                                            'site_domain': Site.objects.get_current().domain,
-                                            'num_workers':num_workers,
-                                            'user_is_worker':user_is_worker, 
-                                            'matches': matches,
-                                            'user_has_bookmarked':user_has_bookmarked}, 
-                                            RequestContext(request))
 #AJAX Request to bookmark a PetReport
 @login_required
 def bookmark_PetReport(request):

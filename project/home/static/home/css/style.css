@@ -423,8 +423,17 @@ footer a {
 
 /**** Other useful styles ***/
 
+
+.epm-table {
+	padding:5px;
+	margin:0 auto;
+	vertical-align: top;
+	word-wrap: break-word;
+	overflow-y:auto;
+	overflow-x:auto;
+}
+
 .img-wrapper {
-	height:300px;
 	display:inline-block;
 	overflow:hidden;
 }
@@ -435,7 +444,7 @@ footer a {
 }
 
 .thumb-wrapper {
-	background: #FFFFEC;	
+	background: white;	
 	border: 1px solid gray;
 	margin:5px;
 	padding:5px;

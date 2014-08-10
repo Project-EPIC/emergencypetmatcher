@@ -58,20 +58,54 @@
 
 		<div id="userprofile-dashboard-info">
 			<!-- UserProfile Information: show if the UserProfile looking at this is show_profile OR that show_profile is being followed by this UserProfile -->
-			<ul class="prdp_info" style="height:inherit; width:480px;">
-				<li><h3 style="margin-top:0px;">{{ show_profile.user.username }}</h3></li>
-				{% if user.userprofile.id == show_profile.user.userprofile.id or show_profile in user.userprofile.following.all %}
-					<li><b>First Name:</b> {{ show_profile.user.first_name }} </li>
-					<li><b>Last Name:</b> {{ show_profile.user.last_name }} </li>
-				    <!-- Show when reputation is ready <tr align="left"><th>Social Points:</th><td style="font-weight:bold;"> {{ show_profile.reputation }} </td></tr> -->
-		    	{% endif %}
-		    	{% if show_profile.user.username == user.username %}
-		    		<li><b>Email:</b> {{ show_profile.user.email }}</li>
-		    		<li><b>Last login:</b> {{ show_profile.user.last_login }}</li>
-		    		<li> {{ show_profile.description }} </li>
-		    		<li><a href="{% url 'editUserProfile_page' %}">Edit your Profile</a></li>
-		    	{% endif %}
-			</ul>
+			<h3 style="margin-top:0px;">{{ show_profile.user.username }}</h3>
+			<a style="display:block;" href="{% url 'editUserProfile_page' %}">Edit your Profile</a>
+			<br/>
+			<table id="user-info-table" class="epm-table table table-hover table-condensed">
+	          <tbody>
+				{% if user.userprofile.id == show_profile.user.userprofile.id or show_profile in user.userprofile.following.all %}	          
+	            <tr>
+	              <td class="user-info-header">First Name</td>
+	              <td class="user-info-data">{{ show_profile.user.first_name }}</td>
+	            </tr>
+	            <tr>
+	              <td class="user-info-header">Last Name</td>
+	              <td class="user-info-data">{{ show_profile.user.last_name }}</td>
+	            </tr>
+	            <tr>
+	              <td class="user-info-header">Pet Points</td>
+	              <td class="user-info-data">34</td>
+	            </tr>	            	            
+	            <tr>
+	              <td class="user-info-header">Pet Reports Listed</td>
+	              <td class="user-info-data">34</td>
+	            </tr>	            
+	            <tr>
+	              <td class="user-info-header">Pet Matches Proposed</td>
+	              <td class="user-info-data">34</td>
+	            </tr>	            
+	            <tr>
+	              <td class="user-info-header">Pets Matched</td>
+	              <td class="user-info-data">34</td>
+	            </tr>	            
+	            <tr>
+	              <td class="user-info-header">Description</td>
+	              <td class="user-info-data">{{ show_profile.description }}</td>
+	            </tr>	            
+	            {% endif %}
+	            {% if show_profile.user.username == user.username %}
+	            <tr>
+	              <td class="user-info-header">Email</td>
+	              <td class="user-info-data">{{ show_profile.user.email }}</td>
+	            </tr>	            
+	            <tr>
+	              <td class="user-info-header">Last Login</td>
+	              <td class="user-info-data">{{ show_profile.user.last_login }}</td>
+	            </tr>
+	            {% endif %}
+	          </tbody>				
+			</table>
+
 
 			<!-- Dashboard Actions -->
 			<div id="userprofile-dashboard-actions">
@@ -106,6 +140,7 @@
 			</div>				
 		</div>	
 	</div>
+	<hr/>
 	
 	<!-- Following list -->
 	<h4 style="text-align:center;">Users Following</h4>

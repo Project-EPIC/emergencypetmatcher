@@ -131,7 +131,7 @@ function moveImage(item, container) {
 			display_PetReport_fields({ "petreport": petreport, "list":$("#candidate_prdpfields") });	
 
 			//Now, iterate through both lists and highlight the matches!
-			highlight_matches($("#target_prdpfields"), $("#candidate_prdpfields"));		
+			highlight_field_matches($("#target_prdpfields"), $("#candidate_prdpfields"));		
 	
 		},
 		error: function(data){

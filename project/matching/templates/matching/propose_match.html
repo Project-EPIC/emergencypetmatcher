@@ -41,10 +41,17 @@
       </div>      
 
       <!-- PetReport Target and Candidate Details -->
-      <div id="pmdp-info">
-        <ul id="target_petreport_fields" class="prdp_info"></ul>
-        <ul id="candidate_petreport_fields" class="prdp_info"></ul>      
-      </div>
+      <table id="pmdp-info-table" class="table table-hover">
+          <tbody>
+            {% for field in pet_fields %}
+            <tr>
+              <td class="pet-info-header"> {{ field.0 }}</td>
+              <td class="pet-info-data"> {{ field.1 }}</td>
+              <td class="pet-info-data">{{ field.2 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+      </table>
     </div>
 
     <div class="modal-footer">

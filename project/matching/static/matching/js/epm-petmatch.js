@@ -1,5 +1,14 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
+
+  $("#lost-prdp-link").click(function(){ 
+    launch_dialog($("#epm-modal"), URL_PRDP + LOST_PETREPORT_ID); 
+  });
+
+  $("#found-prdp-link").click(function(){ 
+    launch_dialog($("#epm-modal"), URL_PRDP + FOUND_PETREPORT_ID); 
+  });
+
     //Variables to control for upvoting and downvoting and for readability.
     var downvote_button = $("#pmdp_downvote_button");
     var upvote_button = $("#pmdp_upvote_button");
@@ -63,10 +72,7 @@ $(document).ready(function(){
       downvote_button.css("cursor", "default");
     }
 
-    //Retrieve and display pet report fields
-    display_PetReport_fields({ "petreport": LOST_PETREPORT, "list": $("#lost_prdpfields") });
-    display_PetReport_fields({ "petreport": FOUND_PETREPORT, "list": $("#found_prdpfields") });
-    highlight_matches ($("#lost_prdpfields"), $("#found_prdpfields"));
+    highlight_field_matches ($("#pmdp-info-table"));
 
     //Use the Zoom plugin to zoom Lost pet pic.
     $("#lost_pet_pic_wrapper img").on("mouseover", function(){
@@ -81,16 +87,11 @@ $(document).ready(function(){
     });
 
     //If the PetMatch is closed, then disallow voting.
-    if (PETMATCH_IS_OPEN == "False"){
+    if (PETMATCH_IS_BEING_CHECKED == "True"){
       $("#pmdp_downvote_button").attr("src", DOWNVOTE_BUTTON_INACTIVE_LINK);
       $("#pmdp_downvote_button").css("cursor", "default");
       $("#pmdp_upvote_button").attr("src", UPVOTE_BUTTON_INACTIVE_LINK);
       $("#pmdp_upvote_button").css("cursor", "default");
-
-      if (PETMATCH_IS_SUCCESSFUL == "True")
-        $(".pmdp_messages").html("<li class='success'> This pet match is finally reunited with its owner. Thank you, digital volunteers!</li>");
-      else
-        $(".pmdp_messages").html("<li class='info'> This pet match is now being checked by its pet contacts.</li>");
     }
 
 });

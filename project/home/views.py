@@ -13,7 +13,6 @@ from django.core.mail import EmailMessage
 from django.db import IntegrityError
 from django.http import Http404
 from django.core import mail
-from django.core.validators import validate_email
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
 from django.core.mail import send_mail
@@ -40,7 +39,7 @@ import oauth2 as oauth, random, urllib, hashlib, random, re, project.settings, r
 def home (request):
     #Get the petreport and petmatch count for pagination purposes.
     petreport_count = len(PetReport.objects.filter(closed=False))
-    petmatch_count = len(PetMatch.objects.filter(is_open=True))
+    petmatch_count = len(PetMatch.objects.filter(petcheck=None))
     successful_petmatch_count = len(PetMatch.objects.filter(is_successful=True))
     context =  {'petreport_count':petreport_count,
                 'petmatch_count':petmatch_count,
@@ -84,7 +83,8 @@ def get_activities_json(request):
 def get_PetReport(request, petreport_id):
     if (request.method == "GET") and (request.is_ajax() == True):
         petreport = get_object_or_404(PetReport, pk=petreport_id)
-        json = simplejson.dumps ({"petreport":petreport.toDICT()})
+        json = simplejson.dumps ({"petreport":petreport.to_array()})
+        pprint(petreport.to_array())
         return HttpResponse(json, mimetype="application/json")
     else:
         raise Http404        
@@ -95,11 +95,11 @@ def get_PetReports(request, page=None):
         #Grab all Pets.
         pet_reports = PetReport.objects.filter(closed = False).order_by("id").reverse()
 
+        #Get the petreport count for pagination purposes.
+        petreport_count = len(pet_reports)
+
         #Now get just a page of PetReports if page # is available.
         pet_reports = PetReport.get_PetReports_by_page(pet_reports, page)
-
-        #Get the petreport count for pagination purposes.
-        petreport_count = len(PetReport.objects.filter(closed=False))
 
         #Zip it up in JSON and ship it out as an HTTP Response.
         pet_reports = [{"ID": pr.id, 
@@ -124,7 +124,7 @@ def get_PetMatch(request, petmatch_id):
 
 def get_PetMatches(request, page=None):
     if request.is_ajax() == True:
-        filtered_matches = PetMatch.objects.filter(is_open=True).order_by("id").reverse()
+        filtered_matches = PetMatch.objects.filter(is_successful=False).order_by("id").reverse()
         pet_matches = PetMatch.get_PetMatches_by_page(filtered_matches, page)
 
         #Get the petmatch count for pagination purposes.

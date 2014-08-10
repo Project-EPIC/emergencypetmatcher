@@ -11,8 +11,8 @@
 }
 
 #preview_img img{
-	width:248px;
-	height:248px;
+	width:246px;
+	height:246px;
 }
 
 /*CSS used in the PRDP*/
@@ -52,23 +52,23 @@
 	padding-bottom: 5px;
 }
 
-.prdp_info {
-	list-style-type: none;
-	word-wrap: break-word;
-	vertical-align: top;
-	font-size:16px;
-	width:300px;
-	height:350px;
-	margin: 0 auto;
-	padding: 2px;
+#prdp-info-table {
+	width: 480px;
+	height:300px;
 	display:inline-block;
-	text-align:justify;
-	overflow-y:visible;
-	overflow-x:hidden;
 }
 
-.prdp_info li {
-	margin:5px;
+#prdp-info-table .pet-info-header {
+	display:inline-block;
+	width:150px;
+	font-weight:bold;
+	text-align: right;
+}
+
+#prdp-info-table .pet-info-data {
+	display:inline-block;
+	width:300px;
+	text-align: left;
 }
 
 

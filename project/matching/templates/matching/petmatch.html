@@ -14,13 +14,16 @@
   <body>
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-      <h4 class="modal-title">{{ petmatch.lost_pet.pet_name }} and {{ petmatch.found_pet.pet_name }}</h4>
+      <h4 class="modal-title">{{ petmatch.lost_pet.pet_name }} and {{ petmatch.found_pet.pet_name }} {% if petmatch.is_successful %} - <b style="color:#428bca">Matched! </b> {% endif %}</h4>
     </div> 
 
     <div id="pmdp-container" class="modal-body">    
       <!-- PMDP Title -->
       <a class="epm-dialog-title" href="/">EmergencyPetMatcher</a>
-      <strong class="epm-dialog-title" style="font-size:24px; margin-bottom:10px;">{{ petmatch.lost_pet.pet_name }} and {{ petmatch.found_pet.pet_name }}</strong>      
+      <strong class="epm-dialog-title" style="font-size:24px; margin-bottom:10px;">
+        <a id="lost-prdp-link" href="#">{{ petmatch.lost_pet.pet_name }}</a> and 
+        <a id="found-prdp-link" href="#">{{ petmatch.found_pet.pet_name }}</a>
+      </strong>      
 
       <!-- Proposed_by link -->
       <span style="text-align:center; display:block">
@@ -45,29 +48,6 @@
           Nobody has voted on this match yet.
         {% endif %}  
       </span>    
-                      
-      <!-- Pet Pictures -->
-      <div id="pmdp-pics">
-        <div id="lost_pet_pic_wrapper" class="img-wrapper" style="float:left;">  
-          <img class="pet_pic" src="{{ MEDIA_URL }}{{ petmatch.lost_pet.img_path }}"/>
-        </div>
-        <div id="found_pet_pic_wrapper" class="img-wrapper">  
-          <img class="pet_pic" src="{{ MEDIA_URL }}{{ petmatch.found_pet.img_path }}"/>
-        </div>                  
-      </div>
-
-      <!-- Pet Info -->
-      <div id="pmdp-info">
-        <ul id="lost_prdpfields" class="prdp_info"></ul>
-        <ul id="found_prdpfields" class="prdp_info"></ul>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-
-      <h4 style='text-align:center;'> Vote for this Pet Match </h4>
-      <span style="display:block; text-align:center; margin-bottom:10px; color:gray;"> 
-      Casting enough votes will bring this match to the owners' attention. </span>
 
       <!-- Messages -->
       {% block messages %}
@@ -76,32 +56,62 @@
         <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li> 
         {% endfor %}
       </ul>
-      {% endblock messages %} 
-          
-      <form id="pmdp-vote-actions">
-        {% csrf_token %}  
-
-        <!-- Downvote Button -->        
-        <div class="pmdp_vote_box" style="display:inline-block;"> 
-          <strong id="pmdp_downvote_number" style="text-align:center; font-size:18px;">{{ num_downvotes }} </strong>          
-          {% if num_downvotes == 1 %} Downvote {% else %} Downvotes {% endif %}
-          <img id= "pmdp_downvote_button" src={% static "home/icons/button_downvote_active.png" %} alt="Downvote this Pet Match"/>
-        </div> 
-
-        <!-- Upvote Button -->
-        <div class="pmdp_vote_box" style="display:inline-block;"> 
-          <strong id="pmdp_upvote_number" style="text-align:center; font-size:18px;">{{ num_upvotes }} </strong>          
-          {% if num_upvotes == 1 %} Upvote {% else %} Upvotes {% endif %}
-          <img id = "pmdp_upvote_button" src={% static "home/icons/button_upvote_active.png" %} alt="Upvote this Pet Match"/>
+      {% endblock messages %}       
+                      
+      <!-- Pet Pictures -->
+      <div id="pmdp-pics">
+        <div id="lost_pet_pic_wrapper" class="img-wrapper" style="float:left;">  
+          <img class="pet_pic" src="{{ MEDIA_URL }}{{ petmatch.lost_pet.img_path }}"/>
         </div>
-    
-      </form>
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      <button id="pmdp-share" type="button" class="btn btn-info">Share</button>      
+        <div id="found_pet_pic_wrapper" class="img-wrapper" style="float:right;">  
+          <img class="pet_pic" src="{{ MEDIA_URL }}{{ petmatch.found_pet.img_path }}"/>
+        </div>                  
+      </div>
+
+      <!-- Pet Info -->
+      <table id="pmdp-info-table" class="epm-table table table-hover">
+        <tbody>
+          {% for field in pet_fields %}
+          <tr>
+            <td class="pet-info-header"> {{ field.0 }} </td>
+            <td class="pet-info-data"> {{ field.1 }}</td>
+            <td class="pet-info-data"> {{ field.2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="modal-footer">
+      {% if not petmatch.is_successful %}
+
+        <h4 style='text-align:center;'> Vote for this Pet Match </h4>
+        <span style="display:block; text-align:center; margin-bottom:10px; color:gray;"> 
+        Casting enough votes will bring this match to the owners' attention. </span>
+            
+        <form id="pmdp-vote-actions">
+          {% csrf_token %}  
+
+          <!-- Downvote Button -->        
+          <div class="pmdp_vote_box" style="display:inline-block;"> 
+            <strong id="pmdp_downvote_number" style="text-align:center; font-size:18px;">{{ num_downvotes }} </strong>          
+            {% if num_downvotes == 1 %} Downvote {% else %} Downvotes {% endif %}
+            <img id= "pmdp_downvote_button" src={% static "home/icons/button_downvote_active.png" %} alt="Downvote this Pet Match"/>
+          </div> 
+
+          <!-- Upvote Button -->
+          <div class="pmdp_vote_box" style="display:inline-block;"> 
+            <strong id="pmdp_upvote_number" style="text-align:center; font-size:18px;">{{ num_upvotes }} </strong>          
+            {% if num_upvotes == 1 %} Upvote {% else %} Upvotes {% endif %}
+            <img id = "pmdp_upvote_button" src={% static "home/icons/button_upvote_active.png" %} alt="Upvote this Pet Match"/>
+          </div>
+      
+        </form>
+      {% endif %}
+      <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
+      <button id="pmdp-share" type="button" class="btn btn-info btn-lg">Share</button>      
     </div>
   </body>
-
-  
 
   <!-- CSS -->
   <link rel="stylesheet" href={% static "home/css/style.css" %} type="text/css"></link>
@@ -136,13 +146,13 @@
       var MEDIA_URL = "{{ MEDIA_URL }}";
       var USER_ID = "{{ user.id }}";        
       var USER_HAS_VOTED = "{{ user_has_voted }}";
-      var PETMATCH_IS_OPEN = "{{ petmatch.is_open }}";
+      var PETMATCH_IS_BEING_CHECKED = "{{ petmatch.is_being_checked }}";
       var PETMATCH_IS_SUCCESSFUL = "{{ petmatch.is_successful }}";
       var PETMATCH_ID = "{{ petmatch.id }}";
+      var LOST_PETREPORT_ID = "{{ petmatch.lost_pet.id }}";
+      var FOUND_PETREPORT_ID = "{{ petmatch.found_pet.id }}";
       var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
       var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";  
-      var LOST_PETREPORT = convert_to_javascript_obj("{{ petmatch.lost_pet.toJSON|escapejs }}");
-      var FOUND_PETREPORT = convert_to_javascript_obj("{{ petmatch.found_pet.toJSON|escapejs }}");
       var UPVOTE = "upvote";
       var DOWNVOTE = "downvote";
       var DOWNVOTE_BUTTON_ACTIVE_LINK = "{{ STATIC_URL}}home/icons/button_downvote_active.png";

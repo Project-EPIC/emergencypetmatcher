@@ -26,7 +26,6 @@ HTML_SOCIAL_AUTH_FORM = "registration/social_auth_form.html"
 
 
 #E-mail Constants
-EMAIL_SUBJECT_PETOWNER_VERIFY_PETMATCH="Emergency Pet Matcher: We have found a potential match for your pet!"
 EMAIL_SUBJECT_PETMATCH_PROPOSER='EmergencyPetMatcher: Your pet match is close to being successful!'
 TEST_EMAIL="emergencypetmatchertest@gmail.com"
 
@@ -34,8 +33,6 @@ TEST_EMAIL="emergencypetmatchertest@gmail.com"
 TEXTFILE_EMAIL_CHANGE_BODY = "social/email_change_body.txt"
 TEXTFILE_EMAIL_CHANGE_SUBJECT = "social/email_change_subject.txt"
 
-
-TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH = "matching/verification_email_to_pet_contact.txt"
 TEXTFILE_EMAIL_PETMATCH_PROPOSER = "matching/verification_email_to_digital_volunteer.txt"
 TEXTFILE_EMAIL_USERPROFILE_MESSAGE = "home/email_message_user.txt"
 TEXTFILE_EMAIL_GUARDIAN_SUBJECT = "registration/guardian_email_subject.txt"

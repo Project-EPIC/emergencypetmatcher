@@ -24,7 +24,7 @@ $(document).ready(function(){
     });
 
     //Highlight the matches.
-    highlight_matches ($("#found_prdpfields"), $("#lost_prdpfields"));
+    highlight_field_matches ($("#found_prdpfields"), $("#lost_prdpfields"));
     
 });
 

@@ -26,8 +26,6 @@ $(document).ready(function(){
 				//and keep tabs on rotation parameter. It will be sent off for POST.
 				var img = document.createElement("img");
 				$(img).attr("src", e.target.result);
-				$(img).width(250);
-				$(img).height(250);
 				$(img).css("cursor", "pointer");
 				$("#preview_img").html("");
             	$("#preview_img").append(img);

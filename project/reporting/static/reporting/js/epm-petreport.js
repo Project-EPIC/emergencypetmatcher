@@ -26,11 +26,7 @@ $(document).ready(function(){
       bookmark_button.attr("title","Bookmark this Pet");
     }
 
-    $(".thumb-wrapper a").click(function(){
-        $("#epm-modal").modal({
-          "remote": $(this).attr("link")
-        });       
-    });
+    $(".thumb-wrapper a").click(function(){ launch_dialog($("#epm-modal"), $(this).attr("link")); });
 
     //Update the share buttons' click event.
     $("#facebook_share_pr").click(function(){
@@ -51,7 +47,6 @@ $(document).ready(function(){
 
 
     //Retrieve and display the current pet report fields using json data   
-    display_PetReport_fields({ "petreport":PETREPORT, "list":$("#prdp-info-list") });
 
   function bookmark(){
     csrf_value = $("input").attr("value");

@@ -1,11 +1,12 @@
-from social.models import UserProfile
-from reporting.models import PetReport
-from matching.models import PetMatch
 from utilities.utils import print_debug_msg
 from django.utils import timezone 
 from django.utils.dateparse import parse_datetime
 from datetime import datetime
 from pprint import pprint
+from verifying.models import PetCheck
+from matching.models import PetMatch
+from reporting.models import PetReport
+from social.models import UserProfile
 from home.constants import *
 import os, sys, time, re, documenter
 

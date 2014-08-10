@@ -48,6 +48,23 @@ def email_is_valid(email_address):
 	except:
 		return False
 
+# This function generates two dictionaries: the first representing the original contact for this petreport
+# and the second the cross-posting contact. Both are contingent upon whether contact fields have been
+# prepared for this petreport.
+def generate_pet_contacts(petreport):
+	userprofile_contact = {	"name": petreport.proposed_by.user.username, 
+							"email": petreport.proposed_by.user.email, 
+							"phone": None, 
+							"link": None }
+
+	if petreport.is_crossposted() == True:
+		return({"name": petreport.contact_name, 
+				"email": petreport.contact_email, 
+				"phone": petreport.contact_number, 
+				"link": petreport.contact_link }, userprofile_contact)
+	else:
+		return (userprofile_contact, None)		
+
 def create_sha1_hash(username):
 	salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
 	if isinstance(username, unicode):

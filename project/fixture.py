@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from social.models import UserProfile, UserProfileForm, EditUserProfile
 from reporting.models import PetReport, PetReportForm
 from matching.models import PetMatch
+from verifying.models import PetCheck
 from social_auth.models import UserSocialAuth
 from utilities import documenter
 from django.db import IntegrityError
@@ -19,6 +20,7 @@ from home.constants import *
 from social.constants import *
 from reporting.constants import *
 from matching.constants import *
+from verifying.constants import *
 from utilities.utils import *
 from utilities import logger
 import random, string, sys, time, datetime, lipsum, traceback
@@ -39,14 +41,14 @@ def delete_all(leave_Users = True):
 	#Delete Model data.
 	PetMatch.objects.all().delete()
 	PetReport.objects.all().delete()
-	User.objects.all().delete()
-	EditUserProfile.objects.all().delete()
-	RegistrationProfile.objects.all().delete()
-	UserSocialAuth.objects.all().delete()
-
-	#Delete Uploads and Thumbnails.
 	delete_PetReport_images()
-	delete_UserProfile_images()
+
+	if leave_Users == True:
+		User.objects.all().delete()
+		EditUserProfile.objects.all().delete()
+		RegistrationProfile.objects.all().delete()
+		UserSocialAuth.objects.all().delete()
+		delete_UserProfile_images()
 
 	#Delete Activities.
 	documenter.empty_collections()
@@ -307,36 +309,23 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 	#If the PetMatch save was successful...
 	if (petmatch != None):
 		if outcome == "NEW PETMATCH":
-			petmatch.score = random.randint(0, 10000)
 			#petmatch.is_open = random.choice ([True, False])
 			user_count = len(UserProfile.objects.all())
 
-			'''if threshold_bias = True, the petmatch has a chance of reaching the threshold.
-			if the random integer generated is 1, the petmatch matches/exceeds the threshold
-			if the random integer is 2, the petmatch might not exceed the threshold'''
-			if threshold_bias == True and random.randint(1,2) == 1 and user_count >=5:
-				up_votes = create_random_Userlist(num_users=random.randint(5, user_count))
-				down_votes = create_random_Userlist(num_users=random.randint(0, len(up_votes) - 5))
+			#if threshold_bias is True, the petmatch has a chance of reaching the threshold.
+			if threshold_bias == True and random.randint(1,2) == 1:
+				up_votes = create_random_Userlist(num_users=random.randint(5, VERIFICATION_DEFAULT_THRESHOLD))
+				down_votes = create_random_Userlist(num_users=random.randint(5, VERIFICATION_DEFAULT_THRESHOLD))
 				petmatch.down_votes = set(down_votes) - set(up_votes)
 				petmatch.up_votes = set(up_votes)
 				
 			else:
-				up_votes = create_random_Userlist(num_users=random.randint(0, user_count))
-				down_votes = create_random_Userlist(num_users=random.randint(0, user_count))
+				up_votes = create_random_Userlist(num_users=random.randint(0, VERIFICATION_DEFAULT_THRESHOLD/4))
+				down_votes = create_random_Userlist(num_users=random.randint(0, VERIFICATION_DEFAULT_THRESHOLD/4))
 				petmatch.down_votes = set(down_votes) - set(up_votes)
 				petmatch.up_votes = set(up_votes) - set(down_votes)
 
 			logger.log_activity(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=petmatch, )
-
-			#If there is a successful bias, let's vote on verification for this new PetMatch.
-			if success_bias == True:
-				if random.random() >= 0.50:
-					petmatch.verification_votes = "11"
-				else:
-					petmatch.verification_votes = "22"
-
-				#Close the PetMatch after verification votes have been generated.	
-				petmatch.close_PetMatch()
 		
 		elif outcome == "SQL UPDATE":
 			petmatch.up_votes.add(user.get_profile())

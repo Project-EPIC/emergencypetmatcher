@@ -66,7 +66,7 @@ $(document).ready(function(){
     //Retrieve and display pet report fields
     display_PetReport_fields({ "petreport": LOST_PETREPORT, "list": $("#lost_prdpfields") });
     display_PetReport_fields({ "petreport": FOUND_PETREPORT, "list": $("#found_prdpfields") });
-    highlight_matches ($("#lost_prdpfields"), $("#found_prdpfields"));
+    highlight_field_matches ($("#lost_prdpfields"), $("#found_prdpfields"));
 
     //Use the Zoom plugin to zoom Lost pet pic.
     $("#lost_pet_pic_wrapper img").on("mouseover", function(){
