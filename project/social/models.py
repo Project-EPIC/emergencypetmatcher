@@ -74,7 +74,16 @@ class UserProfile (models.Model):
         except MultipleObjectsReturned:
             return -1 
         except UserProfile.DoesNotExist:
-            return None           
+            return None          
+
+    def get_reported_PetReports(self):
+        return self.proposed_related.all()
+
+    def get_proposed_PetMatches(self):
+        return self.proposed_by_related.all()
+
+    def get_voted_PetMatches(self):
+        return list(self.up_votes_related.all()) + list(self.down_votes_related.all())
 
     # This function accepts a RegistrationFormTermsOfService and a request POST object 
     # and attempts to validate form data. It returns (A, B), where A is a Boolean
@@ -236,8 +245,6 @@ class UserProfileForm (ModelForm):
         model = UserProfile
         #exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by','closed', 'thumb_path')
         fields = ("username", "first_name", "last_name", "email", "photo")
-
-
 
 
 from utilities import logger

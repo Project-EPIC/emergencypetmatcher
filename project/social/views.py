@@ -4,6 +4,7 @@ from social.models import UserProfile, UserProfileForm, EditUserProfile
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.conf import settings
@@ -229,26 +230,36 @@ def update_User_info(request):
 @login_required
 def update_User_password(request):
     if request.method == "POST":
+        pprint(request.POST)
         user = request.user
         old_password = request.POST ["old_password"]
-        new_password = request.POST ["new_password"]
-        confirm_password = request.POST ["confirm_password"]
+        new_password = request.POST ["new_password1"]
+        confirm_password = request.POST ["new_password2"]
 
         #First, check old password.
         if user.check_password(old_password) == False:
             messages.error(request, "Sorry, your old password was incorrect. Try again.")
-            return redirect(URL_EDITUSERPROFILE)
 
         if new_password != confirm_password:
             messages.error(request, "Please confirm your new password. Your new passwords don't match.")
-            return redirect(URL_EDITUSERPROFILE)
 
         else:
             user.set_password(new_password)
             messages.success(request, "Your password has been changed successfully.")
             user.save()
-            return redirect (URL_EDITUSERPROFILE)
+        return redirect (URL_EDITUSERPROFILE)
 
+    else:
+        raise Http404
+
+@login_required
+def delete_userprofile(request):
+    if request.method == "POST":
+        profile = request.user.get_profile()
+        profile.delete()
+        logout(request)
+        messages.success(request, "Profile successfully deleted. Thank you for your help, and please come back soon!")
+        return redirect(URL_HOME)
     else:
         raise Http404
 

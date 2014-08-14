@@ -15,18 +15,16 @@ $(document).ready(function(){
         });
     });    
 
-    $("#userprof_msg_user").click(function(){
+    $("#userprofile-msg-btn").click(function(){
 
     	//If the form is not shown, show it.
-    	if ($("#message_user_form").css("display") == "none"){
-    		$("#message_user_form").css("display", "block");
-            $("#message_user_form_helptext").css("display", "inline");
-    		$("#userprof_msg_user").prop("textContent", "Cancel");
+    	if ($("#userprofile-message-form").css("display") == "none"){
+    		$("#userprofile-message-form").css("display", "block");
+    		$("#userprofile-msg-btn").prop("textContent", "Cancel");
     	}
     	else {
-            $("#message_user_form_helptext").css("display", "none");
-    		$("#message_user_form").css("display", "none");
-    		$("#userprof_msg_user").prop("textContent", "Send a Message");
+    		$("#userprofile-message-form").css("display", "none");
+    		$("#userprofile-msg-btn").prop("textContent", "Send a Message");
     	}
     });
 

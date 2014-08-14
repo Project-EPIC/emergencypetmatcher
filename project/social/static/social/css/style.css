@@ -7,6 +7,7 @@
 }
 
 #userprofile-dashboard-info {
+	width:480px;
 	display:inline-block;
 	margin-left:10px;
 	vertical-align:top;
@@ -17,21 +18,22 @@
 }
 
 #user-info-table {
-	width: 480px;
+	width: 450px;
 	height:200px;
+	margin:0;
 	display:inline-block;
 }
 
 #user-info-table .user-info-header {
 	display:inline-block;
-	width:150px;
+	width:180px;
 	font-weight:bold;
 	text-align: right;
 }
 
 #user-info-table .user-info-data {
 	display:inline-block;
-	width:300px;
+	width:250px;
 	text-align: left;
 }
 
@@ -62,4 +64,19 @@
 .userprofile-img-wrapper img {
 	max-height:245px;
 	width:225px;
+}
+
+
+#userprofile-message-form {
+	display:none; 
+	padding:2px; 
+	margin-top:20px; 
+	margin-left:auto; 
+	margin-right:auto;
+}
+
+#userprofile-message-form textarea {
+	height:100px; 
+	resize:none;
+	margin-bottom:10px;
 }

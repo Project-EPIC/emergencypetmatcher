@@ -71,9 +71,9 @@
 		<h3>Change your Password</h3>
 			{% csrf_token %}
 			{% for field in password_form %}
-				<div class="form-group">
+				<div class="form-group" style="width:400px;">
 					<label for="{{ field.label }}">{{ field.label }}</label>
-					<input class="form-control" name="{{ field.name }}"/>
+					<input type="password" class="form-control" name="{{ field.name }}"/>
 				</div>
 			{% endfor %}
 			<div class="form-actions">
@@ -82,13 +82,19 @@
 		</form>	
 	{% endif %}
 
-	<a class="btn btn-default" href="{% url 'get_UserProfile_page' user.get_profile.id %}">Back to Profile</a>	
+	<a class="btn btn-default" href="{% url 'get_UserProfile_page' user.get_profile.id %}">Back to Profile</a>
+	<form method="post" action="{% url 'delete_userprofile' %}" onsubmit="return confirm(CONFIRM);" style="display:inline-block;">
+		{% csrf_token %}
+		<input type="submit" class="btn btn-danger" value="Delete Profile"/>
+	</form>
+	
 </div>
 {% endblock content %}
 
 {% block js %}
 	<script type = 'text/javascript'> 
 		var USER_ID = "{{ user.id }}";
+		var CONFIRM = "Are you sure you want to delete your profile? Selecting OK will remove all pet reports, matches, and votes that are tied to you. However, for research purposes, this information is not deleted permanently, will be de-identified from your personal information, and will not be shared with anyone. Is this okay?";
 		var USERPROFILE_ID = "{{ user.get_profile.id }}"; 
 	</script>
 	<script src={% static "social/js/epm-edituserprofile_form.js" %} type = 'text/javascript'></script> 

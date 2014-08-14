@@ -13,7 +13,8 @@ urlpatterns = patterns('social.views',
 	url (r'^unfollow$','unfollow_UserProfile',name='unfollow_UserProfile'),	
 	url (r'^edit_userprofile/update_User_info$', "update_User_info", name="update_User_info"),
 	url (r'^edit_userprofile/update_User_password$', "update_User_password", name="update_User_password"),	
-	url (r'^edit_userprofile', 'editUserProfile_page', name='editUserProfile_page'),		
+	url (r'^edit_userprofile', 'editUserProfile_page', name='editUserProfile_page'),	
+	url (r'^delete_userprofile', 'delete_userprofile', name='delete_userprofile'),	
 	#email verification URL
 	url(r'^email_verification_complete/(?P<activation_key>\w+)/$', "email_verification_complete", name='email_verification_complete'),	
 )

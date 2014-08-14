@@ -2,16 +2,6 @@
 {% load staticfiles %}
 {% block head_title %}EPM - User Profile: {{ show_profile.user.username }} {% endblock head_title %}
 
-{% block js %}
-	<script src = {% static "social/js/epm-userprofile.js" %} type = 'text/javascript'></script>
-{% endblock js %}
-
-{% block css %}
-	<link rel="stylesheet" href={% static "social/css/style.css" %} type="text/css"></link>	
-	<link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
-	<link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>	
-{% endblock css %}
-
 {% block nav-choices %}
 <ul id="epm-nav-links" class="nav navbar-nav navbar-right">
 	<li><a href="{% url 'home' %}"> Home</a></li>
@@ -56,14 +46,35 @@
 			<img src="{{ MEDIA_URL }}{{ show_profile.img_path }}"/>	
 		</div>
 
+
 		<div id="userprofile-dashboard-info">
-			<!-- UserProfile Information: show if the UserProfile looking at this is show_profile OR that show_profile is being followed by this UserProfile -->
 			<h3 style="margin-top:0px;">{{ show_profile.user.username }}</h3>
-			<a style="display:block;" href="{% url 'editUserProfile_page' %}">Edit your Profile</a>
+			<p style="word-wrap:break;">{{ show_profile.description }}</p>
+			<!-- UserProfile Information: show if the UserProfile looking at this is show_profile OR that show_profile is being followed by this UserProfile -->
+			
+			{% if show_profile.user.id == user.id %}
+				<a style="display:block;" href="{% url 'editUserProfile_page' %}">Edit your Profile</a>
+			{% endif %}
 			<br/>
 			<table id="user-info-table" class="epm-table table table-hover table-condensed">
 	          <tbody>
-				{% if user.userprofile.id == show_profile.user.userprofile.id or show_profile in user.userprofile.following.all %}	          
+	            <tr>
+	              <td class="user-info-header">Pet Points</td>
+	              <td class="user-info-data">{{ show_profile.reputation }}</td>
+	            </tr>	            	            
+	            <tr>
+	              <td class="user-info-header">Pet Reports Created</td>
+	              <td class="user-info-data">{{ show_profile.get_reported_PetReports.count }}</td>
+	            </tr>	            
+	            <tr>
+	              <td class="user-info-header">Pet Matches Proposed</td>
+	              <td class="user-info-data">{{ show_profile.get_proposed_PetMatches.count }}</td>
+	            </tr>	            
+	            <tr>
+	              <td class="user-info-header">Pet Matches Voted</td>
+	              <td class="user-info-data">{{ show_profile.get_voted_PetMatches|length }}</td>
+	            </tr>	            
+	            {% if show_profile.user.id == user.id %}
 	            <tr>
 	              <td class="user-info-header">First Name</td>
 	              <td class="user-info-data">{{ show_profile.user.first_name }}</td>
@@ -71,29 +82,7 @@
 	            <tr>
 	              <td class="user-info-header">Last Name</td>
 	              <td class="user-info-data">{{ show_profile.user.last_name }}</td>
-	            </tr>
-	            <tr>
-	              <td class="user-info-header">Pet Points</td>
-	              <td class="user-info-data">34</td>
-	            </tr>	            	            
-	            <tr>
-	              <td class="user-info-header">Pet Reports Listed</td>
-	              <td class="user-info-data">34</td>
 	            </tr>	            
-	            <tr>
-	              <td class="user-info-header">Pet Matches Proposed</td>
-	              <td class="user-info-data">34</td>
-	            </tr>	            
-	            <tr>
-	              <td class="user-info-header">Pets Matched</td>
-	              <td class="user-info-data">34</td>
-	            </tr>	            
-	            <tr>
-	              <td class="user-info-header">Description</td>
-	              <td class="user-info-data">{{ show_profile.description }}</td>
-	            </tr>	            
-	            {% endif %}
-	            {% if show_profile.user.username == user.username %}
 	            <tr>
 	              <td class="user-info-header">Email</td>
 	              <td class="user-info-data">{{ show_profile.user.email }}</td>
@@ -104,41 +93,39 @@
 	            </tr>
 	            {% endif %}
 	          </tbody>				
-			</table>
-
-
-			<!-- Dashboard Actions -->
-			<div id="userprofile-dashboard-actions">
-			{% if show_profile.user.username != user.username %}
-				<!-- Follow and Message links -->
-				{% if not show_profile in user.userprofile.following.all %}
-				<form action = "{% url 'follow_UserProfile' %}" method="post" style="display:inline-block;">
-					{% csrf_token %}
-					<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
-					<input class="btn btn-primary" type="Submit" value="Follow"/>
-				</form>
-				{% else %}
-				<form action = "{% url 'unfollow_UserProfile' %}" method="post" style="display:inline-block;">
-					{% csrf_token %}
-					<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>						
-					<input class="btn btn-default" type="Submit" value="Unfollow"/>
-				</form>
-				{% endif %}
-				<button id="userprof_msg_user" class="btn btn-default">Send a Message</button>
-
-				<!-- Message a UserProfile -->
-				<div id="message_user_form" style="display:none; width:600px; height:200px; margin-top:20px; margin-left:auto; margin-right:auto;">
-					<strong id="message_user_form_helptext" style="display:none; text-align:center;"> Messaging will send an email to this user while keeping email addresses private. </strong>
-					<form style="padding: 2px;" action="{% url 'message_UserProfile' %}" method="post">
-						{% csrf_token %}
-						<textarea name="message" style="height:150px; width:500px; resize:none;"></textarea>
-						<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
-						<input type="submit" class="epm_button" style="width:70px; height:40px;" value="Send"/> 
-					</form>
-				</div>
-			{% endif %}			
-			</div>				
+			</table>			
 		</div>	
+
+		<!-- Dashboard Actions -->
+		<div id="userprofile-dashboard-actions">
+		{% if show_profile.user.username != user.username %}
+			<!-- Follow and Message links -->
+			{% if not show_profile in user.userprofile.following.all %}
+			<form action = "{% url 'follow_UserProfile' %}" method="post" style="display:inline-block;">
+				{% csrf_token %}
+				<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
+				<input class="btn btn-primary" type="Submit" value="Follow"/>
+			</form>
+			{% else %}
+			<form action = "{% url 'unfollow_UserProfile' %}" method="post" style="display:inline-block;">
+				{% csrf_token %}
+				<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>						
+				<input class="btn btn-default" type="Submit" value="Unfollow"/>
+			</form>
+			{% endif %}
+			<button id="userprofile-msg-btn" class="btn btn-default">Send a Message</button>
+		{% endif %}			
+		</div>			
+
+		<!-- Message a UserProfile -->
+		<form id="userprofile-message-form" action="{% url 'message_UserProfile' %}" method="post">
+			{% csrf_token %}
+			<textarea class="form-control" name="message" placeholder="Messaging will send an email to this user while keeping email addresses private."></textarea>
+			<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
+			<div class="form-actions">
+				<input type="submit" class="btn btn-primary" style="width:70px; height:40px;" value="Send"/> 
+			</div>
+		</form>
 	</div>
 	<hr/>
 	
@@ -203,4 +190,12 @@
 </div>
 {% endblock content %}
 
+{% block js %}
+	<script src = {% static "social/js/epm-userprofile.js" %} type = 'text/javascript'></script>
+{% endblock js %}
 
+{% block css %}
+	<link rel="stylesheet" href={% static "social/css/style.css" %} type="text/css"></link>	
+	<link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
+	<link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>	
+{% endblock css %}

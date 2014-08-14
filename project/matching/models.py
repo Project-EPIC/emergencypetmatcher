@@ -1,8 +1,11 @@
 from django.db import models
 from social.models import UserProfile
 from reporting.models import PetReport, PetReportForm
+from django.dispatch import receiver
+from django.db.models.signals import pre_delete
 from utilities.utils import *
 from verifying.constants import *
+
 from constants import *
 
 #The Pet Match Object Model
@@ -140,6 +143,14 @@ class PetMatch(models.Model):
         else:
             return False
 
-    
     def __unicode__ (self):
         return '{ID{%s} lost:%s, found:%s, proposed_by:%s}' % (self.id, self.lost_pet, self.found_pet, self.proposed_by)
+
+#Create a pre-delete signal function to delete the corresponding PetCheck object for the underlying PetMatch object.
+@receiver (pre_delete, sender=PetMatch)
+def delete_PetMatch(sender, instance=None, **kwargs):
+    if instance.is_being_checked() == True:
+        instance.petcheck.delete()
+        print_info_msg("PetCheck %s has been deleted because %s has now been deleted." % (instance.petcheck, instance))
+
+
