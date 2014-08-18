@@ -1,6 +1,6 @@
 from django.db import models
 from matching.models import PetMatch
-from social.models import UserProfile
+from socializing.models import UserProfile
 from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail

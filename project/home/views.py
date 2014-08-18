@@ -6,12 +6,11 @@ from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect
 from django.contrib.messages.api import get_messages
-from social_auth import __version__ as version
-from social_auth.views import auth
-from social_auth.utils import setting
 from django.core.mail import EmailMessage
 from django.db import IntegrityError
 from django.http import Http404
+from urllib import urlopen
+from StringIO import StringIO
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
@@ -26,7 +25,7 @@ from django.utils import simplejson
 from registration.models import RegistrationProfile
 from registration.forms import RegistrationFormTermsOfService
 from datetime import datetime
-from social.models import UserProfile
+from socializing.models import UserProfile
 from reporting.models import PetReport
 from matching.models import PetMatch
 from constants import *
@@ -43,8 +42,7 @@ def home (request):
     successful_petmatch_count = len(PetMatch.objects.filter(is_successful=True))
     context =  {'petreport_count':petreport_count,
                 'petmatch_count':petmatch_count,
-                'successful_petmatch_count': successful_petmatch_count,
-                'version': version}
+                'successful_petmatch_count': successful_petmatch_count}
 
     #Also get bookmark count for pagination purposes.
     if request.user.is_authenticated() == True:    
@@ -275,14 +273,6 @@ def registration_activation_complete (request):
     messages.success (request, "Alright, you are all set registering! You may now login to EPM.")
     return redirect (URL_LOGIN)     
 
-def disp_TC(request):
-    # request.session['agreed'] = False
-    return render_to_response(HTML_TC, {}, RequestContext(request))
-
-def disp_TC_18(request):
-    # request.session['agreed'] = False
-    return render_to_response(HTML_TC_18, {}, RequestContext(request))
-
 def registration_register (request):
     #Requesting the Registration Form Page
     if request.method == "GET":
@@ -296,7 +286,7 @@ def registration_register (request):
     elif request.method == "POST":
         form = RegistrationFormTermsOfService(request.POST)
         pprint(request.POST)
-        success, message = UserProfile.check_registration(form, request.POST)
+        success, message = UserProfile.check_registration(post_obj=request.POST, registration_form=form)
 
         if success == False:
             messages.error(request, message)
@@ -321,12 +311,12 @@ def registration_register (request):
             profile.save()
 
             #Send an email to the guardian with activation key.
-            email_body = render_to_string(TEXTFILE_EMAIL_GUARDIAN_BODY, 
-                {   "participant_email": request.POST["email"], 
-                    "guardian_activation_key": profile.guardian_activation_key,
-                    "site": Site.objects.get_current() })
             email_subject = render_to_string(TEXTFILE_EMAIL_GUARDIAN_SUBJECT, {})
-            send_mail(email_subject, email_body, None, [profile.guardian_email])                        
+            email_body = render_to_string(TEXTFILE_EMAIL_GUARDIAN_BODY, {   "participant_email": request.POST["email"],
+                                                                            "guardian_activation_key": profile.guardian_activation_key,
+                                                                            "site": Site.objects.get_current() })
+            
+            send_mail(email_subject, email_body, None, [profile.guardian_email])
 
         user.first_name = request.POST.get("first_name")
         user.last_name = request.POST.get("last_name")
@@ -354,87 +344,7 @@ def password_reset_done (request):
 
 def social_auth_get_details (request):
     print_info_msg("at home.views.social_auth_get_details")
-    name = setting('SOCIAL_AUTH_PARTIAL_PIPELINE_KEY', 'partial_pipeline')
-    details = request.session[name]['kwargs']['details']
-    backend = request.session[name]['backend']
-    link = None
-    print_debug_msg(details)
-    
-    #We have retrieved a picture link from Facebook OR from Twitter, otherwise raise Http404.
-    if backend =='facebook':
-        # profile pic
-        pic_url = "http://graph.facebook.com/%s/picture?type=large" % request.session[name]['kwargs']['response']['id']
-        # personal webpage
-        link = request.session[name]['kwargs']['response']['link']
-    elif backend == 'twitter':
-        pic_url = request.session[name]['kwargs']['response'].get('profile_image_url', '').replace('_normal', '')
-    else:
-        raise Http404
-
-    #If the first-time user submits the form...
-    if request.method == 'POST':
-        form = RegistrationFormTermsOfService(request.POST)
-        success, message = UserProfile.check_registration(form)
-
-        if success == False:
-            messages.error(request, message)
-            return render_to_response(HTML_SOCIAL_AUTH_FORM,{   'username':details['username'],
-                                                                'first_name':details['first_name'], 
-                                                                'last_name':details['last_name'], 
-                                                                'email':details['email'], 
-                                                                'pic_url':pic_url, 
-                                                                "tos_minor_text":TOS_MINOR_TEXT,
-                                                                "tos_adult_text":TOS_ADULT_TEXT,
-                                                                'link':link
-                                                            }, RequestContext(request))            
-
-
-        #Create a RegistrationProfile object, populate the potential User object, and be ready for activation.
-        user = RegistrationProfile.objects.create_inactive_user(request.POST["username"], 
-                                                                request.POST["email"], 
-                                                                request.POST["password1"], 
-                                                                Site.objects.get_current())
-
-        #If this user truly is a minor, save some extra information to be checked during activation.
-        if is_minor(request.POST["date_of_birth"]) == True:
-            profile = user.get_profile()
-            profile.is_minor = True
-            profile.guardian_email = request.POST.get("guardian_email")
-            profile.guardian_activation_key = create_sha1_hash(user.username)
-            profile.save()
-
-            #Send an email to the guardian with activation key.
-            email_body = render_to_string(TEXTFILE_EMAIL_GUARDIAN_BODY, 
-                {   "participant_email": request.POST["email"], 
-                    "guardian_activation_key": profile.guardian_activation_key,
-                    "site": Site.objects.get_current() })
-            email_subject = render_to_string(TEXTFILE_EMAIL_GUARDIAN_SUBJECT, {})
-            send_mail(email_subject, email_body, None, [profile.guardian_email])   
-
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-
-        user.first_name = request.POST.get("first_name")
-        user.last_name = request.POST.get("last_name")
-        user.save()
-        print_info_msg ("(SOCIAL AUTH): RegistrationProfile now created for inactive user %s" % user)
-        user_dict = {"username":username, "email":email, "first_name":first_name, "last_name":last_name}
-        request.session["user_dict"] = user_dict
-        return redirect(URL_SOCIAL_AUTH_COMPLETE + backend, backend=backend)
-
-    # If the user has logged in for the first time as facebook or twitter user, get details.
-    else:
-        return render_to_response(HTML_SOCIAL_AUTH_FORM, {  'username':details['username'],
-                                                            'first_name':details['first_name'], 
-                                                            'last_name':details['last_name'], 
-                                                            'email':details['email'], 
-                                                            'pic_url':pic_url, 
-                                                            "tos_minor_text":TOS_MINOR_TEXT,
-                                                            "tos_adult_text":TOS_ADULT_TEXT,
-                                                            'link':link}, RequestContext(request))
-
+   
 
 '''
 def social_auth_login(request, backend):

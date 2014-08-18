@@ -1,6 +1,6 @@
 
-TWITTER_CONSUMER_KEY        = 'K42bozieypTgRCQgDqcJsQ'
-TWITTER_CONSUMER_SECRET     = 'XgYnjnsp0eyQgKOCNEJT8c1dETON3p5Uv6mopbAEI'
+SOCIAL_AUTH_TWITTER_KEY        = 'K42bozieypTgRCQgDqcJsQ'
+SOCIAL_AUTH_TWITTER_SECRET     = 'XgYnjnsp0eyQgKOCNEJT8c1dETON3p5Uv6mopbAEI'
 FACEBOOK_APP_ID             = '315409715220911'
 FACEBOOK_API_SECRET         = '0d6dccfbd7f042c31a29904222df78a2'
 
@@ -13,22 +13,23 @@ SOCIAL_AUTH_FORCE_RANDOM_USERNAME = False
 SOCIAL_AUTH_ERROR_KEY             = 'socialauth_error'
 # SOCIAL_AUTH_CHANGE_SIGNAL_ONLY = True   #?????
 
+
 FACEBOOK_EXTENDED_PERMISSIONS = ['email']
 # No permisson for email in Twitter, check this https://dev.twitter.com/discussions/4019
 
+SOCIAL_AUTH_PROTECTED_USER_FIELDS = ['email']
+
 SOCIAL_AUTH_PIPELINE = (
-    'social_auth.backends.pipeline.social.social_auth_user',
-    'social_auth.backends.pipeline.associate.associate_by_email',
-    'social_auth.backends.pipeline.user.get_username',
-    'social_auth.backends.pipeline.misc.save_status_to_session',
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+    # 'social.pipeline.user.get_username',
+    'social.pipeline.user.create_user',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details',
     'home.pipeline.redirect_to_form',
-    'home.pipeline.setup_User_fields',
-    'social_auth.backends.pipeline.user.create_user',
-    'social_auth.backends.pipeline.social.associate_user',
-    'social_auth.backends.pipeline.social.load_extra_data',
-    'social_auth.backends.pipeline.misc.save_status_to_session',
-    'home.pipeline.set_profile_image',
-    'home.pipeline.create_user_log',
 )
 
 # Twitter testing

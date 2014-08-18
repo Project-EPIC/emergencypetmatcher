@@ -14,9 +14,6 @@ from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import model_to_dict
 from django.utils import simplejson
-from social_auth import __version__ as version
-from social_auth.utils import setting
-from social_auth.views import auth
 from random import choice, uniform
 from pprint import pprint
 from reporting.models import PetReport

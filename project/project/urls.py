@@ -18,7 +18,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
 
 	url (r'^', include ('home.urls')),
-	url (r'^users/', include ('social.urls')),
+	url (r'^users/', include ('socializing.urls')),
 	url (r'^reporting/', include('reporting.urls')),
 	url (r'^matching/', include ('matching.urls')),
 	url (r'^verifying/', include ('verifying.urls')),

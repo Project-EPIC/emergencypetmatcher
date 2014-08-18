@@ -55,6 +55,7 @@ def get_activities_for_feed(userprofile_id, since_date, limit=10):
 		userprofile_cursor = get_UserProfile_activities(collection_query, for_one_result=False)
 		petreport_cursor = get_PetReport_activities(collection_query, for_one_result=False)
 		petmatch_cursor = get_PetMatch_activities(collection_query, for_one_result=False)
+		petcheck_cursor = get_PetCheck_activities(collection_query, for_one_result=False)
 	except Exception as e:
 		print "[ERROR]: Problem when reading from Mongo: %s" % e
 
@@ -66,9 +67,11 @@ def get_activities_for_feed(userprofile_id, since_date, limit=10):
 	for pm in petmatch_cursor:
 		total_activities += pm
 
+	print total_activities
+
 	#Total # activities must be less than or equal to specified limit.
 	total_activities = sorted(total_activities, key= lambda s: s[DOCUMENTER_KEY_DATE])
-	print total_activities
+	# print total_activities
 	return total_activities
 
 def insert_into_UserProfiles (activity):
@@ -77,6 +80,8 @@ def insert_into_PetReports (activity):
 	insert(DOCUMENTER_ACTIVITY_COLLECTION_PETREPORT, activity)
 def insert_into_PetMatches (activity):
 	insert(DOCUMENTER_ACTIVITY_COLLECTION_PETMATCH, activity)	
+def insert_into_PetChecks (activity):
+	insert(DOCUMENTER_ACTIVITY_COLLECTION_PETCHECK, activity)
 
 def get_UserProfile_activities(collection_query, for_one_result=True):
 	return query(DOCUMENTER_ACTIVITY_COLLECTION_USERPROFILE, collection_query, for_one_result=for_one_result)
@@ -84,6 +89,8 @@ def get_PetReport_activities(collection_query, for_one_result=True):
 	return query(DOCUMENTER_ACTIVITY_COLLECTION_PETREPORT, collection_query, for_one_result=for_one_result)
 def get_PetMatch_activities(collection_query, for_one_result=True):
 	return query(DOCUMENTER_ACTIVITY_COLLECTION_PETMATCH, collection_query, for_one_result=for_one_result)
+def get_PetCheck_activities(collection_query, for_one_result=True):
+	return query(DOCUMENTER_ACTIVITY_COLLECTION_PETCHECK, collection_query, for_one_result=for_one_result)	
 
 #Drop all collections in the specified database.
 def empty_collections ():

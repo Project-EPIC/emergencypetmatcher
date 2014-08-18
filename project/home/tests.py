@@ -2,14 +2,15 @@ from django.contrib.auth import authenticate
 from django.test.client import Client
 from django.contrib.sites.models import Site
 from utilities.constants import *
-from social.models import UserProfile
+from socializing.models import UserProfile
 from utilities.utils import *
 from time import sleep
 from selenium import webdriver
 from pprint import pprint
+from fixture import create_random_User, create_random_PetReport, create_random_PetMatch, setup_objects
 from django.template.loader import render_to_string
 from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD, TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD, TEST_DOMAIN, EMAIL_FILE_PATH, EMAIL_BACKEND
-import unittest, string, random, sys, time, urlparse, project.settings, logger, math
+import unittest, string, random, sys, time, urlparse, project.settings, math
 
 '''===================================================================================
 home.tests.py: Testing for Home App Functionality:
@@ -482,117 +483,71 @@ class LoginTesting (unittest.TestCase):
 SocialAuthTesting: Testing for Social Authentication
 ==================================================================================='''
 
-class SocialAuthTesting(unittest.TestCase):
-    def setUp(self):
-        self.driver = webdriver.Chrome()
+# class SocialAuthTesting(unittest.TestCase):
+#     def setUp(self):
+#         self.driver = webdriver.Chrome()
 
-    def tearDown(self):
-        self.driver.quit()
-        # pass
+#     def tearDown(self):
+#         self.driver.quit()
+#         # pass
 
-    def url(self, path):
-        return urlparse.urljoin(TEST_DOMAIN, path)
+#     def url(self, path):
+#         return urlparse.urljoin(TEST_DOMAIN, path)
 
-    def test_twitter_authentication(self):
-    	print_testing_name('test_twitter_authentication')
-        start_time = time.clock()
+#     def test_twitter_authentication(self):
+#     	print_testing_name('test_twitter_authentication')
+#         start_time = time.clock()
 
-        # Assert the username and passward for the testing Twitter account are not none
-        self.assertTrue(TEST_TWITTER_USER)
-        self.assertTrue(TEST_TWITTER_PASSWORD)
+#         # Assert the username and passward for the testing Twitter account are not none
+#         self.assertTrue(TEST_TWITTER_USER)
+#         self.assertTrue(TEST_TWITTER_PASSWORD)
 
-        # Go to Twitter App Authorization page
-        self.driver.get(self.url('/login/twitter/'))
-        self.assertEqual("Twitter / Authorize an application", self.driver.title)
-        print_test_msg("Redirecting to log in Twitter App Authorization page.")
+#         # Go to Twitter App Authorization page
+#         self.driver.get(self.url('/login/twitter/'))
+#         self.assertEqual("Twitter / Authorize an application", self.driver.title)
+#         print_test_msg("Redirecting to log in Twitter App Authorization page.")
 
-        # Log in Twitter using the testing user credential
-        username_field = self.driver.find_element_by_id('username_or_email')
-        username_field.send_keys(TEST_TWITTER_USER)
-        password_field = self.driver.find_element_by_id('password')
-        password_field.send_keys(TEST_TWITTER_PASSWORD)
+#         # Log in Twitter using the testing user credential
+#         username_field = self.driver.find_element_by_id('username_or_email')
+#         username_field.send_keys(TEST_TWITTER_USER)
+#         password_field = self.driver.find_element_by_id('password')
+#         password_field.send_keys(TEST_TWITTER_PASSWORD)
  
-        try:
-        	# Try to log in
-            password_field.submit()           
-            sleep(5)
+#         try:
+#         	# Try to log in
+#             password_field.submit()           
+#             sleep(5)
         
-	        # If the testing user is not found in the user profile table,
-	        # the user will be prompted to submit a username 
-            try:
-	        	assert "Social Account" in self.driver.title
-	        	username_field = self.driver.find_element_by_id('username_id')
-	        	# username = "twitter_test_user" + str(random.randrange(100, 999))
-	        	username =  str(random.randrange(100, 999))
-	        	username_field.send_keys(username)
-	        	email_field = self.driver.find_element_by_id('email_id')
-	         	email = "twitter_test_user@twitter.com"
-	         	email_field.send_keys(email)
-	         	# username_field.submit()	  
-	         	self.driver.find_element_by_id("submit").click()
-	         	# print "  Submitting a username '%s' for a created user profile account." % username
-            except:
-                pass
+# 	        # If the testing user is not found in the user profile table,
+# 	        # the user will be prompted to submit a username 
+#             try:
+# 	        	assert "Social Account" in self.driver.title
+# 	        	username_field = self.driver.find_element_by_id('username_id')
+# 	        	# username = "twitter_test_user" + str(random.randrange(100, 999))
+# 	        	username =  str(random.randrange(100, 999))
+# 	        	username_field.send_keys(username)
+# 	        	email_field = self.driver.find_element_by_id('email_id')
+# 	         	email = "twitter_test_user@twitter.com"
+# 	         	email_field.send_keys(email)
+# 	         	# username_field.submit()	  
+# 	         	self.driver.find_element_by_id("submit").click()
+# 	         	# print "  Submitting a username '%s' for a created user profile account." % username
+#             except:
+#                 pass
 	        
-	        # Assert the user logged in and has been redirected to the app home page 
-	        # after successful authentication by Twitter 
-            assert "EPM" in self.driver.title
-            self.assertTrue(self.driver.find_element_by_id('logout'))
-            print_test_msg("Successfully logger in EPM home page with Twitter authentication.")
-        except:
-        	print_test_msg("Unable to authenticate the testing user with Twitter.")
+# 	        # Assert the user logged in and has been redirected to the app home page 
+# 	        # after successful authentication by Twitter 
+#             assert "EPM" in self.driver.title
+#             self.assertTrue(self.driver.find_element_by_id('logout'))
+#             print_test_msg("Successfully logger in EPM home page with Twitter authentication.")
+#         except:
+#         	print_test_msg("Unable to authenticate the testing user with Twitter.")
 
-        end_time = time.clock()
-        performance_report(end_time - start_time)
+#         end_time = time.clock()
+#         performance_report(end_time - start_time)
        
 
-    def test_facebook_authentication(self):
-    	print_testing_name("test_facebook_authentication")
-        start_time = time.clock()
 
-        # Assert the username and passward for the testing Facebook account are not none
-        self.assertTrue(TEST_FACEBOOK_USER)
-        self.assertTrue(TEST_FACEBOOK_PASSWORD)
-
-        # Go to Facebook App Authorization page
-        self.driver.get(self.url('/login/facebook/'))
-        self.assertEqual("Log In | Facebook", self.driver.title)
-        print_test_msg("Redirecting to log in Facebook App Authorization page.")
-
-        # Log in Facebook using the testing user credential
-        username_field = self.driver.find_element_by_id('email')
-        username_field.send_keys(TEST_FACEBOOK_USER)
-        password_field = self.driver.find_element_by_id('pass')
-        password_field.send_keys(TEST_FACEBOOK_PASSWORD)
-
-        try:
-        	# Try to log in
-            password_field.submit()           
-            sleep(5)
-             
-            # If the testing user is not found in the user profile table,
-            # the user will be prompted to submit a username
-            try:
-	        	assert "Social Account" in self.driver.title
-	        	username_field = self.driver.find_element_by_id('username_id')
-	        	# username = "facebook_test_user" + str(random.randrange(100, 999))
-	        	username = str(random.randrange(100, 999))
-	        	username_field.send_keys(username)
-	         	username_field.submit()
-	         	# print "  Submitting a username '%s' for a created user profile account." % username
-            except:
-                pass
-  
-            # Assert the user logged in and has been redirected to the app home page
-            # after successful authentication by Facebook
-            assert "EPM" in self.driver.title
-            self.assertTrue(self.driver.find_element_by_id('logout'))
-            print_test_msg("Successfully logger in EPM home page with Facebook authentication.")
-
-        except:
-        	print_test_msg("Unable to authenticate the testing user with Facebook.")
-        	
-        performance_report(end_time - start_time)
 
 '''===================================================================================
 UserProfileTesting: Testing for EPM User Profile Page

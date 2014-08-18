@@ -7,17 +7,17 @@ from django.conf import settings
 from registration.models import RegistrationProfile
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import User
-from social.models import UserProfile, UserProfileForm, EditUserProfile
+from socializing.models import UserProfile, UserProfileForm, EditUserProfile
 from reporting.models import PetReport, PetReportForm
 from matching.models import PetMatch
 from verifying.models import PetCheck
-from social_auth.models import UserSocialAuth
+from social.apps.django_app.default.models import UserSocialAuth
 from utilities import documenter
 from django.db import IntegrityError
 from PIL import Image
 from random import randint
 from home.constants import *
-from social.constants import *
+from socializing.constants import *
 from reporting.constants import *
 from matching.constants import *
 from verifying.constants import *

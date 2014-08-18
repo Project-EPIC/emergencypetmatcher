@@ -30,7 +30,7 @@
 			<div class="form-group" style="width:300px;">
 				<label for="username">Username<b class="required-field-symbol">*</b></label>
 				{% for error in field.errors %} <span class="field-error-message">{{ error }}</span> {% endfor %}
-				<input class="form-control" autofocus="true" name="username" placeholder="Enter New Username">
+				<input class="form-control" autofocus="true" name="username" maxlength="30" placeholder="Enter New Username">
 			</div>
 
 			<!-- Email -->
@@ -44,13 +44,13 @@
 		    <!-- First Name -->
 		    <div class="form-group" style="width:300px;">
 		      <label for="first_name_id">First Name</label>
-		      <input type="text" name="first_name" class="form-control" placeholder="Enter First Name" />
+		      <input type="text" name="first_name" class="form-control" maxlength="30" placeholder="Enter First Name" />
 		    </div>
 
 		    <!-- Last Name -->
 		    <div class="form-group" style="width:300px">
 		      <label for="last_name_id">Last Name</label>
-		      <input type="text" name="last_name" class="form-control" placeholder="Enter Last Name"/>
+		      <input type="text" name="last_name" class="form-control" maxlength="30" placeholder="Enter Last Name"/>
 		    </div>
 
 

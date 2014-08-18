@@ -30,8 +30,8 @@ EMAIL_SUBJECT_PETMATCH_PROPOSER='EmergencyPetMatcher: Your pet match is close to
 TEST_EMAIL="emergencypetmatchertest@gmail.com"
 
 #Email Change.
-TEXTFILE_EMAIL_CHANGE_BODY = "social/email_change_body.txt"
-TEXTFILE_EMAIL_CHANGE_SUBJECT = "social/email_change_subject.txt"
+TEXTFILE_EMAIL_CHANGE_BODY = "socializing/email_change_body.txt"
+TEXTFILE_EMAIL_CHANGE_SUBJECT = "socializing/email_change_subject.txt"
 
 TEXTFILE_EMAIL_PETMATCH_PROPOSER = "matching/verification_email_to_digital_volunteer.txt"
 TEXTFILE_EMAIL_USERPROFILE_MESSAGE = "home/email_message_user.txt"
@@ -54,6 +54,7 @@ ACTIVITY_LOG_DIRECTORY = LOGS_DIRECTORY + "activity_logs/"
 DOCUMENTER_ACTIVITY_COLLECTION_USERPROFILE = "userprofiles"
 DOCUMENTER_ACTIVITY_COLLECTION_PETREPORT = "petreports"
 DOCUMENTER_ACTIVITY_COLLECTION_PETMATCH = "petmatches"
+DOCUMENTER_ACTIVITY_COLLECTION_PETCHECK = "petchecks"
 DOCUMENTER_KEY_USERPROFILE_ID = "userprofile_id"
 DOCUMENTER_KEY_LOG = "log"
 DOCUMENTER_KEY_ACTIVITY = "activity"

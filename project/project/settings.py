@@ -70,7 +70,7 @@ MEDIA_ROOT = '/vagrant/media/'
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = '/media/'
+MEDIA_URL = '/vagrant/media/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -80,7 +80,7 @@ STATIC_ROOT = '/vagrant/deployment/static/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/vagrant/project/' 
+STATIC_URL = '/vagrant/deployment/static/' 
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -120,7 +120,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.media",
     "django.core.context_processors.static",
     "django.contrib.messages.context_processors.messages",
-    'social_auth.context_processors.social_auth_by_name_backends',
+    'social.apps.django_app.context_processors.backends',
+    'social.apps.django_app.context_processors.login_redirect',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -146,12 +147,12 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'home',
-    'social',
+    'socializing',
     'matching',
     'reporting',
     'verifying',
     'registration',
-    'social_auth',
+    'social.apps.django_app.default',
     'analysis',
     'south',
     # Uncomment the next line to enable the admin:
@@ -169,7 +170,7 @@ LOGIN_URL = '/login'
 LOGOUT_URL = '/'
 
 #Variable that specifies the exact model representing the user profile for the auth.User model.
-AUTH_PROFILE_MODULE = 'social.UserProfile'
+AUTH_PROFILE_MODULE = 'socializing.UserProfile'
 
 ACCOUNT_ACTIVATION_DAYS = 1 # One-week activation window; you may, of course, use a different value.
 
@@ -187,12 +188,11 @@ EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
 EMAIL_HOST_PASSWORD = '3m3rgEncY'
 
 AUTHENTICATION_BACKENDS = (
+    'social.backends.twitter.TwitterOAuth',
     'django.contrib.auth.backends.ModelBackend',
-    'social_auth.backends.twitter.TwitterBackend',
-    'social_auth.backends.facebook.FacebookBackend',
 )
 
-SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter', 'facebook',)
+SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter')
 
 #DOMAIN_URL = 'http://www.emergencypetmatcher.com/'
 DOMAIN_URL = 'http://epm.cs.colorado.edu/'

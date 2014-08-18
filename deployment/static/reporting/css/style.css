@@ -1,0 +1,101 @@
+.prdp-thumb {
+	height:70px;
+	width:70px;
+}
+
+#preview_img {
+	border:2px dashed gray; 
+	width:250px; 
+	height:250px; 
+	margin:10px 10px 10px 0px;
+}
+
+#preview_img img{
+	width:246px;
+	height:246px;
+}
+
+/*CSS used in the PRDP*/
+
+#prdp-title{
+	text-align: center;
+}
+
+#prdp-overview {
+	margin:0px auto 20px auto;
+	text-align: center;
+
+}
+
+#prdp-info-list {
+	width:400px;
+	height:300px;
+}
+
+#prdp_back {
+	width: 650px;
+	height: auto;
+	background-size: 100%;
+	background-color: #E8E8E8;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.prdp_subtitle{
+
+	height: 20px;
+	letter-spacing: -1px;
+	font-size: 2em;
+	font-weight: normal;
+	color: #000000;
+	padding-top:5px;
+	padding-bottom: 5px;
+}
+
+#prdp-info-table {
+	width: 480px;
+	height:300px;
+	display:inline-block;
+}
+
+#prdp-info-table .pet-info-header {
+	display:inline-block;
+	width:150px;
+	font-weight:bold;
+	text-align: right;
+}
+
+#prdp-info-table .pet-info-data {
+	display:inline-block;
+	width:300px;
+	text-align: left;
+}
+
+
+/** Use this if you want to display the PetReport description or Tag and Collar Information**/
+.pr_desc {
+
+	border:2px;
+	max-height: 75px;
+	word-wrap:break-word;
+	overflow-y:visible;
+	overflow-x:hidden;
+	margin: 5px 0;
+
+}
+
+/*the X button to remove a bookmark*/
+img.bookmark_x{
+	position: absolute;
+	z-index: 10;
+	left: 120px;
+	width: 15px;
+	height: 15px;
+}
+
+.helpertext {
+	font-weight: none;
+}
+
+
+

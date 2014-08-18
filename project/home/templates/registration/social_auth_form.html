@@ -15,11 +15,11 @@
     {% block messages %}
     <ul id="messages">
       {% for message in messages %}
-        <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
-        {% endfor %}
+      <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
+      {% endfor %}
     </ul>
-
     {% endblock messages %}  
+    
     <div style="margin-bottom:20px;">
       {% for error in form.non_field_errors %} <span class="field-error-message"> {{ error }} </span>{% endfor %}
     </div>
@@ -95,9 +95,9 @@
 {% endblock content %}
 
 {% block css %}
-  <link rel="stylesheet" href={% static "registration/css/style.css" %} type="text/css"></link>
+<link rel="stylesheet" href={% static "registration/css/style.css" %} type="text/css"></link>
 {% endblock css %}
 
 {% block js %}
-  <script src = {% static "registration/js/epm-register.js" %} type='text/javascript'></script> 
+<script src = {% static "registration/js/epm-register.js" %} type='text/javascript'></script> 
 {% endblock js %}

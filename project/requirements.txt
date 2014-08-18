@@ -1,7 +1,7 @@
 django == 1.5.1
 lorem-ipsum-generator
 django-registration
-django-social-auth
+python-social-auth
 pymongo
 South
 psycopg2

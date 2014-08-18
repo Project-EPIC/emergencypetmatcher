@@ -1,5 +1,5 @@
 from django.db import models
-from social.models import UserProfile
+from socializing.models import UserProfile
 from reporting.models import PetReport, PetReportForm
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
@@ -13,12 +13,12 @@ class PetMatch(models.Model):
     lost_pet = models.ForeignKey("reporting.PetReport", null=False, default=None, related_name='lost_pet_related')
     found_pet = models.ForeignKey("reporting.PetReport", null=False, default=None, related_name='found_pet_related')
     #UserProfile who proposed the PetMatch object.
-    proposed_by = models.ForeignKey("social.UserProfile", null=False, related_name='proposed_by_related')
+    proposed_by = models.ForeignKey("socializing.UserProfile", null=False, related_name='proposed_by_related')
     #Date when PetMatch was proposed (created).
     proposed_date = models.DateTimeField(null=False, auto_now_add=True)
     is_successful = models.BooleanField(default=False)
-    up_votes = models.ManyToManyField("social.UserProfile", null=True, related_name='up_votes_related')
-    down_votes = models.ManyToManyField("social.UserProfile", null=True, related_name='down_votes_related')
+    up_votes = models.ManyToManyField("socializing.UserProfile", null=True, related_name='up_votes_related')
+    down_votes = models.ManyToManyField("socializing.UserProfile", null=True, related_name='down_votes_related')
 
     '''Because of the Uniqueness constraint that the PetMatch must uphold, we override the save method'''
     def save(self, *args, **kwargs):

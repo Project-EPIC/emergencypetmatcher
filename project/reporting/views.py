@@ -6,10 +6,7 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect
 from django.contrib.messages.api import get_messages
 from django.db.models import Min
-from social_auth import __version__ as version
-from social_auth.utils import setting
 from django.contrib.messages.api import get_messages
-from social_auth.views import auth
 from django.db import models, IntegrityError
 from django.http import Http404
 from django.core import mail
@@ -21,7 +18,7 @@ from django.utils import simplejson
 from matching.views import *
 from django.forms.models import model_to_dict
 from django.contrib.sites.models import Site
-from social.models import UserProfile
+from socializing.models import UserProfile
 from reporting.models import PetReport, PetReportForm
 from matching.models import PetMatch
 from pprint import pprint

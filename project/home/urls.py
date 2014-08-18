@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.views.generic import DetailView, ListView
 from django.views.generic import RedirectView
-from social.models import UserProfile 
+from socializing.models import UserProfile 
 #from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth import views as auth_views
 
@@ -18,10 +18,9 @@ urlpatterns = patterns('home.views',
 	url (r'^logout$', 'logout_User', name='logout_User'),
 	url (r'^about$', 'about', name='about'),
 
-	#Django-Social-Auth
-	#url(r'^social_auth_login/([a-z]+)$', 'social_auth_login', name='users_social_auth_login'),
+	#Python-Social-Auth
+	url(r'^', include('social.apps.django_app.urls', namespace='social')),
 	url(r'^social_auth_get_details/$', 'social_auth_get_details', name='social_auth_get_details'),
-	url(r'^', include('social_auth.urls')),
 
 	#registration-related URLs that have been customized.
 	url(r'^activate/complete/$', "registration_activation_complete", name='registration_activation_complete'),

@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.views.generic import DetailView, ListView
 from django.views.generic import RedirectView
-from social.models import UserProfile 
+from socializing.models import UserProfile 
 
 urlpatterns = patterns('reporting.views',
 

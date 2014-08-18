@@ -1,0 +1,105 @@
+{% extends 'socializing/userprofile.html' %}
+{% load staticfiles %}
+{% block head_title %}Edit your Profile{% endblock head_title %}
+	
+{% block content %}
+<div id="content" style="width:600px;">
+	{% block content_subtitle %}
+		<h3>Edit Your Personal Information</h3> The fields marked with <b style="margin:0;" class="required-field-symbol">*</b> are required. </p>
+	{% endblock content_subtitle %}
+
+	{% block messages %}
+	<ul id="messages">
+		{% for message in messages %}
+	    <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
+	    {% endfor %}
+	</ul>
+	{% endblock messages %}	
+
+	<!-- Update UserProfile information -->
+	{% if form %}
+	<form enctype="multipart/form-data" method="POST" class="edit-userprofile-form" role="form" action="{% url 'update_User_info' %}">
+		{% csrf_token %}
+		{% for field in form %}
+			<div class="form-group">
+				{% if field.label == "Username" %}
+					<label for="{{ field.label }}" style="display:block;">{{ field.label }}<b class="required-field-symbol">*</b></label>
+					{% for error in field.errors %} <span class="field-error-message">{{ error }}</span>{% endfor %}
+					<input class="form-control" name="{{ field.name }}" value="{{ user.username }}" placeholder="Enter Username" style="width:300px;"/>
+
+				{% elif field.label == "First Name" %}
+					<label for="{{ field.label }}" style="display:block;">{{ field.label }}</label>
+					{% for error in field.errors %} <span class="field-error-message">{{ error }}</span>{% endfor %}					
+					<input class="form-control" name="{{ field.name }}" value="{{ user.first_name }}" placeholder="Enter First Name" style="width:200px;"/>
+
+				{% elif field.label == "Last Name" %}
+					<label for="{{ field.label }}" style="display:block;">{{ field.label }}</label>		
+					{% for error in field.errors %} <span class="field-error-message">{{ error }}</span>{% endfor %}					
+					<input class="form-control" name="{{ field.name }}" value="{{ user.last_name }}" placeholder="Enter Last Name" style="width:220px;"/>
+
+				{% elif field.label == "Email" %}
+					<label for="{{ field.label }}" style="display:block;">{{ field.label }}<b class="required-field-symbol">*</b></label>
+					{% for error in field.errors %} <span class="field-error-message">{{ error }}</span>{% endfor %}							
+					<input class="form-control" name="{{ field.name }}" value="{{ user.email }}" placeholder="Enter Email Address" style="width:300px;"/>
+
+				{% elif field.label == "Profile Picture" %}
+					<label for="{{ field.label }}" style="display:block;">{{ field.label }}</label>	
+					{% for error in field.errors %} <span class="field-error-message">{{ error }}</span>{% endfor %}					
+					<div class="userprofile-img-wrapper">	
+						<img src="{{ MEDIA_URL }}{{ user.get_profile.img_path }}"/>	
+					</div>				
+					<input id="img_path" name="{{ field.name }}" type="file"/>
+					{{ field.help_text }}	
+
+				{% elif field.label == "Describe Yourself" %}
+					<label for="{{ field.label }}" style="display:block;">{{ field.label }}</label>
+					{% for error in field.errors %} <span class="field-error-message">{{ error }}</span>{% endfor %}							
+					<textarea class="form-control" name="{{ field.name }}" maxlength="{{ USERPROFILE_DESCRIPTION_LENGTH }}" rows="5" cols="20" placeholder="Say Something About Yourself..." style="width:400px; max-width:400px; max-height:200px;">{{ user.get_profile.description }}</textarea>
+				{% endif %}
+			</div>
+		{% endfor %}
+
+		<div class="form-actions">
+			<input class="btn btn-primary" type="submit" value="Save" />
+		</div>
+	</form>
+	{% endif %}
+
+	<!-- Update User Password  -->
+	{% if password_form and user.get_profile.social_profile == False %}
+		<form enctype="multipart/form-data" method="POST" class="edit-userprofile-form" name="password_form" role="form" action="{% url 'update_User_password' %}">
+		<h3>Change your Password</h3>
+			{% csrf_token %}
+			{% for field in password_form %}
+				<div class="form-group" style="width:400px;">
+					<label for="{{ field.label }}">{{ field.label }}</label>
+					<input type="password" class="form-control" name="{{ field.name }}"/>
+				</div>
+			{% endfor %}
+			<div class="form-actions">
+				<input class="btn btn-primary" type="submit" value="Save"/>
+			</div>
+		</form>	
+	{% endif %}
+
+	<a class="btn btn-default" href="{% url 'get_UserProfile_page' user.get_profile.id %}">Back to Profile</a>
+	<form method="post" action="{% url 'delete_userprofile' %}" onsubmit="return confirm(CONFIRM);" style="display:inline-block;">
+		{% csrf_token %}
+		<input type="submit" class="btn btn-danger" value="Delete Profile"/>
+	</form>
+	
+</div>
+{% endblock content %}
+
+{% block js %}
+	<script type = 'text/javascript'> 
+		var USER_ID = "{{ user.id }}";
+		var CONFIRM = "Are you sure you want to delete your profile? Selecting OK will remove all pet reports, matches, and votes that are tied to you. However, for research purposes, this information is not deleted permanently, will be de-identified from your personal information, and will not be shared with anyone. Is this okay?";
+		var USERPROFILE_ID = "{{ user.get_profile.id }}"; 
+	</script>
+	<script src={% static "socializing/js/epm-edituserprofile_form.js" %} type = 'text/javascript'></script> 
+{% endblock js %}
+
+
+
+

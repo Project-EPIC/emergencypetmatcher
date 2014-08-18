@@ -1,6 +1,6 @@
 from django.db import models
 from django.forms.models import model_to_dict
-from social.models import UserProfile
+from socializing.models import UserProfile
 from django.forms import ModelForm, Textarea
 from django import forms
 from django.core.files.images import ImageFile
@@ -18,7 +18,7 @@ class PetReport(models.Model):
     #Date Lost/Found
     date_lost_or_found = models.DateField(null=False)
     #The UserProfile who is submitting this PetReport (ForeignKey: Many-to-one relationship with User)
-    proposed_by = models.ForeignKey("social.UserProfile", null=False, default=None, related_name='proposed_related')
+    proposed_by = models.ForeignKey("socializing.UserProfile", null=False, default=None, related_name='proposed_related')
 
     '''Non-Required Fields'''
     #Sex of the Pet
@@ -59,9 +59,9 @@ class PetReport(models.Model):
     #Description of Pet
     description   = models.CharField(max_length=PETREPORT_DESCRIPTION_LENGTH, null=True, default="")
     #The UserProfiles who are working on this PetReport (Many-to-Many relationship with User)
-    workers = models.ManyToManyField("social.UserProfile", null=True, related_name='workers_related')
+    workers = models.ManyToManyField("socializing.UserProfile", null=True, related_name='workers_related')
     #The UserProfiles who have bookmarked this PetReport
-    bookmarked_by = models.ManyToManyField("social.UserProfile", null=True, related_name='bookmarks_related')
+    bookmarked_by = models.ManyToManyField("socializing.UserProfile", null=True, related_name='bookmarks_related')
     #A pet report is closed once it has been successfully matched
     closed = models.BooleanField(default=False)
     revision_number = models.IntegerField(null=True) #update revision using view

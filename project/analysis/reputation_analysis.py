@@ -1,4 +1,4 @@
-from social.models import UserProfile
+from socializing.models import UserProfile
 from utilities.utils import *
 from utilities.constants import *
 from django.contrib.auth import authenticate

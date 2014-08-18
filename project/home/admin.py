@@ -3,7 +3,7 @@ from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group
 # from social_auth.models import Nonce
 from django.contrib.auth.models import User
-from social.models import UserProfile
+from socializing.models import UserProfile
 from reporting.models import PetReport
 from matching.models import PetMatch
 

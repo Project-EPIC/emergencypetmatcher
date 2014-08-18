@@ -55,6 +55,8 @@ nginx::resource::vhost { 'project-vhost':
 
 nginx::resource::location { 'project':
     ensure         => "present",
+    ssl            => "true",
+    ssl_only       => "true",
     location       => '/vagrant/deployment/static',
     location_alias => "/vagrant/deployment/static",
     vhost          => 'project-vhost',
@@ -87,13 +89,7 @@ python::gunicorn::instance { "epm":
   src => "/vagrant/project",
   django => true,
   django_settings => "settings.py",
-} ->
-
-#Startup Gunicorn
-exec { "startup gunicorn":
-  command => "${as_vagrant} 'cd /vagrant/project; source bin/activate; bash start_server.sh'",
 }
-
 
 # #Once Puppet has configured the environment, you need to run the following
 # #commands manually:

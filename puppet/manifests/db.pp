@@ -27,6 +27,16 @@ postgresql::server::db { 'epm_db':
   password => postgresql_password('epm_login', '3m3rgEncY'),
 }
 
+postgresql::server::db { 'test_epm_db':
+  user     => 'epm_login',
+  password => postgresql_password('epm_login', '3m3rgEncY'),
+  owner    => "epm_login"
+}
+
+postgresql::server::role { "epm_login":
+  createdb   => true
+}
+
 postgresql::server::pg_hba_rule { 'allow application network to access app database':
   description => "Open up postgresql for access from 192.168.50.5/24",
   type => 'host',
@@ -35,6 +45,7 @@ postgresql::server::pg_hba_rule { 'allow application network to access app datab
   address => '192.168.50.5/24',
   auth_method => 'md5',
 }
+
 
 #MongoDB
 class { "::mongodb::server":

@@ -6,7 +6,7 @@ from pprint import pprint
 from verifying.models import PetCheck
 from matching.models import PetMatch
 from reporting.models import PetReport
-from social.models import UserProfile
+from socializing.models import UserProfile
 from home.constants import *
 import os, sys, time, re, documenter
 
@@ -15,7 +15,7 @@ import os, sys, time, re, documenter
 ==================================================================================='''
 
 '''Method for logging activities given an input UserProfile, Activity Enum, and (optionally) PetReport and PetMatch objects.'''
-def log_activity(activity, userprofile, userprofile2=None, petreport=None, petmatch=None):
+def log_activity(activity, userprofile, userprofile2=None, petreport=None, petmatch=None, petcheck=None):
     assert isinstance(userprofile, UserProfile)
     user = userprofile.user
     log = {}
@@ -101,6 +101,23 @@ def log_activity(activity, userprofile, userprofile2=None, petreport=None, petma
             assert isinstance(petmatch, PetMatch)
             log[DOCUMENTER_KEY_LOG] = "%s downvoted the PetMatch object with ID{%d}" % (user.username, petmatch.id)  
             activity_type = DOCUMENTER_ACTIVITY_COLLECTION_PETMATCH
+
+        # ============================= [Verifying Activities] =============================
+
+        elif activity == ACTIVITY_PETCHECK_TRIGGERED:
+            assert isinstance(petcheck, PetCheck)
+            log[DOCUMENTER_KEY_LOG] = "PetMatch with ID {%d} was triggered for verification by created PetCheck object with ID {%d}" % (petcheck.petmatch.id, petcheck.id)
+            activity_type = DOCUMENTER_ACTIVITY_COLLECTION_PETCHECK
+
+        elif activity == ACTIVITY_PETCHECK_VOTED:
+            assert isinstance(petcheck, PetCheck)
+            log[DOCUMENTER_KEY_LOG] = "%s has voted on the PetCheck object with ID{%d}" % (user.username, petcheck.id)
+            activity_type = DOCUMENTER_ACTIVITY_COLLECTION_PETCHECK
+
+        elif activity == ACTIVITY_PETCHECK_SUCCESSFUL:
+            assert isinstance(petcheck, PetCheck)
+            log[DOCUMENTER_KEY_LOG] = "PetCheck object with ID {%d} is successful" % (petcheck.id)
+            activity_type = DOCUMENTER_ACTIVITY_COLLECTION_PETCHECK
  
         else:
             raise IOError
@@ -115,6 +132,8 @@ def log_activity(activity, userprofile, userprofile2=None, petreport=None, petma
             documenter.insert_into_PetReports(log)
         elif activity_type == DOCUMENTER_ACTIVITY_COLLECTION_PETMATCH:            
             documenter.insert_into_PetMatches(log)
+        elif activity_type == DOCUMENTER_ACTIVITY_COLLECTION_PETCHECK:
+            documenter.insert_into_PetChecks(log)
 
     except Exception as e:
         print "[ERROR]: problem in logger.log_activity(%s)." % e

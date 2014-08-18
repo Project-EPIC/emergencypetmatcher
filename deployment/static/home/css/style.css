@@ -1,0 +1,518 @@
+body {
+	padding-top:70px;
+}
+
+/** General page styling **/
+#epm-container {
+	background-size: 100%;	
+	margin: 0 auto;
+	max-width:1200px;
+}
+
+#content {
+	box-shadow: 0px 5px 20px #888888;
+	background: #F0F0F0;
+	margin:50px auto 20px auto;
+	padding:15px;
+}
+
+#header {
+	padding:0px 10px 100px 10px;
+}
+
+header h1 {
+	text-align: center;
+	font-size: 24px;
+	font-weight: normal;
+	margin: 30px 0 3px 0;
+}
+
+header p {
+	text-align: center;
+	font-size: 13px;
+	color: #777;
+	margin: 0;
+}
+
+/* EPM Brand */
+
+#epm-brand {
+	width:375px;
+}
+
+#epm-brand-title {
+	margin: 0;
+	font-size: 36px;
+	height:40px;
+	padding:10px 0px 0px 0px;
+	text-transform: lowercase;
+	letter-spacing: -2px;
+	font-weight: normal;
+	color: #F0E68C;
+}
+
+#epm-brand-epic-title {
+	font-size: 16px;
+	display: block;
+	text-decoration: none;
+	color: white;
+}
+
+#epm-brand-epic-title:hover {
+	text-decoration: underline;
+}
+
+/* Nav */
+#epm-nav {
+	padding:0px 10px;
+	border: 1px solid gray;
+	box-shadow: 0px 5px 10px #888888;
+}
+
+#epm-nav-links {
+
+}
+
+#epm-nav-links a {
+	margin:10px 10px;
+}
+
+#epm-nav-links a:hover {
+	color:white;
+}
+
+#epm-nav-links li:active {
+	color:blue;
+}
+
+#menu li {
+	display: inline;
+}
+
+#menu form {
+	display: block;
+	float: left;
+	margin-left: 5px;
+	padding: 5px 20px;
+	text-decoration: none;
+	border-top: 4px solid #F2EFA2;
+	font-family: Arial, Helvetica, sans-serif; 
+	font-weight: bold;
+	font-size: 14px;
+	color: #182C33;
+}
+
+#menu a {
+	display: inline-block;
+	float: left;
+	margin-left: 5px;
+	padding: 5px 20px;
+	text-decoration: none;
+	border-top: 4px solid #F2EFA2;
+	font-family: Arial, Helvetica, sans-serif; 
+	font-weight: bold;
+	font-size: 14px;
+	color: #182C33;
+}
+
+#menu form input {
+
+	text-decoration: none;
+	font-family: Arial, Helvetica, sans-serif; 
+	font-weight: bold;
+	font-size: 11px;
+	width:80px;
+	height:25px;
+	color: #182C33;
+}
+
+#menu form input:hover, .active form input {
+	background: #F2EFA2;
+}
+
+#menu a:hover, .active a {
+	background: #F2EFA2;
+	cursor:pointer;
+}
+
+#menu .active {
+	cursor:pointer;
+	background: #F2EFA2;
+}
+
+/****** Messages *******/
+#messages {
+
+	list-style: none;
+	height: auto;
+	margin-top:25px;
+	margin-bottom: 10px;
+	padding: 2px;
+	text-align:left;
+	font-size: 14px;
+
+}
+
+#messages .error {
+
+	padding: 3px;
+	background-color:#FFB6C1;
+	border: 2px solid #B22222;
+	text-align:center;
+}
+
+#messages .success {
+	padding: 3px;
+	background-color:#90EE90;
+	border: 2px solid #006400;
+	text-align:center;
+}
+
+#messages .info {
+	padding: 3px;
+	background-color:#87CEFA;
+	border: 2px solid #00008B;
+	text-align:center;
+}
+
+.errorlist {
+	list-style: none;
+	height: auto;
+	margin-top:5px;
+	margin-bottom: 10px;
+	text-align:left;
+	font-weight: bold;
+	font-size: 14px;
+	padding: 3px;
+	background-color:#FFB6C1;
+	border: 2px solid #B22222;
+}
+
+/* epm-pet-choices */
+
+#epm-choices {
+	padding:10px 0px 10px 10px;
+}
+
+.pagination_container {
+	
+	margin:0px auto;
+	width:150px;
+	height:30px;
+}
+
+.step-links {
+	font-size:13pt;
+}
+
+/******  Tiles container ******/
+#epm-tiles-container {
+	min-height:500px;
+}
+
+#tab-subtitle {
+	margin:10px; 
+	display:block; 
+	font-size:24px; 
+	color:gray; 
+	text-align:center;
+}
+
+#tiles {
+	list-style-type: none;
+	position: relative; /** Needed to ensure items are laid out relative to this container **/
+	border:5px;
+	margin:30px 10px 30px 10px;
+	padding:0;
+	z-index:0;
+}
+
+/*****  Grid items ***********/
+
+#tiles li.item {
+	background-color: white;
+	border: 1px solid gray;
+	box-shadow: 0px 0px 5px #888888;
+	position: relative;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
+	z-index:1;
+	display: none; /** Hide items initially to avoid a flicker effect **/
+	width:170px;
+	cursor: pointer;
+	padding: 4px;
+	word-wrap: break-word;
+}
+
+#tiles li.item:hover{
+	border:1px solid yellow;
+}
+
+#tiles li img {
+	display: block;
+	max-width: 200px;
+}
+
+/**
+ * Grid item text
+ */
+#tiles li p {
+	color: #666;
+	font-size: 12px;
+	margin: 7px 0 0 7px;
+}
+
+#tiles li a{
+	color: black;
+}
+
+#tiles li h1 {
+	color: #000000;
+	font-size: 13px;
+	margin: 1px 0 2px 0;
+}
+
+h1.lost {
+	background: #ECF0EC url(../images/gradients/gradient_lost.png) repeat;
+}
+
+h1.found {
+	background: #ECF0EC url(../images/gradients/gradient_found.png) repeat;
+}
+
+.bookmark_x {
+	width:30px;
+	height:30px;
+	position:absolute;
+	top:-15px;
+	left:160px;
+}
+
+#feedlist_container {
+	position:fixed;
+	left:0px;
+	top:25%;
+	width: 200px;
+	max-height: 600px;
+	background-color: #E8E8E8;
+	border: 1px solid gray;
+	-moz-border-radius: 1px;
+	-webkit-border-radius: 1px;
+	word-wrap: break-word;
+	padding:5px;
+	z-index: 10;
+	margin-bottom:5px;
+}
+
+#feedlist_container span{
+	display:block;
+	text-align:center;
+	padding: 5px;
+	background-color: #E8E8E8;
+	font-weight: bold;
+	font-size: 16px;
+}
+
+#feedlist {
+	max-height:500px;
+	list-style-type: none;
+	margin: 2px 0px 2px 0px;
+	padding: 0px 0px 0px 0px;
+	overflow-y:auto;
+
+}
+
+#feedlist li {
+	background-color: #ffffff;
+	color: #000000;
+	margin: 0 0 5px 0;
+}
+
+#feedlist li:nth-child(even) {
+	background-color: #e9e9e9;
+}
+
+/**
+ * Some extra styles to randomize heights of grid items.
+ */
+
+#tiles ali:nth-child(2){
+
+	width:300px;
+}
+#tiles ali:nth-child(3n) {
+	height: 175px;
+}
+
+#tiles ali:nth-child(4n-3) {
+	padding-bottom: 30px;
+}
+
+#tiles ali:nth-child(5n) {
+	height: 250px;
+}
+
+/* Footer */
+
+#wrapper2 {
+	background: #422C21;
+}
+
+footer {
+	height: 30px;
+	text-align: center;
+	font-size: 10px;
+	color: #525252;
+	text-transform: uppercase;
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+}
+
+footer a {
+	color: #525252;
+}
+
+
+/******* Login Page *******/
+
+#login-form {
+	padding:15px;
+	width:430px;
+	margin:20px auto 20px auto;
+}
+
+
+/******* Logout ******/
+
+#epm-logout {
+	margin-top:20px;
+}
+
+#epm-logout input:hover {
+	color:white;
+}
+
+/******* About Page *******/
+
+#about_pets {
+	margin-left:auto;
+	margin-right:auto;
+	height: 50px;
+	display:block;
+	text-align: center;
+	overflow:hidden;
+
+}
+
+.about_p {
+	font-size:13pt;
+}
+
+#about_images {
+	width:850px;
+	margin-bottom:20px;
+	margin-left:auto;
+	margin-right:auto;
+	list-style:none;
+}
+
+#about_images li {
+	display:inline-block;
+}
+
+
+/**** Other useful styles ***/
+
+
+.epm-table {
+	padding:5px;
+	margin:0 auto;
+	vertical-align: top;
+	word-wrap: break-word;
+	overflow-y:auto;
+	overflow-x:auto;
+}
+
+.img-wrapper {
+	display:inline-block;
+	overflow:hidden;
+}
+
+.img-wrapper img {
+	height:295px;
+	width: 275px;
+}
+
+.thumb-wrapper {
+	background: white;	
+	border: 1px solid gray;
+	margin:5px;
+	padding:5px;
+	height: 100px;
+	display:inline-block;
+	cursor:pointer;	
+}
+
+.thumb-wrapper:hover{ 
+	border:1px solid yellow;
+}
+
+.thumb-wrapper a {
+	text-decoration: none;
+	color: black;
+	font-size: 12px;	
+}
+
+.thumb-wrapper img {
+	vertical-align: baseline;
+	margin:0 auto;
+}
+
+.thumb-wrapper strong {
+	text-align: center;
+	display: block;
+	height:15px;
+	margin-bottom:5px;
+}
+
+.hidden {
+	display:none;
+}
+
+.required-field-symbol {
+	color:red;
+	margin-left:10px;
+}
+
+.field-error-message {
+	color:darkred;
+	display:block;
+}
+
+.pet_img {
+	vertical-align: middle;
+	display:inline-block;
+	width:204px;
+	height:204px;	
+}
+
+.pet_img img{
+	width:200px;
+	height:200px;
+}
+
+.pet_img img:hover{
+	cursor:pointer;
+}
+
+.droppable {
+	float:right;
+	border:2px dashed gray;
+}
+
+.epm-dialog-title {
+	font-size:20px;
+	text-align:center;
+	display:block;
+}
+

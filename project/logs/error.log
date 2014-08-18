@@ -162,3 +162,276 @@
 [OK]: The MongoDB instance is running at [192.168.50.6].
 
 2014-07-07 13:22:49 [1507] [INFO] Shutting down: Master
+2014-08-14 17:44:56 [10490] [INFO] Starting gunicorn 18.0
+2014-08-14 17:44:56 [10490] [INFO] Listening at: http://0.0.0.0:8000 (10490)
+2014-08-14 17:44:56 [10490] [INFO] Using worker: sync
+2014-08-14 17:44:56 [10495] [INFO] Booting worker with pid: 10495
+2014-08-14 17:45:32 [10490] [INFO] Handling signal: term
+2014-08-14 12:45:32 [10495] [INFO] Worker exiting (pid: 10495)
+[OK]: The MongoDB instance is running at [192.168.50.6].
+
+2014-08-14 17:45:32 [10490] [INFO] Shutting down: Master
+2014-08-14 17:45:39 [10520] [INFO] Starting gunicorn 18.0
+2014-08-14 17:45:39 [10520] [INFO] Listening at: http://0.0.0.0:8000 (10520)
+2014-08-14 17:45:39 [10520] [INFO] Using worker: sync
+2014-08-14 17:45:39 [10525] [INFO] Booting worker with pid: 10525
+2014-08-14 17:48:12 [10520] [INFO] Handling signal: term
+2014-08-14 12:48:12 [10525] [INFO] Worker exiting (pid: 10525)
+[OK]: The MongoDB instance is running at [192.168.50.6].
+
+2014-08-14 17:48:12 [10520] [INFO] Shutting down: Master
+2014-08-14 18:12:16 [10574] [INFO] Starting gunicorn 18.0
+2014-08-14 18:12:16 [10574] [INFO] Listening at: http://0.0.0.0:8000 (10574)
+2014-08-14 18:12:16 [10574] [INFO] Using worker: sync
+2014-08-14 18:12:16 [10579] [INFO] Booting worker with pid: 10579
+2014-08-14 13:25:06 [10579] [INFO] Worker exiting (pid: 10579)
+2014-08-14 18:25:06 [10574] [INFO] Handling signal: term
+[OK]: The MongoDB instance is running at [192.168.50.6].
+
+[INFO]: get_activities_json(): Anonymous User - random sample of activities...
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[INFO]: get_activities_json(): Anonymous User - random sample of activities...
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[INFO]: get_activities_json(): Anonymous User - random sample of activities...
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+<QueryDict: {u'username': [u'mario'], u'password1': [u'blue'], u'first_name': [u'Mario'], u'last_name': [u'Barrenechea'], u'tos': [u'on'], u'guardian_email': [u''], u'password2': [u'blue'], u'next': [u''], u'date_of_birth': [u'05/13/1989'], u'csrfmiddlewaretoken': [u'tgWgQ8vm2exvN5o9Rtuc2YbiJ8kUsIfT'], u'email': [u'mbarrenecheajr@gmail.com']}>
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+Exception SystemExit: 0 in <module 'threading' from '/usr/lib/python2.7/threading.pyc'> ignored
+2014-08-14 18:25:06 [10574] [INFO] Shutting down: Master
+2014-08-14 18:46:28 [1530] [INFO] Starting gunicorn 18.0
+2014-08-14 18:46:28 [1530] [INFO] Listening at: http://0.0.0.0:8000 (1530)
+2014-08-14 18:46:28 [1530] [INFO] Using worker: sync
+2014-08-14 18:46:28 [1535] [INFO] Booting worker with pid: 1535
+2014-08-14 13:56:08 [1535] [INFO] Worker exiting (pid: 1535)
+2014-08-14 18:56:08 [1530] [INFO] Handling signal: term
+[OK]: The MongoDB instance is running at [192.168.50.6].
+
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+[INFO]: get_activities_json(): Anonymous User - random sample of activities...
+[INFO]: get_activities_json(): Anonymous User - random sample of activities...
+<QueryDict: {u'username': [u'mario'], u'password1': [u'blueblue'], u'first_name': [u'Mario'], u'last_name': [u'Barrenechea'], u'tos': [u'on'], u'guardian_email': [u''], u'password2': [u'blueblue'], u'next': [u''], u'date_of_birth': [u'05/13/1989'], u'csrfmiddlewaretoken': [u'tgWgQ8vm2exvN5o9Rtuc2YbiJ8kUsIfT'], u'email': [u'mbarrenecheajr@gmail.com']}>
+[OK]: A new UserProfile log file was created for {mario} with ID{77}
+
+[INFO]: RegistrationProfile now created for inactive user mario
+[INFO]: get_activities_json(): Anonymous User - random sample of activities...
+[INFO]: Activation Key: f5cf3526439e7e45243baa789039cd623b9b64f2
+{'_state': <django.db.models.base.ModelState object at 0xb214c0c>,
+ '_user_cache': <User: mario>,
+ 'description': u'',
+ 'guardian_activation_key': None,
+ 'guardian_consented': False,
+ 'guardian_email': None,
+ 'id': 77,
+ 'img_path': u'userprofile/uploads/defaults/anonymous.gif',
+ 'is_minor': False,
+ 'last_logout': datetime.datetime(2014, 8, 14, 13, 48, 17, 74814),
+ 'reputation': 10.0,
+ 'social_profile': False,
+ 'thumb_path': u'userprofile/thumbnails/defaults/anonymous.gif',
+ 'user_id': 77}
+[INFO]: RegistrationProfile now activated for active user mario
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+2014-08-14 18:56:08 [1530] [INFO] Shutting down: Master
+2014-08-15 17:35:35 [1497] [INFO] Starting gunicorn 18.0
+2014-08-15 17:35:35 [1497] [INFO] Listening at: http://0.0.0.0:8000 (1497)
+2014-08-15 17:35:35 [1497] [INFO] Using worker: sync
+2014-08-15 17:35:35 [1502] [INFO] Booting worker with pid: 1502
+2014-08-15 17:42:17 [1581] [INFO] Starting gunicorn 18.0
+2014-08-15 17:42:17 [1581] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-08-15 17:42:17 [1581] [ERROR] Retrying in 1 second.
+2014-08-15 17:42:18 [1581] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-08-15 17:42:18 [1581] [ERROR] Retrying in 1 second.
+2014-08-15 17:42:19 [1581] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-08-15 17:42:19 [1581] [ERROR] Retrying in 1 second.
+2014-08-15 17:42:20 [1581] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-08-15 17:42:20 [1581] [ERROR] Retrying in 1 second.
+2014-08-15 17:42:21 [1581] [ERROR] Connection in use: ('0.0.0.0', 8000)
+2014-08-15 17:42:21 [1581] [ERROR] Retrying in 1 second.
+2014-08-15 17:42:22 [1581] [ERROR] Can't connect to ('0.0.0.0', 8000)
+2014-08-15 17:45:27 [1497] [INFO] Handling signal: term
+2014-08-15 12:45:27 [1502] [INFO] Worker exiting (pid: 1502)
+[OK]: The MongoDB instance is running at [192.168.50.6].
+
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+2014-08-15 17:45:27 [1497] [INFO] Shutting down: Master
+2014-08-15 17:46:12 [1629] [INFO] Starting gunicorn 18.0
+2014-08-15 17:46:12 [1629] [INFO] Listening at: http://0.0.0.0:8000 (1629)
+2014-08-15 17:46:12 [1629] [INFO] Using worker: sync
+2014-08-15 17:46:12 [1634] [INFO] Booting worker with pid: 1634
+2014-08-15 17:47:16 [1629] [INFO] Handling signal: term
+2014-08-15 12:47:16 [1634] [INFO] Worker exiting (pid: 1634)
+[OK]: The MongoDB instance is running at [192.168.50.6].
+
+2014-08-15 17:47:16 [1629] [INFO] Shutting down: Master
+2014-08-15 17:47:24 [1654] [INFO] Starting gunicorn 18.0
+2014-08-15 17:47:24 [1654] [INFO] Listening at: http://0.0.0.0:8000 (1654)
+2014-08-15 17:47:24 [1654] [INFO] Using worker: sync
+2014-08-15 17:47:24 [1659] [INFO] Booting worker with pid: 1659
+2014-08-15 17:56:50 [1654] [INFO] Handling signal: term
+2014-08-15 12:56:50 [1659] [INFO] Worker exiting (pid: 1659)
+[OK]: The MongoDB instance is running at [192.168.50.6].
+
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+{'age': u'Baby',
+ 'bookmarked_by': [81, 84, 85, 88, 89, 90, 91, 94, 95, 98, 99, 100, 101],
+ 'breed': u'2LZXX9G2FXQ9ZP8N4BEL5AG7QODL4C',
+ 'closed': False,
+ 'color': u'2S4ZII1I6O301Z6574UMVX8J6XZXT6',
+ 'contact_email': u'9AMD2I(at)test.com',
+ 'contact_link': u'http://QJVBNXQD0GHQS09QPFGNXRF4NLYNPZBMG9VYWTOZZQPIVLWGNIY6OPEJPYNJCS54AN2E1JHKO6MPTYS4PPFLKTY00TZ86GCUZVIP',
+ 'contact_name': u'Abe',
+ 'contact_number': u'(480)-189-5933',
+ 'date_lost_or_found': 'July 13, 2012',
+ 'description': u'Arcu malesuada tellus. Conubia vehicula aptent felis. Fusce orci elementum. Id cras bibendum a, senectus quis.',
+ 'geo_location_lat': None,
+ 'geo_location_long': None,
+ u'id': 1208,
+ 'img_path': u'petreport/samples/cat/CO06.22027751-1-x.jpg',
+ 'location': u'N9KKBHV70EJTB93UTPKH4BY85NOAPMSFZOCUGO5QKQW8Y983YA28AEIOTLOCQ4EDL3DQJGAP58K858OJ0WMYQOSAZJ8AYJVS57OO',
+ 'microchip_id': None,
+ 'pet_name': u'Toodle',
+ 'pet_type': u'Cat',
+ 'proposed_by': 89,
+ 'proposed_by_username': u'Dave11',
+ 'revision_number': None,
+ 'sex': u'Female',
+ 'size': u'Large',
+ 'spayed_or_neutered': u'Unknown',
+ 'status': u'Lost',
+ 'tag_info': u'P8B9WYN1KLODD6ZXK7NZF5T8KXIF8YLVMPP6JE65WXFFH3F78TFTKZTI7VGB35P31HGIUL6DK6N48NMH9FOPE3RHQNV1SE9WWIJQ7ZULCFLLEINQ5HDOOWINFTZS0II9RPY65AYXFXG1L3ASZSUBM1GVS58RMP9XHVQJJBZZGW58BTJQZRUNDC5JTCESVUD2O7QR02N2YT9BI9WUGAMWBLRS9KMHQ2DWPYMT39Z9TD5O3WJHHWU8TUAIOC8C4TEOTFDE7D7WUAXKHCDO0YEDUKE67MBE91M7DBHEQ598SCGP0GOS4CLLT4QUXDMM739QGAV7KKJL1AD6BGVPC8OO12V2PD2UQS7PN7OCM4NGWD7F7BUKHNZWFYB44LTW4ER9IKMPHV7YIW94SBQHMDB1C0OAQ4TXQ8QIVD4GCEFECHEA0FBX67W4PUJDSLS893DE2XV3SMQMJIKS950POZ6CYW3UKZJQEU0NU4XJ7G7AVPLOF4I5FKFR',
+ 'thumb_path': u'petreport/samples/cat/CO06.22027751-1-x.jpg',
+ 'workers': [94, 92, 82, 81, 79, 78, 101, 99, 98, 96]}
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+[INFO]: get_activities_json(): Authenticated User - recent activities...
+[]
+[INFO]: logger out UserProfile {{ID{77} mario}}
+[INFO]: get_activities_json(): Anonymous User - random sample of activities...
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[INFO]: at redirect_to_form
+[INFO]: user_dict: None
+[INFO]: user: None
+[INFO]: is_new: False
+[INFO]: at home.views.social_auth_get_details
+[DEBUG]: {'username': u'mbarrenecheajr', 'fullname': u'Mario Barrenechea', 'last_name': u'Barrenechea', 'email': '', 'first_name': u'Mario'}
+[INFO]: get_activities_json(): Anonymous User - random sample of activities...
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+[]
+2014-08-15 17:56:50 [1654] [INFO] Shutting down: Master
