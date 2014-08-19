@@ -1,0 +1,119 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          gunicorn-<%= @name %>
+# Required-Start:    $remote_fs
+# Required-Stop:     $remote_fs
+# Should-Start:      $all
+# Should-Stop:       $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Event-based HTTP/WSGI server (running <%= @name %>)
+# Description:       Green Unicorn (gunicorn) is an HTTP/WSGI server designed
+#                    to serve fast clients or sleepy applications. That is to
+#                    say; behind a buffering front-end server such as nginx or
+#                    lighttpd. This instance runs <%= @name %>.
+### END INIT INFO
+
+NAME=gunicorn-<%= @name %>
+DESC=$NAME
+VENV=<%= @venv %>
+SRC=<%= @src %>
+DAEMON=$VENV/bin/gunicorn<% if @django %>_django<% end %><% if @paste %>_paster<% end %>
+<% if @owner == 'undef' or @group == 'undef' %>
+CHOWN=""
+<% else %>
+CHOWN="-c<%= @owner %>:<%= @group %>"
+<% end %>
+SOCKET=<%= @real_socket %>
+RUNDIR=<%= @rundir %>
+PIDFILE=<%= @pidfile %>
+LOGFILE=<%= @logfile %>
+WORKERS=<%= @workers %>
+TIMEOUT=<%= @timeout_seconds %>
+MODULE=<%= @django ? @django_settings : (@paste ? @paste_settings : @wsgi_module) %>
+<% if @django %>
+PYTHONPATH_PARAM="--pythonpath $SRC"
+<% else %>
+PYTHONPATH_PARAM=""
+<% end %>
+<% if @conffile == '' %>
+CONFFILE=""
+<% else %>
+CONFFILE="-c <%= @conffile %>"
+<% end %>
+
+if [ -f "/etc/default/$NAME" ]; then
+  . /etc/default/$NAME
+fi
+
+DAEMON_OPTS="$CONFFILE -b $SOCKET -p $PIDFILE --log-file $LOGFILE \
+--workers $WORKERS -t $TIMEOUT --pythonpath=$SRC --daemon --name $NAME \
+$PYTHONPATH_PARAM $MODULE"
+
+test -x $DAEMON || exit 0
+
+set -e
+
+. /lib/lsb/init-functions
+
+if [ ! -d $RUNDIR ]; then
+  mkdir -p $RUNDIR
+  <% if @owner != 'undef' and @group != 'undef' %>
+  chown <%= @owner %>:<%= @group%> $RUNDIR
+  <% end %>
+fi
+
+
+
+gunicorn_start() {
+  log_daemon_msg "Starting $DESC" $NAME
+  start-stop-daemon --oknodo -S $CHOWN -q -p $PIDFILE -d $SRC \
+    -x $DAEMON -- $DAEMON_OPTS
+
+  RET="$?"
+  log_end_msg $RET
+  return $RET
+}
+
+gunicorn_stop() {
+  log_daemon_msg "Stopping $DESC" $NAME
+  start-stop-daemon --oknodo -K -q -p $PIDFILE --retry QUIT/10/TERM/10/KILL/10
+  RET="$?"
+  log_end_msg $RET
+  return $RET
+
+}
+
+gunicorn_reload() {
+  log_daemon_msg "Reloading $DESC" $NAME
+  start-stop-daemon --oknodo -K -q -p $PIDFILE -s HUP
+  RET="$?"
+  log_end_msg $RET
+  return $RET
+}
+
+case "$1" in
+  start)
+    gunicorn_start || exit 1
+  ;;
+  stop)
+    gunicorn_stop || exit 1
+  ;;
+  restart)
+    gunicorn_stop
+    gunicorn_start || exit 1
+  ;;
+  reload)
+    gunicorn_reload || exit 1
+  ;;
+  status)
+    status_of_proc -p $PIDFILE "$DAEMON" $NAME && exit 0 || exit $?
+  ;;
+  *)
+  echo "Usage: $NAME {start|stop|restart|status}" >&2
+  exit 1
+  ;;
+esac
+
+exit 0

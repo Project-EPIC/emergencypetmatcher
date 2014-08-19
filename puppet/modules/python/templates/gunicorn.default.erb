@@ -1,0 +1,5 @@
+# This file is managed by puppet
+
+<% @environment.keys.sort.each do |key| -%>
+export <%= key %>="<%= @environment[key] %>"
+<% end -%>
