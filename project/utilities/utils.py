@@ -109,6 +109,14 @@ def open_image(img_path):
 		pass
 	return img
 
+
+def generate_random_birthdate():
+	year = random.choice(range(1950, 2005))
+	month = random.choice(range(1, 12))
+	day = random.choice(range(1, 28))
+	birthDate = datetime(year, month, day).strftime("%m/%d/%Y")
+	return birthDate
+
 #Given Date of Birth (DOB), return True if User with Input DOB is a minor, false otherwise.
 def is_minor(date_of_birth):
 	now = datetime.now()

@@ -47,7 +47,7 @@ class PetReport(models.Model):
     #Thumbnail Img of Pet
     thumb_path = models.ImageField(upload_to=PETREPORT_THUMBNAIL_PATH, null=True)
     #Spayed or Neutered?
-    spayed_or_neutered = models.CharField(max_length=PETREPORT_SPAYED_OR_NEUTERED_LENGTH, choices=SPAYED_OR_NEUTERED_CHOICES, null=True, default="Unknown")
+    spayed_or_neutered = models.CharField(max_length=PETREPORT_SPAYED_OR_NEUTERED_LENGTH, choices=SPAYED_OR_NEUTERED_CHOICES, null=True, default="Not Known")
     #Pet Name (if available)
     pet_name = models.CharField(max_length=PETREPORT_PET_NAME_LENGTH, null=True, default='Name unknown') 
     #Pet Age (if known/available)

@@ -1,4 +1,5 @@
 # Django settings for project project.
+import sys
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -15,7 +16,7 @@ ALLOWED_HOSTS = ["*"]
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',     # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.  
+        'ENGINE':'django.db.backends.postgresql_psycopg2',     # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.  
         'NAME': 'epm_db',                      # Or path to database file if using sqlite3.
         'USER': 'epm_login',                      # Not used with sqlite3.
         'PASSWORD': '3m3rgEncY',                  # Not used with sqlite3.

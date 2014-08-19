@@ -287,6 +287,7 @@ def registration_register (request):
         form = RegistrationFormTermsOfService(request.POST)
         pprint(request.POST)
         success, message = UserProfile.check_registration(post_obj=request.POST, registration_form=form)
+        print_debug_msg(message)
 
         if success == False:
             messages.error(request, message)

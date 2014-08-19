@@ -1,6 +1,3 @@
-#Number of Tests
-NUMBER_OF_TESTS = 50
-
 #URLs
 URL_GET_PETMATCHES = "/get_PetMatches"
 URL_GET_SUCCESSFUL_PETMATCHES = "/get_successful_PetMatches"

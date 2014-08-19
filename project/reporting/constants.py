@@ -1,5 +1,8 @@
 from project.settings import MEDIA_ROOT
 
+#Number of Tests
+NUMBER_OF_TESTS = 10
+
 #URLs
 URL_GET_PETREPORTS = "/get_PetReports"
 URL_PRDP = '/reporting/PetReport/'
@@ -10,9 +13,6 @@ URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
 HTML_SUBMIT_PETREPORT = "reporting/petreport_form.html"
 HTML_PRDP = "reporting/petreport.html"
 HTML_PRDP_FULL = "reporting/petreport_full.html"
-
-#Number of Tests
-NUMBER_OF_TESTS = 50
 
 #number of pet reports on the home page
 NUM_PETREPORTS_HOMEPAGE = 50
@@ -71,7 +71,7 @@ PETREPORT_MEDIA_DIRECTORY = MEDIA_ROOT + "petreport/"
 
 #Top-level PetReport subdirectory constants
 PETREPORT_BREEDS_DIRECTORY = PETREPORT_MEDIA_DIRECTORY + "breeds/"
-PETREPORT_DIFFERENT_FORMATS_DIRECTORY = PETREPORT_MEDIA_DIRECTORY + "diff_formats/"
+PETREPORT_IMAGES_DIFFERENT_FORMATS_DIRECTORY = PETREPORT_MEDIA_DIRECTORY + "diff_formats/"
 PETREPORT_SAMPLES_DIRECTORY = PETREPORT_MEDIA_DIRECTORY + "samples/"
 PETREPORT_THUMBNAILS_DIRECTORY = PETREPORT_MEDIA_DIRECTORY + "thumbnails/"
 PETREPORT_UPLOADS_DIRECTORY = PETREPORT_MEDIA_DIRECTORY + "uploads/"

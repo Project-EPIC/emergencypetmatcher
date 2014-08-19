@@ -1,8 +1,8 @@
 from django.contrib.auth import authenticate
 from django.test.client import Client
 from django.forms.models import model_to_dict
-from utilities.constants import *
 from utilities.utils import *
+from fixture import *
 from socializing.models import UserProfile
 from pprint import pprint
 import unittest, string, random, sys, time
@@ -258,7 +258,7 @@ class ReportingTesting (unittest.TestCase):
 		self.assertTrue(len(PetReport.objects.all()) == NUMBER_OF_TESTS)
 		performance_report(iteration_time)
 		#Delete the test images created here in the petreport_images folder.
-		delete_PetReport_images(from_list=saved_images)
+		delete_PetReport_images()
 
 
 	def test_check_PetReport_image_and_thumbnail(self):
@@ -299,7 +299,7 @@ class ReportingTesting (unittest.TestCase):
 			print_success_msg ("Expected and Actual Thumbnail paths match.")
 
 			#The actual image Check
-			expected_img = PETREPORT_IMAGES_DIRECTORY + str(petreport.proposed_by.id) + "-" + petreport.proposed_by.user.username + "-" + str(petreport.id) + "-" + petreport.pet_name + "-" + petreport.status + ".jpg"
+			expected_img = PETREPORT_UPLOADS_DIRECTORY + str(petreport.proposed_by.id) + "-" + petreport.proposed_by.user.username + "-" + str(petreport.id) + "-" + petreport.pet_name + "-" + petreport.status + ".jpg"
 			print_test_msg ("Expected Image Path: " + expected_img)
 			self.assertTrue(os.path.exists(expected_img) == True)
 			print_success_msg ("Expected and Actual Image paths match.")

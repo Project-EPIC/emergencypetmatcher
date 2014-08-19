@@ -13,9 +13,6 @@ URL_EMAIL_VERIFICATION_COMPLETE = "/users/email_verification_complete/"
 HTML_USERPROFILE = "socializing/userprofile.html"
 HTML_EDITUSERPROFILE_FORM ="socializing/edituserprofile_form.html"
 
-#Number of Tests
-NUMBER_OF_TESTS = 50
-
 #max_length for Model Fields
 USER_USERNAME_LENGTH = 30
 USER_FIRSTNAME_LENGTH = 30

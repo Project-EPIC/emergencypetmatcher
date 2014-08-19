@@ -230,7 +230,7 @@ def update_User_info(request):
 @login_required
 def update_User_password(request):
     if request.method == "POST":
-        pprint(request.POST)
+        # pprint(request.POST)
         user = request.user
         old_password = request.POST ["old_password"]
         new_password = request.POST ["new_password1"]
@@ -240,7 +240,7 @@ def update_User_password(request):
         if user.check_password(old_password) == False:
             messages.error(request, "Sorry, your old password was incorrect. Try again.")
 
-        if new_password != confirm_password:
+        elif new_password != confirm_password:
             messages.error(request, "Please confirm your new password. Your new passwords don't match.")
 
         else:

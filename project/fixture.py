@@ -43,7 +43,7 @@ def delete_all(leave_Users = True):
 	PetReport.objects.all().delete()
 	delete_PetReport_images()
 
-	if leave_Users == True:
+	if leave_Users == False:
 		User.objects.all().delete()
 		EditUserProfile.objects.all().delete()
 		RegistrationProfile.objects.all().delete()

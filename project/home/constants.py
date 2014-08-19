@@ -2,7 +2,7 @@ import os
 from project.settings import STATIC_URL
 
 #Number of Tests
-NUMBER_OF_TESTS = 50
+NUMBER_OF_TESTS = 10
 
 #URLS - use for redirect calls
 URL_HOME = '/'
@@ -34,7 +34,7 @@ TEXTFILE_EMAIL_CHANGE_BODY = "socializing/email_change_body.txt"
 TEXTFILE_EMAIL_CHANGE_SUBJECT = "socializing/email_change_subject.txt"
 
 TEXTFILE_EMAIL_PETMATCH_PROPOSER = "matching/verification_email_to_digital_volunteer.txt"
-TEXTFILE_EMAIL_USERPROFILE_MESSAGE = "home/email_message_user.txt"
+TEXTFILE_EMAIL_USERPROFILE_MESSAGE = "socializing/email_message_user.txt"
 TEXTFILE_EMAIL_GUARDIAN_SUBJECT = "registration/guardian_email_subject.txt"
 TEXTFILE_EMAIL_GUARDIAN_BODY = "registration/guardian_email.txt"
 

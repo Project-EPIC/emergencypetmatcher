@@ -9,7 +9,6 @@ from datetime import timedelta
 from django import forms
 from django.forms import ModelForm, Textarea
 from django.template.loader import render_to_string
-from django.core.validators import validate_email
 from django.dispatch import receiver
 from registration.models import RegistrationProfile
 from registration.forms import RegistrationFormTermsOfService
@@ -41,7 +40,7 @@ class UserProfile (models.Model):
     guardian_activation_key = models.CharField(null=True, max_length=40)
 
     def send_email_message_to_UserProfile (self, target_userprofile, message, test_email=True):
-        if validate_email(target_userprofile.user.email) or (test_email == True):
+        if email_is_valid(target_userprofile.user.email) or (test_email == True):
             site = Site.objects.get(pk=1)
             ctx = {"site":site, "message":message, "from_user":self.user, "from_user_profile_URL": URL_USERPROFILE + str(self.id)}
             email_body = render_to_string(TEXTFILE_EMAIL_USERPROFILE_MESSAGE, ctx)
@@ -118,6 +117,7 @@ class UserProfile (models.Model):
 
         if registration_form != None:
             if registration_form.is_valid() == False:
+                # print_error_msg(registration_form.errors)
                 return (False, "Errors were found in the form.")
 
             #Passwords must match.
