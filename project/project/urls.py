@@ -30,4 +30,5 @@ urlpatterns = patterns('',
  #    url (r'^api/', include(v1_api.urls)),
 
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 #This is for development - MAKE SURE TO TURN OFF for Production!

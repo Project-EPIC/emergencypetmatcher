@@ -124,23 +124,19 @@
 					<div id="petreport-form-geo" class="form-group">
 						<label for="{{ field.id }}"> Geo-location </label>
 						{% for error in field.errors %} <span class="field-error-message">{{ error }}</span> {% endfor %}
-						<p>	Do you have geographical coordinates for the pet? 
-						<input id="petreport-form-geo-check" type="checkbox"/></p>
-						<div id="petreport-form-geo-fields" class="hidden">
-							<strong style="display:inline-block"> Latitude (Lat) Coordinate: </strong>
-							<input id="id-geo-location-lat" class="form-control" name="geo_location_lat" type="text" />
-							<strong style="display:inline-block"> Longitude (Long) Coordinate: </strong>
-							<input id="id_geo_location_long" class="form-control" name="geo_location_long" type="text" />
+						<p>	Do you have geographical coordinates for the pet? <input id="petreport_form_geo_check" type="checkbox"/></p>
+						<div id="petreport_form_geo_fields" class="hidden">
+							<input id="id-geo-location-lat" class="form-control" name="geo_location_lat" placeholder="Latitude (Lat) Coordinate" type="text" />
+							<input id="id-geo-location-long" class="form-control" name="geo_location_long" placeholder="Longitude (Long) Coordinate" type="text" />
 						</div>
 					</div>
 				
 				{% elif "Microchip ID" in field.label %}
-					<label for="{{ field.id }}"> {{ field.label }} </label>
-					<div id="petreport_form_microchip" style="padding-bottom:15px;">
-						Is the pet microchipped? <input id="petreport_form_microchip_check" type="checkbox"/><br/>
-						<div id="petreport_form_microchip_field" style="display:none;">
-							<strong>Enter Microchip ID </strong>
-							<input id='id_microchip_field' class="form-control" name="{{ field.html_name }}" type='text' placeholder="It will be used to verify this pet but will not be shown publicly" style="width:400px;"/>
+					<div id="petreport_form_microchip" class="form-group">
+						<label for="{{ field.id }}"> {{ field.label }} </label>
+						<p> Is the pet microchipped? <input id="petreport_form_microchip_check" type="checkbox"/></p>
+						<div id="petreport_form_microchip_field" class="hidden">
+							<input id='id-microchip-field' class="form-control" name="{{ field.html_name }}" type='text' placeholder="Enter Microchip ID. It will be used to verify this pet but will not be shown publicly."/>
 						</div>
 					</div>	
 

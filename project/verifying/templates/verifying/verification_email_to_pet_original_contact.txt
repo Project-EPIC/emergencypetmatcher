@@ -4,7 +4,7 @@ Congratulations! The digital volunteers on EmergencyPetMatcher.com have found a 
 
 People all over the world using EmergencyPetMatcher helped bring this match to your attention:
 	{{ cross_posting_phrase }} 
-	- A volunteer by the username of {{ other_contact.name }} reported on a {{ other_pet.status }} {{ other_pet.breed }} {{ other_pet.pet_type }} ({{ other_pet.pet_name }}).
+	- A volunteer by the name of {{ other_contact.name }} reported on a {{ other_pet.status }} {{ other_pet.breed }} {{ other_pet.pet_type }} ({{ other_pet.pet_name }}).
 	- {{ petmatcher.user.username }} then matched that pet with the one that was submitted under your email address. 
 	- Finally, the EmergencyPetMatcher community voted on the match enough times for contact information to be shared. Now is the time to check if these pets are a match!
 

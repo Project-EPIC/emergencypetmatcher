@@ -54,19 +54,8 @@ $(document).ready(function(){
 		$("#id_description_count").html(count + " characters remaining");
 	});
 
-	$("#petreport_form_microchip_check").click(function(){
-		if($(this).prop("checked") == true)
-			$("#petreport_form_microchip_field").css("display", "inline")
-		else
-			$("#petreport_form_microchip_field").css("display", "none")
-	});
-
-	$("#petreport_form_geo_check").click(function(){
-		if($(this).prop("checked") == true)
-			$("#petreport_form_geo_fields").css("display", "inline");
-		else
-			$("#petreport_form_geo_fields").css("display", "none"); 
-	});	
+	$("#petreport_form_microchip_check").click(function(){ $("#petreport_form_microchip_field").toggleClass("hidden"); });
+	$("#petreport_form_geo_check").click(function(){ $("#petreport_form_geo_fields").toggleClass("hidden"); });	
 
 
 	$("#id_tag_info").bind('mouseleave', function() { 

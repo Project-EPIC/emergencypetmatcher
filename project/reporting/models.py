@@ -144,24 +144,31 @@ class PetReport(models.Model):
             if self.pet_type == PETREPORT_PET_TYPE_DOG:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_DOG_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_DOG_IMAGE
+
             elif self.pet_type == PETREPORT_PET_TYPE_CAT:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_CAT_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_CAT_IMAGE
+
             elif self.pet_type == PETREPORT_PET_TYPE_BIRD:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_BIRD_IMAGE                    
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_BIRD_IMAGE
+
             elif self.pet_type == PETREPORT_PET_TYPE_HORSE:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_HORSE_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_HORSE_IMAGE
+
             elif self.pet_type == PETREPORT_PET_TYPE_RABBIT:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_RABBIT_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_RABBIT_IMAGE
+
             elif self.pet_type == PETREPORT_PET_TYPE_SNAKE:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_SNAKE_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_SNAKE_IMAGE
+
             elif self.pet_type == PETREPORT_PET_TYPE_TURTLE:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_TURTLE_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_TURTLE_IMAGE
+                
             else:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_OTHER_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_OTHER_IMAGE
