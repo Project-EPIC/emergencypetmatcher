@@ -2,11 +2,13 @@ django == 1.5.1
 lorem-ipsum-generator
 django-registration
 python-social-auth
+oauth2
 pymongo
 South
 psycopg2
 pillow
 selenium
+gunicorn
 simplejson
 django-tastypie
 mimeparse

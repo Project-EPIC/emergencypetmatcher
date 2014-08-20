@@ -53,43 +53,69 @@ nginx::resource::vhost { 'project-vhost':
   proxy       => "http://gunicorn",
 }
 
+
 nginx::resource::location { 'project':
-    ensure         => "present",
-    ssl            => "true",
-    ssl_only       => "true",
-    location       => '/vagrant/deployment/static',
-    location_alias => "/vagrant/deployment/static",
-    vhost          => 'project-vhost',
+  ensure         => "present",
+  location       => '/vagrant/deployment/static',
+  location_alias => "/vagrant/deployment/static",
+  vhost          => 'project-vhost',
+}
+
+nginx::resource::location { "project-media":
+  ensure        => "present",
+  location      => "/vagrant/media",
+  location_alias  => "/vagrant/media",
+  vhost           => "project-vhost"
 }
 
 #Get rid of Nginx Defaults.
-file { "/etc/nginx/conf.d/default.conf":
-  require => Package ["nginx"],
-  ensure => "absent",
-  notify => Service ["nginx"],
-}
+# file { "/etc/nginx/conf.d/default.conf":
+#   require => Package ["nginx"],
+#   ensure => "absent",
+#   notify => Service ["nginx"],
+# }
 
 # --- Setup Python, VirtualEnv, Django, and Gunicorn -----------------------------------------------------------------
 
 
 #Python
-class { "python::dev": version => "2.7"}
-
-#VirtualEnv
-class { "python::venv": owner => "vagrant", group => "vagrant" }
-python::venv::isolate {"/vagrant/project":
-  requirements => "/vagrant/project/requirements.txt",
-  version => "2.7.3"
+class { 'python':
+  version    => 'system',
+  pip        => true,
+  dev        => true,
+  virtualenv => true,
+  gunicorn   => false,
 }
 
-#Gunicorn
-class { "python::gunicorn": owner => "vagrant", group => "vagrant" }
-python::gunicorn::instance { "epm":
-  venv => "/vagrant/project",
-  src => "/vagrant/project",
-  django => true,
-  django_settings => "settings.py",
+python::requirements { '/vagrant/project/requirements.txt':
+  virtualenv => '/vagrant/project',
+  owner      => 'vagrant',
+  group      => 'vagrant',
 }
+
+# python::gunicorn { 'vhost':
+#   ensure      => present,
+#   virtualenv  => '/vagrant/project',
+#   mode        => 'wsgi',
+#   dir         => '/vagrant/project',
+#   bind        => 'unix:/tmp/gunicorn.socket',
+# }
+
+# #VirtualEnv
+# class { "python::venv": owner => "vagrant", group => "vagrant" }
+# python::venv::isolate {"/vagrant/project":
+#   requirements => "/vagrant/project/requirements.txt",
+#   version => "2.7.3"
+# } ~>
+
+# #Gunicorn
+# class { "python::gunicorn": owner => "vagrant", group => "vagrant" }
+# python::gunicorn::instance { "epm":
+#   venv => "/vagrant/project",
+#   src => "/vagrant/project",
+#   django => true,
+#   django_settings => "settings.py",
+# }
 
 # #Once Puppet has configured the environment, you need to run the following
 # #commands manually:
