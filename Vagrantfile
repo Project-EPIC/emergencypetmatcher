@@ -43,6 +43,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
+  config.vm.define "app" do |web|
+    web.vm.box = "precise64"
+    web.vm.network :forwarded_port, host: 8888, guest: 80
+
+    web.vm.provision :puppet do |puppet|
+      puppet.module_path = "puppet/modules"
+      puppet.manifests_path = "puppet/manifests"
+      puppet.manifest_file  = "app.pp"
+      puppet.options = ["--verbose"]
+    end
+  end  
+
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
