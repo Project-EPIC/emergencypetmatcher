@@ -19,7 +19,7 @@ DATABASES = {
         'NAME': 'epm_db',                      # Or path to database file if using sqlite3.
         'USER': 'epm_login',                      # Not used with sqlite3.
         'PASSWORD': '3m3rgEncY',                  # Not used with sqlite3.
-        'HOST': '192.168.50.6',                      # Set to empty string for localhost. Not used with sqlite3.
+        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
@@ -28,7 +28,7 @@ DATABASES = {
 NOSQL_DATABASES = {
     'mongodb': {
         'NAME':'epm_activity_db',
-        "HOST":"192.168.50.6",
+        "HOST":"localhost",
         'PORT':27018,
         'MAX_POOL_SIZE':10
     }

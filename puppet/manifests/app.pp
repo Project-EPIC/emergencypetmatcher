@@ -70,6 +70,7 @@ nginx::resource::location { "project-media":
 
 # --- Setup Python, VirtualEnv, Django, and Gunicorn -----------------------------------------------------------------
 
+
 #Python
 class { 'python':
   version    => 'system',
@@ -85,3 +86,39 @@ python::requirements { '/vagrant/project/requirements.txt':
   group      => 'vagrant',
 }
 
+
+
+#PostgreSQL
+class { "postgresql::server":
+  listen_addresses => "*"
+}
+
+postgresql::server::db { 'epm_db':
+  user     => 'epm_login',
+  owner    => "epm_login",
+  password => postgresql_password('epm_login', '3m3rgEncY'),
+}
+
+postgresql::server::pg_hba_rule { 'allow application network to access test_epm_db database':
+  description => "Open up postgresql for access from 192.168.50.5/24",
+  type => 'host',
+  database => 'epm_db',
+  user => 'epm_login',
+  address => 'localhost',
+  auth_method => 'md5',
+}
+
+#MongoDB
+class { "::mongodb::server":
+  # auth => true,
+  ensure => "present",
+  port => 27017,
+  verbose => true,
+  bind_ip => ["127.0.0.1"]
+}
+
+mongodb_database { "epm_db":
+  ensure => "present",
+  tries => 10,
+  require => Class["mongodb::server"]
+}
