@@ -16,7 +16,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define "db" do |db|
     db.vm.box = "precise64"
-    db.vm.network :forwarded_port, host: 5432, guest: 5432
+    db.vm.network :forwarded_port, host: 5435, guest: 5432
     db.vm.network :forwarded_port, host: 27018, guest: 27017
     db.vm.network "private_network", ip:"192.168.50.6",
     virtualbox__intnet: "true"

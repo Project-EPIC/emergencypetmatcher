@@ -28,14 +28,13 @@ postgresql::server::db { 'epm_db':
   password => postgresql_password('epm_login', '3m3rgEncY'),
 }
 
-
 postgresql::server::pg_hba_rule { 'allow application network to access epm_db database':
   description => "Open up postgresql for access from 192.168.50.5/24",
   type => 'host',
   database => 'epm_db',
   user => 'epm_login',
   address => '192.168.50.5/24',
-  auth_method => 'md5',
+  auth_method => 'trust',
 }
 
 postgresql::server::pg_hba_rule { 'allow application network to access test_epm_db database':
@@ -44,7 +43,7 @@ postgresql::server::pg_hba_rule { 'allow application network to access test_epm_
   database => 'test_epm_db',
   user => 'epm_login',
   address => '192.168.50.5/24',
-  auth_method => 'md5',
+  auth_method => 'trust',
 }
 
 

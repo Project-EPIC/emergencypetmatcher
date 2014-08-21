@@ -44,7 +44,7 @@ class {"nginx": }
 
 nginx::resource::upstream { 'gunicorn':
   ensure  => "present",
-  members => ["127.0.0.1:8000"]
+  members => ["127.0.0.1:8889"]
 }
 
 nginx::resource::vhost { 'project-vhost':
