@@ -14,35 +14,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box_url = "http://files.vagrantup.com/precise32.box"
 
-  config.vm.define "db" do |db|
-    db.vm.box = "precise64"
-    db.vm.network :forwarded_port, host: 5435, guest: 5432
-    db.vm.network :forwarded_port, host: 27018, guest: 27017
-    db.vm.network "private_network", ip:"192.168.50.6",
-    virtualbox__intnet: "true"
-
-    db.vm.provision :puppet do |puppet|
-      puppet.module_path = "puppet/modules"
-      puppet.manifests_path = "puppet/manifests"
-      puppet.manifest_file  = "db.pp"
-      puppet.options = ["--verbose"]
-    end
-  end
-
-  config.vm.define "web" do |web|
-    web.vm.box = "precise32"
-    web.vm.network :forwarded_port, host: 8888, guest: 80
-    web.vm.network "private_network", ip:"192.168.50.5",
-    virtualbox__intnet: "true"
-
-    web.vm.provision :puppet do |puppet|
-      puppet.module_path = "puppet/modules"
-      puppet.manifests_path = "puppet/manifests"
-      puppet.manifest_file  = "web.pp"
-      puppet.options = ["--verbose"]
-    end
-  end
-
   config.vm.define "app" do |web|
     web.vm.box = "precise64"
     web.vm.network :forwarded_port, host: 8888, guest: 80

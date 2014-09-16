@@ -3,7 +3,6 @@ from django.contrib.sites.models import Site
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.mail import send_mail
-from datetime import datetime
 from django.conf import settings
 from datetime import timedelta
 from django import forms
@@ -14,6 +13,7 @@ from registration.models import RegistrationProfile
 from registration.forms import RegistrationFormTermsOfService
 from django.core.exceptions import MultipleObjectsReturned
 from django.db.models.signals import post_save, pre_save, pre_delete, post_delete, m2m_changed
+from datetime import date, datetime
 from utilities.utils import *
 from constants import *
 from home.constants import *
@@ -27,6 +27,7 @@ class UserProfile (models.Model):
     '''Non-Required Fields'''
     img_path = models.ImageField(upload_to=USERPROFILE_IMG_PATH, default=USERPROFILE_IMG_PATH_DEFAULT, null=True)
     thumb_path = models.ImageField(upload_to=USERPROFILE_THUMBNAIL_PATH, default=USERPROFILE_THUMBNAIL_PATH_DEFAULT, null=True)
+    dob = models.DateField(null=True, default=None)
     last_logout = models.DateTimeField(null=True, auto_now_add=True)
     following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
     reputation = models.FloatField(default=0, null=True)
@@ -127,41 +128,19 @@ class UserProfile (models.Model):
 
     #Update the current user's reputation points based on an activity
     def update_reputation(self, activity):
-        if activity == ACTIVITY_PETMATCH_UPVOTE:
-            self.reputation += REWARD_PETMATCH_VOTE
-        elif activity == ACTIVITY_PETMATCH_DOWNVOTE:
-            self.reputation += REWARD_PETMATCH_VOTE
-        elif activity == ACTIVITY_PETREPORT_SUBMITTED:
-            self.reputation += REWARD_PETREPORT_SUBMIT
-        elif activity == ACTIVITY_PETMATCH_PROPOSED:
-            self.reputation += REWARD_PETMATCH_PROPOSE
-        elif activity == ACTIVITY_USER_BEING_FOLLOWED:
-            self.reputation += REWARD_USER_FOLLOWED
-        elif activity == ACTIVITY_USER_BEING_UNFOLLOWED:
-            self.reputation -= REWARD_USER_FOLLOWED
-        elif activity == ACTIVITY_PETREPORT_ADD_BOOKMARK:
-            self.reputation += REWARD_PETREPORT_BOOKMARK
-        elif activity == ACTIVITY_PETREPORT_REMOVE_BOOKMARK:
-            self.reputation -= REWARD_PETREPORT_BOOKMARK
-        elif activity == ACTIVITY_ACCOUNT_CREATED:
-            self.reputation += REWARD_NEW_ACCOUNT
-        elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE:
-            self.reputation += REWARD_USER_PROPOSED_PETMATCH_VOTE
-        elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL:
-            self.reputation += REWARD_USER_PROPOSED_PETMATCH_SUCCESSFUL
-        elif activity == ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE:
-            self.reputation += REWARD_USER_PROPOSED_PETMATCH_FAILURE
-        elif activity == ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL:
-            self.reputation += REWARD_USER_VERIFY_PETMATCH_SUCCESSFUL
-        elif activity == ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL:
-            self.reputation += REWARD_PETMATCH_UPVOTE_SUCCESSFUL
+        if activity in ACTIVITIES.keys():
+            self.reputation += ACTIVITIES[activity]["reward"]
         else:
-            print_error_msg("Cannot update reputation points: This is not a valid activity!")
-            return False
+            print_error_msg("Activity %s does not exist!")
 
-        #Save the UserProfile and return True
         self.save()
-        return True
+        return self
+
+    #Format the DOB string ("MM/DD/YYYY") coming in and set it to DOB Attribute.
+    def set_date_of_birth(self, dob_str):
+        dob = map(lambda s: int(s), dob_str.split("/"))
+        self.dob = date(dob[2], dob[0], dob[1])        
+        self.save()
 
     #check if username exists in the database
     @staticmethod
@@ -175,6 +154,7 @@ class UserProfile (models.Model):
 
 
     #set_img_path(): Sets the image path and thumb path for this UserProfile. Save is optional.
+    #Returns True if setting photo for the first time, False otherwise.
     def set_images(self, img_path, save=True, rotation=0):
         #Deal with the 'None' case.
         if img_path == None:
@@ -245,33 +225,23 @@ class UserProfileForm (ModelForm):
         fields = ("username", "first_name", "last_name", "email", "photo")
 
 
-from utilities import logger
-
 #Create a pre-delete signal function to delete a UserProfile before a User/UserProfile is deleted
 @receiver (pre_delete, sender=UserProfile)
 def delete_UserProfile(sender, instance=None, **kwargs):
     if instance.user == None:
         print_error_msg("User was deleted before UserProfile. Cannot delete log file.")
     else:    
-        #Delete the UserProfile log file.
-        #logger.delete_log(instance)
         #Instead of deleting the User (which might break foreign-key relationships),
         #set the active flag to False (INACTIVE)
         instance.user.is_active = False
         instance.user.save()
 
+from home.models import Activity
 #Create a post save signal function to setup a UserProfile when a User is created
 @receiver (post_save, sender=User)
 def setup_UserProfile(sender, instance, created, **kwargs):
     if created == True:
-        #Create a UserProfile object.
         userprofile = UserProfile.objects.create(user=instance)
-        logger.log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)
-        userprofile.update_reputation(ACTIVITY_ACCOUNT_CREATED)
-
-    elif instance.is_active:
-        if logger.log_exists(instance.get_profile()) == False:
-            logger.log_activity(ACTIVITY_ACCOUNT_CREATED, instance.get_profile())
-
-
+        Activity.log_activity("ACTIVITY_ACCOUNT_CREATED", userprofile)
+        userprofile.update_reputation("ACTIVITY_ACCOUNT_CREATED")
 

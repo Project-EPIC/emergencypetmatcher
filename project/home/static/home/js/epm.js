@@ -1,6 +1,6 @@
 //URLS - use for redirect calls (consistent with constants file)
 URL_HOME = '/'
-URL_GET_ACTIVITIES = "/get_activities_json"
+URL_GET_ACTIVITIES = "/get_activities"
 URL_GET_PETMATCHES = "/get_PetMatches"
 URL_GET_SUCCESSFUL_PETMATCHES = "/get_successful_PetMatches"
 URL_GET_PETREPORT = "/get_PetReport/"
@@ -93,7 +93,7 @@ function setup_petreport_item(report, modal_element){
     var pet_img = document.createElement("img");
 
     //Link attributes.
-    $(item).addClass("item");
+    $(item).addClass("pet-item");
     $(alink).attr("identity", report.ID);    
     $(alink).on("click", function(){ launch_dialog(modal_element, URL_PRDP + report.ID); });
 
@@ -120,7 +120,7 @@ function setup_petmatch_item (match, modal_element){
     var found_pet_img = document.createElement("img");
 
     //Deal with Attributes.
-    $(item).addClass("item");
+    $(item).addClass("pet-item");
     $(alink).on("click", function(){ launch_dialog(modal_element, URL_PMDP + match.ID); });
 
     $(lost_pet_img).attr("src", MEDIA_URL + match.lost_pet_img_path);

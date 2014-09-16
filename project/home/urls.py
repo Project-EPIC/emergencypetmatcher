@@ -8,7 +8,7 @@ from django.contrib.auth import views as auth_views
 urlpatterns = patterns('home.views',
 
 	url (r'^$', 'home', name='home'),
-	url (r'^get_activities_json$', 'get_activities_json', name="get_activities_json"),
+	url (r'^get_activities$', 'get_activities', name="get_activities"),
 	url (r'^get_PetReport/(?P<petreport_id>\d+)/$', 'get_PetReport', name="get_PetReport"),	
 	url (r'^get_PetReports/(?P<page>\d+)/$', 'get_PetReports', name="get_PetReports"),
 	url (r'^get_PetMatches/(?P<page>\d+)/$', 'get_PetMatches', name="get_PetMatches"),	

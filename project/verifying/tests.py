@@ -47,7 +47,7 @@ class VerificationTesting (unittest.TestCase):
 			print_test_msg(verification_page_url)
 			response = client.get(verification_page_url)
 
-			userprofile = user.get_profile()
+			userprofile = user.userprofile
 
 			if response.status_code == 302:
 				if petmatch.PetMatch_has_reached_threshold():
@@ -56,7 +56,7 @@ class VerificationTesting (unittest.TestCase):
 			#Looking for other users and their passwords in the users list.
 			proposers = [petmatch.lost_pet.proposed_by.user, petmatch.found_pet.proposed_by.user]
 			proposer = random.choice(proposers)
-			userprofile = proposer.get_profile()
+			userprofile = proposer.userprofile
 			password = None
 
 			for (user_obj, user_password) in users:
@@ -122,7 +122,7 @@ class VerificationTesting (unittest.TestCase):
 				print verification_page_url
 				response = client.get(verification_page_url)
 
-				userprofile = user.get_profile()
+				userprofile = user.userprofile
 
 				self.assertEquals(response.status_code,200)
 				#user responds with a random message: either yes or no

@@ -14,10 +14,12 @@ SOCIAL_AUTH_ERROR_KEY             = 'socialauth_error'
 # SOCIAL_AUTH_CHANGE_SIGNAL_ONLY = True   #?????
 
 
-FACEBOOK_EXTENDED_PERMISSIONS = ['email']
+FACEBOOK_EXTENDED_PERMISSIONS = ['email', 'first_name', 'last_name']
 # No permisson for email in Twitter, check this https://dev.twitter.com/discussions/4019
 
 SOCIAL_AUTH_PROTECTED_USER_FIELDS = ['email']
+
+# SOCIAL_AUTH_USER_MODEL = 'User'
 
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
@@ -25,11 +27,11 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.auth_allowed',
     'social.pipeline.social_auth.social_user',
     # 'social.pipeline.user.get_username',
+    'home.pipeline.redirect_to_form',
     'social.pipeline.user.create_user',
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.social_auth.load_extra_data',
-    'social.pipeline.user.user_details',
-    'home.pipeline.redirect_to_form',
+    'home.pipeline.setup_user_details',
 )
 
 # Twitter testing

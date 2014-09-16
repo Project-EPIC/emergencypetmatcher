@@ -73,7 +73,7 @@ nginx::resource::location { "project-media":
 
 #Python
 class { 'python':
-  version    => 'system',
+  version    => "system",
   pip        => true,
   dev        => true,
   virtualenv => true,
@@ -85,8 +85,6 @@ python::requirements { '/vagrant/project/requirements.txt':
   owner      => 'vagrant',
   group      => 'vagrant',
 }
-
-
 
 #PostgreSQL
 class { "postgresql::server":
@@ -108,17 +106,8 @@ postgresql::server::pg_hba_rule { 'allow application network to access test_epm_
   auth_method => 'md5',
 }
 
-#MongoDB
-class { "::mongodb::server":
-  # auth => true,
-  ensure => "present",
-  port => 27017,
-  verbose => true,
-  bind_ip => ["127.0.0.1"]
-}
 
-mongodb_database { "epm_db":
-  ensure => "present",
-  tries => 10,
-  require => Class["mongodb::server"]
-}
+
+
+
+

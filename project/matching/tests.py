@@ -167,8 +167,8 @@ class MatchingTesting (unittest.TestCase):
 				print_test_msg("%s has successfully requested page %s..." % (user, matching_url))  	
 			
 			self.assertEquals(response.request ['PATH_INFO'], matching_url)	
-			self.assertTrue(user.get_profile() in petreport.workers.all())
-			self.assertTrue(petreport in user.get_profile().workers_related.all())
+			self.assertTrue(user.userprofile in petreport.workers.all())
+			self.assertTrue(petreport in user.userprofile.workers_related.all())
 			client.logout()	
 			output_update(i + 1)
 			end_time = time.clock()
@@ -281,7 +281,7 @@ class MatchingTesting (unittest.TestCase):
 
 			#Grab the PetMatch that has either been posted in the past or has been posted by this User.
 			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
-			if match.UserProfile_has_voted(user.get_profile()) == True:
+			if match.UserProfile_has_voted(user.userprofile) == True:
 				print_test_msg("[OK]:A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user))
 			else:
 				print_test_msg("[OK]: has successfully POSTED a new match!" % (user))				
@@ -394,8 +394,8 @@ class PetMatchTesting (unittest.TestCase):
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], vote_url)
-			self.assertTrue(petmatch.UserProfile_has_voted(user.get_profile()) == UPVOTE)
-			self.assertEquals(petmatch.up_votes.get(pk = user.id), user.get_profile())
+			self.assertTrue(petmatch.UserProfile_has_voted(user.userprofile) == UPVOTE)
+			self.assertEquals(petmatch.up_votes.get(pk = user.id), user.userprofile)
 
 			output_update(i + 1)
 			end_time = time.clock()
@@ -438,8 +438,8 @@ class PetMatchTesting (unittest.TestCase):
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], vote_url)
-			self.assertTrue(petmatch.UserProfile_has_voted(user.get_profile()) == DOWNVOTE)
-			self.assertEquals(petmatch.down_votes.get(pk = user.id), user.get_profile())
+			self.assertTrue(petmatch.UserProfile_has_voted(user.userprofile) == DOWNVOTE)
+			self.assertEquals(petmatch.down_votes.get(pk = user.id), user.userprofile)
 
 			output_update(i + 1)
 			end_time = time.clock()

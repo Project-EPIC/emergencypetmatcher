@@ -16,11 +16,11 @@ from django.forms.models import model_to_dict
 from django.utils import simplejson
 from random import choice, uniform
 from pprint import pprint
+from home.models import Activity
 from reporting.models import PetReport
 from matching.models import PetMatch
 from verifying.models import PetCheck
 from utilities.utils import *
-from utilities import logger
 from constants import *
 from home.constants import *
 import datetime, re
@@ -32,7 +32,7 @@ def get_PetMatch(request, petmatch_id):
 
     #Need to check if the user is authenticated (non-anonymous) to find out if he/she has voted on this PetMatch.
     if request.user.is_authenticated() == True:
-        user_has_voted = pm.UserProfile_has_voted(request.user.get_profile())
+        user_has_voted = pm.UserProfile_has_voted(request.user.userprofile)
     else:
         user_has_voted = False
 
@@ -41,6 +41,8 @@ def get_PetMatch(request, petmatch_id):
 
     if pm.is_successful == True:
         messages.success(request, "These pet reports have been matched! Thank you digital volunteers!")
+    elif pm.has_failed == True:
+        messages.info(request, "Sorry, this match did not succeed in reuniting pet and pet owner.")
     elif pm.is_being_checked() == True:
         messages.info(request, "These pet reports are currently being checked by their owners! Votes are closed.")
 
@@ -52,18 +54,18 @@ def get_PetMatch(request, petmatch_id):
         html = HTML_PMDP_FULL    
 
     return render_to_response(html, {  "petmatch": pm,
-                                            "site_domain":Site.objects.get_current().domain,
-                                            "pet_fields": fields,
-                                            "num_voters": len(voters), 
-                                            "user_has_voted": user_has_voted, 
-                                            "num_upvotes":num_upvotes, 
-                                            "num_downvotes":num_downvotes}, RequestContext(request))  
+                                        "site_domain":Site.objects.get_current().domain,
+                                        "pet_fields": fields,
+                                        "num_voters": len(voters), 
+                                        "user_has_voted": user_has_voted, 
+                                        "num_upvotes":num_upvotes, 
+                                        "num_downvotes":num_downvotes}, RequestContext(request))  
 
 #Vote on the PetMatch    
 @login_required
 def vote_PetMatch(request):
     if request.method == "POST":
-        userprofile = request.user.get_profile()
+        userprofile = request.user.userprofile
         vote = request.POST ['vote']
         pm = get_object_or_404(PetMatch, pk=request.POST["match_id"])
 
@@ -74,28 +76,23 @@ def vote_PetMatch(request):
         if vote == "upvote":
             # If the user is voting for the 1st time, add reputation points
             if pm.UserProfile_has_voted(userprofile) is False:
-                userprofile.update_reputation(ACTIVITY_PETMATCH_UPVOTE)
-                pm.proposed_by.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE)
-
-            # Also, add reputation points to the user whose proposed petmatch is being upvoted
-            if pm.UserProfile_has_voted(userprofile) == DOWNVOTE:
-                pm.proposed_by.update_reputation(ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE)
+                userprofile.update_reputation("ACTIVITY_PETMATCH_UPVOTE")
             
             pm.up_votes.add(userprofile)
             pm.down_votes.remove(userprofile)
 
-            logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, userprofile, petmatch=pm)
-            message = "You have successfully upvoted this PetMatch!"
+            Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", userprofile, source=pm)
+            message = "You have successfully upvoted this PetMatch - You have earned %d Pet Points!" % (ACTIVITIES["ACTIVITY_PETMATCH_UPVOTE"]["reward"])
 
         elif vote == "downvote":
             # If the user is voting for the 1st time, add reputation points
             if pm.UserProfile_has_voted(userprofile) is False:
-                userprofile.update_reputation(ACTIVITY_PETMATCH_DOWNVOTE)
+                userprofile.update_reputation("ACTIVITY_PETMATCH_DOWNVOTE")
                 
             pm.down_votes.add(userprofile)
             pm.up_votes.remove(userprofile)
-            logger.log_activity(ACTIVITY_PETMATCH_DOWNVOTE, userprofile, petmatch=pm)
-            message = "You have successfully downvoted this PetMatch!"
+            Activity.log_activity("ACTIVITY_PETMATCH_DOWNVOTE", userprofile, source=pm)
+            message = "You have successfully downvoted this PetMatch - You have earned %d Pet Points!" % (ACTIVITIES["ACTIVITY_PETMATCH_DOWNVOTE"]["reward"])
 
         #Was the petmatch triggered for verification? Check here.
         threshold_reached = pm.has_reached_threshold() 
@@ -121,7 +118,7 @@ def match_PetReport(request, petreport_id, page=None):
         #Are there any candidates?
         candidates = target_petreport.get_candidate_PetReports()
         #Add the UserProfile to the PetReport's workers list.
-        target_petreport.workers.add(request.user.get_profile())
+        target_petreport.workers.add(request.user.userprofile)
 
         if candidates == None:
             messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added as a worker for this pet.")
@@ -163,7 +160,7 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
     candidate = get_object_or_404(PetReport, pk=candidate_petreport_id)
 
     if request.method == "POST":
-        proposed_by = request.user.get_profile()
+        proposed_by = request.user.userprofile
 
         if target.status == "Lost":
             pm = PetMatch(lost_pet=target, found_pet=candidate, proposed_by=proposed_by)
@@ -190,18 +187,18 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
                 # add voting reputation points if the user didn't vote before for this duplicate petmatch
                 # if (proposed_by not in result.up_votes.all()) and (proposed_by not in result.down_votes.all()):
                 if pm.UserProfile_has_voted(userprofile) is False:
-                    proposed_by.update_reputation(ACTIVITY_PETMATCH_UPVOTE)
+                    proposed_by.update_reputation("ACTIVITY_PETMATCH_UPVOTE")
 
                 result.up_votes.add(proposed_by)
                 result.save()
                 messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match. Help spread the word about this match!")
-                logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, proposed_by, petmatch=result)
+                Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", proposed_by, source=result)
 
             elif outcome == PETMATCH_OUTCOME_NEW_PETMATCH:
-                messages.success(request, "Congratulations - The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile. Help spread the word about your match!")
-                logger.log_activity(ACTIVITY_PETMATCH_PROPOSED, proposed_by, petmatch=result)
+                messages.success(request, "Congratulations - The pet match was successful - You have earned %d Pet Points! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile. Help spread the word about your match!" % ACTIVITIES["ACTIVITY_PETMATCH_PROPOSED"]["reward"])
+                Activity.log_activity("ACTIVITY_PETMATCH_PROPOSED", proposed_by, source=result)
                 # add reputation points for proposing a new petmatch
-                proposed_by.update_reputation(ACTIVITY_PETMATCH_PROPOSED)
+                proposed_by.update_reputation("ACTIVITY_PETMATCH_PROPOSED")
 
         else:
             if outcome == PETMATCH_OUTCOME_DUPLICATE_PETMATCH:
@@ -215,12 +212,12 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
 
                 # add voting reputation points if the user didn't vote before for this duplicate petmatch
                 if user_has_voted == False:
-                    proposed_by.update_reputation(ACTIVITY_PETMATCH_UPVOTE)
+                    proposed_by.update_reputation("ACTIVITY_PETMATCH_UPVOTE")
 
                 result.up_votes.add(proposed_by)
                 result.save()          
                 messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match. Help spread the word about this match!")
-                logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, proposed_by, petmatch=result)
+                Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", proposed_by, source=result)
             else:                
                 messages.error(request, "A Problem was found when trying to propose the PetMatch. We have been notified of the issue and will fix it as soon as possible.")            
 

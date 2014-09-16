@@ -20,7 +20,6 @@ from reporting.models import PetReport
 from verifying.models import PetCheck
 from matching.models import PetMatch
 from utilities.utils import *
-from utilities import logger
 from verifying.constants import *
 from home.constants import *
 import datetime, re
@@ -35,7 +34,7 @@ def verify_PetCheck(request, petcheck_id):
     if request.user.is_anonymous() == True:
         profile = None
     else:
-        profile = request.user.get_profile()
+        profile = request.user.userprofile
 
     if request.method == "GET":
         num_upvotes = len(petmatch.up_votes.all())

@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from datetime import datetime
 from utilities.utils import *
+from home.models import Activity
 from home.constants import *
 from constants import *
 
@@ -107,23 +108,44 @@ class PetCheck(models.Model):
 		found_pet_contact = found_pet.proposed_by
 		self.closed_date = datetime.now()
 
-		#If successful, trigger the success parameters and award reputation points to those involved.
+		#If successful, trigger the success parameters and award pet points to those involved.
 		if self.verification_successful() == True:
 			self.is_successful = True	
 			petmatch.is_successful = True
 			lost_pet.closed = True
 			found_pet.closed = True
 			self.save()    
-			petmatch.save()
 			lost_pet.save()
 			found_pet.save()
-			message = "Thanks for your response, and congratulations on the successful match! The reunited match can be found in the 'Reunited Pets' Tab."
+			message = "Thanks for your response, and congratulations on the successful match! You have earned %s Pet Points. The reunited match can be found in the 'Reunited Pets' Tab." % ACTIVITIES["ACTIVITY_PETCHECK_VERIFY_SUCCESS"]["reward"]
+			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_SUCCESS", lost_pet_contact, source=self)
+			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_SUCCESS", found_pet_contact, source=self)
+			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_SUCCESS", petmatch_owner, source=self)
+			lost_pet_contact.update_reputation("ACTIVITY_PETCHECK_VERIFY_SUCCESS")
+			found_pet_contact.update_reputation("ACTIVITY_PETCHECK_VERIFY_SUCCESS")
+			petmatch_owner.update_reputation("ACTIVITY_PETCHECK_VERIFY_SUCCESS")
 			print_info_msg ("PetMatch %s is now closed" % (self))
-			return message
+
+		#If not successful, delete the PetCheck object, award pet points, and notify.
 		else:
+			message = "Unfortunately, this Pet Match was not successful. The pet contacts have agreed that this wasn't the right match. You have earned %d Pet Points. Please try other matches!" % ACTIVITIES["ACTIVITY_PETCHECK_VERIFY_FAIL"]["reward"]
+			petmatch.has_failed = True
+			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_FAIL", lost_pet_contact, source=self)
+			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_FAIL", found_pet_contact, source=self)
+			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_FAIL", petmatch_owner, source=self)
+			lost_pet_contact.update_reputation("ACTIVITY_PETCHECK_VERIFY_FAIL")
+			found_pet_contact.update_reputation("ACTIVITY_PETCHECK_VERIFY_FAIL")
+			petmatch_owner.update_reputation("ACTIVITY_PETCHECK_VERIFY_FAIL")			
+			print_info_msg ("PetMatch %s did not pass verification!" % (self))
 			del self
-			message = "Unfortunately, this Pet Match was not successful. The pet contacts have agreed that this wasn't the right match. Please try other matches!"
-			return message
+
+		petmatch.save()	
+		return message
 
 	def __unicode__ (self):
 		return '{ID{%s} petmatch:%s, votes:%s}' % (self.id, self.petmatch, self.verification_votes)
+
+
+
+
+

@@ -16,6 +16,9 @@ class PetMatch(models.Model):
     proposed_by = models.ForeignKey("socializing.UserProfile", null=False, related_name='proposed_by_related')
     #Date when PetMatch was proposed (created).
     proposed_date = models.DateTimeField(null=False, auto_now_add=True)
+    #Field to capture failed PetMatches.
+    has_failed = models.BooleanField(null=False, default=False)
+    #Field to capture successful PetMatches.
     is_successful = models.BooleanField(default=False)
     up_votes = models.ManyToManyField("socializing.UserProfile", null=True, related_name='up_votes_related')
     down_votes = models.ManyToManyField("socializing.UserProfile", null=True, related_name='down_votes_related')
@@ -47,7 +50,6 @@ class PetMatch(models.Model):
         super(PetMatch, self).save(*args, **kwargs)
         print_success_msg("PetMatch %s was saved!" % self)
         return (self, PETMATCH_OUTCOME_NEW_PETMATCH)
-
 
     ''' Determine if a PetMatch exists between pr1 and pr2, and if so, return it. Otherwise, return None. '''
     @staticmethod

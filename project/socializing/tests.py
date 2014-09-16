@@ -73,8 +73,8 @@ class UserProfileTesting (unittest.TestCase):
 			start_time = time.clock()
 			user_one, password_one = random.choice(users)
 			user_two, password_two = random.choice(users)
-			userprofile_one = user_one.get_profile()
-			userprofile_two = user_two.get_profile()
+			userprofile_one = user_one.userprofile
+			userprofile_two = user_two.userprofile
 			client = random.choice(clients)
 
 			#Log onto the first user.
@@ -271,8 +271,8 @@ class FollowingTesting (unittest.TestCase):
 
             user_one, password_one = random.choice(users)
             user_two, password_two = random.choice(users)
-            userprofile_one = user_one.get_profile()
-            userprofile_two = user_two.get_profile()
+            userprofile_one = user_one.userprofile
+            userprofile_two = user_two.userprofile
             client = random.choice(clients)
 
             if user_one.id == user_two.id:
@@ -382,14 +382,14 @@ class ReputationTesting(unittest.TestCase):
 			
 			print_test_msg ("Reputation points for %s BEFORE upvoting: %s" % (user, old_reputation))
 			print_test_msg ("Reputation points for %s (who proposed this PetMatch) BEFORE upvoting: %s" %(pm_proposed_by_user, p_old_reputation))
-			print_test_msg ("Voted or not for this petmatch before: %s" % petmatch.UserProfile_has_voted(user.get_profile()))
+			print_test_msg ("Voted or not for this petmatch before: %s" % petmatch.UserProfile_has_voted(user.userprofile))
 			
 			# check if the user has voted before or not and set the 'voted' flag accordingly
-			if petmatch.UserProfile_has_voted(user.get_profile()) is False:
+			if petmatch.UserProfile_has_voted(user.userprofile) is False:
 				voted = False
 				print_test_msg ("User has NEVER voted for this petmatch")
 			else:
-				voted = petmatch.UserProfile_has_voted(user.get_profile())
+				voted = petmatch.UserProfile_has_voted(user.userprofile)
 				print_test_msg ("User has Voted for this petmatch before")
 
 			vote_url = URL_VOTE_MATCH
@@ -402,30 +402,30 @@ class ReputationTesting(unittest.TestCase):
 			user_index = [u[0] for u in users].index(user)
 			users[user_index] = (user, password)
 
-			print_test_msg ("Reputation points for %s AFTER upvoting: %s" %(user, user.get_profile().reputation))
+			print_test_msg ("Reputation points for %s AFTER upvoting: %s" %(user, user.userprofile.reputation))
 			pm_proposed_by_user = PetMatch.objects.get(pk=petmatch.id).proposed_by
 			print_test_msg ("Reputation points for %s (who proposed this PetMatch) AFTER upvoting: %s" %(pm_proposed_by_user, pm_proposed_by_user.reputation))
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], vote_url)
-			self.assertTrue(petmatch.UserProfile_has_voted(user.get_profile()) == UPVOTE)
-			self.assertEquals(petmatch.up_votes.get(pk=user.id), user.get_profile())
+			self.assertTrue(petmatch.UserProfile_has_voted(user.userprofile) == UPVOTE)
+			self.assertEquals(petmatch.up_votes.get(pk=user.id), user.userprofile)
 
-			if (voted == False) and (user.get_profile().id != pm_proposed_by_user.id):
-				self.assertEquals(user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE)
+			if (voted == False) and (user.userprofile.id != pm_proposed_by_user.id):
+				self.assertEquals(user.userprofile.reputation, old_reputation + REWARD_PETMATCH_VOTE)
 				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_USER_PROPOSED_PETMATCH_VOTE)
 			
-			elif (voted == UPVOTE) and (user.get_profile().id != pm_proposed_by_user.id):
-				self.assertEquals(user.get_profile().reputation, old_reputation)
+			elif (voted == UPVOTE) and (user.userprofile.id != pm_proposed_by_user.id):
+				self.assertEquals(user.userprofile.reputation, old_reputation)
 				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation)
 
-			elif (voted == DOWNVOTE) and (user.get_profile().id != pm_proposed_by_user.id):
-				self.assertEquals(user.get_profile().reputation, old_reputation)
+			elif (voted == DOWNVOTE) and (user.userprofile.id != pm_proposed_by_user.id):
+				self.assertEquals(user.userprofile.reputation, old_reputation)
 				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_USER_PROPOSED_PETMATCH_VOTE)
 			
-			elif (voted == False) and (user.get_profile().id == pm_proposed_by_user.id):
-				self.assertEquals(user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE + REWARD_USER_PROPOSED_PETMATCH_VOTE)
+			elif (voted == False) and (user.userprofile.id == pm_proposed_by_user.id):
+				self.assertEquals(user.userprofile.reputation, old_reputation + REWARD_PETMATCH_VOTE + REWARD_USER_PROPOSED_PETMATCH_VOTE)
 				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_PETMATCH_VOTE + REWARD_USER_PROPOSED_PETMATCH_VOTE)
 			else:
 				print_error_msg("Unexpected case...")
@@ -471,15 +471,15 @@ class ReputationTesting(unittest.TestCase):
 			response = client.get(pmdp_url)
 			
 			print_test_msg ("Reputation points BEFORE downvoting: %s" % (old_reputation))
-			print_test_msg ("Voted or not for this petmatch before: %s" % petmatch.UserProfile_has_voted(user.get_profile()))
+			print_test_msg ("Voted or not for this petmatch before: %s" % petmatch.UserProfile_has_voted(user.userprofile))
 			print_test_msg ("Reputation points for %s (who proposed this PetMatch) BEFORE downvoting: %s" % (pm_proposed_by_user, p_old_reputation))
 			
 			# check if the user has voted before or not and set the 'voted' flag accordingly
-			if petmatch.UserProfile_has_voted(user.get_profile()) is False:
+			if petmatch.UserProfile_has_voted(user.userprofile) is False:
 				voted = False
 				print_test_msg ("User has NEVER voted for this petmatch")
-			elif petmatch.UserProfile_has_voted(user.get_profile()) is not False:
-				voted = petmatch.UserProfile_has_voted(user.get_profile())
+			elif petmatch.UserProfile_has_voted(user.userprofile) is not False:
+				voted = petmatch.UserProfile_has_voted(user.userprofile)
 				print_test_msg ("User has Voted for this petmatch before")
 			else:
 				print_error_msg ("Something is wrong!")
@@ -495,28 +495,28 @@ class ReputationTesting(unittest.TestCase):
 			user_index = [u[0] for u in users].index(user)
 			users[user_index] = (user, password)
 
-			print_test_msg ("Reputation points AFTER downvoting: %s" %(user.get_profile().reputation))
+			print_test_msg ("Reputation points AFTER downvoting: %s" %(user.userprofile.reputation))
 			pm_proposed_by_user = PetMatch.objects.get(pk=petmatch.id).proposed_by
 			print_test_msg ("Reputation points for %s (who proposed this PetMatch) AFTER downvoting: %s" %(pm_proposed_by_user, pm_proposed_by_user.reputation))
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], vote_url)
-			self.assertTrue(petmatch.UserProfile_has_voted(user.get_profile()) == DOWNVOTE)
-			self.assertEquals(petmatch.down_votes.get(pk = user.id), user.get_profile())
+			self.assertTrue(petmatch.UserProfile_has_voted(user.userprofile) == DOWNVOTE)
+			self.assertEquals(petmatch.down_votes.get(pk = user.id), user.userprofile)
 			
-			if (voted == False) and (user.get_profile().id != pm_proposed_by_user.id):
-				self.assertEquals(user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE)
+			if (voted == False) and (user.userprofile.id != pm_proposed_by_user.id):
+				self.assertEquals(user.userprofile.reputation, old_reputation + REWARD_PETMATCH_VOTE)
 			
-			elif (voted == DOWNVOTE) and (user.get_profile().id != pm_proposed_by_user.id):
-				self.assertEquals(user.get_profile().reputation, old_reputation)
+			elif (voted == DOWNVOTE) and (user.userprofile.id != pm_proposed_by_user.id):
+				self.assertEquals(user.userprofile.reputation, old_reputation)
 				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation)
 			
-			elif (voted == UPVOTE) and (user.get_profile().id != pm_proposed_by_user.id):
-				self.assertEquals(user.get_profile().reputation, old_reputation)
+			elif (voted == UPVOTE) and (user.userprofile.id != pm_proposed_by_user.id):
+				self.assertEquals(user.userprofile.reputation, old_reputation)
 			
-			elif (not voted) and (user.get_profile().id == pm_proposed_by_user.id):
-				self.assertEquals(user.get_profile().reputation, old_reputation + REWARD_PETMATCH_VOTE)
+			elif (not voted) and (user.userprofile.id == pm_proposed_by_user.id):
+				self.assertEquals(user.userprofile.reputation, old_reputation + REWARD_PETMATCH_VOTE)
 				self.assertEquals(pm_proposed_by_user.reputation, p_old_reputation + REWARD_PETMATCH_VOTE)
 			else:
 				print_error_msg ("Assert FAILED! Something is wrong!")
@@ -573,7 +573,7 @@ class ReputationTesting(unittest.TestCase):
 			user = User.objects.get(pk=user.id)
 			user_index = [u[0] for u in users].index(user)
 			users[user_index] = (user, password)
-			print_test_msg ("Reputation points AFTER submitting a PetReport: %s" %(user.get_profile().reputation))
+			print_test_msg ("Reputation points AFTER submitting a PetReport: %s" %(user.userprofile.reputation))
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
@@ -582,8 +582,8 @@ class ReputationTesting(unittest.TestCase):
 			self.assertEquals(response.redirect_chain[0][1], 302)
 			self.assertTrue(response.request ['PATH_INFO'] == URL_HOME)
 			self.assertTrue(len(PetReport.objects.all()) == 2*i + 2)
-			self.assertNotEquals(user.get_profile().reputation, old_reputation)
-			self.assertEquals(user.get_profile().reputation, old_reputation + REWARD_PETREPORT_SUBMIT)
+			self.assertNotEquals(user.userprofile.reputation, old_reputation)
+			self.assertEquals(user.userprofile.reputation, old_reputation + REWARD_PETREPORT_SUBMIT)
 			client.logout()
 
 			output_update(i + 1)
@@ -649,10 +649,10 @@ class ReputationTesting(unittest.TestCase):
 			#Grab the PetMatch that is either a new one, has been posted in the past or has been posted by this User, and set the pm_status flag accordingly based on the activities.
 			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
 			if match is not None:
-				if match.UserProfile_has_voted(user.get_profile()) is not False:
+				if match.UserProfile_has_voted(user.userprofile) is not False:
 					print_test_msg ("A duplicate PetMatch, and %s has VOTED this match before! User will get no points." % (user))
 					pm_status = None
-				elif match.UserProfile_has_voted(user.get_profile()) is False:
+				elif match.UserProfile_has_voted(user.userprofile) is False:
 					print_test_msg ("A duplicate PetMatch, and %s has NEVER voted this match before! User will get voting points." % (user))
 					pm_status = ACTIVITY_PETMATCH_UPVOTE
 				else:
@@ -677,11 +677,11 @@ class ReputationTesting(unittest.TestCase):
 			user = User.objects.get(pk=user.id)
 			user_index = [u[0] for u in users].index(user)
 			users[user_index] = (user, password)
-			print_test_msg ("Reputation points AFTER proposing a PetMatch: %s" %(user.get_profile().reputation))
+			print_test_msg ("Reputation points AFTER proposing a PetMatch: %s" %(user.userprofile.reputation))
 
 			#Grab the PetMatch, again, that has either been posted in the past or has been posted by this User.
 			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
-			if match.UserProfile_has_voted(user.get_profile()) is not False:
+			if match.UserProfile_has_voted(user.userprofile) is not False:
 				print_test_msg ("A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user))
 			else:
 				print_test_msg ("%s has successfully POSTED a new match!" % (user))
@@ -694,11 +694,11 @@ class ReputationTesting(unittest.TestCase):
 			self.assertEquals(response.redirect_chain[0][1], 302)
 			self.assertEquals(response.request ['PATH_INFO'], URL_HOME)	
 			if pm_status == ACTIVITY_PETMATCH_PROPOSED:
-				self.assertEquals(user.get_profile().reputation, old_reputation+REWARD_PETMATCH_PROPOSE)
+				self.assertEquals(user.userprofile.reputation, old_reputation+REWARD_PETMATCH_PROPOSE)
 			elif pm_status == ACTIVITY_PETMATCH_UPVOTE:
-				self.assertEquals(user.get_profile().reputation, old_reputation+REWARD_PETMATCH_VOTE)
+				self.assertEquals(user.userprofile.reputation, old_reputation+REWARD_PETMATCH_VOTE)
 			elif pm_status == None:
-				self.assertEquals(user.get_profile().reputation, old_reputation)
+				self.assertEquals(user.userprofile.reputation, old_reputation)
 			else:
 				print_error_msg ("Assert Failed! Something went wrong with reputation points!")
 				self.assertTrue(False)
@@ -726,8 +726,8 @@ class ReputationTesting(unittest.TestCase):
 	        # objects
 	        user_one, password_one = random.choice(users)
 	        user_two, password_two = random.choice(users)
-	        userprofile_one = user_one.get_profile()
-	        userprofile_two = user_two.get_profile()
+	        userprofile_one = user_one.userprofile
+	        userprofile_two = user_two.userprofile
 	        old_reputation = userprofile_two.reputation
 	        client = random.choice(clients)
 
@@ -845,7 +845,7 @@ class ReputationTesting(unittest.TestCase):
 			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
 			response = client.post(add_bookmark_url, post, follow=True)
-			old_bookmarks_count = user.get_profile().bookmarks_related.count()
+			old_bookmarks_count = user.userprofile.bookmarks_related.count()
 
 			# reset user with a new fresh copy from the db
 			# Then stick the updated (user,password) combo back into the users list for easy referencing later.
@@ -853,22 +853,22 @@ class ReputationTesting(unittest.TestCase):
 			user_index = [u[0] for u in users].index(user)
 			users[user_index] = (user, password)
 
-			print_test_msg ("Reputation points AFTER bookmarking a PetReport: %s" %(user.get_profile().reputation))
+			print_test_msg ("Reputation points AFTER bookmarking a PetReport: %s" %(user.userprofile.reputation))
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], add_bookmark_url)
-			self.assertEquals(user.get_profile().reputation, old_reputation+REWARD_PETREPORT_BOOKMARK)
+			self.assertEquals(user.userprofile.reputation, old_reputation+REWARD_PETREPORT_BOOKMARK)
 
 
 			# ...................Testing Removing a Bookmark.........................
-			old_reputation = user.get_profile().reputation
+			old_reputation = user.userprofile.reputation
 			print_test_msg ("Reputation points BEFORE unbookmarking a PetReport: %s" %(old_reputation))
 
 			remove_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Remove Bookmark"}
 			response = client.post(remove_bookmark_url, post, follow=True)
-			new_bookmarks_count = user.get_profile().bookmarks_related.count()
+			new_bookmarks_count = user.userprofile.bookmarks_related.count()
 
 			# Reset user with a new fresh copy from the db
 			# Then stick the updated (user,password) combo back into the users list for easy referencing later.
@@ -876,13 +876,13 @@ class ReputationTesting(unittest.TestCase):
 			user_index = [u[0] for u in users].index(user)
 			users[user_index] = (user, password)
 
-			print_test_msg ("Reputation points AFTER unbookmarking a PetReport: %s" %(user.get_profile().reputation))
+			print_test_msg ("Reputation points AFTER unbookmarking a PetReport: %s" %(user.userprofile.reputation))
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], remove_bookmark_url)
 			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
-			self.assertEquals(user.get_profile().reputation, old_reputation-REWARD_PETREPORT_BOOKMARK)
+			self.assertEquals(user.userprofile.reputation, old_reputation-REWARD_PETREPORT_BOOKMARK)
 
 			output_update(i + 1)
 			end_time = time.clock()
@@ -929,7 +929,7 @@ class ReputationTesting(unittest.TestCase):
 				verification_page_url = URL_VERIFY_PETMATCH + str(petmatch.id) + "/"
 
 				response = client.get(verification_page_url)
-				userprofile = user.get_profile()
+				userprofile = user.userprofile
 				self.assertEquals(response.status_code, 200)
 
 				print_test_msg ("PetMatch owner (%s) reputation BEFORE: %s " % (petmatch_owner.user, reputation[0]))

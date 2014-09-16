@@ -12,8 +12,8 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.template.loader import render_to_string
 from django.core.validators import validate_email
 from django.shortcuts import get_object_or_404, render_to_response, redirect
+from home.models import Activity
 from datetime import datetime
-from utilities import logger
 from constants import *
 from home.constants import *
 from utilities.utils import *
@@ -22,7 +22,7 @@ from pprint import pprint
 @login_required
 def get_UserProfile_page(request, userprofile_id):
     #Be aware of what you show other authenticated users in contrast to the *same* authenticated user.
-    request_profile = request.user.get_profile()   
+    request_profile = request.user.userprofile   
     show_profile = get_object_or_404(UserProfile, pk=userprofile_id)
     context = {"show_profile": show_profile}
 
@@ -55,11 +55,11 @@ def follow_UserProfile(request):
             else:
                 userprofile.following.add(target_userprofile)
                 # add points to the user who is being followed (i.e. the target_userprofile) 
-                target_userprofile.update_reputation(ACTIVITY_USER_BEING_FOLLOWED)
+                target_userprofile.update_reputation("ACTIVITY_SOCIAL_FOLLOW")
                 messages.success(request, "You are now following " + str(target_userprofile.user.username) + ".")     
 
                 # Log the following activity for this UserProfile
-                logger.log_activity(ACTIVITY_FOLLOWING, userprofile, target_userprofile)
+                Activity.log_activity("ACTIVITY_SOCIAL_FOLLOW", userprofile, source=target_userprofile)
 
             return redirect (URL_USERPROFILE + str(target_userprofile.id))
 
@@ -80,10 +80,10 @@ def unfollow_UserProfile(request):
             if target_userprofile in userprofile.following.all():
                 userprofile.following.remove(target_userprofile)
                 # remove points to the use who has been unfollowed (i.e. the target_userprofile)
-                target_userprofile.update_reputation(ACTIVITY_USER_BEING_UNFOLLOWED)
+                target_userprofile.update_reputation("ACTIVITY_SOCIAL_UNFOLLOW")
                 messages.success(request, "You are no longer following " + str(target_userprofile.user.username) + ".") 
                 # Log the unfollowing activity for this UserProfile
-                logger.log_activity(ACTIVITY_UNFOLLOWING, userprofile, target_userprofile)
+                Activity.log_activity("ACTIVITY_SOCIAL_UNFOLLOW", userprofile, source=target_userprofile)
                 return redirect(URL_USERPROFILE + str(target_userprofile.id))
 
             else:
@@ -100,7 +100,7 @@ def message_UserProfile(request):
         message = request.POST ["message"]
         target_userprofile_id = request.POST ["target_userprofile_id"]
         target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
-        from_userprofile = request.user.get_profile()
+        from_userprofile = request.user.userprofile
 
         #You cannot send a message to yourself!
         if from_userprofile.id == target_userprofile.id:
@@ -124,7 +124,7 @@ def message_UserProfile(request):
 def editUserProfile_page(request):
     if request.method=='GET':
         user = request.user
-        form = UserProfileForm(instance=user.get_profile())
+        form = UserProfileForm(instance=user.userprofile)
         return render_to_response(HTML_EDITUSERPROFILE_FORM, 
             {   "form": form, 
                 "USERPROFILE_DESCRIPTION_LENGTH": USERPROFILE_DESCRIPTION_LENGTH, 
@@ -136,7 +136,7 @@ def editUserProfile_page(request):
 def update_User_info(request):
     if request.method == "POST":
         user = request.user
-        profile = user.get_profile()
+        profile = user.userprofile
         user_changed = False
         email_changed = False
         userprofile_form = UserProfileForm(request.POST, request.FILES)
@@ -156,6 +156,9 @@ def update_User_info(request):
             user_changed = True
             photo = request.FILES.get("photo")
             profile.set_images(photo)
+            messages.success(request, "Looking good! +%d Pet Points for a nice portrait!" % ACTIVITIES["ACTIVITY_USER_SET_PHOTO"]["reward"])
+            Activity.log_activity("ACTIVITY_USER_SET_PHOTO", profile)
+            profile.update_reputation("ACTIVITY_USER_SET_PHOTO")
 
         #Check if username has changed.
         if request.POST ["username"] != user.username:
@@ -255,7 +258,7 @@ def update_User_password(request):
 @login_required
 def delete_userprofile(request):
     if request.method == "POST":
-        profile = request.user.get_profile()
+        profile = request.user.userprofile
         profile.delete()
         logout(request)
         messages.success(request, "Profile successfully deleted. Thank you for your help, and please come back soon!")

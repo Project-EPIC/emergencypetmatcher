@@ -1,6 +1,6 @@
 # Django settings for project project.
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -21,16 +21,6 @@ DATABASES = {
         'PASSWORD': '3m3rgEncY',                  # Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
-    }
-}
-
-#NoSQL Databases being used.
-NOSQL_DATABASES = {
-    'mongodb': {
-        'NAME':'epm_activity_db',
-        "HOST":"localhost",
-        'PORT':27018,
-        'MAX_POOL_SIZE':10
     }
 }
 

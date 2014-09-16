@@ -45,51 +45,47 @@ EPM_DIRECTORY = os.path.dirname(PROJECT_WORKSPACE)
 LOGS_DIRECTORY = STATIC_URL + "logs/"
 
 #Represents how many activities to fetch per request.
-ACTIVITY_FEED_LENGTH = 20
+ACTIVITY_FEED_LENGTH = 10
 
 #Activity Log File Path Constants
 ACTIVITY_LOG_DIRECTORY = LOGS_DIRECTORY + "activity_logs/"
 
-#MongoDB Collection Names for Model-based Activities.
-DOCUMENTER_ACTIVITY_COLLECTION_USERPROFILE = "userprofiles"
-DOCUMENTER_ACTIVITY_COLLECTION_PETREPORT = "petreports"
-DOCUMENTER_ACTIVITY_COLLECTION_PETMATCH = "petmatches"
-DOCUMENTER_ACTIVITY_COLLECTION_PETCHECK = "petchecks"
-DOCUMENTER_KEY_USERPROFILE_ID = "userprofile_id"
-DOCUMENTER_KEY_LOG = "log"
-DOCUMENTER_KEY_ACTIVITY = "activity"
-DOCUMENTER_KEY_DATE = "date"
+#Activities with their reward points attached.
+ACTIVITIES = {  "ACTIVITY_ACCOUNT_CREATED"            : {"reward": 10},
+                "ACTIVITY_LOGIN"                      : {"reward":  0},
+                "ACTIVITY_LOGOUT"                     : {"reward":  0},
+                "ACTIVITY_USER_CHANGED_USERNAME"      : {"reward":  0},
+                "ACTIVITY_USER_SET_PHOTO"             : {"reward":  2},
+                "ACTIVITY_PETREPORT_SUBMITTED"        : {"reward": 10},
+                "ACTIVITY_PETREPORT_ADD_BOOKMARK"     : {"reward":  0},
+                "ACTIVITY_PETREPORT_REMOVE_BOOKMARK"  : {"reward":  0},
+                "ACTIVITY_PETMATCH_PROPOSED"          : {"reward": 15},
+                "ACTIVITY_PETMATCH_UPVOTE"            : {"reward":  1},
+                "ACTIVITY_PETMATCH_DOWNVOTE"          : {"reward":  1},
+                "ACTIVITY_PETCHECK_VERIFY"            : {"reward":  5},
+                "ACTIVITY_PETCHECK_VERIFY_SUCCESS"    : {"reward": 20},
+                "ACTIVITY_PETCHECK_VERIFY_FAIL"       : {"reward": 10},
+                "ACTIVITY_SOCIAL_FOLLOW"              : {"reward":  5},
+                "ACTIVITY_SOCIAL_UNFOLLOW"            : {"reward":  0},
+                "ACTIVITY_SOCIAL_SEND_MESSAGE_TO_USER": {"reward":  0}  }
 
-#Home Activities
-ACTIVITY_ACCOUNT_CREATED = "ACTIVITY_ACCOUNT_CREATED"
-ACTIVITY_LOGIN = "ACTIVITY_LOGIN"
-ACTIVITY_LOGOUT = "ACTIVITY_LOGOUT"
-#PetReport Activities
-ACTIVITY_PETREPORT_SUBMITTED = "ACTIVITY_PETREPORT_SUBMITTED"
-ACTIVITY_PETREPORT_ADD_BOOKMARK = "ACTIVITY_PETREPORT_ADD_BOOKMARK"
-ACTIVITY_PETREPORT_REMOVE_BOOKMARK = "ACTIVITY_PETREPORT_REMOVE_BOOKMARK"
-#PetMatch Activities
-ACTIVITY_PETMATCH_PROPOSED = "ACTIVITY_PETMATCH_PROPOSED"
-ACTIVITY_PETMATCH_UPVOTE = "ACTIVITY_PETMATCH_UPVOTE"
-ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL = "ACTIVITY_PETMATCH_UPVOTE_SUCCESSFUL"
-ACTIVITY_PETMATCH_DOWNVOTE= "ACTIVITY_PETMATCH_DOWNVOTE"
-ACTIVITY_PETMATCH_PROPOSED_FOR_BOOKMARKED_PETREPORT = "ACTIVITY_PETMATCH_PROPOSED_FOR_BOOKMARKED_PETREPORT"
-ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE = "ACTIVITY_USER_PROPOSED_PETMATCH_UPVOTE"
-ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL = "ACTIVITY_USER_PROPOSED_PETMATCH_SUCCESSFUL"
-ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE = "ACTIVITY_USER_PROPOSED_PETMATCH_FAILURE"
-ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL = "ACTIVITY_USER_VERIFY_PETMATCH_SUCCESSFUL"
-#Social Activities
-ACTIVITY_FOLLOWING = "ACTIVITY_FOLLOWING"
-ACTIVITY_UNFOLLOWING = "ACTIVITY_UNFOLLOWING"
-ACTIVITY_FOLLOWER = "ACTIVITY_FOLLOWER"
-ACTIVITY_UNFOLLOWER = "ACTIVITY_UNFOLLOWER"
-ACTIVITY_USER_CHANGED_USERNAME = "ACTIVITY_USER_CHANGED_USERNAME"
-ACTIVITY_USER_BEING_FOLLOWED = "ACTIVITY_USER_BEING_FOLLOWED"
-ACTIVITY_USER_BEING_UNFOLLOWED = "ACTIVITY_USER_BEING_UNFOLLOWED"
-ACTIVITY_USER_SEND_MESSAGE_TO_USERPROFILE = "ACTIVITY_USER_SEND_MESSAGE_TO_USER"
+ACTIVITY_SOCIAL_ACTIVITIES = ["ACTIVITY_ACCOUNT_CREATED",
+                              "ACTIVITY_USER_CHANGED_USERNAME",
+                              "ACTIVITY_USER_SET_PHOTO",
+                              "ACTIVITY_PETREPORT_SUBMITTED," 
+                              "ACTIVITY_PETMATCH_PROPOSED," 
+                              "ACTIVITY_PETMATCH_UPVOTE," 
+                              "ACTIVITY_PETMATCH_DOWNVOTE",
+                              "ACTIVITY_PETCHECK_VERIFY",
+                              "ACTIVITY_PETCHECK_VERIFY_SUCCESS",
+                              "ACTIVITY_PETCHECK_VERIFY_FAIL",
+                              "ACTIVITY_SOCIAL_FOLLOW"]
+
+#Activity Model Field Length
+ACTIVITIES_MAX_LENGTH = 50                              
 
 
-TOS_MINOR_TEXT = """Hello! We are researchers from Project EPIC at the University of Colorado Boulder.  We are doing a study to see how excellent volunteers like you work with each other to help pet owners find their pets when disaster strikes. We are asking you to take part in the research study because we are interested in how you use EmergencyPetMatcher.
+TOS_MINOR_TEXT = """Hello! We are researchers from Project EPIC (Empowering the Public with Information in Crisis) at the University of Colorado Boulder.  We are doing a study to see how excellent volunteers like you work with each other to help pet owners find their pets when disaster strikes. We are asking you to take part in the research study because we are interested in how you use EmergencyPetMatcher.
 
 For this research, we will keep track of the information you provide to us, like the pets and pet matches you work on, which users you talk to, and how often you log on and use EPM. We will keep all of your information secure and private as much as possible. Some information, such as your username, needs to be public so others on the web site know who you are. 
 
@@ -113,7 +109,7 @@ Project EPIC
 
 TOS_ADULT_TEXT = """Welcome to EmergencyPetMatcher! By checking the box below you indicate that you have read, understood, and agreed to the following:
  
-Emergency Pet Matcher (EPM) is a tool developed and supported by the Project EPIC research team at the University of Colorado Boulder. This research project is led by Leysia Palen (Professor of the Department of Computer Science, 430 UCB, palen@cs.colorado.edu).
+Emergency Pet Matcher (EPM) is a tool developed and supported by the Project EPIC (Empowering the Public with Information in Crisis) research team at the University of Colorado Boulder. This research project is led by Leysia Palen (Professor of the Department of Computer Science, 430 UCB, palen@cs.colorado.edu).
  
 Project Description: This project studies how people collect and share information about displaced pets in disaster events.
  

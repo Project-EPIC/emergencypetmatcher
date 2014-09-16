@@ -402,10 +402,10 @@ class ReportingTesting (unittest.TestCase):
 			prdp_url = URL_PRDP + str(petreport.id) + "/"
 			print_test_msg(prdp_url)
 			response = client.get(prdp_url)
-			old_bookmarks_count = user.get_profile().bookmarks_related.count()
+			old_bookmarks_count = user.userprofile.bookmarks_related.count()
 
 			#if user has bookmarked this petreport previously,
-			if(petreport.UserProfile_has_bookmarked(user.get_profile())):
+			if(petreport.UserProfile_has_bookmarked(user.userprofile)):
 				previously_bookmarked = True
 			else:
 				previously_bookmarked = False
@@ -413,13 +413,13 @@ class ReportingTesting (unittest.TestCase):
 			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Bookmark this Pet"}
 			response = client.post(add_bookmark_url, post, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
-			new_bookmarks_count = user.get_profile().bookmarks_related.count()
+			new_bookmarks_count = user.userprofile.bookmarks_related.count()
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], add_bookmark_url)
-			self.assertTrue(petreport.UserProfile_has_bookmarked(user.get_profile()))
-			self.assertEquals(petreport.bookmarked_by.get(pk = user.id), user.get_profile())
+			self.assertTrue(petreport.UserProfile_has_bookmarked(user.userprofile))
+			self.assertEquals(petreport.bookmarked_by.get(pk = user.id), user.userprofile)
 			if(not previously_bookmarked):
 				self.assertEquals(old_bookmarks_count, (new_bookmarks_count-1))
 
@@ -460,37 +460,37 @@ class ReportingTesting (unittest.TestCase):
 			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
 			response = client.post(add_bookmark_url, post, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
-			old_bookmarks_count = user.get_profile().bookmarks_related.count()
+			old_bookmarks_count = user.userprofile.bookmarks_related.count()
 
 			#remove the bookmark
 			remove_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Remove Bookmark"}
 			response = client.post(remove_bookmark_url, post, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
-			new_bookmarks_count = user.get_profile().bookmarks_related.count()
+			new_bookmarks_count = user.userprofile.bookmarks_related.count()
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], remove_bookmark_url)
-			#self.assertTrue(petreport.UserProfile_has_bookmarked(user.get_profile()),False)
+			#self.assertTrue(petreport.UserProfile_has_bookmarked(user.userprofile),False)
 			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
 
 			#add back the bookmark
 			add_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Bookmark this Pet"}
 			response = client.post(add_bookmark_url, post, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
-			old_bookmarks_count = user.get_profile().bookmarks_related.count()
+			old_bookmarks_count = user.userprofile.bookmarks_related.count()
 
 
 			#remove the bookmark 
 			remove_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id,"action":"Remove Bookmark"}
 			response = client.post(add_bookmark_url, post, HTTP_X_REQUESTED_WITH='XMLHttpRequest', follow=True)
-			new_bookmarks_count = user.get_profile().bookmarks_related.count()
+			new_bookmarks_count = user.userprofile.bookmarks_related.count()
 
 			#Make assertions
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ['PATH_INFO'], remove_bookmark_url)
-			#self.assertTrue(petreport.UserProfile_has_bookmarked(user.get_profile()),False)
+			#self.assertTrue(petreport.UserProfile_has_bookmarked(user.userprofile),False)
 			self.assertEquals(old_bookmarks_count, (new_bookmarks_count+1))
 
 			output_update(i + 1)

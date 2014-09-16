@@ -18,12 +18,12 @@ from django.utils import simplejson
 from matching.views import *
 from django.forms.models import model_to_dict
 from django.contrib.sites.models import Site
+from home.models import Activity
 from socializing.models import UserProfile
 from reporting.models import PetReport, PetReportForm
 from matching.models import PetMatch
 from pprint import pprint
 from PIL import Image
-from utilities import logger
 from utilities.utils import *
 from constants import *
 from home.constants import *
@@ -48,7 +48,7 @@ def get_PetReport(request, petreport_id):
         user_is_worker = False
     
     if request.user.is_authenticated() == True:
-        userprofile = request.user.get_profile()
+        userprofile = request.user.userprofile
 
         if pet_report.UserProfile_has_bookmarked(userprofile) == True:
             user_has_bookmarked = True
@@ -95,7 +95,7 @@ def submit_PetReport(request):
         if form.is_valid() == True:
             pr = form.save(commit=False)
             #Create (but do not save) the Pet Report Object associated with this form data.
-            pr.proposed_by = request.user.get_profile()
+            pr.proposed_by = request.user.userprofile
             img_rotation = 0
 
             #if email_re.match(pr.contact_email) == None:
@@ -119,14 +119,15 @@ def submit_PetReport(request):
             pr.set_images(pr.img_path, save=True, rotation=img_rotation)
 
             #Add reputation points for submitting a pet report
-            request.user.get_profile().update_reputation(ACTIVITY_PETREPORT_SUBMITTED)
+            request.user.userprofile.update_reputation("ACTIVITY_PETREPORT_SUBMITTED")
+            message = "Thank you for your submission! You have earned %d Pet Points! " % ACTIVITIES["ACTIVITY_PETREPORT_SUBMITTED"]["reward"]
             if pr.status == 'Lost':
-                messages.success (request, 'Thank you for your submission! Your contribution will go a long way towards helping people find your lost pet.')
+                messages.success (request, message + "Your contribution will go a long way towards helping people find your lost pet.")
             else:
-                messages.success (request, 'Thank you for your submission! Your contribution will go a long way towards helping others match lost and found pets.')                
+                messages.success (request, message + "Your contribution will go a long way towards helping others match lost and found pets.")                
 
             #Log the PetReport submission for this UserProfile
-            logger.log_activity(ACTIVITY_PETREPORT_SUBMITTED, request.user.get_profile(), petreport=pr)
+            Activity.log_activity("ACTIVITY_PETREPORT_SUBMITTED", request.user.userprofile, source=pr)
             print_success_msg("Pet Report submitted successfully")
             return redirect(URL_HOME)
 
@@ -192,41 +193,42 @@ def get_pet_breeds(request, pet_type=0):
 @login_required
 def bookmark_PetReport(request):
     if request.method == "POST" and request.is_ajax() == True:
-        user = request.user.get_profile()
+        profile = request.user.userprofile
         petreport_id = request.POST['petreport_id']
         petreport = get_object_or_404(PetReport, pk=petreport_id)
         action = request.POST['action']
-        print_debug_msg("User: %s, Action: %s, petreport: %s" % (request.user.username, action, petreport))
+        print_debug_msg("User: %s, Action: %s, petreport: %s" % (profile.user.username, action, petreport))
 
         #If the user has bookmarked this pet and the action is to remove it...
-        if ((petreport.UserProfile_has_bookmarked(user)) and (action == "Remove Bookmark")) :
-            petreport.bookmarked_by.remove(user)
+        if ((petreport.UserProfile_has_bookmarked(profile) == True) and (action == "Remove Bookmark")) :
+            petreport.bookmarked_by.remove(profile)
             petreport.save()
-            user.update_reputation(ACTIVITY_PETREPORT_REMOVE_BOOKMARK)
             message = "You have successfully removed the bookmark for this pet." 
             text = "Bookmark this Pet"
 
+            print_debug_msg("REMOVING BOOKMARK")
+
             # Log removing the PetReport bookmark for this UserProfile
-            logger.log_activity(ACTIVITY_PETREPORT_REMOVE_BOOKMARK, request.user.get_profile(), petreport=petreport)
+            Activity.log_activity("ACTIVITY_PETREPORT_REMOVE_BOOKMARK", profile, source=petreport)
 
         #If the user has NOT bookmarked this pet and the action is to bookmark it...
-        elif ((not petreport.UserProfile_has_bookmarked(user)) and (action == "Bookmark this Pet")):
-            petreport.bookmarked_by.add(user)
+        elif ((petreport.UserProfile_has_bookmarked(profile) == False) and (action == "Bookmark this Pet")):
+            petreport.bookmarked_by.add(profile)
             petreport.save()
-            user.update_reputation(ACTIVITY_PETREPORT_ADD_BOOKMARK)
-            print_info_msg ('Bookmarked pet report %s for %s' % (petreport, user))
+            print_info_msg ('Bookmarked pet report %s for %s' % (petreport, profile))
             message = "You have successfully bookmarked this pet!" 
             text = "Remove Bookmark"
 
+            print_debug_msg("ADDING BOOKMARK")
+
             # Log adding the PetReport bookmark for this UserProfile
-            logger.log_activity(ACTIVITY_PETREPORT_ADD_BOOKMARK, request.user.get_profile(), petreport=petreport)
+            Activity.log_activity("ACTIVITY_PETREPORT_ADD_BOOKMARK", profile, source=petreport)
 
         else:
-            print_info_msg ("User has bookmarked the pet: " + str(petreport.UserProfile_has_bookmarked(user)))
-            message = "Unable to "+action+"!"
+            print_info_msg ("User has bookmarked the pet: " + str(petreport.UserProfile_has_bookmarked(profile)))
+            message = "Unable to "+ action + "!"
             text = action
         json = simplejson.dumps ({"message":message, "text":text})
-        #print "JSON: " + str(json)
         return HttpResponse(json, mimetype="application/json")
     else:
         raise Http404

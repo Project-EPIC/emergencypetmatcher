@@ -49,6 +49,7 @@
 		var HOME_TITLE = 'EmergencyPetMatcher';
 		var HOME_CAPTION ='EmergencyPetMatcher';
 		var HOME_SUMMARY = 'EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.';
+		var ACTIVITY_COUNT = "{{ activity_count }}";
 		var PETREPORT_COUNT = "{{ petreport_count }}";
 		var PETMATCH_COUNT = "{{ petmatch_count }}";
 		var BOOKMARK_COUNT = "{{ bookmark_count }}";
@@ -57,7 +58,6 @@
 	{% endblock js %}	
 
 	<body style="background: #E0E0E0;">
-
 		<!-- EPM Modal Dialog Box -->
 		<div id="epm-modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-lg">
@@ -76,7 +76,7 @@
 					<ul class="nav navbar-nav navbar-left">
 						<li><div id="epm-brand">
 							<a id="epm-brand-title" class="navbar-brand" href="{% url 'home' %}">Emergency<b>PetMatcher</b></a>
-							<a id="epm-brand-epic-title" href = "http://epic.cs.colorado.edu">Project EPIC</a>
+							<a id="epm-brand-epic-title" href="http://epic.cs.colorado.edu">Project EPIC</a>
 						</div></li>
 					</ul>
 
@@ -123,14 +123,17 @@
 					<li id="epm-choices-petreports" class="active"><a href="#pets" role="tab"><b>Pets</b></a></li>
 					<li id="epm-choices-petmatches"><a href="#petmatches" role="tab"><b>Pet Matches</b></a></li>
 					<li id="epm-choices-reunited-pets"><a href="#reunited-pets" role="tab"><b>Reunited Pets</b></a></li>
+					<li id="epm-choices-activity"><a href="#activity" role="tab"><b>Activity</b></a></li>
 					{% if user.is_authenticated %}
 					<li id="epm-choices-bookmarked"><a href="#bookmarked" role="tab"><b>Bookmarked</b></a></li>
-					{% endif %}												
+					{% endif %}
 				</ul>
 
 				<div id="epm-tiles-container">
+
 					<!-- Pagination Placeholder -->
-					<div class="pagination_container"><div class="pagination"></div></div>
+					<div class="text-center"><ul class="pagination" style="display:inline-block;"></ul></div>
+
 					<!-- Tiles -->
 					<div class="tab-content">
 						<span id="tab-subtitle"></span>					

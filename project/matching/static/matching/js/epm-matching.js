@@ -81,10 +81,10 @@ function refresh_layout(){
 	};
 
 	// Get a reference to your grid items.
-	var handler = $('#tiles li.item');
+	var handler = $('#tiles li.pet-item');
 
-	$("#tiles li.item").attr("draggable", true);
-	$("#tiles li.item").each(function(i, item){
+	$("#tiles li.pet-item").attr("draggable", true);
+	$("#tiles li.pet-item").each(function(i, item){
 		$(item).on("dragstart", handleDragStart);
 		$(item).on("dragend", handleDragEnd);	
 	});
@@ -151,7 +151,7 @@ function moveImage(item, container) {
 
 function fetch_PetReports(page){
 	//First, remove all tile elements
-	$("#tiles li.item").remove();
+	$("#tiles li.pet-item").remove();
 	$("#tiles h3").remove();
 	$.ajax({
 	    type:"GET",

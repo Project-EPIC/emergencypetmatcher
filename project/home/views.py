@@ -25,13 +25,13 @@ from django.utils import simplejson
 from registration.models import RegistrationProfile
 from registration.forms import RegistrationFormTermsOfService
 from datetime import datetime
+from models import Activity
 from socializing.models import UserProfile
 from reporting.models import PetReport
 from matching.models import PetMatch
 from constants import *
 from utilities.utils import *
 from pprint import pprint
-from utilities import logger
 import oauth2 as oauth, random, urllib, hashlib, random, re, project.settings, registration
 
 #Home view
@@ -46,34 +46,33 @@ def home (request):
 
     #Also get bookmark count for pagination purposes.
     if request.user.is_authenticated() == True:    
-        up = request.user.get_profile()
+        up = request.user.userprofile
         bookmark_count = len(up.bookmarks_related.all())
         context.update({ "bookmark_count": bookmark_count })
 
     return render_to_response(HTML_HOME, context, RequestContext(request))
 
-def get_activities_json(request):
+def get_activities(request, page=None):
     if request.is_ajax() == True:
         activities = []
 
         #Let's populate the activity feed based upon whether the user is logged in.
         if request.user.is_authenticated() == True:
-            print_info_msg ("get_activities_json(): Authenticated User - recent activities...")
-            current_userprofile = request.user.get_profile()      
-            activities += logger.get_activities_from_log(userprofile=current_userprofile, since_date=current_userprofile.last_logout, num_activities=ACTIVITY_FEED_LENGTH)            
+            print_info_msg ("get_activities(): Authenticated User - recent activities...")
+            current_userprofile = request.user.userprofile      
+            activities = Activity.get_activities_for_feed(since_date=current_userprofile.last_logout, page=page, userprofile=current_userprofile, limit=ACTIVITY_FEED_LENGTH)            
 
         else:
-            print_info_msg ("get_activities_json(): Anonymous User - random sample of activities...")
+            print_info_msg ("get_activities(): Anonymous User - random sample of activities...")
             # Get random activities for the anonymous user
-            for userprof in UserProfile.objects.order_by("?").filter(user__is_active=True)[:ACTIVITY_FEED_LENGTH]:
-                activities += logger.get_activities_from_log(userprofile=userprof, num_activities=1)
+            activities = Activity.get_activities_for_feed(since_date=datetime.fromtimestamp(time.time()), page=page, userprofile=None, limit=10)
 
         #Zip it up in JSON and ship it out as an HTTP Response.
         json = simplejson.dumps ({"activities":activities})
         return HttpResponse(json, mimetype="application/json")     
 
     else:
-        print_error_msg ("Request for get_activities_json not an AJAX request!")
+        print_error_msg ("Request for get_activities not an AJAX request!")
         raise Http404           
 
 
@@ -122,7 +121,7 @@ def get_PetMatch(request, petmatch_id):
 
 def get_PetMatches(request, page=None):
     if request.is_ajax() == True:
-        filtered_matches = PetMatch.objects.filter(is_successful=False).order_by("id").reverse()
+        filtered_matches = PetMatch.objects.filter(is_successful=False, has_failed=False).order_by("id").reverse()
         pet_matches = PetMatch.get_PetMatches_by_page(filtered_matches, page)
 
         #Get the petmatch count for pagination purposes.
@@ -165,7 +164,7 @@ def get_successful_PetMatches(request, page=None):
 @login_required
 def get_bookmarks(request, page=None):
     if request.is_ajax() == True:
-        up = request.user.get_profile()
+        up = request.user.userprofile
         bookmarks = up.bookmarks_related.all()
 
         #Get the bookmark count for pagination purposes.
@@ -195,14 +194,11 @@ def login_User(request):
 
         if user != None:
             if user.is_active == True:
-                userprofile = user.get_profile()
-
-                #if log_exists(userprofile) == False:
-                 #   logger.log_activity(ACTIVITY_ACCOUNT_CREATED, userprofile)
+                userprofile = user.userprofile
 
                 login(request, user)
                 messages.success(request, 'Welcome, %s!' % (username))
-                logger.log_activity(ACTIVITY_LOGIN, user.get_profile())
+                Activity.log_activity("ACTIVITY_LOGIN", user.userprofile)
                 next_url = request.REQUEST ['next']
 
                 if "//" in next_url and re.match(r'[^\?]*//', next_url):
@@ -225,37 +221,38 @@ def login_User(request):
 
 @login_required
 def logout_User(request):
-    print_info_msg ("logger out UserProfile {%s}" % request.user.get_profile())
-
-    # Update to last_logout date field
-    user = get_object_or_404(UserProfile, pk=request.user.get_profile().id)
+    # Update last_logout date field
+    user = get_object_or_404(UserProfile, pk=request.user.userprofile.id)
     user.last_logout = datetime.now()
     user.save()
  
-    logger.log_activity(ACTIVITY_LOGOUT, request.user.get_profile())
-    messages.success(request, "You have successfully logged out.")
+    Activity.log_activity("ACTIVITY_LOGOUT", request.user.userprofile)
+    messages.success(request, "See you next time!")
     logout(request)
     return redirect(URL_HOME)
 
 def registration_activate (request, activation_key=None, backend=None):
     print_info_msg ("Activation Key: %s" % activation_key)
-
     #Does the activation key exist within a RegistrationProfile? 
     #(i.e. is somebody actually trying to activate an account or resurrect an old activation link?)
     try:
         rp = RegistrationProfile.objects.get(activation_key=activation_key)
-        profile = rp.user.get_profile()
+        profile = rp.user.userprofile
 
     except RegistrationProfile.DoesNotExist:
         messages.error(request, "This account has already been activated!")
         return redirect(URL_HOME)
 
     #Need to check if user is a minor and if parent/guardian consented.
-    pprint(profile.__dict__)
     if profile.is_minor == False or profile.guardian_consented == True:
-        activated_user = RegistrationProfile.objects.activate_user(activation_key)
-        print_info_msg ("RegistrationProfile now activated for active user %s" % activated_user)
-        return redirect (URL_ACTIVATION_COMPLETE)
+        if rp.activation_key_expired() == False:
+            activated_user = RegistrationProfile.objects.activate_user(activation_key)
+            print_info_msg ("RegistrationProfile now activated for active user %s" % activated_user)
+            return redirect (URL_ACTIVATION_COMPLETE)
+        else:
+            rp.delete()
+            messages.error(request, "Activation has expired! Please re-register your account.")
+            return redirect (URL_HOME)
     else:
         messages.error(request, "Your Parent/Guardian has not yet verified your account.")
         return redirect(URL_HOME)
@@ -302,10 +299,12 @@ def registration_register (request):
                                                                 request.POST["email"], 
                                                                 request.POST["password1"], 
                                                                 Site.objects.get_current())
+        
+        #Grab the UserProfile object.
+        profile = user.userprofile
 
         #If this user truly is a minor, save some extra information to be checked during activation.
         if is_minor(request.POST["date_of_birth"]) == True:
-            profile = user.get_profile()
             profile.is_minor = True
             profile.guardian_email = request.POST.get("guardian_email")
             profile.guardian_activation_key = create_sha1_hash(user.username)
@@ -321,6 +320,9 @@ def registration_register (request):
 
         user.first_name = request.POST.get("first_name")
         user.last_name = request.POST.get("last_name")
+
+        #Format the Date of Birth and store it.
+        profile.set_date_of_birth(request.POST.get("date_of_birth"))
         user.save()
         print_info_msg ("RegistrationProfile now created for inactive user %s" % user)
         return redirect (URL_REGISTRATION_COMPLETE)

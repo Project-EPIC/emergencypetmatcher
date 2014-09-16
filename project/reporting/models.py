@@ -81,13 +81,12 @@ class PetReport(models.Model):
         assert isinstance(user_profile, UserProfile)
         try:
             user = self.bookmarked_by.get(pk = user_profile.id)
-        except UserProfile.DoesNotExist:
-            user = None        
-        if (user != None):
             return True
-        else:
+        except UserProfile.DoesNotExist:
             return False
-        return False
+
+    def UserProfile_is_owner(self, userprofile):
+        return userprofile.id == self.proposed_by.id
 
     def is_crossposted(self):
         if self.contact_email and email_is_valid(self.contact_email):

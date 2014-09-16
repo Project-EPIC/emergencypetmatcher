@@ -7,24 +7,28 @@ from django.conf import settings
 from registration.models import RegistrationProfile
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import User
+from home.models import Activity
 from socializing.models import UserProfile, UserProfileForm, EditUserProfile
 from reporting.models import PetReport, PetReportForm
 from matching.models import PetMatch
 from verifying.models import PetCheck
 from social.apps.django_app.default.models import UserSocialAuth
-from utilities import documenter
 from django.db import IntegrityError
 from PIL import Image
 from random import randint
+from datetime import datetime
 from home.constants import *
 from socializing.constants import *
 from reporting.constants import *
 from matching.constants import *
 from verifying.constants import *
 from utilities.utils import *
-from utilities import logger
 import random, string, sys, time, datetime, lipsum, traceback
 
+#Control Variables
+NUM_PETREPORTS = 100
+NUM_USERS = 10
+NUM_PETMATCHES = 20
 
 #Setup the Site (if it hasn't yet been done)
 site = Site.objects.get_current()
@@ -42,6 +46,7 @@ def delete_all(leave_Users = True):
 	PetMatch.objects.all().delete()
 	PetReport.objects.all().delete()
 	delete_PetReport_images()
+	Activity.objects.all().delete()
 
 	if leave_Users == False:
 		User.objects.all().delete()
@@ -49,9 +54,6 @@ def delete_all(leave_Users = True):
 		RegistrationProfile.objects.all().delete()
 		UserSocialAuth.objects.all().delete()
 		delete_UserProfile_images()
-
-	#Delete Activities.
-	documenter.empty_collections()
 
 #Deletes all images in the designated folder
 def delete_images(target_dir=None, from_list=None):
@@ -108,7 +110,7 @@ def create_random_User(i, pretty_name=True):
 	except IntegrityError, e:
 		print_error_msg (str(e.message))
 
-	userprofile = user.get_profile()
+	userprofile = user.userprofile
 	return (user, password)
 
 #returns a random list of UserProfiles
@@ -135,7 +137,7 @@ def create_random_following_list (userprofile, num_following=None):
 
 	for followed in following_list:
 		userprofile.following.add(followed)
-		logger.log_activity(ACTIVITY_FOLLOWING, userprofile, userprofile2=followed)
+		Activity.log_activity("ACTIVITY_SOCIAL_FOLLOW", userprofile, followed)
 
 	print_success_msg("following list created for %s" % userprofile)
 	return userprofile
@@ -186,7 +188,7 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 		user = random.choice(User.objects.all())
 
 	#Populate the PetReport with the required fields.
-	pr = PetReport (pet_type = pet_type, status = status, proposed_by = user.get_profile())
+	pr = PetReport (pet_type = pet_type, status = status, proposed_by = user.userprofile)
 	pr.date_lost_or_found = generate_random_date(DATE_LOWER_BOUND, DATE_UPPER_BOUND, "%Y-%m-%d", random.random())
 	pr.sex = random.choice(SEX_CHOICES)[0]
 	pr.size = random.choice(SIZE_CHOICES)[0] 
@@ -253,7 +255,7 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 	else:
 		pr.save()
 		pr.workers = create_random_Userlist()
-		logger.log_activity(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=pr, )
+		Activity.log_activity("ACTIVITY_PETREPORT_SUBMITTED", user.userprofile, pr)
 		return pr
 
 #Find all potential PetMatch PetReport (Lost, Found) pairs and return a list of them.
@@ -303,7 +305,7 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 		user = random.choice(User.objects.all())
 
 	#Make your PetMatch.
-	pm = PetMatch(lost_pet = lost_pet, found_pet = found_pet, proposed_by = user.get_profile())
+	pm = PetMatch(lost_pet = lost_pet, found_pet = found_pet, proposed_by = user.userprofile)
 	(petmatch, outcome) = pm.save()
 
 	#If the PetMatch save was successful...
@@ -325,24 +327,24 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 				petmatch.down_votes = set(down_votes) - set(up_votes)
 				petmatch.up_votes = set(up_votes) - set(down_votes)
 
-			logger.log_activity(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=petmatch, )
+			Activity.log_activity("ACTIVITY_PETMATCH_PROPOSED", user.userprofile, petmatch)
 		
 		elif outcome == "SQL UPDATE":
-			petmatch.up_votes.add(user.get_profile())
-			logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=petmatch, )			
+			petmatch.up_votes.add(user.userprofile)
+			Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", user.userprofile, petmatch)			
 
 	else:
 		if outcome =="DUPLICATE PETMATCH":
 			existing_petmatch = PetMatch.get_PetMatch(lost_pet, found_pet)
 
 			if random.random() >= 0.5:
-				existing_petmatch.up_votes.add(user.get_profile())
-				existing_petmatch.down_votes.remove(user.get_profile())
-				logger.log_activity(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=existing_petmatch, )				
+				existing_petmatch.up_votes.add(user.userprofile)
+				existing_petmatch.down_votes.remove(user.userprofile)
+				Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", user.userprofile, existing_petmatch)				
 			else:
-				existing_petmatch.down_votes.add(user.get_profile())
-				existing_petmatch.up_votes.remove(user.get_profile())
-				logger.log_activity(ACTIVITY_PETMATCH_DOWNVOTE, user.get_profile(), petmatch=existing_petmatch, )				
+				existing_petmatch.down_votes.add(user.userprofile)
+				existing_petmatch.up_votes.remove(user.userprofile)
+				Activity.log_activity("ACTIVITY_PETMATCH_DOWNVOTE", user.userprofile, existing_petmatch)				
 			
 	print "\n"
 	#Return the (possibly None) PetMatch
@@ -381,7 +383,7 @@ def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_O
 		#Then, create the Users' following lists (if specified)
 		if create_following_lists == True:
 			for user in results ["users"]:
-				userprofile = user[0].get_profile()
+				userprofile = user[0].userprofile
 				create_random_following_list(userprofile)
 
 	#Then, create the Client objects (if specified)
@@ -400,7 +402,7 @@ def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_O
 		#Then, create the Users' bookmarks lists (if specified)
 		if create_bookmark_lists == True:
 			for user in results["users"]:
-				userprofile = user[0].get_profile()
+				userprofile = user[0].userprofile
 				create_random_bookmark_list(userprofile)
 
 	#Finally, create PetMatch objects (if specified)
@@ -420,13 +422,6 @@ def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_O
 
 	#Return the full dictionary.
 	return results
-
-
-#Control Variables
-NUM_PETREPORTS = 300
-NUM_USERS = 25
-NUM_PETMATCHES = 20
-
 
 if __name__ == "__main__":
 

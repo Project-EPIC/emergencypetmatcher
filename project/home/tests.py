@@ -44,7 +44,7 @@ class ModelTesting (unittest.TestCase):
 			user, password = create_random_User(i)
 			username = user.username
 
-			user_profile = user.get_profile()
+			user_profile = user.userprofile
 			user_profile.reputation = random.randint(0,100)
 			user_profile.save()
 
@@ -78,7 +78,7 @@ class ModelTesting (unittest.TestCase):
 			user, password = create_random_User(i)
 			username = user.username
 
-			user_profile = user.get_profile()
+			user_profile = user.userprofile
 			user_profile.reputation = random.randint(0,100)
 			user_profile.save()
 
@@ -116,7 +116,7 @@ class ModelTesting (unittest.TestCase):
 			user, password = create_random_User(i)
 			username = user.username
 
-			user_profile = user.get_profile()
+			user_profile = user.userprofile
 			user_profile.reputation = random.randint(0,100)
 			user_profile.save()
 
@@ -266,7 +266,7 @@ class ModelTesting (unittest.TestCase):
 			pm = create_random_PetMatch(pr1, pr2, user, pet_type=pet_type)
 
 			#Now, retrieve it and assert that they are the same.
-			pm_same = PetMatch.objects.get(proposed_by = user.get_profile())
+			pm_same = PetMatch.objects.get(proposed_by = user.userprofile)
 			self.assertEqual(pm.lost_pet, pm_same.lost_pet)
 			self.assertEqual(pm.found_pet, pm_same.found_pet)
 			self.assertEqual(pm.proposed_by, pm_same.proposed_by)
@@ -369,7 +369,7 @@ class ModelTesting (unittest.TestCase):
 
 			#Save it to the database.
 			pm.save()
-			pm_updated = PetMatch.objects.get(proposed_by = user.get_profile(), lost_pet = pr1, found_pet = pr2)
+			pm_updated = PetMatch.objects.get(proposed_by = user.userprofile, lost_pet = pr1, found_pet = pr2)
 
 			#Now assert that the updated PetMatch matches the one we've just updated.
 			self.assertEqual(pm, pm_updated)
@@ -408,7 +408,7 @@ class ModelTesting (unittest.TestCase):
 			pm = create_random_PetMatch(pr1, pr2, user, pet_type=pet_type)
 
 			#And now delete the PetMatch Object.
-			PetMatch.objects.all().get(proposed_by = user.get_profile(), lost_pet = pr1, found_pet = pr2).delete()
+			PetMatch.objects.all().get(proposed_by = user.userprofile, lost_pet = pr1, found_pet = pr2).delete()
 			#Assert that there is nothing in the database!
 			self.assertTrue(len(PetMatch.objects.all()) == 0)
 			output_update (i + 1)
@@ -568,7 +568,7 @@ class LoggerTesting (unittest.TestCase):
 		for i in range(NUMBER_OF_TESTS):
 			start_time = time.clock()
 			user = User.objects.create_user(username=generate_string(USER_USERNAME_LENGTH))
-			userprofile = user.get_profile()
+			userprofile = user.userprofile
 
 			#Now check: Does the userprofile's log file exist where it should?
 			self.assertTrue(logger.log_exists(userprofile) == True)
@@ -633,13 +633,13 @@ class LoggerTesting (unittest.TestCase):
 		for i in range(NUMBER_OF_TESTS):
 			start_time = time.clock()
 			(user, password) = create_random_User(i)
-			user_log_filename = ACTIVITY_LOG_DIRECTORY + str(user.get_profile().id) + ".log"
+			user_log_filename = ACTIVITY_LOG_DIRECTORY + str(user.userprofile.id) + ".log"
 
 			with open(user_log_filename, 'r') as logging:
 
 				lines = list(iter(logging.readlines()))
 				print lines
-				self.assertTrue(logger.activity_has_been_logged(ACTIVITY_ACCOUNT_CREATED, user.get_profile()) == True)
+				self.assertTrue(logger.activity_has_been_logged(ACTIVITY_ACCOUNT_CREATED, user.userprofile) == True)
 				self.assertEquals(len(lines), 1)
 
 			logging.close()
@@ -700,7 +700,7 @@ class LoggerTesting (unittest.TestCase):
 
 			#Now, check if the activity for submitting a PetReport appears in this user's log.
 			petreport = PetReport.objects.get(proposed_by = user, pet_name = user.username + str(i))
-			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETREPORT_SUBMITTED, user.get_profile(), petreport=petreport) == True)	
+			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETREPORT_SUBMITTED, user.userprofile, petreport=petreport) == True)	
 
 			output_update(i + 1)
 			end_time = time.clock()
@@ -771,13 +771,13 @@ class LoggerTesting (unittest.TestCase):
 			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
 
 			#Either the User is upvoting an already existing PetMatch...
-			if match.UserProfile_has_voted(user.get_profile()) == UPVOTE:
-				self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETMATCH_UPVOTE, user.get_profile(), petmatch=match) == True)
+			if match.UserProfile_has_voted(user.userprofile) == UPVOTE:
+				self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETMATCH_UPVOTE, user.userprofile, petmatch=match) == True)
 				print_test_msg ("A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user))
 
 			#...Or the User successfully proposed a NEW PetMatch.
 			else:
-				self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETMATCH_PROPOSED, user.get_profile(), petmatch=match) == True)					
+				self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETMATCH_PROPOSED, user.userprofile, petmatch=match) == True)					
 				print_test_msg ("%s has successfully POSTED a new match!" % (user))
 	
 			output_update(i + 1)
@@ -798,8 +798,8 @@ class LoggerTesting (unittest.TestCase):
 
 			user_one, password_one = random.choice(users)
 			user_two, password_two = random.choice(users)
-			userprofile_one = user_one.get_profile()
-			userprofile_two = user_two.get_profile()
+			userprofile_one = user_one.userprofile
+			userprofile_two = user_two.userprofile
 			client = random.choice(clients)
 			
 			if user_one.id == user_two.id:
@@ -846,8 +846,8 @@ class LoggerTesting (unittest.TestCase):
 			start_time = time.clock()
 			user_one, password_one = random.choice(users)
 			user_two, password_two = random.choice(users)
-			userprofile_one = user_one.get_profile()
-			userprofile_two = user_two.get_profile()
+			userprofile_one = user_one.userprofile
+			userprofile_two = user_two.userprofile
 			client = random.choice(clients)
 			
 			if user_one.id == user_two.id:
@@ -913,10 +913,10 @@ class LoggerTesting (unittest.TestCase):
 			# Go to the PRDP (Pet Report Detailed Page) interface
 			response = client.get(URL_PRDP + str(petreport.id) + "/")
 			self.assertEquals(response.status_code, 200)
-			old_bookmarks_count = user.get_profile().bookmarks_related.count()
+			old_bookmarks_count = user.userprofile.bookmarks_related.count()
 
 			#if user has bookmarked this petreport previously,
-			if(petreport.UserProfile_has_bookmarked(user.get_profile())):
+			if(petreport.UserProfile_has_bookmarked(user.userprofile)):
 				previously_bookmarked = True
 			else:
 				previously_bookmarked = False
@@ -927,7 +927,7 @@ class LoggerTesting (unittest.TestCase):
 			response = client.post(add_bookmark_url, post, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
 			self.assertEquals(response.status_code, 200)
 			client.logout()	
-			new_bookmarks_count = user.get_profile().bookmarks_related.count()
+			new_bookmarks_count = user.userprofile.bookmarks_related.count()
 			
 			#Make assertions
 			if not previously_bookmarked:
@@ -935,7 +935,7 @@ class LoggerTesting (unittest.TestCase):
 
 			# Check if the activity for adding a PetReport bookmark appears in this user's log.
 			print_test_msg("%s has added a bookmark for %s." % (user, petreport))
-			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)
+			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.userprofile, petreport=petreport) == True)
 
 			output_update(i + 1)
 			end_time = time.clock()
@@ -975,14 +975,14 @@ class LoggerTesting (unittest.TestCase):
 			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Bookmark this Pet"}
 			response = client.post(add_bookmark_url, post, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)	
 			self.assertEquals(response.status_code, 200)
-			old_bookmarks_count = user.get_profile().bookmarks_related.count()
+			old_bookmarks_count = user.userprofile.bookmarks_related.count()
 
 			# Remove the bookmark
 			remove_bookmark_url = URL_BOOKMARK_PETREPORT
 			post =  {"petreport_id":petreport.id, "user_id":user.id, "action":"Remove Bookmark"}
 			response = client.post(remove_bookmark_url, post, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
 			self.assertEquals(response.status_code, 200)
-			new_bookmarks_count = user.get_profile().bookmarks_related.count()
+			new_bookmarks_count = user.userprofile.bookmarks_related.count()
 			client.logout()	
 
 			#Make assertions
@@ -990,7 +990,7 @@ class LoggerTesting (unittest.TestCase):
 
 			# Check if the activity for adding a PetReport bookmark appears in this user's log.
 			print_test_msg("%s has removed a bookmark for %s." % (user, petreport))
-			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.get_profile(), petreport=petreport) == True)				
+			self.assertTrue(logger.activity_has_been_logged(ACTIVITY_PETREPORT_ADD_BOOKMARK, userprofile=user.userprofile, petreport=petreport) == True)				
 
 			output_update(i + 1)
 			end_time = time.clock()
@@ -1013,7 +1013,7 @@ class LoggerTesting (unittest.TestCase):
 
 			#objects
 			user, password = random.choice(users)
-			userprofile = user.get_profile()			
+			userprofile = user.userprofile			
 			client = random.choice(clients)
 
 			#Log in First.
@@ -1098,7 +1098,7 @@ class LoggerTesting (unittest.TestCase):
 
 			#objects
 			user, password = random.choice(users)
-			userprofile = user.get_profile()
+			userprofile = user.userprofile
 			another_user, another_user_password = random.choice(users)
 			petreport = random.choice(petreports)
 			client = random.choice(clients)
@@ -1369,7 +1369,7 @@ class HomePageTesting (unittest.TestCase):
 				self.assertEquals(response.status_code, 200)
 				self.assertEquals(response.request ["PATH_INFO"], url)
 
-				all_bookmarks = user.get_profile().bookmarks_related.all()
+				all_bookmarks = user.userprofile.bookmarks_related.all()
 				total_bookmark_count = len(all_bookmarks)
 				paged_bookmarks = PetReport.get_bookmarks_by_page(all_bookmarks, page)
 

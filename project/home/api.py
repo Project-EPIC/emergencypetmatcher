@@ -63,7 +63,7 @@ class PetReportResource(MultipartResource, ModelResource):
             if form.is_valid() == True:
                 pr = form.save(commit=False)
                 #Create (but do not save) the Pet Report Object associated with this form data.
-                pr.proposed_by = request.user.get_profile()
+                pr.proposed_by = request.user.userprofile
                 print "[INFO]: Pet Report Image Path: %s" % pr.img_path
                 #If there was no image attached, let's take care of defaults.
                 if pr.img_path == None:
@@ -92,7 +92,7 @@ class PetReportResource(MultipartResource, ModelResource):
                     bundle.data ['message'] = 'Thank you for your submission! Your contribution will go a long way towards helping others match lost and found pets.'
 
                 #Log the PetReport submission for this UserProfile
-                logger.log_activity(ACTIVITY_PETREPORT_SUBMITTED, request.user.get_profile(), petreport=pr)
+                logger.log_activity(ACTIVITY_PETREPORT_SUBMITTED, request.user.userprofile, petreport=pr)
                 print "[SUCCESS]: Pet Report submitted successfully" 
                 bundle.obj = pr
             else:
@@ -130,7 +130,7 @@ class PetReportResource2(MultipartResource, ModelResource):
             sex = bundle.data['sex']
             size = bundle.data['size']
             location = bundle.data['location']
-            proposed_by = request.user.get_profile()
+            proposed_by = request.user.userprofile
             '''Non-Required Fields'''
             img_path = ""
             pet_name = ""
