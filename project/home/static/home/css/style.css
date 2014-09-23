@@ -9,6 +9,8 @@ body {
 	max-width:1400px;
 }
 
+#epm-modal {}
+
 #content {
 	box-shadow: 0px 5px 20px #888888;
 	background: #F0F0F0;
@@ -215,8 +217,8 @@ header p {
 	list-style-type: none;
 	position: relative; /** Needed to ensure items are laid out relative to this container **/
 	border:5px;
-	margin:30px 10px 30px 10px;
-	padding:0;
+	margin:30px auto 30px auto;
+	padding:0px;
 	z-index:0;
 }
 
@@ -249,6 +251,45 @@ header p {
 	max-width: 200px;
 }
 
+#tiles li.activity-item {
+	font-size:16px;
+	max-width:300px;
+	padding:10px;
+}
+
+#tiles li.activity-item img {
+	width:50px;
+	height:50px;
+	vertical-align: sub;
+	display:inline-block;
+}
+
+#tiles li.activity-item div.source {
+	display:block;
+	margin:10px auto;
+	text-align: center;
+}
+
+#tiles li.activity-item div.source img{
+	width:75px;
+	height:75px;
+}
+
+#tiles li.activity-item p {
+	display:inline-block;
+	font-size:16px;
+	width:200px;
+	word-wrap:break-word;
+	margin:10px;
+}
+
+#tiles li.activity-item div.date {
+	display:block;
+	font-size:10px;
+	color:gray;
+	float:right;
+}
+
 /**
  * Grid item text
  */
@@ -259,7 +300,6 @@ header p {
 }
 
 #tiles li a{
-	color: black;
 }
 
 #tiles li h1 {

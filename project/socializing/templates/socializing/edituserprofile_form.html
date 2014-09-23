@@ -66,7 +66,7 @@
 	{% endif %}
 
 	<!-- Update User Password  -->
-	{% if password_form and user.get_profile.social_profile == False %}
+	{% if password_form and user.userprofile.social_profile == False %}
 		<form enctype="multipart/form-data" method="POST" class="edit-userprofile-form" name="password_form" role="form" action="{% url 'update_User_password' %}">
 		<h3>Change your Password</h3>
 			{% csrf_token %}

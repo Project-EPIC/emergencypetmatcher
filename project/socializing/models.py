@@ -23,11 +23,11 @@ from home.constants import *
 class UserProfile (models.Model):
     '''Required Fields'''
     user = models.OneToOneField(User, null=False, default=None)    
-    
+    dob = models.DateField(null=False, default=date.today())
+
     '''Non-Required Fields'''
     img_path = models.ImageField(upload_to=USERPROFILE_IMG_PATH, default=USERPROFILE_IMG_PATH_DEFAULT, null=True)
     thumb_path = models.ImageField(upload_to=USERPROFILE_THUMBNAIL_PATH, default=USERPROFILE_THUMBNAIL_PATH_DEFAULT, null=True)
-    dob = models.DateField(null=True, default=None)
     last_logout = models.DateTimeField(null=True, auto_now_add=True)
     following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
     reputation = models.FloatField(default=0, null=True)
@@ -40,6 +40,19 @@ class UserProfile (models.Model):
     guardian_email = models.EmailField(null=True)
     guardian_activation_key = models.CharField(null=True, max_length=40)
 
+
+    def to_DICT(self):
+        return {    "id"                : self.id,
+                    "username"          : self.user.username,
+                    "img_path"          : self.img_path.name,
+                    "thumb_path"        : self.thumb_path.name,
+                    "date_of_birth"     : self.dob.ctime(),
+                    "last_logout"       : self.last_logout.ctime(),
+                    "reputation"        : float(self.reputation),
+                    "description"       : self.description,
+                    "is_social_profile" : self.social_profile,
+                    "is_minor"          : self.is_minor }
+                    
     def send_email_message_to_UserProfile (self, target_userprofile, message, test_email=True):
         if email_is_valid(target_userprofile.user.email) or (test_email == True):
             site = Site.objects.get(pk=1)

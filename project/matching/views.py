@@ -13,7 +13,6 @@ from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import model_to_dict
-from django.utils import simplejson
 from random import choice, uniform
 from pprint import pprint
 from home.models import Activity
@@ -23,7 +22,7 @@ from verifying.models import PetCheck
 from utilities.utils import *
 from constants import *
 from home.constants import *
-import datetime, re
+import datetime, re, json
 
 #Display the PetMatch object
 def get_PetMatch(request, petmatch_id):
@@ -100,13 +99,17 @@ def vote_PetMatch(request):
         #If the votes reach the threshold, prepare for pet checking!
         if threshold_reached == True:
             new_check = PetCheck.objects.create(petmatch=pm)
+            Activity.log_activity("ACTIVITY_PETCHECK_VERIFY", userprofile, source=new_check)
             message = new_check.verify_PetMatch()
             
         num_upvotes = len(pm.up_votes.all())
         num_downvotes = len(pm.down_votes.all())
-        json = simplejson.dumps ({"vote":vote, "message":message, "threshold_reached": threshold_reached, "num_downvotes":num_downvotes, "num_upvotes":num_upvotes})
-        print_info_msg ("JSON: " + str(json))
-        return HttpResponse(json, mimetype="application/json")
+        payload = json.dumps ({ "vote":vote, 
+                                "message":message, 
+                                "threshold_reached": threshold_reached, 
+                                "num_downvotes":num_downvotes, 
+                                "num_upvotes":num_upvotes })
+        return HttpResponse(payload, mimetype="application/json")
 
     else:
         raise Http404
@@ -139,11 +142,13 @@ def match_PetReport(request, petreport_id, page=None):
                                     "img_path": pr.img_path.name } for pr in paged_candidates]
 
             #Serialize the PetReport into JSON for easy accessing.
-            json = simplejson.dumps ({"pet_reports_list":paged_candidates, "count":len(paged_candidates), "total_count": candidates_count})
-            return HttpResponse(json, mimetype="application/json")            
+            payload = json.dumps ({ "pet_reports_list":paged_candidates, 
+                                    "count":len(paged_candidates), 
+                                    "total_count": candidates_count})
+            return HttpResponse(payload, mimetype="application/json")            
 
         #Serialize the PetReport into JSON for easy accessing.
-        target_pr_json = target_petreport.toJSON()
+        target_pr_json = target_petreport.to_JSON()
         pet_fields = target_petreport.pack_PetReport_fields()
         return render_to_response (HTML_MATCHING, { 'pet_fields': pet_fields,
                                                     "target_petreport":target_petreport, 

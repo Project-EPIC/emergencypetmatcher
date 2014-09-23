@@ -45,39 +45,41 @@ EPM_DIRECTORY = os.path.dirname(PROJECT_WORKSPACE)
 LOGS_DIRECTORY = STATIC_URL + "logs/"
 
 #Represents how many activities to fetch per request.
-ACTIVITY_FEED_LENGTH = 10
+NUM_ACTIVITIES_HOMEPAGE = 20
 
 #Activity Log File Path Constants
 ACTIVITY_LOG_DIRECTORY = LOGS_DIRECTORY + "activity_logs/"
 
 #Activities with their reward points attached.
-ACTIVITIES = {  "ACTIVITY_ACCOUNT_CREATED"            : {"reward": 10},
-                "ACTIVITY_LOGIN"                      : {"reward":  0},
-                "ACTIVITY_LOGOUT"                     : {"reward":  0},
-                "ACTIVITY_USER_CHANGED_USERNAME"      : {"reward":  0},
-                "ACTIVITY_USER_SET_PHOTO"             : {"reward":  2},
-                "ACTIVITY_PETREPORT_SUBMITTED"        : {"reward": 10},
-                "ACTIVITY_PETREPORT_ADD_BOOKMARK"     : {"reward":  0},
-                "ACTIVITY_PETREPORT_REMOVE_BOOKMARK"  : {"reward":  0},
-                "ACTIVITY_PETMATCH_PROPOSED"          : {"reward": 15},
-                "ACTIVITY_PETMATCH_UPVOTE"            : {"reward":  1},
-                "ACTIVITY_PETMATCH_DOWNVOTE"          : {"reward":  1},
-                "ACTIVITY_PETCHECK_VERIFY"            : {"reward":  5},
-                "ACTIVITY_PETCHECK_VERIFY_SUCCESS"    : {"reward": 20},
-                "ACTIVITY_PETCHECK_VERIFY_FAIL"       : {"reward": 10},
-                "ACTIVITY_SOCIAL_FOLLOW"              : {"reward":  5},
-                "ACTIVITY_SOCIAL_UNFOLLOW"            : {"reward":  0},
-                "ACTIVITY_SOCIAL_SEND_MESSAGE_TO_USER": {"reward":  0}  }
+ACTIVITIES = {  "ACTIVITY_ACCOUNT_CREATED"                : {"reward": 10,  "source":"self"},
+                "ACTIVITY_LOGIN"                          : {"reward":  0,  "source":"self"},
+                "ACTIVITY_LOGOUT"                         : {"reward":  0,  "source":"self"},
+                "ACTIVITY_USER_CHANGED_USERNAME"          : {"reward":  0,  "source":"self"},
+                "ACTIVITY_USER_SET_PHOTO"                 : {"reward":  2,  "source":"self"},
+                "ACTIVITY_PETREPORT_SUBMITTED"            : {"reward": 10,  "source":"petreport"},
+                "ACTIVITY_PETREPORT_ADD_BOOKMARK"         : {"reward":  0,  "source":"petreport"},
+                "ACTIVITY_PETREPORT_REMOVE_BOOKMARK"      : {"reward":  0,  "source":"petreport"},
+                "ACTIVITY_PETMATCH_PROPOSED"              : {"reward": 15,  "source":"petmatch"},
+                "ACTIVITY_PETMATCH_UPVOTE"                : {"reward":  2,  "source":"petmatch"},
+                "ACTIVITY_PETMATCH_DOWNVOTE"              : {"reward":  2,  "source":"petmatch"},
+                "ACTIVITY_PETCHECK_VERIFY"                : {"reward":  5,  "source":"petcheck"},
+                "ACTIVITY_PETCHECK_VERIFY_SUCCESS"        : {"reward": 20,  "source":"petcheck"},
+                "ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER"  : {"reward": 40,  "source":"petcheck"},
+                "ACTIVITY_PETCHECK_VERIFY_FAIL"           : {"reward": 10,  "source":"petcheck"},
+                "ACTIVITY_SOCIAL_FOLLOW"                  : {"reward":  5,  "source":"userprofile"},
+                "ACTIVITY_SOCIAL_UNFOLLOW"                : {"reward":  0,  "source":"userprofile"},
+                "ACTIVITY_SOCIAL_SEND_MESSAGE_TO_USER"    : {"reward":  0,  "source":"userprofile"} }
 
 ACTIVITY_SOCIAL_ACTIVITIES = ["ACTIVITY_ACCOUNT_CREATED",
                               "ACTIVITY_USER_CHANGED_USERNAME",
                               "ACTIVITY_USER_SET_PHOTO",
-                              "ACTIVITY_PETREPORT_SUBMITTED," 
-                              "ACTIVITY_PETMATCH_PROPOSED," 
-                              "ACTIVITY_PETMATCH_UPVOTE," 
+                              "ACTIVITY_PETREPORT_SUBMITTED", 
+                              "ACTIVITY_PETMATCH_PROPOSED", 
+                              "ACTIVITY_PETMATCH_UPVOTE", 
                               "ACTIVITY_PETMATCH_DOWNVOTE",
                               "ACTIVITY_PETCHECK_VERIFY",
                               "ACTIVITY_PETCHECK_VERIFY_SUCCESS",
+                              "ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER",
                               "ACTIVITY_PETCHECK_VERIFY_FAIL",
                               "ACTIVITY_SOCIAL_FOLLOW"]
 

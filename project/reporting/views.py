@@ -14,7 +14,6 @@ from django.core.urlresolvers import reverse
 from registration.forms import RegistrationForm
 from random import choice, uniform
 from django.contrib import messages
-from django.utils import simplejson
 from matching.views import *
 from django.forms.models import model_to_dict
 from django.contrib.sites.models import Site
@@ -27,7 +26,7 @@ from PIL import Image
 from utilities.utils import *
 from constants import *
 from home.constants import *
-import datetime, re, time
+import datetime, re, time, json
 
 def get_PetReport(request, petreport_id):
     #Grab the PetReport.
@@ -55,10 +54,10 @@ def get_PetReport(request, petreport_id):
 
     pet_has_been_successfully_matched = pet_report.has_been_successfully_matched()
     if pet_has_been_successfully_matched == True:
-        messages.success(request, "This pet has been successfully matched! Thank you digital volunteers!")
+        messages.success(request, "This pet has been successfully matched with its owner! Thank you digital volunteers!")
 
     #Serialize the PetReport into JSON for easy accessing.
-    pr_json = pet_report.toJSON()
+    pr_json = pet_report.to_JSON()
     pet_fields = pet_report.pack_PetReport_fields()
 
     if request.is_ajax() == True:
@@ -182,8 +181,8 @@ def get_pet_breeds(request, pet_type=0):
         for index, breed in enumerate(data):
             breeds.append({"id":breed, "text":breed})
 
-        json = simplejson.dumps({"breeds":breeds})
-        return HttpResponse(json, mimetype="application/json")
+        payload = json.dumps({"breeds":breeds})
+        return HttpResponse(payload, mimetype="application/json")
 
     else:
         raise Http404
@@ -228,8 +227,8 @@ def bookmark_PetReport(request):
             print_info_msg ("User has bookmarked the pet: " + str(petreport.UserProfile_has_bookmarked(profile)))
             message = "Unable to "+ action + "!"
             text = action
-        json = simplejson.dumps ({"message":message, "text":text})
-        return HttpResponse(json, mimetype="application/json")
+        payload = json.dumps ({"message":message, "text":text})
+        return HttpResponse(payload, mimetype="application/json")
     else:
         raise Http404
 

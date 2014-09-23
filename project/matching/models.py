@@ -4,9 +4,9 @@ from reporting.models import PetReport, PetReportForm
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
 from utilities.utils import *
-from verifying.constants import *
-
 from constants import *
+from verifying.constants import *
+import json
 
 #The Pet Match Object Model
 class PetMatch(models.Model):
@@ -50,6 +50,27 @@ class PetMatch(models.Model):
         super(PetMatch, self).save(*args, **kwargs)
         print_success_msg("PetMatch %s was saved!" % self)
         return (self, PETMATCH_OUTCOME_NEW_PETMATCH)
+
+    def to_DICT(self):
+        return {    "id"                    : self.id,
+                    "lost_pet_name"         : self.lost_pet.pet_name,
+                    "lost_pet_type"         : self.lost_pet.pet_type,
+                    "lost_pet_breed"        : self.lost_pet.breed,
+                    "found_pet_name"        : self.found_pet.pet_name,
+                    "found_pet_type"        : self.found_pet.pet_type,
+                    "found_pet_breed"       : self.found_pet.breed,
+                    "img_path"              : [self.lost_pet.img_path.name, self.found_pet.img_path.name],
+                    "thumb_path"            : [self.lost_pet.thumb_path.name, self.found_pet.thumb_path.name],
+                    "proposed_by_username"  : self.proposed_by.user.username,
+                    "proposed_by_id"        : self.proposed_by.id,
+                    "proposed_date"         : self.proposed_date.ctime(),
+                    "has_failed"            : self.has_failed,
+                    "is_successful"         : self.is_successful,
+                    "num_upvotes"           : self.up_votes.count(),
+                    "num_downvotes"         : self.down_votes.count() }
+
+    def to_JSON(self):
+        return json.dumps(self.to_DICT())        
 
     ''' Determine if a PetMatch exists between pr1 and pr2, and if so, return it. Otherwise, return None. '''
     @staticmethod
@@ -106,23 +127,6 @@ class PetMatch(models.Model):
         elif (downvote != None):
             return DOWNVOTE
         return False  
-
-    def toDICT(self):
-        modeldict = model_to_dict(self)
-        #Iterate through all fields in the model_dict
-        for field in modeldict:
-            value = modeldict[field]
-            if isinstance(value, DATETIME.datetime) or isinstance(value, DATETIME.date):
-                modeldict[field] = value.strftime("%B %d, %Y")
-            elif isinstance(value, ImageFile):
-                modeldict[field] = value.name
-        #Just add a couple of nice attributes.
-        modeldict ["proposed_by_username"] = self.proposed_by.user.username       
-        return modeldict
-
-    def toJSON(self):
-        json = simplejson.dumps(self.toDICT())
-        return json        
 
     def has_reached_threshold(self):
         #Difference (D) is calculated as the difference between number of upvotes and downvotes.

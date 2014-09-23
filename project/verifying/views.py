@@ -13,7 +13,6 @@ from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import model_to_dict
-from django.utils import simplejson
 from random import choice, uniform
 from pprint import pprint
 from reporting.models import PetReport
@@ -22,7 +21,7 @@ from matching.models import PetMatch
 from utilities.utils import *
 from verifying.constants import *
 from home.constants import *
-import datetime, re
+import datetime, re, json
 
 def verify_PetCheck(request, petcheck_id):
     petcheck = get_object_or_404(PetCheck, pk=petcheck_id)

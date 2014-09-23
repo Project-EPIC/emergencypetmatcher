@@ -9,6 +9,5 @@ psycopg2
 pillow
 selenium
 gunicorn
-simplejson
 django-tastypie
 mimeparse

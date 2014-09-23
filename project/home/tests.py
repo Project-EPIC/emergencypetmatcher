@@ -1223,7 +1223,7 @@ class HomePageTesting (unittest.TestCase):
 			
 			pet_reports = PetReport.objects.filter(closed = False).order_by("id").reverse()
 			total_petreport_count = len(pet_reports)
-			pet_reports = PetReport.get_PetReports_by_page(pet_reports, page)
+			pet_reports = get_objects_by_page(pet_reports, page)
 
 			#Iterate through each paged PetReport and assert that it's ID is indeed the right one.
 			for j in range(len(pet_reports)):
@@ -1309,7 +1309,7 @@ class HomePageTesting (unittest.TestCase):
 
 			response = client.get(URL_HOME)
 			self.assertEquals(response.status_code, 200)
-			url = URL_GET_SUCCESSFUL_PETMATCHES + "/" + str(page) + "/"
+			url = URL_GET_PETMATCHES + "/" + "1" + "/" + str(page) + "/"
 			response = client.get(url, HTTP_X_REQUESTED_WITH="XMLHttpRequest", follow=True)
 			self.assertEquals(response.status_code, 200)
 			self.assertEquals(response.request ["PATH_INFO"], url)
@@ -1371,7 +1371,7 @@ class HomePageTesting (unittest.TestCase):
 
 				all_bookmarks = user.userprofile.bookmarks_related.all()
 				total_bookmark_count = len(all_bookmarks)
-				paged_bookmarks = PetReport.get_bookmarks_by_page(all_bookmarks, page)
+				paged_bookmarks = get_objects_by_page(all_bookmarks, page, limit=NUM_BOOKMARKS_HOMEPAGE)
 
 				#If the total num of bookmarks is smaller than the number for each page, then assert we have the exact number in our paged_bookmarks.
 				if total_bookmark_count <= NUM_BOOKMARKS_HOMEPAGE:

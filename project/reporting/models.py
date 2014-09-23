@@ -7,7 +7,7 @@ from django.core.files.images import ImageFile
 from constants import *
 from pprint import pprint
 from utilities.utils import *
-import simplejson, datetime
+import json, datetime
 
 class PetReport(models.Model):
     '''Required Fields'''
@@ -28,8 +28,8 @@ class PetReport(models.Model):
     #Location where found
     location = models.CharField(max_length=PETREPORT_LOCATION_LENGTH, null=True)
     #Lat/Long Geo-coordinates of Location
-    geo_location_lat = models.DecimalField(max_digits=8, decimal_places=5, null=True)
-    geo_location_long = models.DecimalField(max_digits=8, decimal_places=5, null=True)
+    geo_location_lat = models.DecimalField(max_digits=8, decimal_places=5, null=True, default=0)
+    geo_location_long = models.DecimalField(max_digits=8, decimal_places=5, null=True, default=0)
     #Microchip ID of Pet
     microchip_id = models.CharField(max_length=PETREPORT_MICROCHIP_ID_LENGTH, null=True)
     #Pet Tag Information (if available)
@@ -49,7 +49,7 @@ class PetReport(models.Model):
     #Spayed or Neutered?
     spayed_or_neutered = models.CharField(max_length=PETREPORT_SPAYED_OR_NEUTERED_LENGTH, choices=SPAYED_OR_NEUTERED_CHOICES, null=True, default="Not Known")
     #Pet Name (if available)
-    pet_name = models.CharField(max_length=PETREPORT_PET_NAME_LENGTH, null=True, default='Name unknown') 
+    pet_name = models.CharField(max_length=PETREPORT_PET_NAME_LENGTH, null=True, default='unknown') 
     #Pet Age (if known/available)
     age = models.CharField(max_length=PETREPORT_AGE_LENGTH, null=True, choices=AGE_CHOICES,default="Age unknown")
     #Color(s) of Pet
@@ -75,6 +75,61 @@ class PetReport(models.Model):
         super(PetReport, self).save(args, kwargs) 
         print_success_msg ("{%s} has been saved by %s!" % (self, self.proposed_by))           
         return self
+
+    def to_DICT(self):
+        return {    "id"                    : self.id,
+                    "pet_type"              : self.pet_type,
+                    "status"                : self.status,
+                    "date_lost_or_found"    : self.date_lost_or_found.ctime(),
+                    "proposed_by_username"  : self.proposed_by.user.username,
+                    "proposed_by_id"        : self.proposed_by.id,
+                    "sex"                   : self.sex,
+                    "size"                  : self.size,
+                    "location"              : self.location,
+                    "geo_lat"               : float(self.geo_location_lat),
+                    "geo_long"              : float(self.geo_location_long),
+                    "microchip_id"          : self.microchip_id,
+                    "tag_info"              : self.tag_info,
+                    "contact_name"          : self.contact_name,
+                    "contact_number"        : self.contact_number,
+                    "contact_email"         : self.contact_email,
+                    "contact_link"          : self.contact_link,
+                    "img_path"              : self.img_path.name,
+                    "thumb_path"            : self.thumb_path.name,
+                    "spayed_or_neutered"    : self.spayed_or_neutered,
+                    "pet_name"              : self.pet_name,
+                    "age"                   : self.age,
+                    "color"                 : self.color,
+                    "breed"                 : self.breed,
+                    "description"           : self.description,
+                    "closed"                : self.closed }
+
+    def to_JSON(self):
+        return json.dumps(self.to_DICT())            
+
+    def to_array(self):
+        result = []
+        result.append({"ID": self.id })
+        result.append({"Pet Name": self.pet_name })
+        result.append({"Pet Type": self.pet_type })
+        result.append({"Lost/Found": self.status })
+        result.append({"Contact": self.proposed_by.user.username })
+        result.append({"Date Lost/Found": self.date_lost_or_found.strftime("%B %d, %Y") })
+        result.append({"Location": self.location })
+        result.append({"Microchipped": "Yes" if (self.microchip_id != "") else "No" })
+        result.append({"Spayed/Neutered": self.spayed_or_neutered })
+        result.append({"Age": self.age })
+        result.append({"Sex": self.sex })
+        result.append({"Breed": self.breed })
+        result.append({"Color": self.color })
+        result.append({"Size": self.size })
+        result.append({"Tag and Collar Information": self.tag_info })
+        result.append({"Description": self.description })
+        result.append({"Contact Name": self.contact_name })
+        result.append({"Contact Phone Number": self.contact_number })
+        result.append({"Contact Email Address": self.contact_email })
+        result.append({"Alternative Link to Pet": self.contact_link })
+        return result        
 
     ''' Determine if the input UserProfile (user) has bookmarked this PetReport already '''
     def UserProfile_has_bookmarked(self, user_profile):
@@ -218,32 +273,9 @@ class PetReport(models.Model):
         except PetReport.DoesNotExist:
             return None
 
-    @staticmethod
-    def get_PetReports_by_page(filtered_petreports, page):
-        if (page != None and page > 0):
-            page = int(page)
-            filtered_petreports = filtered_petreports [((page-1) * NUM_PETREPORTS_HOMEPAGE):((page-1) * NUM_PETREPORTS_HOMEPAGE + NUM_PETREPORTS_HOMEPAGE)]
-
-        #Just return the list of PetReports.
-        return filtered_petreports 
-
-    @staticmethod
-    def get_bookmarks_by_page(filtered_bookmarks, page):
-        if (page != None and page > 0):
-            page = int(page)
-            filtered_bookmarks = filtered_bookmarks [((page-1) * NUM_BOOKMARKS_HOMEPAGE):((page-1) * NUM_BOOKMARKS_HOMEPAGE + NUM_BOOKMARKS_HOMEPAGE)]
-
-        #Just return the list of bookmarks.
-        return filtered_bookmarks   
-
-
     #Return a list of candidate PetReports that could potentially be matches for this PetReport.
     def get_candidate_PetReports(self):
-        candidates = PetReport.objects.exclude(status = self.status).filter(pet_type = self.pet_type, closed=False)
-
-        if len(candidates) == 0:
-            return None
-        return candidates
+        return PetReport.objects.exclude(status = self.status).filter(pet_type = self.pet_type, closed=False)
 
     #This method returns a ranked list of all PetReports found in the input specified list. This ranking is based on the PetReport compare() method.
     def get_ranked_PetReports(self, candidates, page=None):
@@ -259,7 +291,7 @@ class PetReport(models.Model):
         for key in matches.keys():
             results += matches[key]             
 
-        return self.get_PetReports_by_page (results, page)
+        return get_objects_by_page(results, page, limit=NUM_PETREPORTS_HOMEPAGE)
 
     #Determine if the input UserProfile (user) is a worker for this PetReport.
     def UserProfile_is_worker(self, user_profile):
@@ -334,30 +366,6 @@ class PetReport(models.Model):
         else:
             return None
 
-    def to_array(self):
-        result = []
-        result.append({"ID": self.id })
-        result.append({"Pet Name": self.pet_name })
-        result.append({"Pet Type": self.pet_type })
-        result.append({"Lost/Found": self.status })
-        result.append({"Contact": self.proposed_by.user.username })
-        result.append({"Date Lost/Found": self.date_lost_or_found.strftime("%B %d, %Y") })
-        result.append({"Location": self.location })
-        result.append({"Microchipped": "Yes" if (self.microchip_id != "") else "No" })
-        result.append({"Spayed/Neutered": self.spayed_or_neutered })
-        result.append({"Age": self.age })
-        result.append({"Sex": self.sex })
-        result.append({"Breed": self.breed })
-        result.append({"Color": self.color })
-        result.append({"Size": self.size })
-        result.append({"Tag and Collar Information": self.tag_info })
-        result.append({"Description": self.description })
-        result.append({"Contact Name": self.contact_name })
-        result.append({"Contact Phone Number": self.contact_number })
-        result.append({"Contact Email Address": self.contact_email })
-        result.append({"Alternative Link to Pet": self.contact_link })
-        return result
-
     def pack_PetReport_fields(self, other_pet=None):
         fields = []
         pet = self.to_array()
@@ -374,39 +382,6 @@ class PetReport(models.Model):
                 field.append(other_pet[i][label])
             fields.append(field)
         return fields       
-
-    def toDICT(self):
-        #A customized version of django model function "model_to_dict"
-        #to convert a PetReport model object to a dictionary object
-        modeldict = model_to_dict(self)
-
-        #Iterate through all fields in the model_dict
-        for field in modeldict:
-            value = modeldict[field]
-            if isinstance(value, datetime.date) or isinstance(value, datetime.datetime):
-                # print_debug_msg(value)
-                modeldict[field] = value.strftime("%B %d, %Y")
-            elif isinstance(value, ImageFile):
-                modeldict[field] = value.name
-            elif field == "sex":
-                modeldict[field] = self.get_sex_display()
-            elif field == "size":
-                modeldict[field] = self.get_size_display()
-            elif field == "geo_location_lat" and str(value).strip() == "":
-                modeldict[field] = None
-            elif field == "geo_location_long" and str(value).strip() == "":
-                modeldict[field] = None
-        #Just add a couple of nice attributes.
-        modeldict ["proposed_by_username"] = self.proposed_by.user.username  
-        pprint(modeldict)     
-        return modeldict
-
-
-    def toJSON(self):
-        #Convert a PetReport model object to a json object
-        json = simplejson.dumps(self.toDICT())
-        #print_info_msg("toJSON: " + str(json))
-        return json
 
 
 #The PetReport ModelForm

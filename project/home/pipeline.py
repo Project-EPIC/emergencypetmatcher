@@ -20,14 +20,16 @@ import settings
 
 #Used by social auth pipeline to get a username value when authenticate a social user for the first time
 @partial
-def redirect_to_form(strategy, backend, uid, request, response, details, user=None, is_new=False, *args, **kwargs):
+def redirect_to_form(strategy, backend, uid, response, details, user=None, is_new=False, *args, **kwargs):
     print_info_msg("at redirect_to_form")
-    print_info_msg("request: %s" % request)
-    print_info_msg("response: %s" % response)
-    print_info_msg("backend: %s" % backend.__dict__)
+    # print_info_msg("strategy: %s" % strategy.__dict__)
+    # print_info_msg("request: %s" % strategy.request.__dict__)
+    # print_info_msg("response: %s" % response)
+    # print_info_msg("backend: %s" % backend.__dict__)
     print_info_msg("details: %s" % details)
     print_info_msg("user: %s" % user)
     print_info_msg("is_new: %s" % is_new)
+    request = strategy.request
 
     if is_new == True:   
         pic_url = None
@@ -55,6 +57,7 @@ def redirect_to_form(strategy, backend, uid, request, response, details, user=No
             details["first_name"] = first_name = request.POST.get("first_name")
             details["last_name"] = last_name = request.POST.get("last_name")
             details["minor"] = is_minor(request.POST.get("date_of_birth"))
+            details["date_of_birth"] = request.POST.get("date_of_birth")
             details["guardian_email"] = request.POST.get("guardian_email")
             details["pic_url"] = pic_url
             print_info_msg("New Details: %s" % details)
@@ -75,8 +78,9 @@ def redirect_to_form(strategy, backend, uid, request, response, details, user=No
         return redirect(URL_HOME)
 
 @partial
-def setup_user_details(strategy, backend, uid, request, response, details, user=None, is_new=False, *args, **kwargs):
+def setup_user_details(strategy, backend, uid, response, details, user=None, is_new=False, *args, **kwargs):
     print_info_msg("at setup_user_details")
+    request = strategy.request
 
     if is_new == True:
         print_info_msg("User: %s" % user)
@@ -108,7 +112,7 @@ def setup_user_details(strategy, backend, uid, request, response, details, user=
             print_info_msg ("(SOCIAL AUTH): RegistrationProfile now created for inactive user %s" % user)
             messages.success(request, "Thanks for registering for EPM! Look for an account activation link sent to both you and your parent/guardian email address.")   
         else:
-            messages.success(request, "Welcome to EPM, %s! You can now login using Twitter!" % username)     
+            messages.success(request, "Welcome to EPM, %s! You can now login using Twitter!" % details["username"])     
 
         user.first_name = details["first_name"]
         user.last_name = details["last_name"]
@@ -121,6 +125,8 @@ def setup_user_details(strategy, backend, uid, request, response, details, user=
             profile = user.userprofile
             img_path = StringIO(urlopen(details["pic_url"]).read())
             profile.set_images(img_path)
+            profile.set_date_of_birth(details["date_of_birth"])
+            profile.social_profile = True
             profile.save()
 
         if profile.is_minor == True:   

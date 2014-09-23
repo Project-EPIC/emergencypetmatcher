@@ -47,6 +47,12 @@ def email_is_valid(email_address):
 			return True
 	except:
 		return False
+		
+def get_objects_by_page(objects, page, limit=25):
+    if (page != None and page > 0):
+        page = int(page)
+        objects = objects[((page-1) * limit):((page-1) * limit + limit)]
+    return objects 
 
 # This function generates two dictionaries: the first representing the original contact for this petreport
 # and the second the cross-posting contact. Both are contingent upon whether contact fields have been

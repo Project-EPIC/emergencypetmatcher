@@ -9,6 +9,7 @@ from utilities.utils import *
 from home.models import Activity
 from home.constants import *
 from constants import *
+import json
 
 #The Pet Check Model
 class PetCheck(models.Model):
@@ -23,6 +24,17 @@ class PetCheck(models.Model):
 	#1 - user clicked on Yes
 	#2 - User clicked on No
 	verification_votes = models.CharField(max_length=2, default='00')
+
+
+	def to_DICT(self):
+		return	{	"id"									: self.id,
+							"petmatch"						: self.petmatch.to_DICT(),
+							"img_path"            : [self.petmatch.lost_pet.img_path.name, self.petmatch.found_pet.img_path.name],
+							"thumb_path"          : [self.petmatch.lost_pet.thumb_path.name, self.petmatch.found_pet.thumb_path.name],
+							"verification_votes"	: self.verification_votes }
+
+	def to_JSON(self):
+		return json.dumps(self.to_DICT())
 
 	def UserProfile_has_verified(self, profile):
 		if profile == self.petmatch.lost_pet.proposed_by:
@@ -118,12 +130,22 @@ class PetCheck(models.Model):
 			lost_pet.save()
 			found_pet.save()
 			message = "Thanks for your response, and congratulations on the successful match! You have earned %s Pet Points. The reunited match can be found in the 'Reunited Pets' Tab." % ACTIVITIES["ACTIVITY_PETCHECK_VERIFY_SUCCESS"]["reward"]
-			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_SUCCESS", lost_pet_contact, source=self)
+
+			if lost_pet.UserProfile_is_owner(lost_pet_contact) == True:
+				Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER", lost_pet_contact, source=self)			
+				lost_pet_contact.update_reputation("ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER")
+			else:
+				Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_SUCCESS", lost_pet_contact, source=self)			
+				lost_pet_contact.update_reputation("ACTIVITY_PETCHECK_VERIFY_SUCCESS")
+
 			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_SUCCESS", found_pet_contact, source=self)
-			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_SUCCESS", petmatch_owner, source=self)
-			lost_pet_contact.update_reputation("ACTIVITY_PETCHECK_VERIFY_SUCCESS")
 			found_pet_contact.update_reputation("ACTIVITY_PETCHECK_VERIFY_SUCCESS")
-			petmatch_owner.update_reputation("ACTIVITY_PETCHECK_VERIFY_SUCCESS")
+
+			#Check if the petmatch owner is somebody different - if so, log and award him/her points too.
+			if petmatch_owner.id not in [lost_pet_contact.id, found_pet_contact.id]:				
+				Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_SUCCESS", petmatch_owner, source=self)
+				petmatch_owner.update_reputation("ACTIVITY_PETCHECK_VERIFY_SUCCESS")
+
 			print_info_msg ("PetMatch %s is now closed" % (self))
 
 		#If not successful, delete the PetCheck object, award pet points, and notify.
@@ -131,11 +153,15 @@ class PetCheck(models.Model):
 			message = "Unfortunately, this Pet Match was not successful. The pet contacts have agreed that this wasn't the right match. You have earned %d Pet Points. Please try other matches!" % ACTIVITIES["ACTIVITY_PETCHECK_VERIFY_FAIL"]["reward"]
 			petmatch.has_failed = True
 			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_FAIL", lost_pet_contact, source=self)
-			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_FAIL", found_pet_contact, source=self)
-			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_FAIL", petmatch_owner, source=self)
-			lost_pet_contact.update_reputation("ACTIVITY_PETCHECK_VERIFY_FAIL")
+			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_FAIL", found_pet_contact, source=self)	
 			found_pet_contact.update_reputation("ACTIVITY_PETCHECK_VERIFY_FAIL")
-			petmatch_owner.update_reputation("ACTIVITY_PETCHECK_VERIFY_FAIL")			
+			lost_pet_contact.update_reputation("ACTIVITY_PETCHECK_VERIFY_FAIL")
+
+			#Check if the petmatch owner is somebody different - if so, log and award him/her points too.
+			if petmatch_owner.id not in [lost_pet_contact.id, found_pet_contact.id]:
+				Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_FAIL", petmatch_owner, source=self)
+				petmatch_owner.update_reputation("ACTIVITY_PETCHECK_VERIFY_FAIL")			
+
 			print_info_msg ("PetMatch %s did not pass verification!" % (self))
 			del self
 
