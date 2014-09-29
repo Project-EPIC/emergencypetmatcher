@@ -123,7 +123,7 @@ def match_PetReport(request, petreport_id, page=None):
         #Add the UserProfile to the PetReport's workers list.
         target_petreport.workers.add(request.user.userprofile)
 
-        if candidates == None:
+        if not candidates:
             messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added as a worker for this pet.")
             return redirect(URL_HOME)            
 

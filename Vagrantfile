@@ -12,7 +12,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # options are documented and commented below. For a complete reference,
   # please see the online documentation at vagrantup.com.
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box_url = "http://files.vagrantup.com/precise32.box"
+  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
   config.vm.define "app" do |web|
     web.vm.box = "precise64"

@@ -1,5 +1,6 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
+	var pageNum = 1;
 
 	//Click Handler for the Propose Match button.
 	$("#button_propose_match").click(function(){
@@ -10,7 +11,7 @@ $(document).ready(function(){
 
 	/***** Start things off. *****/
 
-	//Click Handler for Target.
+	//Click Handler for Target. 
 	$("#matching-workspace-target-img img").click(function(){
 		$("#epm-modal").modal({
 			"remote": URL_PRDP + TARGET_PETREPORT_ID
@@ -23,24 +24,14 @@ $(document).ready(function(){
 	$("#matching-workspace-candidate-img").on("drop", handleDrop);
 	$("#matching-workspace-candidate-img").on("dragleave", handleDragLeave);		
 
-	//Setup PetReport Pagination here.
-	$(".pagination").pagination({
-		items:CANDIDATE_COUNT,
-		itemsOnPage:50,
-		cssStyle:"light-theme",
-		onPageClick: function(pageNum){
-			fetch_PetReports(pageNum);
-		}
-	});
-
-	//It's important to adjust pagination width for centering.
-	var numPages = $(".pagination").pagination("getPagesCount");
-	numPages = (numPages > 10) ? 10 : numPages;
-	$(".pagination_container").css("width", 110 + 35 * numPages);
-	$(".pagination").pagination("redraw");		
+	//Add more items when user scrolls down!
+	$("#tiles").scroll(function() {
+		if($(this).scrollTop() + $(this).innerHeight() == $(this)[0].scrollHeight - 1)
+			fetch_PetReports(pageNum++);
+	});			
 
 	//Make the first call to fetch PetReports!
-	fetch_PetReports(1);
+	fetch_PetReports(pageNum++);
 
 }); //end of document.ready()
 
@@ -77,20 +68,20 @@ function refresh_layout(){
 	var options = {
 		autoResize: true, // This will auto-update the layout when the browser window is resized.
 		container: $('#tiles'), // Optional, used for some extra CSS styling
-		offset:10
+		offset:10,
+		outerOffset: 20
 	};
 
-	// Get a reference to your grid items.
-	var handler = $('#tiles li.pet-item');
-
-	$("#tiles li.pet-item").attr("draggable", true);
-	$("#tiles li.pet-item").each(function(i, item){
+	$("#tiles li").attr("draggable", true);
+	$("#tiles li").each(function(i, item){
 		$(item).on("dragstart", handleDragStart);
 		$(item).on("dragend", handleDragEnd);	
 	});
 
 	// Call the layout function.
+	var handler = $('#tiles li');	
 	handler.wookmark(options);
+	$("#tiles").css("height", "70vh");
 }
 
 //This function accepts the draggable item and the container within which the item is placed, 
@@ -150,9 +141,6 @@ function moveImage(item, container) {
 }
 
 function fetch_PetReports(page){
-	//First, remove all tile elements
-	$("#tiles li.pet-item").remove();
-	$("#tiles h3").remove();
 	$.ajax({
 	    type:"GET",
 	    url:URL_MATCHING + TARGET_PETREPORT_ID + "/" + page,
@@ -167,13 +155,11 @@ function fetch_PetReports(page){
 
 				//Setup PetReport Tile here.
 				var item = setup_petreport_item(report, $("#epm-modal"));
+				$(item).css("cursor", "move");
 
 				//Finally, add this item to the tiles.
 				$("#tiles").append(item);		
 			}
-
-			if (petreports.length == 0)
-				$("#tiles").append("<strong style='width:100%; display:inline-block; text-align:center;'> No Pets Available! </strong>");			
 			
 			//Don't forget to refresh the grid layout.
 			refresh_layout();
@@ -183,5 +169,6 @@ function fetch_PetReports(page){
 	    }	
   	});
 }
+
 
 

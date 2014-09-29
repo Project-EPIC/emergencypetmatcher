@@ -34,7 +34,7 @@
 
 	<!-- Workspace for Placing Pet Report Candidate Matches-->
 	<div id="matching-workspace">
-		{% block content_title %} <strong style="display:block; margin-bottom:10px; font-size:18px; text-align:center;">Match this Pet</strong>{% endblock content_title %}
+		{% block content_title %} <span class="tab-subtitle">Match {{ target_petreport.pet_name }}</span>{% endblock content_title %}
 
 		<!-- PetReport Target and Candidates -->
 		<div id="matching-workspace-images">
@@ -65,18 +65,10 @@
 	    </table>
 	</div>
 
-	<!-- Container for ML-Ranked Pet Reports -->
+  <!-- Candidate Pet Reports -->
 	<div id="matching-candidates-container">
-
-		<strong style="text-align:center; display:block; margin-bottom:10px; font-size:18px;"> Click and Drag from these Ranked Pets to Match </strong>
-
-		<!-- Pagination Placeholder -->
-		<div class="text-center"><ul class="pagination" style="display:inline-block;"></ul></div>
-
-   		<!-- Candidate Pet Reports -->
-		<div style="overflow-y:scroll; overflow-x:hidden; max-height:850px;">
-			<ul id="tiles" style=""></ul>
-		</div>
+		<span class="tab-subtitle">Click and Drag on a Pet to Match.</span>
+		<ul id="tiles" class="matching-candidates-tiles"></ul>
 	</div>
 
 	{% block chat %}

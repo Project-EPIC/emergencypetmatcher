@@ -26,8 +26,8 @@ from utilities.utils import *
 import random, string, sys, time, datetime, lipsum, traceback
 
 #Control Variables
-NUM_PETREPORTS = 100
-NUM_USERS = 10
+NUM_PETREPORTS = 200
+NUM_USERS = 20
 NUM_PETMATCHES = 20
 
 #Setup the Site (if it hasn't yet been done)
@@ -365,6 +365,8 @@ def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_O
 
 	#Firstly, delete everything existing.
 	if delete_all_objects == True:
+		delete_all(leave_Users=False)
+	else:
 		delete_all(leave_Users=False)
 
 	#Need to setup the object lists. The users list encapsulates tuples of <user, password>

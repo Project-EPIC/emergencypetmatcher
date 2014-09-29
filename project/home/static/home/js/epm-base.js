@@ -1,6 +1,6 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
-	var pageNum = 1
+	var pageNum = 1;
 
 	//Retrieve Items!
 	$("#epm-choices li").click(function(e){
@@ -92,7 +92,7 @@ function fetch_PetReports(page, clear){
 	//Create Loading GIF
 	img = document.createElement("img")
 	img.src = STATIC_URL + "home/icons/loading.gif"
-	$(".tab-content #tab-subtitle").html(img);
+	$(".tab-content .tab-subtitle").html(img);
 
 	//AJAX Away.
 	$.ajax({
@@ -117,16 +117,16 @@ function fetch_PetReports(page, clear){
 			$("#epm-choices-petreports").toggleClass("active");
 
 			if (petreports.length == 0 && page == 1)
-				$("#tab-subtitle").text("No Pets Available Yet!");
+				$(".tab-subtitle").text("No Pets Available Yet!");
 			else
-				$("#tab-subtitle").text("Click on a Pet to Begin Matching. Scroll down to see more pets!");
+				$(".tab-subtitle").text("Click on a Pet to Begin Matching. Scroll down to see more pets!");
 
 			//Don't forget to refresh the grid layout.
 			refresh_layout(10);			
 		},
 		error: function(data){
 				alert("An unexpected error occurred when trying to get Pets. Please try again!"); 
-				$(".tab-content #tab-subtitle").text("No Pets Available Yet!");
+				$(".tab-content .tab-subtitle").text("No Pets Available Yet!");
 			}	
 		});
 }
@@ -138,7 +138,7 @@ function fetch_PetMatches(page, successful_petmatches, clear){
 	//Create Loading GIF
 	img = document.createElement("img")
 	img.src = STATIC_URL + "home/icons/loading.gif"
-	$(".tab-content #tab-subtitle").html(img);	
+	$(".tab-content .tab-subtitle").html(img);	
 
 	if (successful_petmatches == true)
 		successful_petmatches = 1
@@ -173,12 +173,12 @@ function fetch_PetMatches(page, successful_petmatches, clear){
 				$("#epm-choices-petmatches").toggleClass("active");
 
 			if (matches.length == 0 && page == 1)
-				$("#tab-subtitle").text("No Pet Matches Available Yet!");
+				$(".tab-subtitle").text("No Pet Matches Available Yet!");
 			else {
 				if (successful_petmatches == true)
-					$("#tab-subtitle").text("Welcome Home, Reunited Pets!");			
+					$(".tab-subtitle").text("Welcome Home, Reunited Pets!");			
 				else
-					$("#tab-subtitle").text("Click on a Pet Match to Vote on it. Scroll down to see more matches!");			
+					$(".tab-subtitle").text("Click on a Pet Match to Vote on it. Scroll down to see more matches!");			
 			}
 
 			//Don't forget to refresh the grid layout.
@@ -186,7 +186,7 @@ function fetch_PetMatches(page, successful_petmatches, clear){
 		},
 		error: function(data){
 			alert("An unexpected error occurred when trying to get Pet Matches. Please try again."); 
-			$(".tab-content #tab-subtitle").text("No Pet Matches Available Yet!");
+			$(".tab-content .tab-subtitle").text("No Pet Matches Available Yet!");
 		}	
 	});
 }
@@ -200,7 +200,7 @@ function fetch_activities(page, clear){
 	//Create Loading GIF
 	img = document.createElement("img")
 	img.src = STATIC_URL + "home/icons/loading.gif"
-	$(".tab-content #tab-subtitle").html(img);		
+	$(".tab-content .tab-subtitle").html(img);		
 
 	activity_list = $("#tiles");
 	$.ajax ({
@@ -222,9 +222,9 @@ function fetch_activities(page, clear){
 			$("#epm-choices-activity").toggleClass("active");			
 
 		 	if (activities.length == 0 && page == 1)
-		 		$("#tab-subtitle").text("No Activities Yet.");
+		 		$(".tab-subtitle").text("No Activities Yet.");
 		 	else {
-		 		$("#tab-subtitle").html("Check out what these digital volunteers are doing. Scroll down to see more!")
+		 		$(".tab-subtitle").html("Check out what these digital volunteers are doing. Scroll down to see more!")
 		 		refresh_layout(10);	//Don't forget to refresh the grid layout.
 		 	}
 		},
@@ -290,9 +290,9 @@ function fetch_bookmarks(page, clear){
 			$("#epm-choices-bookmarked").toggleClass("active");
 
 			if (bookmarks.length == 0 && page == 1)
-				$("#tab-subtitle").text("No Pets Available Yet!");
+				$(".tab-subtitle").text("No Pets Available Yet!");
 			else
-				$("#tab-subtitle").text("Select a Pet to Begin Matching. Scroll down to see more bookmarks!");			
+				$(".tab-subtitle").text("Select a Pet to Begin Matching. Scroll down to see more bookmarks!");			
 			
 			//Don't forget to refresh the grid layout.
 			refresh_layout();

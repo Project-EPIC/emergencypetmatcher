@@ -275,7 +275,7 @@ class PetReport(models.Model):
 
     #Return a list of candidate PetReports that could potentially be matches for this PetReport.
     def get_candidate_PetReports(self):
-        return PetReport.objects.exclude(status = self.status).filter(pet_type = self.pet_type, closed=False)
+        return PetReport.objects.exclude(status = self.status).filter(pet_type=self.pet_type, closed=False)
 
     #This method returns a ranked list of all PetReports found in the input specified list. This ranking is based on the PetReport compare() method.
     def get_ranked_PetReports(self, candidates, page=None):
