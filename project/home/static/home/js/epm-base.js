@@ -1,5 +1,7 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
+	$("#epm-nav-links .nav-link-home").toggleClass("active");
+	
 	var pageNum = 1;
 
 	//Retrieve Items!
@@ -212,6 +214,10 @@ function fetch_activities(page, clear){
 			//Iterate through the activities and append them to the list.
 			for (var i = 0; i < activities.length; i++){
 				var activity = activities[i];
+
+				if (activity.source == null)
+					continue
+				
 		 		//Setup the list item.
 		 		var li = setup_activity_item(activity, $("#epm-modal"));			 		
 		 		activity_list.append(li);

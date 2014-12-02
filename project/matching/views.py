@@ -81,7 +81,7 @@ def vote_PetMatch(request):
             pm.down_votes.remove(userprofile)
 
             Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", userprofile, source=pm)
-            message = "You have successfully upvoted this PetMatch - You have earned %d Pet Points!" % (ACTIVITIES["ACTIVITY_PETMATCH_UPVOTE"]["reward"])
+            message = "You have upvoted this PetMatch and earned %d Pet Points!" % (ACTIVITIES["ACTIVITY_PETMATCH_UPVOTE"]["reward"])
 
         elif vote == "downvote":
             # If the user is voting for the 1st time, add reputation points
@@ -91,7 +91,7 @@ def vote_PetMatch(request):
             pm.down_votes.add(userprofile)
             pm.up_votes.remove(userprofile)
             Activity.log_activity("ACTIVITY_PETMATCH_DOWNVOTE", userprofile, source=pm)
-            message = "You have successfully downvoted this PetMatch - You have earned %d Pet Points!" % (ACTIVITIES["ACTIVITY_PETMATCH_DOWNVOTE"]["reward"])
+            message = "You have downvoted this PetMatch and earned %d Pet Points!" % (ACTIVITIES["ACTIVITY_PETMATCH_DOWNVOTE"]["reward"])
 
         #Was the petmatch triggered for verification? Check here.
         threshold_reached = pm.has_reached_threshold() 

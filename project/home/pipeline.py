@@ -49,8 +49,8 @@ def redirect_to_form(strategy, backend, uid, response, details, user=None, is_ne
                                                                     'last_name':details['last_name'], 
                                                                     'email':details['email'], 
                                                                     'pic_url':pic_url, 
-                                                                    "tos_minor_text":TOS_MINOR_TEXT,
-                                                                    "tos_adult_text":TOS_ADULT_TEXT }, RequestContext(request))
+                                                                    "consent_form_minor_text":CONSENT_FORM_MINOR_TEXT,
+                                                                    "consent_form_adult_text":CONSENT_FORM_ADULT_TEXT }, RequestContext(request))
 
             details["username"] = username = request.POST.get("username")
             details["email"] = email = request.POST.get("email")
@@ -69,8 +69,8 @@ def redirect_to_form(strategy, backend, uid, response, details, user=None, is_ne
                                                                 'last_name':details['last_name'], 
                                                                 'email':details['email'], 
                                                                 "pic_url": pic_url,
-                                                                "tos_minor_text":TOS_MINOR_TEXT,
-                                                                "tos_adult_text":TOS_ADULT_TEXT }, RequestContext(request))
+                                                                "consent_form_minor_text":CONSENT_FORM_MINOR_TEXT,
+                                                                "consent_form_adult_text":CONSENT_FORM_ADULT_TEXT }, RequestContext(request))
     elif user.is_active == True:
         messages.success(request, "Welcome, %s!" % user.username)
     else:
@@ -106,6 +106,7 @@ def setup_user_details(strategy, backend, uid, response, details, user=None, is_
             email_body = render_to_string(TEXTFILE_EMAIL_GUARDIAN_BODY, 
                 {   "participant_email": details["email"], 
                     "guardian_activation_key": profile.guardian_activation_key,
+                    "consent_form_guardian_text": CONSENT_FORM_GUARDIAN_TEXT,
                     "site": Site.objects.get_current() })
             
             send_mail(email_subject, email_body, None, [profile.guardian_email])

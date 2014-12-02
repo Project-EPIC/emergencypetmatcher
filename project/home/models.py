@@ -1,7 +1,9 @@
 from django.db import models
 from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
 from utilities.utils import *
 from constants import *
+
 
 #The Activity Object Model
 class Activity(models.Model):
@@ -17,16 +19,20 @@ class Activity(models.Model):
     from matching.models import PetMatch
     from verifying.models import PetCheck
 
-    if ACTIVITIES[self.activity]["source"] == "userprofile":
-      source = UserProfile.objects.get(pk=self.source_id)
-    elif ACTIVITIES[self.activity]["source"] == "petreport":
-      source = PetReport.objects.get(pk=self.source_id)
-    elif ACTIVITIES[self.activity]["source"] == "petmatch":
-      source = PetMatch.objects.get(pk=self.source_id)
-    elif ACTIVITIES[self.activity]["source"] == "petcheck":
-      source = PetCheck.objects.get(pk=self.source_id)
-    else:
+    try:
+      if ACTIVITIES[self.activity]["source"] == "userprofile":
+        source = UserProfile.objects.get(pk=self.source_id)
+      elif ACTIVITIES[self.activity]["source"] == "petreport":
+        source = PetReport.objects.get(pk=self.source_id)
+      elif ACTIVITIES[self.activity]["source"] == "petmatch":
+        source = PetMatch.objects.get(pk=self.source_id)
+      elif ACTIVITIES[self.activity]["source"] == "petcheck":
+        source = PetCheck.objects.get(pk=self.source_id)
+      else:
+        return None
+    except ObjectDoesNotExist:
       return None
+
     return source.to_DICT()
 
   @staticmethod

@@ -61,13 +61,14 @@ def generate_pet_contacts(petreport):
 	userprofile_contact = {	"name": petreport.proposed_by.user.username, 
 							"email": petreport.proposed_by.user.email, 
 							"phone": None, 
-							"link": None }
+							"link": None,
+							"guardian_email": petreport.proposed_by.guardian_email }
 
 	if petreport.is_crossposted() == True:
-		return({"name": petreport.contact_name, 
-				"email": petreport.contact_email, 
-				"phone": petreport.contact_number, 
-				"link": petreport.contact_link }, userprofile_contact)
+		return ({	"name": petreport.contact_name, 
+							"email": petreport.contact_email, 
+							"phone": petreport.contact_number, 
+							"link": petreport.contact_link }, userprofile_contact)
 	else:
 		return (userprofile_contact, None)		
 

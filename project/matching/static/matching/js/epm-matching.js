@@ -1,6 +1,19 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
 	var pageNum = 1;
+	var resizeTimer;
+
+	$(window).bind("resizeEnd", function(){
+		refresh_layout();
+	})
+
+	$(window).resize(function() {
+		if(this.resizeTO) 
+			clearTimeout(this.resizeTO);
+		this.resizeTO = setTimeout(function() {
+			$(this).trigger('resizeEnd');
+		}, 250);
+	});
 
 	//Click Handler for the Propose Match button.
 	$("#button_propose_match").click(function(){
@@ -81,7 +94,6 @@ function refresh_layout(){
 	// Call the layout function.
 	var handler = $('#tiles li');	
 	handler.wookmark(options);
-	$("#tiles").css("height", "70vh");
 }
 
 //This function accepts the draggable item and the container within which the item is placed, 

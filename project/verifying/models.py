@@ -3,7 +3,7 @@ from matching.models import PetMatch
 from socializing.models import UserProfile
 from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage, send_mail
 from datetime import datetime
 from utilities.utils import *
 from home.models import Activity
@@ -59,7 +59,7 @@ class PetCheck(models.Model):
 		petmatch_owner = petmatch.proposed_by
 		site = Site.objects.get_current()
 
-		#Craft the message that you'll send back to person voting on PetMatch view
+		#Craft the message that you'll send back to pet contacts.
 		lost_oc, lost_cc = generate_pet_contacts(lost_pet)
 		found_oc, found_cc = generate_pet_contacts(found_pet)
 		send_petmatch_email = True
@@ -78,10 +78,10 @@ class PetCheck(models.Model):
 
 		if send_petmatch_email == True:
 			email_body = render_to_string(TEXTFILE_EMAIL_MATCHER_VERIFY_PETMATCH, { "site": site,
-																					"lost_pet": lost_pet,
-																					"found_pet": found_pet,
-																					"petcheck_id": self.id,
-																					"petmatch": petmatch })
+																																							"lost_pet": lost_pet,
+																																							"found_pet": found_pet,
+																																							"petcheck_id": self.id,
+																																							"petmatch": petmatch })
 			send_mail(email_subject, email_body, None, [petmatch_owner.user.email])
 
 		#Iterate through lost and found original and crossposting contacts and email them accordingly. Do this smartly.
@@ -96,16 +96,24 @@ class PetCheck(models.Model):
 				email_body = render_to_string (TEXTFILE_EMAIL_CROSSPOSTER_VERIFY_PETMATCH, {"site":site, "pet": pet, "petcheck_id":self.id, "petmatch": petmatch})
 				send_mail(email_subject, email_body, None, [cc["email"]])
 
-			email_body = render_to_string (TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH, { 	"site": site,
-    																					"pet": pet,
-    																					"petmatcher": petmatch_owner,
-    																					"petmatch": petmatch, 
-    																					"petcheck_id": self.id,
-    																					"cross_posting_phrase": cross_posting_phrase,
-    																					"cross_posting_reach_out": cross_posting_reach_out,
-    																					"other_contact": other_oc,
-    																					"other_pet": other_pet })
-			send_mail(email_subject, email_body, None, [oc["email"]])
+			email_body = render_to_string (TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH, { "site": site, 
+																																								"pet": pet,
+																																								"petmatcher": petmatch_owner,
+																																								"petmatch": petmatch, 
+																																								"petcheck_id": self.id,
+																																								"cross_posting_phrase": cross_posting_phrase,
+																																								"cross_posting_reach_out": cross_posting_reach_out,
+																																								"other_contact": other_oc,
+																																								"other_pet": other_pet })
+			
+			#Setup guardian as CC'ed on this email.
+			if oc["guardian_email"]:
+				cc = [oc["guardian_email"]]
+			else:
+				cc = None
+				
+			email_message = EmailMessage(email_subject, email_body, to=[oc["email"]], cc=cc)
+			email_message.send(fail_silently=True)
 		return message
 
 	#This function will either set the PetMatch to its successful state, whereupon it will be galleried; 

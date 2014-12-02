@@ -37,9 +37,8 @@ class UserProfile (models.Model):
     #Guardian Attributes for Child Assent.
     is_minor = models.BooleanField(default=False)
     guardian_consented = models.BooleanField(default=False)
-    guardian_email = models.EmailField(null=True)
+    guardian_email = models.EmailField(null=True, default=None)
     guardian_activation_key = models.CharField(null=True, max_length=40)
-
 
     def to_DICT(self):
         return {    "id"                : self.id,

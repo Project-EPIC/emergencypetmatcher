@@ -32,43 +32,47 @@
 	</ul>
 	{% endblock messages %}	
 
-	<!-- Workspace for Placing Pet Report Candidate Matches-->
-	<div id="matching-workspace">
-		{% block content_title %} <span class="tab-subtitle">Match {{ target_petreport.pet_name }}</span>{% endblock content_title %}
+	<div id="matching-page" style="text-align:center;">
+		<!-- Workspace for Placing Pet Report Candidate Matches-->
+		<div id="matching-workspace">
+			{% block content_title %} <span class="tab-subtitle">Match {{ target_petreport.pet_name }}</span>{% endblock content_title %}
 
-		<!-- PetReport Target and Candidates -->
-		<div id="matching-workspace-images">
-			<div id="matching-workspace-target-img" class="pet_img"> <img src="{{ MEDIA_URL }}{{ target_petreport.img_path }}"/></div>
-			<div id="matching-workspace-candidate-img" class="pet_img">
-				<strong style="width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;"> Click and Drag a Pet Here </strong>		
+			<!-- PetReport Target and Candidates -->
+			<div id="matching-workspace-images">
+				<div id="matching-workspace-target-img" class="pet_img"> <img src="{{ MEDIA_URL }}{{ target_petreport.img_path }}"/></div>
+				<div id="matching-workspace-candidate-img" class="pet_img">
+					<strong style="width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;"> Click and Drag a Pet Here </strong>		
+				</div>
 			</div>
+
+			<!--Buttons -->
+			<div id="matching-workspace-actions">
+		   		<button id="button_propose_match" class="btn btn-primary" disabled>Propose Match</button>
+		   		<button id="button_clear_candidate" class="btn btn-default" disabled>Clear Pet </button>
+		   	</div>	
+
+		   	<div>
+			   	<!-- Pet Info -->
+			   	<table id="matching-info-table" class="epm-table table table-hover">
+			        <tbody>
+			          {% for field in pet_fields %}
+			          <tr>
+			            <td class="pet-info-header"> {{ field.0 }} </td>
+			            <td class="pet-info-data"> {{ field.1 }}</td>
+			            <!-- Candidate Pet Fields go here -->
+			            <td class="pet-info-data"></td>
+			          </tr>
+			          {% endfor %}
+			        </tbody>
+			    </table>
+			  </div>
 		</div>
 
-		<!--Buttons -->
-		<div id="matching-workspace-actions">
-	   		<button id="button_propose_match" class="btn btn-primary" disabled>Propose Match</button>
-	   		<button id="button_clear_candidate" class="btn btn-default" disabled>Clear Pet </button>
-	   	</div>	
-
-	   	<!-- Pet Info -->
-	   	<table id="matching-info-table" class="epm-table table table-hover">
-	        <tbody>
-	          {% for field in pet_fields %}
-	          <tr>
-	            <td class="pet-info-header"> {{ field.0 }} </td>
-	            <td class="pet-info-data"> {{ field.1 }}</td>
-	            <!-- Candidate Pet Fields go here -->
-	            <td class="pet-info-data"></td>
-	          </tr>
-	          {% endfor %}
-	        </tbody>
-	    </table>
-	</div>
-
-  <!-- Candidate Pet Reports -->
-	<div id="matching-candidates-container">
-		<span class="tab-subtitle">Click and Drag on a Pet to Match.</span>
-		<ul id="tiles" class="matching-candidates-tiles"></ul>
+	  <!-- Candidate Pet Reports -->
+		<div id="matching-candidates-container">
+			<span class="tab-subtitle">Click and Drag on a Pet to Match.</span>
+			<ul id="tiles" class="matching-candidates-tiles"></ul>
+		</div>
 	</div>
 
 	{% block chat %}

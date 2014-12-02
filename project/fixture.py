@@ -1,7 +1,5 @@
 import os
 os.environ['DJANGO_SETTINGS_MODULE']='project.settings'
-from django.core.files.images import ImageFile
-from django.forms.models import model_to_dict
 from django.test.client import Client
 from django.conf import settings
 from registration.models import RegistrationProfile
@@ -14,7 +12,6 @@ from matching.models import PetMatch
 from verifying.models import PetCheck
 from social.apps.django_app.default.models import UserSocialAuth
 from django.db import IntegrityError
-from PIL import Image
 from random import randint
 from datetime import datetime
 from home.constants import *
@@ -29,14 +26,6 @@ import random, string, sys, time, datetime, lipsum, traceback
 NUM_PETREPORTS = 200
 NUM_USERS = 20
 NUM_PETMATCHES = 20
-
-#Setup the Site (if it hasn't yet been done)
-site = Site.objects.get_current()
-if (settings.DEBUG == True) and (site.domain != "localhost:8888"):
-	site.domain ="localhost:8888"
-	site.name = "localhost:8888"
-	site.save()
-	print_success_msg("Localhost Site successfully setup @ localhost:8888. Make sure Nginx has port 8888 configured in proxy.conf settings.")
 	
 #=================================# Functions #=================================#
 
@@ -355,6 +344,14 @@ def create_random_PetMatch(lost_pet=None, found_pet=None, user=None, pet_type=No
 def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_OF_TESTS, create_following_lists=False, create_bookmark_lists = False, create_clients=True, 
 	num_clients=NUMBER_OF_TESTS, create_petreports=False, num_petreports=NUMBER_OF_TESTS, create_petmatches=False, num_petmatches=NUMBER_OF_TESTS, allow_closed_matches=False):
 
+	#Setup the Site (if it hasn't yet been done)
+	site = Site.objects.get_current()
+	if (settings.DEBUG == True) and (site.domain != "localhost:8888"):
+		site.domain ="localhost:8888"
+		site.name = "localhost:8888"
+		site.save()
+		print_success_msg("Localhost Site successfully setup @ localhost:8888. Make sure Nginx has port 8888 configured in proxy.conf settings.")
+	
 	#Check if there's anything to do.
 	if create_users == False and create_clients == False and create_petreports == False and create_petmatches == False:
 		print_info_msg ("Nothing to do in setup_objects().")
@@ -426,7 +423,6 @@ def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_O
 	return results
 
 if __name__ == "__main__":
-
 	#When Executed: Setup our fixture
 	if (len(sys.argv) < 2) == True or (len(sys.argv) > 3) == True:
 		print_error_msg ("You must specify one command argument:\n")
@@ -458,6 +454,16 @@ if __name__ == "__main__":
 	elif argument == "wipeout":
 		delete_all(leave_Users=False)
 		print_info_msg ("All model objects have been cleared from the database.")
+
+	elif argument == "performance":
+		print_info_msg("Going to Run Performance Benchmarks on EPM...")
+		#Test Memory Usage
+		#Test Response Time
+		#Test CPU Usage
+				
+
+
+
 
 	else:
 		print_error_msg("You must specify one command argument:\n")

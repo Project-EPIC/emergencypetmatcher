@@ -1,4 +1,6 @@
 $(document).ready(function(){
+
+	$("#epm-nav-links .nav-link-pet").toggleClass("active");
 	//Image Size.
 	var img_size = 0.0;
 	var img_rotation = 0;

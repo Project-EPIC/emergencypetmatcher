@@ -165,6 +165,7 @@ def get_PetMatches(request, successful=None, page=None):
 
 def login_User(request):
     if request.method == "POST":
+        pprint(request.POST)
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
@@ -240,6 +241,12 @@ def registration_guardian_activate (request, guardian_activation_key):
         profile.guardian_consented = True
         profile.save()
 
+    #Send an email to the minor notifying that the guardian has approved!
+    registration_profile = RegistrationProfile.objects.get(user=profile.user)
+    email_subject = render_to_string(TEXTFILE_EMAIL_POST_GUARDIAN_ACTIVATION_SUBJECT, {})
+    email_body = render_to_string(TEXTFILE_EMAIL_POST_GUARDIAN_ACTIVATION_BODY, {"activation_key": registration_profile.activation_key, "site": Site.objects.get_current() })
+    send_mail(email_subject, email_body, None, [profile.user.email])    
+
     messages.success(request, "All done! Thank you for supporting your child in participating in EmergencyPetMatcher!")
     return redirect(URL_HOME)
 
@@ -252,8 +259,8 @@ def registration_register (request):
     if request.method == "GET":
         return render_to_response (HTML_REGISTRATION_FORM, 
             {   "form":RegistrationFormTermsOfService(),
-                "tos_minor_text":TOS_MINOR_TEXT,
-                "tos_adult_text":TOS_ADULT_TEXT,
+                "consent_form_minor_text":CONSENT_FORM_MINOR_TEXT,
+                "consent_form_adult_text":CONSENT_FORM_ADULT_TEXT,
             }, RequestContext (request))
 
     #Submitting Registration Form Data
@@ -267,8 +274,8 @@ def registration_register (request):
             messages.error(request, message)
             return render_to_response(HTML_REGISTRATION_FORM, 
                 {   "form": form,
-                    "tos_minor_text":TOS_MINOR_TEXT,
-                    "tos_adult_text":TOS_ADULT_TEXT
+                    "consent_form_minor_text":CONSENT_FORM_MINOR_TEXT,
+                    "consent_form_adult_text":CONSENT_FORM_ADULT_TEXT,
                 }, RequestContext (request))
         
         #Create a RegistrationProfile object, populate the potential User object, and be ready for activation.
@@ -291,6 +298,7 @@ def registration_register (request):
             email_subject = render_to_string(TEXTFILE_EMAIL_GUARDIAN_SUBJECT, {})
             email_body = render_to_string(TEXTFILE_EMAIL_GUARDIAN_BODY, {   "participant_email": request.POST["email"],
                                                                             "guardian_activation_key": profile.guardian_activation_key,
+                                                                            "consent_form_guardian_text": CONSENT_FORM_GUARDIAN_TEXT,
                                                                             "site": Site.objects.get_current() })
             
             send_mail(email_subject, email_body, None, [profile.guardian_email])
@@ -356,8 +364,6 @@ def social_auth_disallowed (request):
 def about (request):
     petreports = PetReport.objects.filter(closed = False).order_by("?")[:50]
     return render_to_response(HTML_ABOUT, {'petreports':petreports}, RequestContext(request))
-
-
 
 class RemoteUserMiddleware(object):
     def process_response(self, request, response):

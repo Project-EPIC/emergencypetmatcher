@@ -1,6 +1,8 @@
 //This function allows us to prepare HTML elements and their activities upon load of the HTML page.
 $(document).ready(function(){
 
+    $("#epm-nav-links .nav-link-profile").toggleClass("active");
+
 	//Link to click to open to the PRDP
 	$("#userprofile-submitted-petreports a").click(function(){ 
         $("#epm-modal").modal({

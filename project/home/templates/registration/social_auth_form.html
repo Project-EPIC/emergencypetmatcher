@@ -64,11 +64,11 @@
     <!-- TOS -->
     <div class="form-group" style="margin-top:30px;">
       <div id="tos-container" class="hidden">
-        <strong>Please Read Our Terms of Service (Required)<b class="required-field-symbol">*</b></strong>
+        <strong>Please Read Our Consent Form (Required)<b class="required-field-symbol">*</b></strong>
 
         <!-- TOS Minor Container -->
         <div id="tos-minor-container" class="hidden">
-          <textarea disabled="true" class="tos form-control" id="tos_minor_text">{{ tos_minor_text }}</textarea>
+          <textarea disabled="true" class="tos form-control" id="tos_minor_text">{{ consent_form_minor_text }}</textarea>
           <div class="form-group" style="width:300px;">
             <label for="guardian-email">Parent/Guardian Email Address<b class="required-field-symbol">*</b></label>
             <input type="email" class="form-control" name="guardian_email" placeholder="Enter Parent/Guardian's Email Address">
@@ -77,10 +77,10 @@
 
         <!-- TOS Adult Container -->
         <div id="tos-adult-container" class="hidden">
-          <textarea disabled="true" class="tos form-control" id="tos_adult_text">{{ tos_adult_text }}</textarea>
+          <textarea disabled="true" class="tos form-control" id="tos_adult_text">{{ consent_form_adult_text }}</textarea>
         </div>
 
-        <label for="tos" style="display:block;">I Agree to the Terms of Service<b class="required-field-symbol">*</b></label>
+        <label for="tos" style="display:block;">I have read this form. I know the possible risks and benefits of using EPM and I choose to be in this study. I know that being in this study is up to me and I can withdraw at any time.<b class="required-field-symbol">*</b></label>
         <input id="register-toc" type="checkbox" name="tos">
       </div>
     </div>    

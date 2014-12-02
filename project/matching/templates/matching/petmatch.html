@@ -11,7 +11,7 @@
     <title>{% block head_title %}Pet Match Detailed Page{% endblock head_title %}</title>
   </head>
 
-  <body>
+  <body id="epm-modal-dialog-content">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
       <h4 class="modal-title">{{ petmatch.lost_pet.pet_name }} and {{ petmatch.found_pet.pet_name }} {% if petmatch.is_successful %} - <b style="color:#428bca">Matched! </b> {% endif %}</h4>
@@ -129,9 +129,6 @@
 
     <!-- Include the wookmark plug-in -->
   <script src={% static "home/js/jquery-wookmark.js" %} type="text/javascript"></script>
-
-    <!-- Include the SimplePagination Plug-in -->
-  <script src={% static "home/js/jquery-simplePagination.js" %} type="text/javascript"></script>
 
   <!-- Global, inheritable JS goes here -->
   <script src = {% static "home/js/epm.js" %} type='text/javascript'></script>  

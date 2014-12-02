@@ -323,6 +323,10 @@ function highlight_field_matches(table){
             $(first_pet_info).css("color", "#428bca")
             $(second_pet_info).css("color", "#428bca")
         }
+        else {
+            $(first_pet_info).css("color", "black")
+            $(second_pet_info).css("color", "black")            
+        }
     });
 }
 

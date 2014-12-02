@@ -2,25 +2,6 @@
 {% load staticfiles %}
 {% block head_title %}EPM - User Profile: {{ show_profile.user.username }} {% endblock head_title %}
 
-{% block nav-choices %}
-<ul id="epm-nav-links" class="nav navbar-nav navbar-right">
-	<li><a href="{% url 'home' %}"> Home</a></li>
-	{% if user.is_authenticated %}
-		<li class="active"><a href="{% url 'get_UserProfile_page' user.get_profile.id %}">{{ user.username }}</a></li>
-		<li><form id="epm-logout" class="navbar-form" method = "post" action= "{% url 'logout_User' %}">
-			{% csrf_token %} 
-			<input class="btn" type="submit" value="Logout"/>
-			</form></li>	
-		<li><a href= "{% url 'submit_PetReport' %}">New Pet Report</a></li>
-	{% else %}
-		<li><a href= "{% url 'login_User' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
-	{% endif %}
-
-	<li><a href="{% url 'about' %}">About</a></li>
-	<li><a href="https://docs.google.com/spreadsheet/viewform?formkey=dG9XTzRzNlB3Nl9KWGRMb2Jnd2tObnc6MQ#gid=0">Feedback</a></li>
-</ul>
-{% endblock nav-choices %}
-
 {% block content %}
 <div id="content" style="width:800px;">
 
@@ -130,7 +111,7 @@
 	<hr/>
 	
 	<!-- Following list -->
-	<h4 style="text-align:center;">Users Following</h4>
+	<legend style="text-align:center;">Users Following</legend>
 	<div class="userprofile-thumb-container">
 		{% for following in show_profile.following.all %}
 		<div class="thumb-wrapper">
@@ -145,7 +126,7 @@
 
 	{% if followers_list %}
 	<!-- Follower list -->
-	<h4 style="text-align:center;">Users Following You</h4>
+	<legend style="text-align:center;">Users Following You</legend>
 	<div class="userprofile-thumb-container">    	
 		{% for follower in show_profile.followers.all %}
 		<div class="thumb-wrapper">	
@@ -160,7 +141,7 @@
 	{% endif %}																		
 
 	<!-- Submitted Pet Reports -->
-	<h4 style="text-align:center;">Submitted Pet Reports</h4>
+	<legend style="text-align:center;">Submitted Pet Reports</legend>
     <div id="userprofile-submitted-petreports" class="userprofile-thumb-container">	
 		{% for pet_report in show_profile.proposed_related.all %}
 		<div class="thumb-wrapper">
@@ -174,7 +155,7 @@
 	</div>	
 	
 	<!-- Proposed Pet Matches -->	
-	<h4 style="text-align:center;">Proposed Pet Matches</h4>
+	<legend style="text-align:center;">Proposed Pet Matches</legend>
 	<div id="userprofile-proposed-petmatches" class="userprofile-thumb-container">
 		{% for pet_match in show_profile.proposed_by_related.all %}	
 			<div class="thumb-wrapper">

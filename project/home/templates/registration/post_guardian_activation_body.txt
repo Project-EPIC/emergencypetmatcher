@@ -1,0 +1,12 @@
+Hi there, 
+
+Congrats! Your parent/guardian has approved you to be part of the EmergencyPetMatcher project.
+
+Please complete your account verification by clicking on the link below:
+
+http://{{ site.domain }}{% url 'registration_activate' activation_key %}
+
+Thanks, and go save some pets!
+---------------------
+The EPM Team
+(http://www.emergencypetmatcher.com)

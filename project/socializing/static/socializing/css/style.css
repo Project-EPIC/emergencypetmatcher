@@ -19,7 +19,7 @@
 
 #user-info-table {
 	width: 450px;
-	height:200px;
+	height:300px;
 	margin:0;
 	display:inline-block;
 }
@@ -40,8 +40,8 @@
 
 .userprofile-thumb-container {
 	margin:10px auto 30px auto;
-	border: 2px solid white;
 	min-width: 200px;
+	border-bottom:1px solid lightgray;
 	height: 125px;
 	overflow: auto;
 	overflow-y:hidden;

@@ -1,8 +1,6 @@
 To the parent/guardian(s) of under-aged participant with email address, {{ participant_email }}, 
 
-This message is to inform you that your child has registered for an account on the pet reporting and matching website, EmergencyPetMatcher (EPM). We accept under-aged participation on EPM, but we do so only through child assent, or the consent of both the under-aged participant and his/her parent or guardian. 
-
-Below, you will find the child assent form that we have provided for your child upon registering. You can also view this on the website. If you agree to consent for your child to participate in EPM, please visit the following link:
+{{ consent_form_guardian_text }}
 
 http://{{ site.domain }}{% url 'registration_guardian_activate' guardian_activation_key %}
 
@@ -12,29 +10,3 @@ Thank you,
 ---------------------
 The EmergencyPetMatcher Team
 (http://www.emergencypetmatcher.com)
-
-
-===================================================================================
-
-Hello! We are researchers from Project EPIC at the University of Colorado Boulder.  We are doing a study to see how excellent volunteers like you work with each other to help pet owners find their pets when disaster strikes. We are asking you to take part in the research study because we are interested in how you use EmergencyPetMatcher.
-
-For this research, we will keep track of the information you provide to us, like the pets and pet matches you work on, which users you talk to, and how often you log on and use EPM. We will keep all of your information secure and private as much as possible. Some information, such as your username, needs to be public so others on the web site know who you are. 
-
-We are asking that you provide one of your parent's email address below to make sure that they are okay with you using EmergencyPetMatcher. If you check the box below, it means that you have read this and that you want to be in the study. If you don't want to be in the research, don't click the box. Being in this research is up to you, and no one will be upset if you don't check the box, or if you change your mind later. If you check the box, and your parent/guardian also provides consent on the email they will have received, then you will be able to use EmergencyPetMatcher. You won't be able to register for EmergencyPetMatcher until we receive your parent's consent as well as yours.
-
-We're super excited for you to take part and volunteer to help report and match lost and found pets. Let's get these pets back home!
- 
-You should know that:
-- You do not have to be in this study if you do not want to.  You won't get into any trouble if you say no.
-- Your parent(s)/guardian(s) were asked if it is OK for you to be in this study.  Even if they say it's OK, it is still your choice whether or not to take part. 
-- You can ask any questions you have, now or later.  If you think of a question later, you or your parents can contact us at emergencypetmatcher-support@googlegroups.com. Keep this email address so you can refer to it later.
- 
-Sign this form only if you:
-- understand what you will be doing for this study,
-- have all your questions answered,
-- have talked to your parent(s)/legal guardian about this project, and agree to take part in this research.
-
-Thanks!
-Project EPIC
-
-===================================================================================

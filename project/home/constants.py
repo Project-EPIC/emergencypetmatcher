@@ -28,13 +28,17 @@ HTML_SOCIAL_AUTH_FORM = "registration/social_auth_form.html"
 #E-mail Constants
 EMAIL_SUBJECT_PETMATCH_PROPOSER='EmergencyPetMatcher: Your pet match is close to being successful!'
 TEST_EMAIL="emergencypetmatchertest@gmail.com"
-
 #Email Change.
 TEXTFILE_EMAIL_CHANGE_BODY = "socializing/email_change_body.txt"
 TEXTFILE_EMAIL_CHANGE_SUBJECT = "socializing/email_change_subject.txt"
-
+#Post Guardian Activation Email
+TEXTFILE_EMAIL_POST_GUARDIAN_ACTIVATION_SUBJECT = "registration/post_guardian_activation_subject.txt"
+TEXTFILE_EMAIL_POST_GUARDIAN_ACTIVATION_BODY = "registration/post_guardian_activation_body.txt"
+#Threshold reach Email.
 TEXTFILE_EMAIL_PETMATCH_PROPOSER = "matching/verification_email_to_digital_volunteer.txt"
+#Personal Messaging Email.
 TEXTFILE_EMAIL_USERPROFILE_MESSAGE = "socializing/email_message_user.txt"
+#Guardian for Minor Account Verification Email.
 TEXTFILE_EMAIL_GUARDIAN_SUBJECT = "registration/guardian_email_subject.txt"
 TEXTFILE_EMAIL_GUARDIAN_BODY = "registration/guardian_email.txt"
 
@@ -87,51 +91,72 @@ ACTIVITY_SOCIAL_ACTIVITIES = ["ACTIVITY_ACCOUNT_CREATED",
 ACTIVITIES_MAX_LENGTH = 50                              
 
 
-TOS_MINOR_TEXT = """Hello! We are researchers from Project EPIC (Empowering the Public with Information in Crisis) at the University of Colorado Boulder.  We are doing a study to see how excellent volunteers like you work with each other to help pet owners find their pets when disaster strikes. We are asking you to take part in the research study because we are interested in how you use EmergencyPetMatcher.
+CONSENT_FORM_MINOR_TEXT = """Welcome to EmergencyPetMatcher! 
 
-For this research, we will keep track of the information you provide to us, like the pets and pet matches you work on, which users you talk to, and how often you log on and use EPM. We will keep all of your information secure and private as much as possible. Some information, such as your username, needs to be public so others on the web site know who you are. 
+We are researchers from Project EPIC (Empowering the Public with Information in Crisis) at the University of Colorado Boulder, and we are conducting a study to see how online volunteers help pet owners find their misplaced pets, as often happens when disaster strikes.
 
-We are asking that you provide one of your parent's email address below to make sure that they are okay with you using EmergencyPetMatcher. If you check the box below, it means that you have read this and that you want to be in the study. If you don't want to be in the research, don't click the box. Being in this research is up to you, and no one will be upset if you don't check the box, or if you change your mind later. If you check the box, and your parent/guardian also provides consent on the email they will have received, then you will be able to use EmergencyPetMatcher. You won't be able to register for EmergencyPetMatcher until we receive your parent's consent as well as yours.
+For this research, we will keep track of the information you provide to us, like the pets and pet matches you work on, which users you talk to, and how often you log on and use EPM. We will keep all of your information secure and private. Some information, such as your username, needs to be public so others on the web site know who you are. 
 
-We're super excited for you to take part and volunteer to help report and match lost and found pets. Let's get these pets back home!
+If you check the box below, it means that you have read this and that you want to work in EPM and be in this study. You will need to provide your parent/guardian's email address to make sure that they approve. You won't be able to register for EmergencyPetMatcher until we receive your parent's consent as well as yours.
+
+If you don't want to be in the research, don't click the box, and that's okay because it's your choice.
  
-You should know that:
-- You do not have to be in this study if you do not want to.  You won't get into any trouble if you say no.
-- Your parent(s)/guardian(s) were asked if it is OK for you to be in this study.  Even if they say it's OK, it is still your choice whether or not to take part. 
-- You can ask any questions you have, now or later.  If you think of a question later, you or your parents can contact us at emergencypetmatcher-support@googlegroups.com. Keep this email address so you can refer to it later.
- 
-Sign this form only if you:
-- understand what you will be doing for this study,
-- have all your questions answered,
-- have talked to your parent(s)/legal guardian about this project, and agree to take part in this research.
+You can ask questions now or later. You or your parents can contact us at emergencypetmatcher-support@googlegroups.com if you have a question. 
 
 Thanks!
 Project EPIC
 """
 
-TOS_ADULT_TEXT = """Welcome to EmergencyPetMatcher! By checking the box below you indicate that you have read, understood, and agreed to the following:
- 
-Emergency Pet Matcher (EPM) is a tool developed and supported by the Project EPIC (Empowering the Public with Information in Crisis) research team at the University of Colorado Boulder. This research project is led by Leysia Palen (Professor of the Department of Computer Science, 430 UCB, palen@cs.colorado.edu).
- 
-Project Description: This project studies how people collect and share information about displaced pets in disaster events.
- 
-Procedures: Researchers will observe your engagement with Emergency Pet Matcher and with other users while you are using both the public and private aspects of the EPM system. The researchers may reach out to you via email and enquire whether you would be willing to be involved in additional research such as questionnaires or interviews. Use of EPM does not compel you to participate in any such research. In all cases, when analyzing and reporting data gathered through EPM and any questionnaires or interviews you may choose to be part of, any personal information will be de-identified.
- 
-Risks: There are no foreseeable risks in using EPM. Please be aware the system is public - treat all content you provide and actions you take in the system to be public, including your use of the Private Message functions.
- 
-Benefits: There are no direct benefits to you from taking part in Emergency Pet Matcher.
- 
-Privacy: You have the right to withdraw consent or stop participating at any time.
-We will maintain the privacy of your data and not share it with anyone outside this research group. In any research conducted we will use a pseudonym instead of your real name or EPM handle.
- 
-Logs of use will be kept securely within the research project's offices indefinitely, and will only be accessed by those directly working on the project. All engagement on the front end of EPM will be public.
- 
-Invitation for Questions: If you have questions about this study, you may contact the EPM researchers at emergencypetmatcher-support@googlegroups.com before indicating your consent. If you have questions regarding your rights as a participant, any concerns about this project, or any dissatisfaction with any aspect of this study, you may report them - confidentially, if you wish - to the Institutional Review Board, 3100 Marine Street, Rm A15, 563 UCB, ph (303) 735-3702.
- 
-Following your agreement below, we take your ongoing use of the system to indicate your ongoing consent. 
+CONSENT_FORM_ADULT_TEXT = """Welcome to EmergencyPetMatcher! 
+
+By checking the box below you indicate that you have read, understood, and agreed to the following:
+
+EmergencyPetMatcher (EPM) is a tool developed and supported by the Project EPIC (Empowering the Public with Information in Crisis) research team at the University of Colorado Boulder. This research project is led by Leysia Palen (Professor of the Department of Computer Science, 430 UCB, palen@cs.colorado.edu).
+
+Project Description: This project studies how people collect and share information about displaced pets in disaster events.  Your use of EPM will make you a participant in this research study.
+
+Procedures: Researchers are interested in understanding your interaction with EPM and evaluating EPM's effectiveness in helping lost pets reunite with their families after a disaster. We will be able to see your interaction with the system in the form of data logs which we will examine after the fact and in collection with all the other users of the system. The data logs will indicate what pet reports users create, what pet matches users make, votes on matches, and following of and messaging to other users.  Private data including contact information (email address, date of birth), as well as personal messages between yourself and other users, will always be kept private and secure within our servers. They will not be exposed to others.
+
+In addition, with your permission, researchers may contact you via email to inquire if you would be willing to participate in a questionnaire or interview about EPM. In all cases, when analyzing and reporting data gathered about your use of EPM, personal information will be removed.
+
+Risks: There are no foreseeable risks in using EPM.  Please be aware the system is public to the outside world: the pet reports, pet matches, votes, and following activities you engage in are visible to everyone. Treat this content as you would treat content in other social networking sites you engage in, like Facebook or Twitter.
+
+Benefits: There are no direct benefits to you by taking part in EmergencyPetMatcher, except that we hope that your work will reunite pets with their owners.
+
+Privacy: You have the right to withdraw consent or stop participating at any time. If you do, you will no longer be able to use EPM. We will maintain the privacy of your data and not share it with anyone outside this research group. Your data will be kept secure. In any research reported we will use a pseudonym instead of your real name or EPM account name.  Choosing not to participate or withdrawing from participation involves no penalty or loss of other benefits to which a subject may be otherwise entitled.
+
+Questions: If you have questions about this study, you may contact the EPM researchers at emergencypetmatcher-support@googlegroups.com before indicating your consent. If you have questions regarding your rights as a participant, any concerns about this project, or any dissatisfaction with any aspect of this study, you may report them - confidentially, if you wish - to the Institutional Review Board, 3100 Marine Street, Rm A15, 563 UCB, ph (303) 735-3702.
+
+Following your agreement below, we take your ongoing use of the system to indicate your ongoing consent.
 
 Thanks!
 Project EPIC
+"""
+
+CONSENT_FORM_GUARDIAN_TEXT = """This consent form is to inform you that your child has registered for an account on the pet reporting and matching website, EmergencyPetMatcher (EPM) and to solicit your approval on your child's participation in EPM. We accept under-aged participation on EPM, but we do so only through child assent, or the consent of both the under-aged participant and his/her parent or guardian.
+
+EmergencyPetMatcher (EPM) is a tool developed and supported by the Project EPIC (Empowering the Public with Information in Crisis) research team at the University of Colorado Boulder. This research project is led by Leysia Palen (Professor of the Department of Computer Science, 430 UCB, palen@cs.colorado.edu).
+
+Project Description: This project studies how people collect and share information about displaced pets in disaster events. Your child's use of EPM will make him/her a participant in this research study.
+
+Procedures: Researchers are interested in understanding your child's interaction with EPM and evaluating EPM's effectiveness in helping lost pets reunite with their families after a disaster. We will be able to see your child's interaction with the system in the form of data logs which we will examine after the fact and in aggregate with all the other users of the system. The data logs will indicate what pet reports users create, what pet matches users make, votes on matches, and following of and messaging to other users.  Private data including contact information (email address, date of birth), as well as personal messages between your child and other users, will always be kept private and secure within our servers. They will not be exposed to others.
+
+In addition, with your permission, researchers may contact you and your child via email to inquire if he/she, with your permission would be willing to participate in a questionnaire or interview about EPM. In all cases, when analyzing and reporting data gathered about your child's use of EPM, personal information will be removed.
+
+Risks: There are no foreseeable risks in using EPM. Please have your child be aware that the system is public to the outside world: the pet reports, pet matches, votes, and following activities your child engages in are visible to everyone. Treat this content as he/she would treat content in other social networking sites he/she engages in, like Facebook or Twitter.
+
+Benefits: There are no direct benefits to you or your child in taking part in EmergencyPetMatcher, except that we hope that your child's work will reunite pets with their owners.
+
+Privacy: Your child has the right to withdraw consent or stop participating at any time. If he/she does, he/she will no longer be able to use EPM. We will maintain the privacy of your child's data and not share it with anyone outside this research group. His/her data will be kept secure. In any research reported, we will use a pseudonym instead of your child's real name or EPM account name.  Choosing not to participate or withdrawing from participation involves no penalty or loss of other benefits to which a subject may be otherwise entitled.
+
+Questions: If you have questions about this study, you or your child may contact the EPM researchers at emergencypetmatcher-support@googlegroups.com before indicating your consent. If you have questions regarding your child's rights as a participant, any concerns about this project, or any dissatisfaction with any aspect of this study, you may report them - confidentially, if you wish - to the Institutional Review Board, 3100 Marine Street, Rm A15, 563 UCB, ph (303) 735-3702.
+
+Following your agreement below, we take your child's ongoing use of the system to indicate your ongoing consent.
+
+Thanks!
+Project EPIC
+
+I have read this consent form. I know the possible risks and benefits of my child using EPM and I choose for him/her to be in this study. I know that being in this study is voluntary. I know that my child can withdraw at any time. 
 """
 
 
