@@ -29,6 +29,11 @@ urlpatterns = patterns('',
  #    url (r'^api/', include(petreport_resource.urls)),    
  #    url (r'^api/', include(v1_api.urls)),
 
-) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) #This is for development - MAKE SURE TO TURN OFF for Production!
 
-#This is for development - MAKE SURE TO TURN OFF for Production!
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += patterns('',
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    )

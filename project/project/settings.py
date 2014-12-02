@@ -1,5 +1,4 @@
 # Django settings for project project.
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -121,6 +120,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -150,6 +150,7 @@ INSTALLED_APPS = (
     'social.apps.django_app.default',
     'analysis',
     'south',
+    'debug_toolbar',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -181,11 +182,21 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
 EMAIL_HOST_PASSWORD = '3m3rgEncY'
+DEFAULT_FROM_EMAIL = "emergencypetmatcher@gmail.com"
 
 AUTHENTICATION_BACKENDS = (
     'social.backends.twitter.TwitterOAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
+
+INTERNAL_IPS = ('127.0.0.1:8888', '192.168.0.1',)
+DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False,}
+
+def show_toolbar(request):
+    return True
+SHOW_TOOLBAR_CALLBACK = show_toolbar
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
 
 SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter')
 
