@@ -1,0 +1,24 @@
+{% extends 'reporting/petreport_form.html' %}
+{% load staticfiles %}
+
+{% block head_title %}Edit Your Pet Report{% endblock head_title %}
+
+{% block content_subtitle %} 
+  <h3> Edit your Pet Report </h3>
+  <p>The fields marked with <b style="margin:0;" class="required-field-symbol">*</b> are required. </p>
+{% endblock content_subtitle %} 
+
+{% block form %}
+<form enctype="multipart/form-data" name="petreport_form" method="POST" action="{% url 'edit' petreport.id %}">
+{% endblock form %}
+
+{% block img_path %}
+  <img src="{{ MEDIA_URL}}{{ field.value }}"/>
+{% endblock img_path %}
+
+{% block form_action %}
+  <div class="form-actions">
+    <input id = "id_submit" class="btn btn-primary" type="button" value="Update This Pet"/>
+  </div>
+{% endblock form_action %}
+

@@ -10,22 +10,27 @@ $(document).ready(function(){
 		pageNum = 1
 		switch(id){
 			case "epm-choices-petreports":
+			$("#pet-report-filter-form").css("display", "block");
 			fetch_PetReports(pageNum++, true);
 			break;
 
 			case "epm-choices-petmatches":
+			$("#pet-report-filter-form").css("display", "none");
 			fetch_PetMatches(pageNum++, false, true);
 			break;
 
 			case "epm-choices-reunited-pets":
+			$("#pet-report-filter-form").css("display", "block");
 			fetch_PetMatches(pageNum++, true, true);
 			break;
 
 			case "epm-choices-bookmarked":
+			$("#pet-report-filter-form").css("display", "block");
 			fetch_bookmarks(pageNum++, true);
 			break;
 
 			case "epm-choices-activity":
+			$("#pet-report-filter-form").css("display", "none");
 			fetch_activities(pageNum++, true);
 			break;
 		}		
@@ -66,9 +71,28 @@ $(document).ready(function(){
 	//Refresh.
 	refresh_layout(); 		
 
+	$(".pet-filter").change(function(){
+		pageNum = 1;
+		fetch_PetReports(pageNum++, true);
+	});
+
 }); //END document.ready()
 
 /******************************* Utility functions *******************************************/
+
+
+function get_pet_report_filter_options(){
+	options = {	
+		"pet_name": $("#filter-name").val(), 
+		"status": $("#filter-status").val(), 
+		"pet_type": $("#filter-type").val() 
+	};
+	$.each(options, function(key, value){
+    if (value === "" || value === null)
+        delete options[key];
+    });
+	return options;
+}
 
 // Prepare layout for home page grid.
 function refresh_layout(offset){
@@ -95,11 +119,13 @@ function fetch_PetReports(page, clear){
 	img = document.createElement("img")
 	img.src = STATIC_URL + "home/icons/loading.gif"
 	$(".tab-content .tab-subtitle").html(img);
+	options = get_pet_report_filter_options() //get pet report filter values.
 
 	//AJAX Away.
 	$.ajax({
 		type:"GET",
-		url:URL_GET_PETREPORTS + "/" + page,
+		url: HOME_URLS["PETREPORTS_DATA"],
+		data:{"page":page, "pet_name":options["pet_name"], "status":options["status"], "pet_type":options["pet_type"]},
 		success: function(data){
 			var petreports = data.pet_reports_list;
 			var count = data.count;
@@ -142,15 +168,11 @@ function fetch_PetMatches(page, successful_petmatches, clear){
 	img.src = STATIC_URL + "home/icons/loading.gif"
 	$(".tab-content .tab-subtitle").html(img);	
 
-	if (successful_petmatches == true)
-		successful_petmatches = 1
-	else
-		successful_petmatches = 0
-
 	//AJAX Away.
 	$.ajax({
 		type:"GET",
-		url: URL_GET_PETMATCHES + "/" + successful_petmatches + "/" + page,
+		url: HOME_URLS["PETMATCHES_DATA"],
+		data: {"successful_petmatches": successful_petmatches, "page":page},
 		success: function(data){
 			var matches = data.pet_matches_list;
 			var count = data.count;
@@ -207,7 +229,8 @@ function fetch_activities(page, clear){
 	activity_list = $("#tiles");
 	$.ajax ({
 		type:"GET",
-		url: URL_GET_ACTIVITIES + "/" + page,
+		url: HOME_URLS["ACTIVITIES_DATA"],
+		data: {"page": page},
 		success: function(data){
 			var activities = data.activities;
 
@@ -247,7 +270,8 @@ function fetch_bookmarks(page, clear){
 
 	$.ajax({
 		type:"GET",
-		url:URL_GET_BOOKMARKS + "/" + page,
+		url: HOME_URLS["BOOKMARKS_DATA"],
+		data: {"page": page},
 		success: function(data){
 			var bookmarks = data.bookmarks_list;
 			var count = data.count;
@@ -318,11 +342,10 @@ function remove_bookmark(petreport_id, parent){
 		//ajax request to remove the bookmark
 		$.ajax({ 
 			type:"POST",
-			url: URL_BOOKMARK_PETREPORT,
+			url: REPORTING_URLS["BOOKMARK"],
 			data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":petreport_id, "user_id": user_id, "action":"Remove Bookmark"},
 
 			success: function(data){
-	    	//$("bookmarks_messages").html("<li class='success'>" + data.message + "</li>");
 	    	$("#messages").html("<li class='success'>" + data.message + "</li>");
 	    	parent.remove();
 	    	refresh_layout();			            	

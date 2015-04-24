@@ -148,7 +148,7 @@
       var PETMATCH_ID = "{{ petmatch.id }}";
       var LOST_PETREPORT_ID = "{{ petmatch.lost_pet.id }}";
       var FOUND_PETREPORT_ID = "{{ petmatch.found_pet.id }}";
-      var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
+      var URL_VOTE_PETMATCH = "{% url 'vote' %}";
       var URL_LOGIN = "Log in <a href={% url 'login_User' %}?next={% firstof request.path '/' %} > here.</a>";  
       var UPVOTE = "upvote";
       var DOWNVOTE = "downvote";

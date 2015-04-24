@@ -23,15 +23,10 @@
       <a class="epm-dialog-title" href="/">EmergencyPetMatcher</a>
       <strong class="epm-dialog-title" style="font-size:24px; margin-bottom:10px;"> 
         {% if pet_report.pet_name != "" %}{{ pet_report.pet_name }}{% else %} Unknown {% endif %}
-      </strong>
-
-      <!-- Proposed_by link -->
-      <span style="text-align:center; display:block">
-        Proposed by <a href="{% url 'get_UserProfile_page' pet_report.proposed_by.id %}">{{ pet_report.proposed_by.user.username }}</a>
-      </span>      
+      </strong>   
 
       <!-- Some logic to give nice header for number of workers -->
-      <span style="display:block; text-align:center; margin-bottom:10px; color:gray;"> 
+      <span style="display:block; text-align:center; color:gray;"> 
         {% if num_workers > 1 %}
           {% if user_is_worker %}
             You and <strong style="font-size:18px;">{{ num_workers|add:"-1" }}</strong> people are working on this pet.
@@ -48,6 +43,15 @@
           Nobody is working on this pet yet.
         {% endif %}  
       </span>
+
+      <!-- Proposed_by link -->
+      <span style="text-align:center; display:block">
+      {% if edit_petreport %}
+        <a href="{% url 'edit' pet_report.id %}">Edit This Pet Report </a>
+      {% else %}
+        Proposed by <a href="{% url 'get_UserProfile_page' pet_report.proposed_by.id %}">{{ pet_report.proposed_by.user.username }}</a>
+      {% endif %}
+      </span>         
 
       <!-- Messages -->
       {% block messages %}
@@ -102,7 +106,7 @@
       {% if user.is_authenticated %}
         <button id="prdp-bookmark" type="button" class="btn btn-success btn-lg">Bookmark</button>
         {% if not pet_has_been_successfully_matched %}
-          <a href="{% url 'match_PetReport' pet_report.id 1%}" type="button" class="btn btn-primary btn-lg">Match this Pet</a>
+          <a href="{% url 'match' pet_report.id %}" type="button" class="btn btn-primary btn-lg">Match this Pet</a>
         {% endif %}
       {% endif %}
     </div>   
@@ -140,8 +144,6 @@
       var BOOKMARKED = "{{ user_has_bookmarked }}";
       var USER_ID = "{{ user.id }}";
       var PETREPORT_ID =  "{{ pet_report.id }}";
-      var URL_LOGIN  = "{% url 'login_User' %}";
-      var URL_BOOKMARK_PETREPORT = "{% url 'bookmark_PetReport' %}";
       var PETREPORT_URL = 'http://{{ site_domain }}/reporting/PetReport/{{ pet_report.id }}';
       var PETREPORT_IMAGE = 'http://{{ site_domain }}{{ STATIC_URL }}{{ pet_report.img_path }}';
       var PETREPORT_TITLE = '#petreporting on #epm';

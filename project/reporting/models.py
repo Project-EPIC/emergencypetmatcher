@@ -86,8 +86,8 @@ class PetReport(models.Model):
                     "sex"                   : self.sex,
                     "size"                  : self.size,
                     "location"              : self.location,
-                    "geo_lat"               : float(self.geo_location_lat),
-                    "geo_long"              : float(self.geo_location_long),
+                    "geo_lat"               : str(self.geo_location_lat),
+                    "geo_long"              : str(self.geo_location_long),
                     "microchip_id"          : self.microchip_id,
                     "tag_info"              : self.tag_info,
                     "contact_name"          : self.contact_name,
@@ -147,6 +147,38 @@ class PetReport(models.Model):
         if self.contact_email and email_is_valid(self.contact_email):
             return True
         return False
+
+    def update_fields(self, pr):
+        self.pet_type           = pr.pet_type
+        self.status             = pr.status
+        self.date_lost_or_found = pr.date_lost_or_found
+        self.sex                = pr.sex
+        self.spayed_or_neutered = pr.spayed_or_neutered
+        self.pet_name           = pr.pet_name
+        self.size               = pr.size
+        self.age                = pr.age
+        self.color              = pr.color
+        self.breed              = pr.breed        
+        self.location           = pr.location
+        self.geo_location_lat   = pr.geo_location_lat
+        self.geo_location_long  = pr.geo_location_long
+        self.microchip_id       = pr.microchip_id
+        self.tag_info           = pr.tag_info
+        self.description        = pr.description
+        self.contact_name       = pr.contact_name
+        self.contact_number     = pr.contact_number
+        self.contact_email      = pr.contact_email
+        self.contact_link       = pr.contact_link
+
+        #Only change if incoming PetReport's image is different.
+        if pr.img_path.name and self.img_path != pr.img_path:
+            self.set_images(pr.img_path, save=True)
+        else:
+            self.save()
+
+    #Make and save images from img_path and thumb_path AND save the PetReport.
+    # pr.set_images(pr.img_path, save=True, rotation=img_rotation)
+
 
     #This function returns True if any marked-successful PetCheck object has been set involving this PetReport, False otherwise.
     def has_been_successfully_matched(self):
@@ -273,9 +305,21 @@ class PetReport(models.Model):
         except PetReport.DoesNotExist:
             return None
 
+
+    @staticmethod
+    def filter(options):
+        pet_reports = PetReport.objects
+        if options.get("status"):
+            pet_reports = pet_reports.filter(status=options["status"])
+        if options.get("pet_type"):
+            pet_reports = pet_reports.filter(pet_type=options["pet_type"])
+        if options.get("pet_name"):
+            pet_reports = pet_reports.filter(pet_name=options["pet_name"])
+        return pet_reports
+
     #Return a list of candidate PetReports that could potentially be matches for this PetReport.
     def get_candidate_PetReports(self):
-        return PetReport.objects.exclude(status = self.status).filter(pet_type=self.pet_type, closed=False)
+        return PetReport.objects.exclude(status = self.status).exclude(proposed_by = self.proposed_by).filter(pet_type=self.pet_type, closed=False)
 
     #This method returns a ranked list of all PetReports found in the input specified list. This ranking is based on the PetReport compare() method.
     def get_ranked_PetReports(self, candidates, page=None):
@@ -383,37 +427,36 @@ class PetReport(models.Model):
             fields.append(field)
         return fields       
 
-
 #The PetReport ModelForm
 class PetReportForm (ModelForm):
 
     '''Required Fields'''
-    pet_type = forms.ChoiceField(label = 'Pet Type', choices = PET_TYPE_CHOICES, required = True)  
-    status = forms.ChoiceField(label = "Pet Status", help_text="(Lost/Found)", choices = STATUS_CHOICES, required = True)
-    date_lost_or_found = forms.DateField(label = "Date Lost/Found", widget = forms.DateInput, required = True)
+    pet_type            = forms.ChoiceField(label='Pet Type', choices = PET_TYPE_CHOICES, required = True, widget=forms.Select(attrs={"class":"form-control", "style":"width:100px"}))  
+    status              = forms.ChoiceField(label="Pet Status", help_text="(Lost/Found)", choices = STATUS_CHOICES, required = True, widget=forms.Select(attrs={"class":"form-control","style":"width:100px"}))
+    date_lost_or_found  = forms.DateField(label="Date Lost/Found", required = True,  widget = forms.DateInput(attrs={"class":"form-control", "style":"width:200px"}))
 
     '''Non-Required Fields'''
-    pet_name = forms.CharField(label = "Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False) 
-    age = forms.ChoiceField(label = "Age", choices=AGE_CHOICES,required = False)
-    breed = forms.CharField(label = "Breed", max_length = PETREPORT_BREED_LENGTH, required = False)
-    color = forms.CharField(label = "Coat Color(s)", max_length = PETREPORT_COLOR_LENGTH, required = False)    
-    sex = forms.ChoiceField(label = "Sex", choices = SEX_CHOICES, required = False)
-    size = forms.ChoiceField(label = "Size of Pet", choices = SIZE_CHOICES, required = False)
-    location = forms.CharField(label = "Location", help_text="(Location where pet was lost/found)", max_length = PETREPORT_LOCATION_LENGTH , required = False)
-    geo_location_lat = forms.DecimalField(label = "Geo Location Lat", help_text="(Latitude coordinate)", max_digits=8, decimal_places=5, widget=forms.TextInput(attrs={'size':'10'}), initial=None, required=False)
-    geo_location_long = forms.DecimalField(label = "Geo Location Long", help_text="(Longitude coordinate)", max_digits=8, decimal_places=5, widget=forms.TextInput(attrs={'size':'10'}),  initial=None, required=False)
-    microchip_id = forms.CharField(label = "Microchip ID", max_length = PETREPORT_MICROCHIP_ID_LENGTH, required=False)
-    tag_info = forms.CharField(label = "Tag and Collar Information", help_text="(if available)", max_length = PETREPORT_TAG_INFO_LENGTH, required=False, widget=Textarea)
-    contact_name = forms.CharField(label = "Contact Name", max_length=PETREPORT_CONTACT_NAME_LENGTH, required=False)
-    contact_number = forms.CharField(label = "Contact Phone Number", max_length=PETREPORT_CONTACT_NUMBER_LENGTH, required=False)
-    contact_email = forms.CharField(label = "Contact Email Address", max_length=PETREPORT_CONTACT_EMAIL_LENGTH, required=False)
-    contact_link = forms.CharField(label = "Contact Alternative link to Pet Posting", max_length=PETREPORT_CONTACT_LINK_LENGTH, required=False)
-    img_path = forms.ImageField(label = "Upload an Image", help_text="(*.jpg, *.png, *.bmp), 3MB maximum", widget = forms.ClearableFileInput, required = False)
-    spayed_or_neutered = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False)
-    description  = forms.CharField(label = "Pet Description", help_text="(Please describe the pet as accurately as possible)", max_length = PETREPORT_DESCRIPTION_LENGTH, widget = forms.Textarea, required = False)
+    pet_name            = forms.CharField(label="Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:150px", "placeholder":"If Available"})) 
+    age                 = forms.ChoiceField(label="Age", choices=AGE_CHOICES,required = False, widget = forms.Select(attrs={"class":"form-control", "style":"width:100px"}))
+    breed               = forms.CharField(label="Breed", max_length = PETREPORT_BREED_LENGTH, required = False, widget=forms.TextInput(attrs={"style":"width:200px; display:block;"}))
+    color               = forms.CharField(label="Coat Color(s)", max_length = PETREPORT_COLOR_LENGTH, required = False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:200px", "placeholder":"Example: Brown, White"}))    
+    sex                 = forms.ChoiceField(label="Sex", choices = SEX_CHOICES, required = False, widget = forms.Select(attrs={"class":"form-control", "style":"width:100px"}))
+    size                = forms.ChoiceField(label="Size of Pet", choices = SIZE_CHOICES, required = False, widget=forms.Select(attrs={"class":"form-control", "style":"width:200px"}))
+    location            = forms.CharField(label="Location", help_text="(Location where pet was lost/found)", max_length = PETREPORT_LOCATION_LENGTH , required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:350px; margin-bottom:10px;", "placeholder": "Write in general information, such as 'Boulder, CO'"}))
+    geo_location_lat    = forms.DecimalField(label="Geo Location Lat", help_text="(Latitude coordinate)", max_digits=8, decimal_places=5, initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:250px; margin-bottom:10px;", "placeholder": "Latitude (Lat) Geo-Coordinate"}))
+    geo_location_long   = forms.DecimalField(label="Geo Location Long", help_text="(Longitude coordinate)", max_digits=8, decimal_places=5, initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:250px; margin-bottom:10px;", "placeholder": "Longitude (Long) Geo-Coordinate"}))
+    microchip_id        = forms.CharField(label="Microchip ID", max_length = PETREPORT_MICROCHIP_ID_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:360px", "placeholder": "Used to verify this pet but will not be shown publicly."}))
+    tag_info            = forms.CharField(label="Tag and Collar Information", help_text="(if available)", max_length = PETREPORT_TAG_INFO_LENGTH, required=False, widget=Textarea(attrs={"class":"form-control", "style":"max-width:400px; max-height:300px;"}))
+    contact_name        = forms.CharField(label="Contact Name", max_length=PETREPORT_CONTACT_NAME_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:200px; margin-bottom:10px;"}))
+    contact_number      = forms.CharField(label="Contact Phone Number", max_length=PETREPORT_CONTACT_NUMBER_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:250px; margin-bottom:10px;"}))
+    contact_email       = forms.CharField(label="Contact Email Address", max_length=PETREPORT_CONTACT_EMAIL_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:200px; margin-bottom:10px;"}))
+    contact_link        = forms.CharField(label="Contact Alternative link to Pet Posting", max_length=PETREPORT_CONTACT_LINK_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"font-family:monospace; width:500px"}))
+    img_path            = forms.ImageField(label="Upload an Image", help_text="(*.jpg, *.png, *.bmp), 3MB maximum", required = False, widget=forms.FileInput)
+    spayed_or_neutered  = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False, widget=forms.Select(attrs={"class":"form-control", "style":"width:200px"}))
+    description         = forms.CharField(label="Pet Description", help_text="(Please describe the pet as accurately as possible)", max_length = PETREPORT_DESCRIPTION_LENGTH, required = False, widget=forms.Textarea(attrs={"class":"form-control", "style":"max-width:400px; max-height:300px;"}))
 
     class Meta:
         model = PetReport
         #exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by','closed', 'thumb_path')
-        fields = ("status", "date_lost_or_found", "pet_type", "pet_name",  "breed", "age", "color", "sex", "spayed_or_neutered", "size", "img_path", "description", "location", "geo_location_lat", "geo_location_long", "microchip_id", "tag_info", "contact_name", "contact_number", "contact_email", "contact_link")
+        fields = ("status", "date_lost_or_found", "pet_type", "pet_name",  "breed", "age", "color", "sex", "spayed_or_neutered", "size", "microchip_id", "img_path", "description", "location", "geo_location_lat", "geo_location_long", "tag_info", "contact_name", "contact_number", "contact_email", "contact_link")
 

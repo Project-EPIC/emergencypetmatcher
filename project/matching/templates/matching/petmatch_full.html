@@ -46,12 +46,12 @@
 	              
 	<!-- Pet Pictures -->
 	<div id="pmdp-pics">
-	<div id="lost_pet_pic_wrapper" class="img-wrapper" style="float:left;">  
-	  <img class="pet_pic" src="{{ MEDIA_URL }}{{ petmatch.lost_pet.img_path }}"/>
-	</div>
-	<div id="found_pet_pic_wrapper" class="img-wrapper" style="float:right;">  
-	  <img class="pet_pic" src="{{ MEDIA_URL }}{{ petmatch.found_pet.img_path }}"/>
-	</div>                  
+		<div id="lost_pet_pic_wrapper" class="img-wrapper" style="float:left;">  
+		  <img class="pet_pic" src="{{ MEDIA_URL }}{{ petmatch.lost_pet.img_path }}"/>
+		</div>
+		<div id="found_pet_pic_wrapper" class="img-wrapper" style="float:right;">  
+		  <img class="pet_pic" src="{{ MEDIA_URL }}{{ petmatch.found_pet.img_path }}"/>
+		</div>                  
 	</div>
 
 	<!-- Pet Info -->
@@ -99,7 +99,7 @@
 
 {% block css %}
 	<link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>
-  	<link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>  	
+  <link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>  	
 {% endblock css %}
 
 {% block js %}

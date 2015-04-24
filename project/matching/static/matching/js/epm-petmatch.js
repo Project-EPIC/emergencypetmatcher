@@ -2,11 +2,11 @@
 $(document).ready(function(){
 
   $("#lost-prdp-link").click(function(){ 
-    launch_dialog($("#epm-modal"), URL_PRDP + LOST_PETREPORT_ID); 
+    launch_dialog($("#epm-modal"), REPORTING_URLS["PETREPORT"] + LOST_PETREPORT_ID); 
   });
 
   $("#found-prdp-link").click(function(){ 
-    launch_dialog($("#epm-modal"), URL_PRDP + FOUND_PETREPORT_ID); 
+    launch_dialog($("#epm-modal"), REPORTING_URLS["PETREPORT"] + FOUND_PETREPORT_ID); 
   });
 
     //Variables to control for upvoting and downvoting and for readability.
@@ -100,10 +100,9 @@ $(document).ready(function(){
 
 //The voting AJAX POST call. Requires a string with either "up" or "down".
 function vote (user_vote){
-
   //Check if the user has logged in.
   if (USER_ID == "None"){
-    $(".pmdp_messages").html("<li class='error'> You cannot vote for this Pet Match because you are not logged in! "+ URL_LOGIN + "</li>");
+    $(".pmdp_messages").html("<li class='error'> You cannot vote for this Pet Match because you are not logged in! <a href='"+ HOME_URLS["LOGIN"] + "'>Log in Here.</a></li>");
     return false;
   }
 
@@ -113,7 +112,7 @@ function vote (user_vote){
   //Perform the AJAX POST Request for Voting on a PetMatch.
   $.ajax({
     type:"POST",
-    url: URL_VOTE_PETMATCH,
+    url: MATCHING_URLS["VOTE"],
     data: {"csrfmiddlewaretoken": csrf_value, "vote":user_vote, "match_id":PETMATCH_ID, "user_id":USER_ID},
     success: function(data){        
       $(".pmdp_messages").html("<li class='success'>" + data.message + "</li>");

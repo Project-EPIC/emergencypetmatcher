@@ -18,7 +18,7 @@ $(document).ready(function(){
 	//Click Handler for the Propose Match button.
 	$("#button_propose_match").click(function(){
 		$("#epm-modal").modal({
-			"remote": URL_PROPOSE_MATCH + TARGET_PETREPORT_ID + "/" + CANDIDATE_PETREPORT_ID + "/"
+			"remote": MATCHING_URLS["PROPOSE"] + TARGET_PETREPORT_ID + "/" + CANDIDATE_PETREPORT_ID + "/"
 		});
 	});
 
@@ -27,7 +27,7 @@ $(document).ready(function(){
 	//Click Handler for Target. 
 	$("#matching-workspace-target-img img").click(function(){
 		$("#epm-modal").modal({
-			"remote": URL_PRDP + TARGET_PETREPORT_ID
+			"remote": REPORTING_URLS["PETREPORT"] + TARGET_PETREPORT_ID
 		}); 
 	});
 
@@ -105,7 +105,8 @@ function moveImage(item, container) {
 	//Make an AJAX Call to get attributes for the Candidate PetReport.
 	$.ajax({
 		type:"GET",
-		url: URL_GET_PETREPORT + petreport_id,
+		url: HOME_URLS["PETREPORT_DATA"],
+		data: {"petreport_id": petreport_id},
 		success: function(data){
 			//Show the details of a candidate petreport after dropping its image to the droppable container
 			var petreport = data.petreport;
@@ -135,7 +136,7 @@ function moveImage(item, container) {
 			//Create the click handler for this candidate.
 			$("#matching-workspace-candidate-img img").click(function(){ 
 				$("#epm-modal").modal({
-					"remote": URL_PRDP + CANDIDATE_PETREPORT_ID
+					"remote": REPORTING_URLS["PETREPORT"] + CANDIDATE_PETREPORT_ID
 				});				
 			});
 
@@ -155,7 +156,8 @@ function moveImage(item, container) {
 function fetch_PetReports(page){
 	$.ajax({
 	    type:"GET",
-	    url:URL_MATCHING + TARGET_PETREPORT_ID + "/" + page,
+	    url: MATCHING_URLS["CANDIDATE_PETREPORTS"],
+	    data:{"target_petreport_id": TARGET_PETREPORT_ID, "page":page},
 	    success: function(data){
 	    	var petreports = data.pet_reports_list;
 	    	var count = data.count;
@@ -172,7 +174,6 @@ function fetch_PetReports(page){
 				//Finally, add this item to the tiles.
 				$("#tiles").append(item);		
 			}
-			
 			//Don't forget to refresh the grid layout.
 			refresh_layout();
 		},

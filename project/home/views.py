@@ -33,7 +33,7 @@ from reporting.constants import NUM_PETREPORTS_HOMEPAGE, NUM_BOOKMARKS_HOMEPAGE
 from matching.constants import NUM_PETMATCHES_HOMEPAGE
 from utilities.utils import *
 from pprint import pprint
-import oauth2 as oauth, json, random, urllib, hashlib, random, re, project.settings, registration
+import oauth2 as oauth, json, pdb, random, urllib, hashlib, random, re, project.settings, registration
 
 #Home view
 def home (request):
@@ -53,8 +53,9 @@ def home (request):
 
     return render_to_response(HTML_HOME, context, RequestContext(request))
 
-def get_activities(request, page=None):
+def get_activities(request):
     if request.is_ajax() == True:
+        page = int(request.GET["page"])
 
         #Let's populate the activity feed based upon whether the user is logged in.
         if request.user.is_authenticated() == True:
@@ -81,8 +82,9 @@ def get_activities(request, page=None):
 
 
 #Given a PetReport ID, just return the PetReport JSON.
-def get_PetReport(request, petreport_id):
+def get_PetReport(request):
     if (request.method == "GET") and (request.is_ajax() == True):
+        petreport_id = int(request.GET["petreport_id"])
         petreport = get_object_or_404(PetReport, pk=petreport_id)
         payload = json.dumps ({"petreport":petreport.to_array()})
         return HttpResponse(payload, mimetype="application/json")
@@ -90,10 +92,13 @@ def get_PetReport(request, petreport_id):
         raise Http404        
 
 #Given a Page Number, return a list of PetReports.
-def get_PetReports(request, page=None):
+def get_PetReports(request):
     if request.is_ajax() == True:
-        #Grab all Pets.
-        pet_reports = PetReport.objects.filter(closed = False).order_by("id").reverse()
+        page = int(request.GET["page"])
+
+        #Grab Pets by Filter Options.
+        pet_reports = PetReport.filter(request.GET).filter(closed = False).order_by("id").reverse()
+
         #Get the petreport count for pagination purposes.
         petreport_count = len(pet_reports)
         #Now get just a page of PetReports if page # is available.
@@ -111,8 +116,9 @@ def get_PetReports(request, page=None):
         raise Http404     
 
 @login_required
-def get_bookmarks(request, page=None):
+def get_bookmarks(request):
     if request.is_ajax() == True:
+        page = int(request.GET["page"])
         up = request.user.userprofile
         bookmarks = up.bookmarks_related.all()
         #Get the bookmark count for pagination purposes.
@@ -141,11 +147,11 @@ def get_PetMatch(request, petmatch_id):
     else:
         raise Http404  
 
-def get_PetMatches(request, successful=None, page=None):
+def get_PetMatches(request):
     if request.is_ajax() == True:
-        successful = bool(int(successful or 0))
-        print_info_msg("SUCCESSFUL:%s" % successful)
-        filtered_matches = PetMatch.objects.filter(is_successful=successful, has_failed=False).order_by("id").reverse()
+        successful_petmatches = True if request.GET["successful_petmatches"] == "true" else False
+        page = int(request.GET["page"])
+        filtered_matches = PetMatch.objects.filter(is_successful=successful_petmatches, has_failed=False).order_by("id").reverse()
         pet_matches = get_objects_by_page(filtered_matches, page, limit=NUM_PETMATCHES_HOMEPAGE)
 
         #Get the petmatch count for pagination purposes.

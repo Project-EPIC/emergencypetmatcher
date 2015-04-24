@@ -1,25 +1,6 @@
 {% extends "home/index.html" %}
 {% load staticfiles %}
 
-{% block nav-choices %}
-<ul id="epm-nav-links" class="nav navbar-nav navbar-right">
-	<li><a href="{% url 'home' %}"> Home</a></li>
-	{% if user.is_authenticated %}
-		<li><a href="{% url 'get_UserProfile_page' user.get_profile.id %}">{{ user.username }}</a></li>
-		<li><form id="epm-logout" class="navbar-form" method = "post" action= "{% url 'logout_User' %}">
-			{% csrf_token %} 
-			<input class="btn" type="submit" value="Logout"/>
-			</form></li>	
-		<li><a href= "{% url 'submit_PetReport' %}">New Pet Report</a></li>
-	{% else %}
-		<li><a href= "{% url 'login_User' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
-	{% endif %}
-
-	<li><a href="{% url 'about' %}">About</a></li>
-	<li><a href="https://docs.google.com/spreadsheet/viewform?formkey=dG9XTzRzNlB3Nl9KWGRMb2Jnd2tObnc6MQ#gid=0">Feedback</a></li>
-</ul>
-{% endblock nav-choices %}
-
 {% block head_title %}EPM - Match a Pet{% endblock head_title %}
 
 {% block content %}

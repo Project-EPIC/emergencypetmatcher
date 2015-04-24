@@ -85,7 +85,7 @@
 	<a class="btn btn-default" href="{% url 'get_UserProfile_page' user.get_profile.id %}">Back to Profile</a>
 	<form method="post" action="{% url 'delete_userprofile' %}" onsubmit="return confirm(CONFIRM);" style="display:inline-block;">
 		{% csrf_token %}
-		<input type="submit" class="btn btn-danger" value="Delete Profile"/>
+		<input type="submit" class="btn btn-link" value="Delete Profile"/>
 	</form>
 	
 </div>

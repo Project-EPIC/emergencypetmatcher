@@ -152,7 +152,6 @@ header p {
 
 /****** Messages *******/
 #messages {
-
 	list-style: none;
 	height: auto;
 	margin-top:25px;
@@ -164,7 +163,7 @@ header p {
 }
 
 #messages .error {
-
+	border-radius:5px;
 	padding: 3px;
 	background-color:#FFB6C1;
 	border: 2px solid #B22222;
@@ -173,12 +172,14 @@ header p {
 
 #messages .success {
 	padding: 3px;
+	border-radius:5px;
 	background-color:#90EE90;
 	border: 2px solid #006400;
 	text-align:center;
 }
 
 #messages .info {
+	border-radius:5px;
 	padding: 3px;
 	background-color:#87CEFA;
 	border: 2px solid #00008B;
@@ -187,11 +188,11 @@ header p {
 
 .errorlist {
 	list-style: none;
+	border-radius:5px;
 	height: auto;
 	margin-top:5px;
 	margin-bottom: 10px;
 	text-align:left;
-	font-weight: bold;
 	font-size: 14px;
 	padding: 3px;
 	background-color:#FFB6C1;

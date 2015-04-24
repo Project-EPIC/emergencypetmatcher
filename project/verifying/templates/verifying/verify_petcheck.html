@@ -2,7 +2,7 @@
 {% load staticfiles %}
 
 {% block content %}
-<div id="content" class="width:800px;">    
+<div id="content" style="width:900px;">    
       
   <!-- PMDP Title -->
   <a class="epm-dialog-title" href="/">EmergencyPetMatcher</a>
@@ -73,7 +73,7 @@
       <span style="display:block; text-align:center; margin-bottom:10px; color:gray;"> 
       Have you met with the other pet contact? Is this match a success? Please submit your response by selecting one of the choices below.</span>  
       
-      <form method="post" style="text-align:center;" action="{% url 'verify_PetCheck' petcheck.id %}" >
+      <form method="post" style="text-align:center;" action="{% url 'verify' petcheck.id %}" >
         {% csrf_token %}
         <select id="verify-choice" class="form-control" name="verify-choice">
           <option value="1">Yes, these pets are a match!</option>
@@ -104,7 +104,6 @@
       var STATIC_URL = "{{ STATIC_URL }}";
       var USER_ID = "{{ user.id }}";
       var PETMATCH_ID = "{{ petmatch.id }}"
-      var URL_VOTE_PETMATCH = "{% url 'vote_PetMatch' %}";
       var USER_HAS_VERIFIED = "{{ user_has_verified }}";
       var USER_HAS_VOTED = "{{ user_has_voted }}";
       var NUM_DOWNVOTES = "{{ num_downvotes }}";

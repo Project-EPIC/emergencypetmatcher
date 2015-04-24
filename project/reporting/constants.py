@@ -5,13 +5,15 @@ NUMBER_OF_TESTS = 10
 
 #URLs
 URL_GET_PETREPORTS = "/get_PetReports"
-URL_PRDP = '/reporting/PetReport/'
-URL_SUBMIT_PETREPORT ='/reporting/submit_PetReport'
+URL_PRDP = '/reporting/'
+URL_SUBMIT_PETREPORT ='/reporting/new'
+URL_EDIT_PETREPORT ='/reporting/edit/'
 URL_GET_PET_BREEDS = "/reporting/get_pet_breeds/"
 URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
 
 HTML_SUBMIT_PETREPORT = "reporting/petreport_form.html"
 HTML_PRDP = "reporting/petreport.html"
+HTML_EDIT_PETREPORT = "reporting/edit_petreport.html"
 HTML_PRDP_FULL = "reporting/petreport_full.html"
 
 #number of pet reports on the home page

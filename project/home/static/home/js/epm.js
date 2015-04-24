@@ -1,34 +1,31 @@
 //URLS - use for redirect calls (consistent with constants file)
-URL_HOME = '/'
-URL_GET_ACTIVITIES = "/get_activities"
-URL_GET_PETMATCHES = "/get_PetMatches"
-URL_GET_PETREPORT = "/get_PetReport/"
-URL_GET_PETREPORTS = "/get_PetReports"
-URL_GET_BOOKMARKS = "/get_bookmarks"
-URL_LOGIN = '/login'
-URL_TC = '/tc'
-URL_TC_18 = '/tc_18'
-URL_USERPROFILE = '/users/'
-URL_EDITUSERPROFILE = "/users/edituserprofile"
-URL_EDITUSERPROFILE_INFO = "/users/edituserprofile/update_User_info"
-URL_EDITUSERPROFILE_PWD = "/users/edituserprofile/update_User_pwd"
-URL_SEND_MESSAGE_TO_USERPROFILE = "/users/message_UserProfile"
-URL_FOLLOW = "/users/follow"
-URL_UNFOLLOW = "/users/unfollow"
-URL_PRDP = '/reporting/PetReport/'
-URL_SUBMIT_PETREPORT ='/reporting/submit_PetReport'
-URL_GET_PET_BREEDS = "/reporting/get_pet_breeds/"
-URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
-URL_SHARE_PETREPORT = "/sharing/share_PetReport"
-URL_PMDP = '/matching/PetMatch/'
-URL_VOTE_MATCH = '/matching/vote_PetMatch'
-URL_MATCHING = "/matching/match_PetReport/"
-URL_PROPOSE_MATCH = "/matching/propose_PetMatch/"
-URL_VERIFY_PETMATCH = "/matching/verify_PetMatch/"
-URL_EMAIL_VERIFICATION_COMPLETE = "/email_verification_complete/" 
-URL_REGISTRATION = "/accounts/register/"
-URL_REGISTRATION_COMPLETE = "/register/complete/"
-URL_ACTIVATION_COMPLETE = "/accounts/activate/complete/"
+HOME_URLS = {
+    "HOME":                 "/",
+    "LOGIN":                "/login",
+    "ACTIVITIES_DATA":      "/get_activities/",
+    "PETMATCHES_DATA":      "/get_PetMatches/",
+    "PETREPORT_DATA":       "/get_PetReport/",
+    "PETREPORTS_DATA":      "/get_PetReports/",
+    "BOOKMARKS_DATA":       "/get_bookmarks/",    
+}
+
+SOCIALIZING_URLS = {
+    "USERPROFILE":          "/users/",
+}
+
+REPORTING_URLS = {
+    "PETREPORT":            "/reporting/",
+    "PET_BREEDS":           "/reporting/get_pet_breeds/",
+    "BOOKMARK":             "/reporting/bookmark/",
+}
+
+MATCHING_URLS = {
+    "PETMATCH":             "/matching/",
+    "CANDIDATE_PETREPORTS": "/matching/get_candidate_PetReports",
+    "MATCH":                "/matching/new/",
+    "PROPOSE":              "/matching/propose/",
+    "VOTE":                 "/matching/vote/",
+}
 
 /******************************* Utility functions *******************************************/
 $(document).ready(function(){
@@ -89,7 +86,7 @@ function setup_petreport_item(report, modal_element){
     //Link attributes.
     $(item).addClass("pet-item");
     $(alink).attr("identity", report.ID);    
-    $(alink).on("click", function(){ launch_dialog(modal_element, URL_PRDP + report.ID); });
+    $(alink).on("click", function(){ launch_dialog(modal_element, REPORTING_URLS["PETREPORT"] + report.ID); });
 
     //Pet Img attributes.
     $(pet_img).attr("src", MEDIA_URL + report.img_path);
@@ -115,7 +112,7 @@ function setup_petmatch_item (match, modal_element){
 
     //Deal with Attributes.
     $(item).addClass("pet-item");
-    $(alink).on("click", function(){ launch_dialog(modal_element, URL_PMDP + match.ID); });
+    $(alink).on("click", function(){ launch_dialog(modal_element, MATCHING_URLS["PETMATCH"] + match.ID); });
 
     $(lost_pet_img).attr("src", MEDIA_URL + match.lost_pet_img_path);
     $(found_pet_img).attr("src", MEDIA_URL + match.found_pet_img_path);
@@ -161,7 +158,7 @@ function setup_activity_item (activity, modal_element){
     var text_element    = document.createElement("p");
 
     $(item).addClass("activity-item");  
-    $(profile_link).attr("href", URL_USERPROFILE + activity.profile.id).html(activity.profile.username);
+    $(profile_link).attr("href", SOCIALIZING_URLS["USERPROFILE"] + activity.profile.id).html(activity.profile.username);
     $(profile_img).attr("src", MEDIA_URL + activity.profile.thumb_path);
     $(date).addClass("date").html(activity.date_posted);
     $(item).append(profile_img);
@@ -203,7 +200,7 @@ function setup_activity_item (activity, modal_element){
         followed_username = text.split(" ")[4];
         text = text.split(" ").slice(1, 4).join(" ");
         follow_link = document.createElement("a");
-        $(follow_link).attr("href", URL_USERPROFILE + source_id);
+        $(follow_link).attr("href", SOCIALIZING_URLS["USERPROFILE"] + source_id);
         $(follow_link).html(followed_username);        
         $(text_element).append(" ");
         $(text_element).append(text);
@@ -218,7 +215,7 @@ function setup_activity_item (activity, modal_element){
         text = text.split(" ").slice(1, 6).join(" ");
         pet_link = document.createElement("a");
         $(pet_link).attr("href", "#");
-        $(pet_link).on("click", function(){ launch_dialog(modal_element, URL_PRDP + source_id); });
+        $(pet_link).on("click", function(){ launch_dialog(modal_element, REPORTING_URLS["PETREPORT"] + source_id); });
         $(pet_link).html(pet_name);
         $(text_element).append(" ");
         $(text_element).append(text);
@@ -282,7 +279,7 @@ function setup_petmatch_activity_item(options){
     petmatch_link   = document.createElement("a");
 
     $(petmatch_link).attr("href", "#");
-    $(petmatch_link).on("click", function(){ launch_dialog(options["modal"], URL_PMDP + options["source_id"]); });
+    $(petmatch_link).on("click", function(){ launch_dialog(options["modal"], MATCHING_URLS["PETMATCH"] + options["source_id"]); });
     $(petmatch_link).html(petmatch_name);
     $(text_element).append(" ");
     $(text_element).append(text);

@@ -22,7 +22,7 @@ from verifying.models import PetCheck
 from utilities.utils import *
 from constants import *
 from home.constants import *
-import datetime, re, json
+import datetime, re, json, pdb, urllib, urllib2
 
 #Display the PetMatch object
 def get_PetMatch(request, petmatch_id):
@@ -62,7 +62,7 @@ def get_PetMatch(request, petmatch_id):
 
 #Vote on the PetMatch    
 @login_required
-def vote_PetMatch(request):
+def vote(request):
     if request.method == "POST":
         userprofile = request.user.userprofile
         vote = request.POST ['vote']
@@ -114,8 +114,34 @@ def vote_PetMatch(request):
     else:
         raise Http404
 
+
 @login_required
-def match_PetReport(request, petreport_id, page=None):
+def get_candidate_PetReports(request):
+    if request.method == "GET" and request.is_ajax() == True:
+        petreport_id = int(request.GET["target_petreport_id"])
+        page = int(request.GET["page"])
+        petreport = get_object_or_404(PetReport, pk=petreport_id)
+        candidates = petreport.get_candidate_PetReports()
+        #Get the candidate count for pagination purposes.
+        candidates_count = len(candidates)                 
+        paged_candidates = petreport.get_ranked_PetReports(candidates=candidates, page=page)  
+        paged_candidates = [{   "ID": pr.id, 
+                                "proposed_by_username": pr.proposed_by.user.username,
+                                "pet_name": pr.pet_name, 
+                                "pet_type": pr.pet_type, 
+                                "img_path": pr.img_path.name } for pr in paged_candidates]
+
+        #Serialize the PetReport into JSON for easy accessing.
+        payload = json.dumps ({ "pet_reports_list":paged_candidates, 
+                                "count":len(paged_candidates), 
+                                "total_count": candidates_count})
+        return HttpResponse(payload, mimetype="application/json")   
+    else:
+        raise Http404
+
+
+@login_required
+def match(request, petreport_id):
     if request.method == "GET":
         target_petreport = get_object_or_404(PetReport, pk=petreport_id)
         #Are there any candidates?
@@ -130,23 +156,6 @@ def match_PetReport(request, petreport_id, page=None):
         #Get the candidate count for pagination purposes.
         candidates_count = len(candidates)
 
-        #If this was an AJAX GET call, then return the list of candidates as JSON
-        if request.is_ajax() == True:
-            
-            #Get Ranked Candidates based on specified attributes.
-            paged_candidates = target_petreport.get_ranked_PetReports(candidates=candidates, page=page)   
-            paged_candidates = [{  "ID": pr.id, 
-                                    "proposed_by_username": pr.proposed_by.user.username,
-                                    "pet_name": pr.pet_name, 
-                                    "pet_type": pr.pet_type, 
-                                    "img_path": pr.img_path.name } for pr in paged_candidates]
-
-            #Serialize the PetReport into JSON for easy accessing.
-            payload = json.dumps ({ "pet_reports_list":paged_candidates, 
-                                    "count":len(paged_candidates), 
-                                    "total_count": candidates_count})
-            return HttpResponse(payload, mimetype="application/json")            
-
         #Serialize the PetReport into JSON for easy accessing.
         target_pr_json = target_petreport.to_JSON()
         pet_fields = target_petreport.pack_PetReport_fields()
@@ -157,14 +166,23 @@ def match_PetReport(request, petreport_id, page=None):
         raise Http404
 
 @login_required
-def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
+def propose(request, target_petreport_id, candidate_petreport_id):
     print_info_msg ("PROPOSE MATCH: target:%s candidate:%s" % (target_petreport_id, candidate_petreport_id))
 
     #Grab the Target and Candidate PetReports first.
     target = get_object_or_404(PetReport, pk=target_petreport_id)
     candidate = get_object_or_404(PetReport, pk=candidate_petreport_id)
 
-    if request.method == "POST":
+    if request.method == "POST" and request.POST["g-recaptcha-response"]:
+        recaptcha = request.POST["g-recaptcha-response"]
+        query_data = urllib.urlencode({"secret":settings.RECAPTCHA_SECRET, "response":recaptcha})
+        response = urllib2.urlopen(settings.RECAPTCHA_SITEVERIFY, query_data)
+        status = json.loads(response.read())
+
+        if status["success"] != True:
+            messages.error(request, "CAPTCHA was not correct. Please try again.")
+            return redirect(URL_MATCHING)
+
         proposed_by = request.user.userprofile
 
         if target.status == "Lost":
@@ -230,10 +248,22 @@ def propose_PetMatch(request, target_petreport_id, candidate_petreport_id):
         return redirect(URL_HOME)
     
     else:
+        if request.method == "POST" and not request.POST["g-recaptcha-response"]:
+            messages.error(request, "Please Fill in the RECAPTCHA.")
+
+        if request.is_ajax() == True:
+            html = HTML_PROPOSE_MATCH
+        else:
+            html = HTML_PROPOSE_MATCH_FULL
+
+        if (target.pet_type != candidate.pet_type) or (target.status == candidate.status) or (target.proposed_by == candidate.proposed_by):
+            messages.error(request, "This proposal is invalid! Please try another one.")
+            return redirect(URL_MATCHING + str(target.id))
+
         pet_fields = target.pack_PetReport_fields(other_pet=candidate)
-        return render_to_response(HTML_PROPOSE_MATCH, { 'target':target, 
-                                                        'candidate':candidate,
-                                                        'pet_fields': pet_fields }, RequestContext(request))
+        return render_to_response(html, { 'target':target, 
+                                                             'candidate':candidate,
+                                                             'pet_fields': pet_fields }, RequestContext(request))
 
 
 
