@@ -14,7 +14,8 @@ ALLOWED_HOSTS = ["*"]
 
 DATABASES = {
     'default': {
-        'ENGINE':'django.db.backends.postgresql_psycopg2',     # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.  
+        #'ENGINE':'django.db.backends.postgresql_psycopg2',     # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.  
+        'ENGINE':'django.db.backends.sqlite3',     # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.  
         'NAME': 'epm_db',                      # Or path to database file if using sqlite3.
         'USER': 'epm_login',                      # Not used with sqlite3.
         'PASSWORD': '3m3rgEncY',                  # Not used with sqlite3.
@@ -50,16 +51,19 @@ USE_L10N = True
 USE_TZ = False
 
 #Absolute filesystem path to the project directory. Use for creating relative paths.
-PROJECT_ROOT = "/vagrant/project"
+#PROJECT_ROOT = "/vagrant/project"
+PROJECT_ROOT = "/Users/mbarrenecheajr/Documents/Development/code/epm/project"
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = '/vagrant/media/'
+#MEDIA_ROOT = '/vagrant/media/'
+MEDIA_ROOT = "/Users/mbarrenecheajr/Documents/Development/code/epm/media/"
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = '/vagrant/media/'
+#MEDIA_URL = '/vagrant/media/'
+MEDIA_URL = "/Users/mbarrenecheajr/Documents/Development/code/epm/media/"
 
 if DEBUG == False:
     # Absolute path to the directory static files should be collected to.
@@ -150,7 +154,6 @@ INSTALLED_APPS = (
     'social.apps.django_app.default',
     'analysis',
     'south',
-    'debug_toolbar',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -184,19 +187,13 @@ EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
 EMAIL_HOST_PASSWORD = '3m3rgEncY'
 DEFAULT_FROM_EMAIL = "emergencypetmatcher@gmail.com"
 
+RECAPTCHA_SECRET = "6LfkHgITAAAAAF1RcPPIB4ydg-_19xFLmoKvEJIr"
+RECAPTCHA_SITEVERIFY = "https://www.google.com/recaptcha/api/siteverify"
+
 AUTHENTICATION_BACKENDS = (
     'social.backends.twitter.TwitterOAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
-
-INTERNAL_IPS = ('127.0.0.1:8888', '192.168.0.1',)
-DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False,}
-
-def show_toolbar(request):
-    return True
-SHOW_TOOLBAR_CALLBACK = show_toolbar
-DEBUG_TOOLBAR_PATCH_SETTINGS = False
-
 
 SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter')
 
