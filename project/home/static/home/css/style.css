@@ -222,6 +222,13 @@ header p {
 	text-align:center;
 }
 
+#tiles-wait {
+	width:200px; 
+	text-align: center;
+	margin: 50px auto;
+	display:none;
+}
+
 #tiles {
 	list-style-type: none;
 	position: relative; /** Needed to ensure items are laid out relative to this container **/

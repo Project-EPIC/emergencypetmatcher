@@ -115,10 +115,7 @@ function fetch_PetReports(page, clear){
 	if (clear == true)
 		$("#tiles li").remove();		
 
-	//Create Loading GIF
-	img = document.createElement("img")
-	img.src = STATIC_URL + "home/icons/loading.gif"
-	$(".tab-content .tab-subtitle").html(img);
+	$("#tiles-wait").css("display", "block");
 	options = get_pet_report_filter_options() //get pet report filter values.
 
 	//AJAX Away.
@@ -146,8 +143,11 @@ function fetch_PetReports(page, clear){
 
 			if (petreports.length == 0 && page == 1)
 				$(".tab-subtitle").text("No Pets Available Yet!");
-			else
+			else{
 				$(".tab-subtitle").text("Click on a Pet to Begin Matching. Scroll down to see more pets!");
+			}
+			
+			$("#tiles-wait").css("display", "none");
 
 			//Don't forget to refresh the grid layout.
 			refresh_layout(10);			
@@ -163,10 +163,7 @@ function fetch_PetMatches(page, successful_petmatches, clear){
 	if (clear == true)
 		$("#tiles li").remove();		
 
-	//Create Loading GIF
-	img = document.createElement("img")
-	img.src = STATIC_URL + "home/icons/loading.gif"
-	$(".tab-content .tab-subtitle").html(img);	
+	$("#tiles-wait").css("display", "block");
 
 	//AJAX Away.
 	$.ajax({
@@ -200,10 +197,12 @@ function fetch_PetMatches(page, successful_petmatches, clear){
 				$(".tab-subtitle").text("No Pet Matches Available Yet!");
 			else {
 				if (successful_petmatches == true)
-					$(".tab-subtitle").text("Welcome Home, Reunited Pets!");			
+					$(".tab-subtitle").text("Welcome Home, Reunited Pets!");		
 				else
 					$(".tab-subtitle").text("Click on a Pet Match to Vote on it. Scroll down to see more matches!");			
 			}
+
+			$("#tiles-wait").css("display", "none");
 
 			//Don't forget to refresh the grid layout.
 			refresh_layout();
@@ -221,10 +220,7 @@ function fetch_activities(page, clear){
 	if (clear == true)
 		$("#tiles li").remove();		
 
-	//Create Loading GIF
-	img = document.createElement("img")
-	img.src = STATIC_URL + "home/icons/loading.gif"
-	$(".tab-content .tab-subtitle").html(img);		
+	$("#tiles-wait").css("display", "block");
 
 	activity_list = $("#tiles");
 	$.ajax ({
@@ -256,6 +252,7 @@ function fetch_activities(page, clear){
 		 		$(".tab-subtitle").html("Check out what these digital volunteers are doing. Scroll down to see more!")
 		 		refresh_layout(10);	//Don't forget to refresh the grid layout.
 		 	}
+		 	$("#tiles-wait").css("display", "none");
 		},
 		error: function(data){
 			alert("An unexpected error occurred when trying to retrieve activities. Please try again."); 
@@ -267,6 +264,8 @@ function fetch_activities(page, clear){
 function fetch_bookmarks(page, clear){
 	if (clear == true)
 		$("#tiles li").remove();		
+
+	$("#tiles-wait").css("display", "block");
 
 	$.ajax({
 		type:"GET",
@@ -324,6 +323,8 @@ function fetch_bookmarks(page, clear){
 			else
 				$(".tab-subtitle").text("Select a Pet to Begin Matching. Scroll down to see more bookmarks!");			
 			
+			$("#tiles-wait").css("display", "none");
+
 			//Don't forget to refresh the grid layout.
 			refresh_layout();
 		},
