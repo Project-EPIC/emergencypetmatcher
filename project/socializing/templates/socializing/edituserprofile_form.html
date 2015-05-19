@@ -94,7 +94,7 @@
 {% block js %}
 	<script type = 'text/javascript'> 
 		var USER_ID = "{{ user.id }}";
-		var CONFIRM = "Are you sure you want to delete your profile? Selecting OK will remove all pet reports, matches, and votes that are tied to you. However, for research purposes, this information is not deleted permanently, will be anonymized, and will not be shared with anyone. Is this okay?";
+		var CONFIRM = "Are you sure you want to delete your profile? Selecting OK will remove all pet reports, matches, and votes that are tied to you. Is this okay?";
 		var USERPROFILE_ID = "{{ user.get_profile.id }}"; 
 	</script>
 	<script src={% static "socializing/js/epm-edituserprofile_form.js" %} type = 'text/javascript'></script> 

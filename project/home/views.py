@@ -108,6 +108,7 @@ def get_PetReports(request):
                         "proposed_by_username"  : pr.proposed_by.user.username,
                         "pet_name"              : pr.pet_name, 
                         "pet_type"              : pr.pet_type, 
+                        "status"                : pr.status,
                         "img_path"              : pr.thumb_path.name } for pr in pet_reports]
 
         payload = json.dumps ({"pet_reports_list":pet_reports, "count":len(pet_reports), "total_count": petreport_count})
@@ -130,6 +131,7 @@ def get_bookmarks(request):
                         "proposed_by_username"  : pr.proposed_by.user.username,
                         "pet_name"              : pr.pet_name, 
                         "pet_type"              : pr.pet_type, 
+                        "status"                : pr.status,
                         "img_path"              : pr.thumb_path.name } for pr in bookmarks]
 
         bookmarks = json.dumps ({"bookmarks_list":bookmarks, "count":len(bookmarks), "total_count": bookmarks_count})

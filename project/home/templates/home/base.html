@@ -51,7 +51,7 @@
     </script>
 	{% endblock js %}	
 
-	<body style="background: silver;">
+	<body id="epm-body">
 		<!-- EPM Modal Dialog Box -->
 		<div id="epm-modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-lg">
@@ -76,23 +76,28 @@
 
 					{% block nav-choices %}
 					<ul id="epm-nav-links" class="nav navbar-nav navbar-right">
-						<li class="nav-link-home"><a href="{% url 'home' %}"> Home</a></li>
+						<li class="nav-link-home" style="padding-top:5px;"><a href="/">Home</a></li>
 						{% if user.is_authenticated %}
-							<li class="nav-link-profile">
-								<img id ="epm-nav-user-thumb" src="{{ MEDIA_URL }}/{{ user.userprofile.thumb_path }}"/>
-								<a href="{% url 'get_UserProfile_page' user.get_profile.id %}" style="margin-left:0px;">{{ user.username }}</a>
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+							  	<img id ="epm-nav-user-thumb" src="{{ MEDIA_URL }}/{{ user.userprofile.thumb_path }}"/>
+							    {{ user.username }}
+							    <span class="caret"></span>
+							  </a>
+							  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1" style="left:0px; background-color:black;">
+							    <li role="presentation">
+							    	<a role="menuitem" style="color:gray;" tabindex="-1" href="{% url 'get_UserProfile_page' user.get_profile.id %}">Profile</a>
+							    </li>
+							    <li role="presentation">
+							    	<a role="menuitem" style="color:gray;" tabindex="-1" href="{% url 'logout_User' %}">Logout</a>
+							    </li>						    
+							  </ul>
 							</li>
-							<li><form id="epm-logout" class="navbar-form" method = "post" action= "{% url 'logout_User' %}">
-								{% csrf_token %} 
-								<input class="btn" type="submit" value="Logout"/>
-								</form></li>	
-							<li class="nav-link-pet"><a href= "{% url 'submit' %}">New Pet Report</a></li>
+							<li class="nav-link-pet" style="padding-top:5px;"><a href= "{% url 'submit' %}">New Pet Report</a></li>
 						{% else %}
-							<li class="nav-link-login"><a href= "{% url 'login_User' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
-						{% endif %}
-
-						<li class="nav-link-about"><a href="{% url 'about' %}">About</a></li>
-						<li><a href="https://docs.google.com/spreadsheet/viewform?formkey=dG9XTzRzNlB3Nl9KWGRMb2Jnd2tObnc6MQ#gid=0">Feedback</a></li>
+							<li class="nav-link-login" style="padding-top:5px;" ><a href= "{% url 'login_User' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
+						{% endif %}						
+						<li class="nav-link-about" style="padding-top:5px;"><a href="{% url 'about' %}">About</a></li>
 					</ul>
 					{% endblock nav-choices %}
 				</div>

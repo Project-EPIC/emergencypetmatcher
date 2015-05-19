@@ -104,6 +104,7 @@
       <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
       <button id="prdp-share" type="button" class="btn btn-info btn-lg">Share</button>
       {% if user.is_authenticated %}
+        {% csrf_token %}
         <button id="prdp-bookmark" type="button" class="btn btn-success btn-lg">Bookmark</button>
         {% if not pet_has_been_successfully_matched %}
           <a href="{% url 'match' pet_report.id %}" type="button" class="btn btn-primary btn-lg">Match this Pet</a>
@@ -136,10 +137,7 @@
   <script src = {% static "home/js/epm.js" %} type='text/javascript'></script>
 
   {% block css %}{% endblock css %}
-  {% block js %}
-    <!-- Page-specific JS goes in this block -->   
-    <script src = {% static "reporting/js/epm-petreport.js" %} type='text/javascript'></script>    
-
+  {% block js %}   
     <script type="text/javascript">
       var BOOKMARKED = "{{ user_has_bookmarked }}";
       var USER_ID = "{{ user.id }}";
@@ -148,8 +146,10 @@
       var PETREPORT_IMAGE = 'http://{{ site_domain }}{{ STATIC_URL }}{{ pet_report.img_path }}';
       var PETREPORT_TITLE = '#petreporting on #epm';
       var PETREPORT_CAPTION ='EmergencyPetMatcher';
-      var PETREPORT_SUMMARY = '{{ pet_report.status }} {{ pet_report.pet_type }} (Name: {{ pet_report.pet_name }}) is now listed online. #epic';
+      var PETREPORT_SUMMARY = '{{ pet_report.status }} {{ pet_report.pet_type }} (Name: {{ pet_report.pet_name }}) is now listed online.';
     </script>    
+    <!-- Page-specific JS goes in this block -->   
+    <script src = {% static "reporting/js/epm-petreport.js" %} type='text/javascript'></script>     
   {% endblock js %} 
 
   {% block headers %} {% endblock headers %} 

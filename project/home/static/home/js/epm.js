@@ -82,6 +82,8 @@ function setup_petreport_item(report, modal_element){
     var item = document.createElement("li");
     var alink = document.createElement("a");
     var pet_img = document.createElement("img");
+    var ribbon = document.createElement("span");
+    var title = document.createElement("div");
 
     //Link attributes.
     $(item).addClass("pet-item");
@@ -95,11 +97,26 @@ function setup_petreport_item(report, modal_element){
     $(pet_img).css("margin", "0 auto");
     $(pet_img).css("display", "block");
 
+    //Ribbon Attributes.
+    $(title).css("text-align", "center");
+    $(ribbon).addClass("label");
+
+    if (report.status == "Lost"){
+        $(ribbon).html("Lost");
+        $(ribbon).addClass("label-danger");
+    }
+    else{
+        $(ribbon).html("Found")
+        $(ribbon).addClass("label-warning");
+    }
+
     //Appends
-    $(alink).append("<strong style='display:block; text-align:center;'>" + report.pet_name + "</strong>");
+    $(title).append("<strong>" + report.pet_name + "</strong>");
+    $(title).append(ribbon);
+    $(alink).append(title);
     $(alink).append("<span style='display:block; text-align:center;'>Contact: " + report.proposed_by_username + "</span>");                 
     $(alink).append(pet_img);
-    $(item).append(alink);                  
+    $(item).append(alink);                 
     return item;
 } 
 

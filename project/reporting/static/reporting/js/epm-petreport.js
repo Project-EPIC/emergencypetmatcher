@@ -45,22 +45,24 @@ $(document).ready(function(){
 
   //Retrieve and display the current pet report fields using json data   
   function bookmark(){
-    csrf_value = $("input").attr("value");
-
     $.ajax({
       type: "POST",
       url: REPORTING_URLS["BOOKMARK"],
-      data: {"csrfmiddlewaretoken":csrf_value, "petreport_id": PETREPORT_ID, "action":bookmark_button.text()},
-        success: function(data){
-          bookmark_button.text(data.text);
-          bookmark_button.attr("title",data.text);
-          $(".prdp_messages").html("<li class='success'>" + data.message + "</li>");
-          return true;
-        },
-        error: function(data){
-          alert("An unexpected error occurred when trying to bookmark this Pet Report. Please try again."); 
-          return false;
-        }
+      data: { 
+        "csrfmiddlewaretoken":$("input[name='csrfmiddlewaretoken']").attr("value"), 
+        "petreport_id": PETREPORT_ID, 
+        "action":bookmark_button.text()
+      },
+      success: function(data){
+        bookmark_button.text(data.text);
+        bookmark_button.attr("title",data.text);
+        $(".prdp_messages").html("<li class='success'>" + data.message + "</li>");
+        return true;
+      },
+      error: function(data){
+        alert("An unexpected error occurred when trying to bookmark this Pet Report. Please try again."); 
+        return false;
+      }
     });
     return true;
   }    

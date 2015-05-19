@@ -65,6 +65,8 @@
 #prdp-info-table {
 	width: 480px;
 	height:300px;
+	border:1px solid darkgrey;
+	border-radius:5px;
 	display:inline-block;
 }
 
