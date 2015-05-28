@@ -111,7 +111,7 @@ function setup_petreport_item(report, modal_element){
     }
 
     //Appends
-    $(title).append("<strong>" + report.pet_name + "</strong>");
+    $(title).append("<b>" + report.pet_name + "</b>");
     $(title).append(ribbon);
     $(alink).append(title);
     $(alink).append("<span style='display:block; text-align:center;'>Contact: " + report.proposed_by_username + "</span>");                 
@@ -145,7 +145,7 @@ function setup_petmatch_item (match, modal_element){
     $(found_pet_img).css("border", "white solid 1px");
 
     //Appends
-    $(alink).append("<strong style='display:block; text-align:center;'>" + match.lost_pet_name + " with " + match.found_pet_name + "</strong>");
+    $(alink).append("<b style='display:block; text-align:center;'>" + match.lost_pet_name + " with " + match.found_pet_name + "</b>");
     $(alink).append("<span style='display:block; text-align:center;'>Contact: " + match.proposed_by_username + "</span>");                  
     $(alink).append(lost_pet_img);
     $(alink).append(found_pet_img);

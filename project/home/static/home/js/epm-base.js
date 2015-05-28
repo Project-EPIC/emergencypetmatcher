@@ -338,7 +338,7 @@ function remove_bookmark(petreport_id, parent){
 	var c = confirm("Are you sure you want to remove this bookmark?");
 	if (c == true){
 		var user_id = USER_ID;
-		var csrf_value = $("input").attr("value");
+		var csrf_value = $("input[name='csrfmiddlewaretoken']").attr("value");
 
 		//ajax request to remove the bookmark
 		$.ajax({ 
