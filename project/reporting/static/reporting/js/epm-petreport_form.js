@@ -9,10 +9,12 @@ $(document).ready(function(){
 	var today = new Date();
 	var curYear = new Date().getUTCFullYear();
 	$("#id_date_lost_or_found").datepicker({
+		format: "mm/dd/yyyy",
 		changeMonth: true, 
 		showOn:"focus",
 		changeYear: true, 
-		yearRange: '1900:curYear'
+		yearRange: '1900:curYear',
+		startDate:"01/01/1950"
 	});
 
 	$("#id_date_lost_or_found").attr("value", today.getMonth()+1 + '/' + today.getDate() + '/' + today.getFullYear());

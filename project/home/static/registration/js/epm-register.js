@@ -1,18 +1,18 @@
 $(document).ready(function(){
-
-	var age = 0
-	var adult = false
-
 	$("#register-submit")[0].disabled = true
 
-	$("#register-dob").datepicker().on("changeDate", function(ev){
+	$("#register-dob").datepicker({
+		format: "mm/dd/yyyy",
+		autoclose: true,
+		startDate: "01/01/1900",
+		endDate:"01/01/2010"
+	}).on("changeDate", function(ev){
 		determine_consent ($(this)[0].value)
 	}).on("change", function(e){
 		determine_consent ($(this)[0].value)
 	});
 
 	$("#password2").change(function(e){
-
 		if ($("#password1")[0].value != $(this)[0].value){
 			$("#register-passwords").text("Passwords do not match.")
 			$("#register-passwords").css("color","red")
@@ -37,14 +37,12 @@ $(document).ready(function(){
 			$("#tos-container").removeClass("hidden")
 			$("#tos-minor-container").removeClass('hidden')
 			$("#tos-adult-container").addClass('hidden')
-			adult = false
 		}
 		else if (age > 18){
 			$("#register-age").text("You will be considered an adult participant for this study.")
 			$("#tos-container").removeClass("hidden")
 			$("#tos-adult-container").removeClass('hidden')
 			$("#tos-minor-container").addClass('hidden')
-			adult = true
 		}
 
 		$("#register-tos-link").removeClass("hidden")

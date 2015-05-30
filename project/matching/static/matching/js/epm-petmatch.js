@@ -107,7 +107,7 @@ function vote (user_vote){
   }
 
   //This is the value for the CSRF Token that must be passed into the POST request.
-  csrf_value = $("input").attr("value");
+  var csrf_value = $("input").attr("value");
 
   //Perform the AJAX POST Request for Voting on a PetMatch.
   $.ajax({
