@@ -18,10 +18,10 @@
 }
 
 #user-info-table {
-	width: 450px;
-	height:300px;
-	margin:0;
+	height:150px;
 	display:inline-block;
+	border:1px solid darkgrey;
+	border-radius:5px;
 }
 
 #user-info-table .user-info-header {
