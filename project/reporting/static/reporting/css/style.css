@@ -75,6 +75,7 @@
 }
 
 #prdp-info-table .pet-info-header {
+	font-family: epm-font-bolder;
 	display:inline-block;
 	width:150px;
 	font-weight:bold;
