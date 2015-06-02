@@ -14,7 +14,8 @@ $(document).ready(function(){
 		showOn:"focus",
 		changeYear: true, 
 		yearRange: '1900:curYear',
-		startDate:"01/01/1950"
+		startDate:"01/01/1950",
+		endDate:"0d"
 	});
 
 	$("#id_date_lost_or_found").attr("value", today.getMonth()+1 + '/' + today.getDate() + '/' + today.getFullYear());
@@ -143,7 +144,8 @@ function load_pet_breeds (pet_type){
 		url: REPORTING_URLS["PET_BREEDS"] + id, 
 		success: function(data){
 			$("#id_breed").select2({ 
-				data: data.breeds,
+				tags: data.breeds,
+				maximumSelectionSize:1,
 				placeholder:"Choose a breed here"
 			});
 
