@@ -25,6 +25,7 @@
 }
 
 #user-info-table .user-info-header {
+	font-family:epm-font-bolder;
 	display:inline-block;
 	width:180px;
 	font-weight:bold;
