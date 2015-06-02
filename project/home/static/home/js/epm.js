@@ -314,8 +314,8 @@ function set_PetReport_fields_to_table(petreport, index_offset, table){
     var rows = $(table).find("tbody tr");
     $(rows).each(function(index, row){
         var pet_rows = $(row).find(".pet-info-data");
-        field = petreport[index]
-        pet_rows[index_offset].innerText = field[Object.keys(field)[0]] 
+        field = petreport[index];
+        pet_rows[index_offset].innerHTML = field[Object.keys(field)[0]];
     })
 }
 
@@ -333,7 +333,7 @@ function highlight_field_matches(table){
         var pet_rows = $(row).find(".pet-info-data")
         var first_pet_info = pet_rows[0]
         var second_pet_info = pet_rows[1]
-        if (first_pet_info.innerText == second_pet_info.innerText){
+        if (first_pet_info.innerHTML.trim() == second_pet_info.innerHTML.trim()){
             $(first_pet_info).css("color", "#428bca")
             $(second_pet_info).css("color", "#428bca")
         }

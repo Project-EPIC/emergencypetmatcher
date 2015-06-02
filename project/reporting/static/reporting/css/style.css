@@ -3,6 +3,10 @@
 	width:70px;
 }
 
+#petreport_form .form-group label{
+	font-family:epm-font-bolder;
+}
+
 #preview_img {
 	border:2px dashed gray; 
 	width:250px; 

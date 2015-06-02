@@ -124,13 +124,10 @@ def submit(request):
             if pr.contact_link.strip() == "":
                 pr.contact_link = None
 
-            if request.POST.get("img_rotation") != None:
-                img_rotation = - int(request.POST ["img_rotation"])
-
             print_info_msg ("Pet Report Image Path: %s" % pr.img_path)
 
             #Make and save images from img_path and thumb_path AND save the PetReport.
-            pr.set_images(pr.img_path, save=True, rotation=img_rotation)
+            pr.set_images(pr.img_path, save=True, rotation=request.POST.get("img_rotation"))
 
             #Add reputation points for submitting a pet report
             request.user.userprofile.update_reputation("ACTIVITY_PETREPORT_SUBMITTED")
@@ -187,7 +184,7 @@ def edit(request, petreport_id):
         form = PetReportForm(request.POST, request.FILES)
         if form.is_valid() == True:
             pr = form.save(commit=False)
-            pet_report.update_fields(pr)
+            pet_report.update_fields(pr, request=request.POST)
             messages.success(request, "You've successfully updated your pet report.")
             return redirect(URL_HOME)
         else:

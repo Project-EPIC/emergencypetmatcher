@@ -11,7 +11,7 @@
 		{% endblock content_subtitle %}	
 
 		{% block form %}
-		<form enctype="multipart/form-data" name="petreport_form" method="POST" action="{% url 'submit' %}">
+		<form enctype="multipart/form-data" id="petreport_form" method="POST" action="{% url 'submit' %}">
 		{% endblock form %}
 
 			{% csrf_token %}
@@ -39,7 +39,8 @@
             	<strong style="width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;"> Pet Picture Preview </strong>
           	{% endblock img_path %}
           </div>
-          <strong id="rotate_instructions" style="display:none; margin:5px auto 5px auto;"> Click on the image to rotate it </strong>
+          <p style="margin:5px auto 5px auto;">(*.jpg, *.png, *.bmp), 3MB maximum</p>
+          <strong id="rotate_instructions" style="display:none; margin:5px auto 5px auto;">Click on the image to rotate it</strong>
           <input id="id_img_rotation" name="img_rotation" type="hidden" value="0"/>
         {% endif %}
         {{ field }}
@@ -47,16 +48,14 @@
       {% endfor %}
 
       <!-- Location Fields -->
-      <hr/>
       <div id="location-subform" class="form-group" style="padding:10px;">
-      	<label>Location of Pet</label>
+      	<label style="font-family:epm-font-bolder;">Location of Pet</label>
       	<p>Please fill in details of the pet's whereabouts, if available.</p>
       </div>
 
       <!-- Contact Fields -->
-      <hr/>
       <div id="contact-subform" class="form-group" style="padding:10px;">
-      	<label>Is someone else the primary contact for this pet?</label>
+      	<label style="font-family:epm-font-bolder;">Is someone else the primary contact for this pet?</label>
       	<p>If so, please fill in these details so that the original contact can be notified about this pet report.</p>
       </div>
       <hr/>

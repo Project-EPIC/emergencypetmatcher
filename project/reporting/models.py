@@ -148,7 +148,7 @@ class PetReport(models.Model):
             return True
         return False
 
-    def update_fields(self, pr):
+    def update_fields(self, pr, request=None):
         self.pet_type           = pr.pet_type
         self.status             = pr.status
         self.date_lost_or_found = pr.date_lost_or_found
@@ -172,7 +172,7 @@ class PetReport(models.Model):
 
         #Only change if incoming PetReport's image is different.
         if pr.img_path.name and self.img_path != pr.img_path:
-            self.set_images(pr.img_path, save=True)
+            self.set_images(pr.img_path, save=True, rotation=request.get("img_rotation"))
         else:
             self.save()
 
@@ -224,7 +224,7 @@ class PetReport(models.Model):
         return matching_attrs        
     
     #set_img_path(): Sets the image path and thumb path for this PetReport. Save is optional.
-    def set_images(self, img_path, save=True, rotation=0):
+    def set_images(self, img_path, save=True, rotation=None):
         #Deal with the 'None' case.
         if img_path == None:
             if self.pet_type == PETREPORT_PET_TYPE_DOG:
@@ -275,7 +275,9 @@ class PetReport(models.Model):
                 unique_img_name = str(self.proposed_by.id) + "-" + self.proposed_by.user.username + "-" + str(self.id) + "-" + self.pet_name + "-" + self.status + ".jpg"
 
                 #Perform rotation (if it applies)
-                img = img.rotate(rotation)
+                if rotation != None:
+                    img = img.rotate(-int(rotation))
+                
                 self.img_path = PETREPORT_IMG_PATH + unique_img_name
                 self.thumb_path = PETREPORT_THUMBNAIL_PATH + unique_img_name
                 img.save(PETREPORT_UPLOADS_DIRECTORY + unique_img_name, "JPEG", quality=75)
@@ -445,7 +447,7 @@ class PetReportForm (ModelForm):
     location            = forms.CharField(label="Location", help_text="(Location where pet was lost/found)", max_length = PETREPORT_LOCATION_LENGTH , required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:350px; margin-bottom:10px;", "placeholder": "Write in general information, such as 'Boulder, CO'"}))
     geo_location_lat    = forms.DecimalField(label="Geo Location Lat", help_text="(Latitude coordinate)", max_digits=8, decimal_places=5, initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:250px; margin-bottom:10px;", "placeholder": "Latitude (Lat) Geo-Coordinate"}))
     geo_location_long   = forms.DecimalField(label="Geo Location Long", help_text="(Longitude coordinate)", max_digits=8, decimal_places=5, initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:250px; margin-bottom:10px;", "placeholder": "Longitude (Long) Geo-Coordinate"}))
-    microchip_id        = forms.CharField(label="Microchip ID", max_length = PETREPORT_MICROCHIP_ID_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:360px", "placeholder": "Used to verify this pet but will not be shown publicly."}))
+    microchip_id        = forms.CharField(label="Microchip ID", max_length = PETREPORT_MICROCHIP_ID_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:380px", "placeholder": "Used to verify this pet but will not be shown publicly."}))
     tag_info            = forms.CharField(label="Tag and Collar Information", help_text="(if available)", max_length = PETREPORT_TAG_INFO_LENGTH, required=False, widget=Textarea(attrs={"class":"form-control", "style":"max-width:400px; max-height:300px;"}))
     contact_name        = forms.CharField(label="Contact Name", max_length=PETREPORT_CONTACT_NAME_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:200px; margin-bottom:10px;"}))
     contact_number      = forms.CharField(label="Contact Phone Number", max_length=PETREPORT_CONTACT_NUMBER_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:250px; margin-bottom:10px;"}))

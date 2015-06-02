@@ -38,20 +38,22 @@
 
 #matching-info-table {
 	height:35vh;
+	width:550px;
 	padding:5px;
 	display:block;
 }
 
 #matching-info-table .pet-info-header {
+	font-family:epm-font-bolder;
 	display:inline-block;
-	width:130px;
+	width:160px;
 	font-weight:bold;
 }
 
 #matching-info-table .pet-info-data {
 	display:inline-block;
 	overflow-y:scroll;
-	width:200px;
+	width:180px;
 }
 
 #matching-info-table tbody {
@@ -173,13 +175,13 @@
 #pmdp-info-table .pet-info-header {
 	font-family:epm-font-bolder;
 	display:inline-block;
-	width:140px;
+	width:160px;
 	font-weight:bold;
 }
 
 #pmdp-info-table .pet-info-data {
 	display:inline-block;
-	width:215px;
+	width:200px;
 }
 
 #pmdp-info-table tbody {

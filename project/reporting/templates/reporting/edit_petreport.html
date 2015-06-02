@@ -9,7 +9,7 @@
 {% endblock content_subtitle %} 
 
 {% block form %}
-<form enctype="multipart/form-data" name="petreport_form" method="POST" action="{% url 'edit' petreport.id %}">
+  <form enctype="multipart/form-data" id="petreport_form" method="POST" action="{% url 'edit' petreport.id %}">
 {% endblock form %}
 
 {% block img_path %}
