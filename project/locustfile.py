@@ -35,7 +35,7 @@ class UserBehavior(TaskSet):
         self.client.get("/")
 
 class WebsiteUser(HttpLocust):
-    host = "http://epic-analytics.cs.colorado.edu:8888"
+    host = "http://localhost:8000"
     task_set = UserBehavior
     min_wait=5000
     max_wait=9000

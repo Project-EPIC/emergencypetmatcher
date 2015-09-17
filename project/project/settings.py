@@ -184,7 +184,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
-EMAIL_HOST_PASSWORD = '3m3rgEncY'
+EMAIL_HOST_PASSWORD = 'h!5H_3m3rgEncY'
 DEFAULT_FROM_EMAIL = "emergencypetmatcher@gmail.com"
 
 RECAPTCHA_SECRET = "6LfkHgITAAAAAF1RcPPIB4ydg-_19xFLmoKvEJIr"
