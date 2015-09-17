@@ -232,6 +232,7 @@ function fetch_activities(page, clear){
 
 			//Iterate through the activities and append them to the list.
 			for (var i = 0; i < activities.length; i++){
+				
 				var activity = activities[i];
 
 				if (activity.source == null)

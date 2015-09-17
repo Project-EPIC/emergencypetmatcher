@@ -136,16 +136,16 @@ class PetMatch(models.Model):
         found_pet_contact = self.found_pet.proposed_by
         petmatch_owner = self.proposed_by
 
-        #Temporary: If the PetMatch proposer votes on this match and is the only vote for it, and he/she happens to be either the lost or found pet submitter,
-        #AND if all email addresses are valid for these contacts, then verification is triggered.
-        if self.up_votes.count() == 1 and (self.proposed_by == self.up_votes.all()[0]):
-            if (self.proposed_by == lost_pet_contact or self.proposed_by == found_pet_contact) and email_is_valid(lost_pet_contact.user.email) and email_is_valid(found_pet_contact.user.email) and email_is_valid(petmatch_owner.user.email):
-                print_info_msg("PetMatch %s has reached threshold!")
-                return True
-
-        if difference >= VERIFICATION_DEFAULT_THRESHOLD:
+        #Temporary: If the PetMatch proposer votes on this match and is the only vote for it, and 
+        #he/she happens to be either the lost or found pet submitter, AND if all email addresses 
+        #are valid for these contacts, then verification is triggered.
+        if email_is_valid(lost_pet_contact.user.email) and email_is_valid(found_pet_contact.user.email) and email_is_valid(petmatch_owner.user.email):
             print_info_msg("PetMatch %s has reached threshold!")
             return True
+
+        if self.up_votes.count() >= (User.objects.filter(is_active=True).count()/VERIFICATION_DEFAULT_THRESHOLD):
+            print_info_msg("PetMatch %s has reached threshold!")
+            return True            
         else:
             return False
 

@@ -55,11 +55,14 @@ NUM_ACTIVITIES_HOMEPAGE = 20
 ACTIVITY_LOG_DIRECTORY = LOGS_DIRECTORY + "activity_logs/"
 
 #Activities with their reward points attached.
-ACTIVITIES = {  "ACTIVITY_ACCOUNT_CREATED"                : {"reward": 10,  "source":"self"},
-                "ACTIVITY_LOGIN"                          : {"reward":  0,  "source":"self"},
-                "ACTIVITY_LOGOUT"                         : {"reward":  0,  "source":"self"},
-                "ACTIVITY_USER_CHANGED_USERNAME"          : {"reward":  0,  "source":"self"},
-                "ACTIVITY_USER_SET_PHOTO"                 : {"reward":  2,  "source":"self"},
+ACTIVITIES = {  "ACTIVITY_ACCOUNT_CREATED"                : {"reward": 10,  "source":"userprofile"},
+                "ACTIVITY_LOGIN"                          : {"reward":  0,  "source":"userprofile"},
+                "ACTIVITY_LOGOUT"                         : {"reward":  0,  "source":"userprofile"},
+                "ACTIVITY_USER_CHANGED_USERNAME"          : {"reward":  0,  "source":"userprofile"},
+                "ACTIVITY_USER_SET_PHOTO"                 : {"reward":  2,  "source":"userprofile"},
+                "ACTIVITY_SOCIAL_FOLLOW"                  : {"reward":  5,  "source":"userprofile"},
+                "ACTIVITY_SOCIAL_UNFOLLOW"                : {"reward":  0,  "source":"userprofile"},
+                "ACTIVITY_SOCIAL_SEND_MESSAGE_TO_USER"    : {"reward":  0,  "source":"userprofile"},                
                 "ACTIVITY_PETREPORT_SUBMITTED"            : {"reward": 10,  "source":"petreport"},
                 "ACTIVITY_PETREPORT_ADD_BOOKMARK"         : {"reward":  0,  "source":"petreport"},
                 "ACTIVITY_PETREPORT_REMOVE_BOOKMARK"      : {"reward":  0,  "source":"petreport"},
@@ -69,10 +72,8 @@ ACTIVITIES = {  "ACTIVITY_ACCOUNT_CREATED"                : {"reward": 10,  "sou
                 "ACTIVITY_PETCHECK_VERIFY"                : {"reward":  5,  "source":"petcheck"},
                 "ACTIVITY_PETCHECK_VERIFY_SUCCESS"        : {"reward": 20,  "source":"petcheck"},
                 "ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER"  : {"reward": 40,  "source":"petcheck"},
-                "ACTIVITY_PETCHECK_VERIFY_FAIL"           : {"reward": 10,  "source":"petcheck"},
-                "ACTIVITY_SOCIAL_FOLLOW"                  : {"reward":  5,  "source":"userprofile"},
-                "ACTIVITY_SOCIAL_UNFOLLOW"                : {"reward":  0,  "source":"userprofile"},
-                "ACTIVITY_SOCIAL_SEND_MESSAGE_TO_USER"    : {"reward":  0,  "source":"userprofile"} }
+                "ACTIVITY_PETCHECK_VERIFY_FAIL"           : {"reward": 10,  "source":"petcheck"}
+              }
 
 ACTIVITY_SOCIAL_ACTIVITIES = ["ACTIVITY_ACCOUNT_CREATED",
                               "ACTIVITY_USER_CHANGED_USERNAME",
