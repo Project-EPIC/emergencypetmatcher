@@ -2,7 +2,7 @@ Hi there,
 
 Congratulations! The digital volunteers on EmergencyPetMatcher.com have agreed that your pet match involving the {{ lost_pet.status }} {{ lost_pet.breed }} {{ lost_pet.pet_type }} ({{ lost_pet.pet_name }} and {{ found_pet.status }} {{ found_pet.breed }} {{ found_pet.pet_type }} ({{ found_pet.pet_name }}) could be a successful match!
 
-Both pet contacts have been notified of the match and will coordinate to determine if the match is truly the right one. Please visit the pet match page here to view the status of their decision: http://{{ site.domain }}{% url 'verify_PetCheck' petcheck_id %}
+Both pet contacts have been notified of the match and will coordinate to determine if the match is truly the right one. Please visit the pet match page here to view the status of their decision: http://{{ site.domain }}{% url 'verify' petcheck_id %}
 
 Thank you for your contribution in getting the pet to its rightful owner!
 ---------------------

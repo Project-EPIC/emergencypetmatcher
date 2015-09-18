@@ -9,7 +9,7 @@ from utilities.utils import *
 from home.models import Activity
 from home.constants import *
 from constants import *
-import json
+import json, pdb
 
 #The Pet Check Model
 class PetCheck(models.Model):
@@ -77,11 +77,13 @@ class PetCheck(models.Model):
 			send_petmatch_email = False
 
 		if send_petmatch_email == True:
-			email_body = render_to_string(TEXTFILE_EMAIL_MATCHER_VERIFY_PETMATCH, { "site": site,
-																																							"lost_pet": lost_pet,
-																																							"found_pet": found_pet,
-																																							"petcheck_id": self.id,
-																																							"petmatch": petmatch })
+			email_body = render_to_string(TEXTFILE_EMAIL_MATCHER_VERIFY_PETMATCH, { 
+				"site": site,
+				"lost_pet": lost_pet,
+				"found_pet": found_pet,
+				"petcheck_id": self.id,
+				"petmatch": petmatch 
+			})
 			send_mail(email_subject, email_body, None, [petmatch_owner.user.email])
 
 		#Iterate through lost and found original and crossposting contacts and email them accordingly. Do this smartly.
@@ -96,15 +98,16 @@ class PetCheck(models.Model):
 				email_body = render_to_string (TEXTFILE_EMAIL_CROSSPOSTER_VERIFY_PETMATCH, {"site":site, "pet": pet, "petcheck_id":self.id, "petmatch": petmatch})
 				send_mail(email_subject, email_body, None, [cc["email"]])
 
-			email_body = render_to_string (TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH, { "site": site, 
-																																								"pet": pet,
-																																								"petmatcher": petmatch_owner,
-																																								"petmatch": petmatch, 
-																																								"petcheck_id": self.id,
-																																								"cross_posting_phrase": cross_posting_phrase,
-																																								"cross_posting_reach_out": cross_posting_reach_out,
-																																								"other_contact": other_oc,
-																																								"other_pet": other_pet })
+			email_body = render_to_string (TEXTFILE_EMAIL_PETOWNER_VERIFY_PETMATCH, { 
+				"site": site, 
+				"pet": pet,
+				"petmatcher": petmatch_owner,
+				"petmatch": petmatch, 
+				"petcheck_id": self.id,
+				"cross_posting_phrase": cross_posting_phrase,
+				"cross_posting_reach_out": cross_posting_reach_out,
+				"other_contact": other_oc,
+				"other_pet": other_pet })
 			
 			#Setup guardian as CC'ed on this email.
 			if oc["guardian_email"]:

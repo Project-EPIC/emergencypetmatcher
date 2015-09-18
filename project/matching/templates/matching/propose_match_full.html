@@ -12,7 +12,7 @@
   </ul>
   {% endblock messages %} 
 
-  <strong id="pmdp-title"> Please examine the two pet reports carefully. Making this match means that everyone can vote on its success. Are you sure this is match that you want to make? </strong>
+  <strong id="pmdp-title"> Please examine the two pet reports carefully. Proposing this match means that everyone can vote on it. Are you sure this is match that you want to propose?</strong>
 
   <!-- PetReport Target and Candidate Pictures -->
   <div id="pmdp-pics">
@@ -43,7 +43,7 @@
       {% csrf_token %}
       <label>Please verify your submission via RECAPTCHA</label> 
       <div class="g-recaptcha" data-sitekey="6LfkHgITAAAAANIuw-RwYMfOWEMBfeVll9nhrdKa" style="margin:10px auto; width:300px;"></div>
-      <input type="Submit" class="btn btn-primary" value="Yes, these are a match!"/>
+      <input type="Submit" class="btn btn-primary" value="Yes, I believe these are a match!"/>
       <a href="{% url 'match' target.id %}" type="button" class="btn btn-default" data-dismiss="modal">Nevermind, these are not a match.</a>
     </form>      
   </div> 

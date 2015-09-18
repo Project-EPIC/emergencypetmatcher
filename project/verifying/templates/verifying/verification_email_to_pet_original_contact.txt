@@ -10,7 +10,7 @@ People all over the world using EmergencyPetMatcher helped bring this match to y
 
 To do this, please reach out to {{ other_contact.name }} at {{ other_contact.email }} and coordinate time to meet to determine if this indeed is a match! {{ cross_posting_reach_out }}
 
-Finally, visit the following link to see the pet match ready for pet-checking. Here, both parties will make the decision as to whether this pet match is successful: http://{{ site.domain }}{% url 'verify_PetCheck' petcheck_id %}
+Finally, visit the following link to see the pet match ready for pet-checking. Here, both parties will make the decision as to whether this pet match is successful: http://{{ site.domain }}{% url 'verify' petcheck_id %}
 
 Good Luck!
 ---------------------

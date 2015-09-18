@@ -6,7 +6,7 @@ from django.db.models.signals import pre_delete
 from utilities.utils import *
 from constants import *
 from verifying.constants import *
-import json
+import json, pdb
 
 #The Pet Match Object Model
 class PetMatch(models.Model):
@@ -129,9 +129,7 @@ class PetMatch(models.Model):
         return False  
 
     def has_reached_threshold(self):
-        #Difference (D) is calculated as the difference between number of upvotes and downvotes.
-        #For a PetMatch to be successful, it should satisfy certain constraints. D should exceed a threshold value.
-        difference = abs(self.up_votes.count() - self.down_votes.count())
+        from django.contrib.auth.models import User
         lost_pet_contact = self.lost_pet.proposed_by
         found_pet_contact = self.found_pet.proposed_by
         petmatch_owner = self.proposed_by

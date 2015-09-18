@@ -23,6 +23,7 @@ from verifying.constants import *
 from home.constants import *
 import datetime, re, json
 
+@login_required
 def verify(request, petcheck_id):
     petcheck = get_object_or_404(PetCheck, pk=petcheck_id)
     petmatch = petcheck.petmatch
