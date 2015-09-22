@@ -346,14 +346,6 @@ header p {
 	margin: 1px 0 2px 0;
 }
 
-h1.lost {
-	background: #ECF0EC url(../images/gradients/gradient_lost.png) repeat;
-}
-
-h1.found {
-	background: #ECF0EC url(../images/gradients/gradient_found.png) repeat;
-}
-
 .bookmark_x {
 	width:30px;
 	height:30px;

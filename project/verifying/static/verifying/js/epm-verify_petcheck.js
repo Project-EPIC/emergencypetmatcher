@@ -1,5 +1,4 @@
 $(document).ready(function(){
- 
 
   $("#lost-prdp-link").click(function(){ 
     launch_dialog($("#epm-modal"), URL_PRDP + LOST_PETREPORT_ID); 

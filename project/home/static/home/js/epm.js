@@ -27,6 +27,7 @@ MATCHING_URLS = {
     "VOTE":                 "/matching/vote/",
 }
 
+
 /******************************* Utility functions *******************************************/
 $(document).ready(function(){
     $('#epm-modal').on('hidden.bs.modal', function () { $(this).find(".modal-content").html(""); }); 
@@ -64,18 +65,11 @@ function share_on_facebook(url, image, title, caption, summary) {
     return false;
 }
 
-
 function share_on_twitter(url, image, title, summary){
     title = escape(title);
     summary = escape(summary);
 	window.open('http://twitter.com/share?url=' + url + '&text=' + title + ': ' + summary, 'newWindow', 'width=700, height=430');
 }
-
-
-function convert_to_javascript_obj(json_str){
-    var obj = $.parseJSON(json_str.replace(/&quot;/ig, '"'));
-    return obj;
- }
 
 //Helper for setting up PetReport Tile.
 function setup_petreport_item(report, modal_element){
@@ -306,24 +300,25 @@ function setup_petmatch_activity_item(options){
     $(item).append(source_img_div);
 }
 
-//This function takes a petreport fields list, its index, and the table in which the attributes will be written.
+//This function takes a petreport object, its index, and the table in which the attributes will be written.
 function set_PetReport_fields_to_table(petreport, index_offset, table){
-    if(index_offset != 0 && index_offset != 1)
-        return null
+    if (index_offset != 0 && index_offset != 1)
+        return null;
 
     var rows = $(table).find("tbody tr");
     $(rows).each(function(index, row){
-        var pet_rows = $(row).find(".pet-info-data");
-        field = petreport[index];
-        pet_rows[index_offset].innerHTML = field[Object.keys(field)[0]];
-    })
+        var header = $(row).find(".pet-info-header");
+        field = petreport[header.attr("attr")];
+        col = $(row).find(".pet-info-data")[index_offset];
+        col.innerHTML = field;
+    });
 }
 
 function clear_PetReport_fields_to_table(index_offset, table){
-    petreport = []
-    for (var i = 0; i < 20; i++)
-        petreport.push({"":""})
-    set_PetReport_fields_to_table(petreport, index_offset, table)
+    $(table).find("tbody tr").each(function(index, row){
+        pet_row = $(row).find(".pet-info-data")[index_offset];
+        pet_row.innerHTML = "";
+    });
 }
 
 function highlight_field_matches(table){
@@ -343,5 +338,26 @@ function highlight_field_matches(table){
         }
     });
 }
+
+function perform_AJAX_call(options){
+    if (options["error"] == undefined || options["error"] == null)
+        options["error"] = function(data){ alert("Oops! Something went wrong. Please try again!");}
+
+    $.ajax({
+        type:options["type"],
+        url:options["url"],
+        data:options["data"],
+        success: options["success"],
+        error: options["error"]
+    });
+
+}
+
+
+
+
+
+
+
 
 

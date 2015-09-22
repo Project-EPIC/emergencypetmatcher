@@ -1,13 +1,10 @@
-django == 1.6
+django == 1.6.2
 lorem-ipsum-generator
 django-registration
 python-social-auth
 oauth2
-pymongo
-South == 1.0
 psycopg2
 pillow
 selenium
 gunicorn
-django-tastypie
 mimeparse

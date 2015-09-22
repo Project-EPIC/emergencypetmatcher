@@ -187,7 +187,8 @@ EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
 EMAIL_HOST_PASSWORD = 'h!5H_3m3rgEncY'
 DEFAULT_FROM_EMAIL = "emergencypetmatcher@gmail.com"
 
-RECAPTCHA_SECRET = "6LfkHgITAAAAAF1RcPPIB4ydg-_19xFLmoKvEJIr"
+RECAPTCHA_SERVER_SECRET = "6LfkHgITAAAAAF1RcPPIB4ydg-_19xFLmoKvEJIr"
+RECAPTCHA_CLIENT_SECRET = "6LfkHgITAAAAANIuw-RwYMfOWEMBfeVll9nhrdKa"
 RECAPTCHA_SITEVERIFY = "https://www.google.com/recaptcha/api/siteverify"
 
 AUTHENTICATION_BACKENDS = (

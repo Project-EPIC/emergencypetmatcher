@@ -36,6 +36,7 @@ AGE_CHOICES = [('Baby','Baby'),('Young','Young'),('Adult','Adult'),('Senior','Se
 
 PETREPORT_NAMES = ['Sparky', 'Nugget', 'Sydney', 'Missy', 'Marley', 'Fousey', 'Daisy', 'Libby', 'Apollo', 'Buster', 'Izzy', 'Bentley', 'Scruffy', 'Dandy', 'Candy', 'Mark', 'Baby', 'Toodle', 'Princess' ,'Prince', 'Guss', 'Rocket', 'Darling']
 
+
 PETREPORT_PET_TYPE_LENGTH = 10
 PETREPORT_STATUS_LENGTH = 5
 PETREPORT_SEX_LENGTH = 6

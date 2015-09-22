@@ -8,7 +8,6 @@ $(document).ready(function(){
       login_link = "Log in <a href="+ HOME_URLS["LOGIN"] +"?next={% firstof request.path '/' %} > here.</a>";
       $(".prdp_messages").html("<li class='error'> You cannot bookmark this Pet Report because you are not logged in! "+login_link+ "</li>");
     } 
-
     else 
       bookmark(); 
   });

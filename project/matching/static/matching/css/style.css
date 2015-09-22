@@ -255,18 +255,19 @@
 }
 
 #pmdp_downvote_button {
-	background: url(../images/icons/button_downvote_active.png) no-repeat fixed center;	
+	background: url(../images/button_downvote_active.png) no-repeat fixed center;	
 	height:90px;
 	width: 85px;
 	cursor: pointer;
 }
 
 #pmdp_upvote_button {
-	background:url(../images/icons/button_upvote_active.png) no-repeat fixed center;	
+	background:url(../images/button_upvote_active.png) no-repeat fixed center;	
 	height:90px;
 	width: 85px;
 	cursor:pointer;
 }
+
 
 
 

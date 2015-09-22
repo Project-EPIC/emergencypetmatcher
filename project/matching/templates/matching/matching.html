@@ -36,14 +36,13 @@
 			   	<!-- Pet Info -->
 			   	<table id="matching-info-table" class="epm-table table table-hover">
 			        <tbody>
-			          {% for field in pet_fields %}
-			          <tr>
-			            <td class="pet-info-header"> {{ field.0 }} </td>
-			            <td class="pet-info-data"> {{ field.1 }}</td>
-			            <!-- Candidate Pet Fields go here -->
-			            <td class="pet-info-data"></td>
-			          </tr>
-			          {% endfor %}
+			        {% for field in petreport_fields %}
+			        	<tr>
+			        		<td class="pet-info-header" attr="{{ field.attr }}"> {{ field.label }}</td>
+			        		<td class="pet-info-data">{{ field.value }}</td>
+			        		<td class="pet-info-data"></td>
+			        	</tr>
+			        {% endfor %}
 			        </tbody>
 			    </table>
 			  </div>

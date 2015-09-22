@@ -86,7 +86,7 @@ def get_PetReport(request):
     if (request.method == "GET") and (request.is_ajax() == True):
         petreport_id = int(request.GET["petreport_id"])
         petreport = get_object_or_404(PetReport, pk=petreport_id)
-        payload = json.dumps ({"petreport":petreport.to_array()})
+        payload = json.dumps ({"petreport":petreport.to_DICT()})
         return HttpResponse(payload, mimetype="application/json")
     else:
         raise Http404        

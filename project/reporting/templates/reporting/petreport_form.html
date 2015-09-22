@@ -31,7 +31,7 @@
       {% for field in form %}
       <div class="form-group">
         {{ field.errors }}
-        {{ field.label_tag }}
+        <label id="label_{{ field.id_for_label }}" for="{{ field.id_for_label }}">{{ field.label }}</label>
 
         {% if "Upload an Image" in field.label %}
           <div id="preview_img">
@@ -47,23 +47,33 @@
       </div>
       {% endfor %}
 
+      <div id="microchip-subform" class="form-group" style="padding:10px">
+        <label style="font-family:epm-font-bolder;">Do you have this pet's microchip ID?</label>
+        <input type="checkbox" id="microchip-box"/>
+        <p>If so, provide it here. This ID will not be shown publicly.</p>
+      </div>
+
       <!-- Location Fields -->
       <div id="location-subform" class="form-group" style="padding:10px;">
-      	<label style="font-family:epm-font-bolder;">Location of Pet</label>
-      	<p>Please fill in details of the pet's whereabouts, if available.</p>
+      	<label style="font-family:epm-font-bolder;">Do you have the pet's location?</label>
+        <input type="checkbox" id="location-box"/>
+      	<p>Use the map to fill in details of the pet's whereabouts, if available.</p>
+        <div id="location-map"></div>
+        <div id="location-coordinates"></div>
       </div>
 
       <!-- Contact Fields -->
       <div id="contact-subform" class="form-group" style="padding:10px;">
       	<label style="font-family:epm-font-bolder;">Is this somebody else's pet?</label>
-      	<p>If so, please fill in these details so that the original contact can be notified about this pet report.</p>
+        <input type="checkbox" id="contact-box"/>
+      	<p>If so, fill in these details so that the original contact can be notified about this pet report.</p>
       </div>
       <hr/>
 
       {% block form_action %}
 				<div class="form-actions">
 					<label> Please verify your submission via RECAPTCHA</label>	
-					<div class="g-recaptcha" data-sitekey="6LfkHgITAAAAANIuw-RwYMfOWEMBfeVll9nhrdKa" style="margin-bottom:20px;"></div>
+					<div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_CLIENT_SECRET }}" style="margin-bottom:20px;"></div>
 					<input id = "id_submit" class="btn btn-primary" type="button" value="Submit"/>
 				</div>
 			{% endblock form_action %}
@@ -75,18 +85,25 @@
 {% block js %}
 	<script src={% static "reporting/js/epm-petreport_form.js" %} type='text/javascript'></script>
 	<script src={% static "reporting/js/jquery-rotate.min.js" %} type='text/javascript'></script>
+  <script src={% static "reporting/js/leaflet.js" %} type='text/javascript'></script>
+  <script src={% static "reporting/js/l.control.geosearch.js" %} type='text/javascript'></script>
+  <script src={% static "reporting/js/l.geosearch.provider.google.js" %} type='text/javascript'></script>
 	<script src={% static "reporting/js/select2.js" %} type='text/javascript'></script>
 	<script src='https://www.google.com/recaptcha/api.js'></script>
 
 	<script type="text/javascript">
 		var PETREPORT_TAG_INFO_LENGTH = {{ PETREPORT_TAG_INFO_LENGTH }}
 		var PETREPORT_DESCRIPTION_LENGTH = {{ PETREPORT_DESCRIPTION_LENGTH }}
+    var PETREPORT_LOCATION_LAT = 40.00605;
+    var PETREPORT_LOCATION_LNG = -105.26413;
 	</script>
 {% endblock js %}
 
 {% block css %}
 	<link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>	
-	<link rel="stylesheet" href={% static "reporting/css/select2.css" %} type="text/css"></
+  <link rel="stylesheet" href={% static "reporting/css/leaflet.css" %} type="text/css"></link>
+  <link rel="stylesheet" href={% static "reporting/css/l.geosearch.css" %} type="text/css"></link>
+	<link rel="stylesheet" href={% static "reporting/css/select2.css" %} type="text/css"></link>
 	<link rel="stylesheet" href={% static "reporting/css/select2-bootstrap.css" %} type="text/css"></link>	
 {% endblock css %}
 

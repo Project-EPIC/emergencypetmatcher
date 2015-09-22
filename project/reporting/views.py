@@ -62,32 +62,29 @@ def get_PetReport(request, petreport_id):
     if pet_has_been_successfully_matched == True:
         messages.success(request, "This pet has been successfully matched with its owner! Thank you digital volunteers!")
 
-    #Serialize the PetReport into JSON for easy accessing.
-    pr_json = pet_report.to_JSON()
-    pet_fields = pet_report.pack_PetReport_fields()
-
     if request.is_ajax() == True:
         html = HTML_PRDP
     else:
         html = HTML_PRDP_FULL
 
-    return render_to_response(html, {   'pet_report_json':pr_json, 
-                                        'pet_report': pet_report,
-                                        'pet_fields': pet_fields,
-                                        'edit_petreport': edit_petreport,
-                                        'pet_has_been_successfully_matched': pet_has_been_successfully_matched,
-                                        'site_domain': Site.objects.get_current().domain,
-                                        'num_workers':num_workers,
-                                        'user_is_worker':user_is_worker, 
-                                        'matches': matches,
-                                        'user_has_bookmarked':user_has_bookmarked}, RequestContext(request))
+    return render_to_response(html, {
+        'pet_report': pet_report,
+        'petreport_fields': pet_report.get_display_fields(),
+        'edit_petreport': edit_petreport,
+        'pet_has_been_successfully_matched': pet_has_been_successfully_matched,
+        'site_domain': Site.objects.get_current().domain,
+        'num_workers':num_workers,
+        'user_is_worker':user_is_worker, 
+        'matches': matches,
+        'user_has_bookmarked':user_has_bookmarked 
+    }, RequestContext(request))
 
 
 @login_required
 def submit(request):
     if request.method == "POST" and request.POST["g-recaptcha-response"]:
         recaptcha = request.POST["g-recaptcha-response"]
-        query_data = urllib.urlencode({"secret":settings.RECAPTCHA_SECRET, "response":recaptcha})
+        query_data = urllib.urlencode({"secret":settings.RECAPTCHA_SERVER_SECRET, "response":recaptcha})
         response = urllib2.urlopen(settings.RECAPTCHA_SITEVERIFY, query_data)
         status = json.loads(response.read())
 
@@ -102,8 +99,10 @@ def submit(request):
         if (geo_lat == "" or geo_lat == "None") or (geo_long == "" or geo_long == "None"):
             request.POST ['geo_location_lat'] = 0.00
             request.POST ['geo_location_long'] = 0.00
+        else:
+            request.POST ["geo_location_lat"] = float("%.5f" % float(geo_lat))
+            request.POST ["geo_location_long"] = float("%.5f" % float(geo_long))
 
-        pprint(request.POST)
         form = PetReportForm(request.POST, request.FILES)
 
         if form.is_valid() == True:
@@ -158,13 +157,16 @@ def submit(request):
             messages.error (request, "Please fill in the RECAPTCHA.")        
         form = PetReportForm() #Unbound Form
 
-    return render_to_response(HTML_SUBMIT_PETREPORT, {  'form':form,
-                                                        "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
-                                                        "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
-                                                        "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
-                                                        "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
-                                                        "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
-                                                        "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH }, RequestContext(request))
+    return render_to_response(HTML_SUBMIT_PETREPORT, {  
+        'form':form,
+        "RECAPTCHA_CLIENT_SECRET": settings.RECAPTCHA_CLIENT_SECRET,
+        "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
+        "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
+        "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
+        "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
+        "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
+        "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH 
+    }, RequestContext(request))
 
 
 @login_required 
@@ -172,32 +174,27 @@ def edit(request, petreport_id):
     pet_report = get_object_or_404(PetReport, pk=petreport_id)
     if request.method == "GET":
         form = PetReportForm(instance=pet_report)
-        return render_to_response(HTML_EDIT_PETREPORT, {'form': form,
-                                                        'petreport': pet_report,
-                                                        "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
-                                                        "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
-                                                        "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
-                                                        "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
-                                                        "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
-                                                        "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH }, RequestContext(request))
-    if request.method == "POST":
+
+    elif request.method == "POST":
         form = PetReportForm(request.POST, request.FILES)
         if form.is_valid() == True:
             pr = form.save(commit=False)
             pet_report.update_fields(pr, request=request.POST)
             messages.success(request, "You've successfully updated your pet report.")
             return redirect(URL_HOME)
-        else:
-            return render_to_response(HTML_EDIT_PETREPORT, {"form": form,
-                                                            "petreport": pet_report,
-                                                            "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
-                                                            "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
-                                                            "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
-                                                            "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
-                                                            "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
-                                                            "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH }, RequestContext(request))
     else:
         raise Http404
+
+    return render_to_response(HTML_EDIT_PETREPORT, {
+        "form": form,
+        "petreport": pet_report,
+        "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
+        "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
+        "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
+        "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
+        "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
+        "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH 
+    }, RequestContext(request))
 
 @login_required
 def get_pet_breeds(request, pet_type=0):

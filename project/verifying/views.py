@@ -29,7 +29,6 @@ def verify(request, petcheck_id):
     petmatch = petcheck.petmatch
     lost_pet = petmatch.lost_pet
     found_pet = petmatch.found_pet
-    pet_fields = lost_pet.pack_PetReport_fields(other_pet=found_pet)
 
     if request.user.is_anonymous() == True:
         profile = None
@@ -54,17 +53,20 @@ def verify(request, petcheck_id):
                 else: 
                     user_is_owner = True #owner.
 
-        return render_to_response(HTML_VERIFY_PETCHECK, {   "petcheck": petcheck,
-                                                            "petmatch": petmatch,
-                                                            "pet_fields": pet_fields,
-                                                            "lost_petreport_id": lost_pet.id,
-                                                            "found_petreport_id": found_pet.id,
-                                                            "profile": profile,
-                                                            "contacts": [lost_pet.proposed_by, found_pet.proposed_by],
-                                                            "num_voters": num_upvotes + num_downvotes,
-                                                            "user_is_owner": user_is_owner,
-                                                            "user_has_voted": user_has_voted,
-                                                            "user_has_verified": user_has_verified}, RequestContext(request))
+        return render_to_response(HTML_VERIFY_PETCHECK, {   
+            "petcheck": petcheck,
+            "petmatch": petmatch,
+            "petreport_fields": petmatch.get_display_fields(),
+            "lost_petreport_id": lost_pet.id,
+            "found_petreport_id": found_pet.id,
+            "profile": profile,
+            "contacts": [lost_pet.proposed_by, found_pet.proposed_by],
+            "num_voters": num_upvotes + num_downvotes,
+            "user_is_owner": user_is_owner,
+            "user_has_voted": user_has_voted,
+            "user_has_verified": user_has_verified
+        }, RequestContext(request))
+
     #POST for Verification.
     elif request.method == "POST":
         pprint(request.POST)

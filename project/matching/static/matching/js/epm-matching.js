@@ -5,7 +5,7 @@ $(document).ready(function(){
 
 	$(window).bind("resizeEnd", function(){
 		refresh_layout();
-	})
+	});
 
 	$(window).resize(function() {
 		if(this.resizeTO) 
@@ -103,14 +103,14 @@ function moveImage(item, container) {
 	var petreport_id = $(item).find("a").attr("identity");
 
 	//Make an AJAX Call to get attributes for the Candidate PetReport.
-	$.ajax({
-		type:"GET",
+	perform_AJAX_call({
+		type: "GET",
 		url: HOME_URLS["PETREPORT_DATA"],
 		data: {"petreport_id": petreport_id},
 		success: function(data){
 			//Show the details of a candidate petreport after dropping its image to the droppable container
 			var petreport = data.petreport;
-			CANDIDATE_PETREPORT_ID = data.petreport[0]["ID"];
+			CANDIDATE_PETREPORT_ID = petreport.id;
 
 			//Animate the drop!
 			var w = container.width();
@@ -124,8 +124,7 @@ function moveImage(item, container) {
 
 			//Clear button to remove Candidate from droppable container.
 			$("#button_clear_candidate").click(function(){
-				//Bring Workspace state back to initial state.
-				$(container).html("");
+				$(container).html(""); //Bring Workspace state back to initial state.
 				$(container).append("<strong style='width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;'> Click and Drag a Pet Here </strong>");
 				clear_PetReport_fields_to_table(1, $("#matching-info-table"));
 				$("#target_prdpfields li").each(function(){ $(this).css("color", "black"); });
@@ -146,22 +145,19 @@ function moveImage(item, container) {
 			//Now, iterate through both lists and highlight the matches!
 			highlight_field_matches($("#matching-info-table"));		
 	
-		},
-		error: function(data){
-			alert("An unexpected error occurred when trying to get information for this Pet. Please try again."); 
 		}
 	});
 }
 
 function fetch_PetReports(page){
-	$.ajax({
-	    type:"GET",
-	    url: MATCHING_URLS["CANDIDATE_PETREPORTS"],
-	    data:{"target_petreport_id": TARGET_PETREPORT_ID, "page":page},
-	    success: function(data){
-	    	var petreports = data.pet_reports_list;
-	    	var count = data.count;
-	    	var total_count = data.total_count;
+	perform_AJAX_call({
+    type:"GET",
+    url: MATCHING_URLS["CANDIDATE_PETREPORTS"],
+    data:{"target_petreport_id": TARGET_PETREPORT_ID, "page":page},
+    success: function(data){
+    	var petreports = data.pet_reports_list;
+    	var count = data.count;
+    	var total_count = data.total_count;
 
 			//Create each tile and its elements.
 			for (var i = 0; i < petreports.length; i++){
@@ -176,11 +172,8 @@ function fetch_PetReports(page){
 			}
 			//Don't forget to refresh the grid layout.
 			refresh_layout();
-		},
-		error: function(data){
-			alert("An unexpected error occurred when trying to get Pet Reports. Please try again."); 
-	    }	
-  	});
+		}
+  });
 }
 
 

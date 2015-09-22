@@ -15,7 +15,6 @@ $(document).ready(function(){
 
     //When the User clicks on the DOWNVOTE Button...
     downvote_button.click(function(){ 
-
       //If the button hasn't been pushed yet.
       if ($(this).attr("src") != DOWNVOTE_BUTTON_INACTIVE_LINK){
 
@@ -33,7 +32,6 @@ $(document).ready(function(){
 
     //When the User clicks on the UPVOTE Button...
     upvote_button.click(function(){ 
-
       //If the button hasn't been pushed yet.
       if ($(this).attr("src") != UPVOTE_BUTTON_INACTIVE_LINK){
 

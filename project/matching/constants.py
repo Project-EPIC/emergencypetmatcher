@@ -29,3 +29,4 @@ DOWNVOTE = "downvote"
 
 #number of pet matches on the home page
 NUM_PETMATCHES_HOMEPAGE = 25
+

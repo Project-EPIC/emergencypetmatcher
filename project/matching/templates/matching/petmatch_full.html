@@ -61,13 +61,13 @@
 	<!-- Pet Info -->
 	<table id="pmdp-info-table" class="epm-table table table-hover">
 		<tbody>
-		  {% for field in pet_fields %}
-		  <tr>
-		    <td class="pet-info-header"> {{ field.0 }} </td>
-		    <td class="pet-info-data"> {{ field.1 }}</td>
-		    <td class="pet-info-data"> {{ field.2 }}</td>
-		  </tr>
-		  {% endfor %}
+      {% for field in petreport_fields %}
+        <tr>
+          <td class="pet-info-header" attr="{{ field.attr }}"> {{ field.label }}</td>
+          <td class="pet-info-data">{{ field.lost_pet_value }}</td>
+          <td class="pet-info-data">{{ field.found_pet_value }}</td>
+        </tr>
+      {% endfor %}
 		</tbody>
 	</table>
 

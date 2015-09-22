@@ -100,6 +100,18 @@ $(document).ready(function(){
 		load_pet_breeds(pet_type);
 	});	
 
+	//Toggle Display of Contact fields if Contact Box gets clicked.
+	$("#contact-box").click(function(){
+		toggle_display("id_contact_name");
+		toggle_display("id_contact_number");
+		toggle_display("id_contact_email");
+		toggle_display("id_contact_link");		
+	});
+
+	$("#microchip-box").click(function(){
+		toggle_display("id_microchip_id");
+	});
+
 	/******** Kick Things Off *********/
 	load_pet_breeds("Dog");
 
@@ -109,17 +121,81 @@ $(document).ready(function(){
 	$("label[for=id_pet_type]").append("<b class='required-field-symbol'>*</b>")
 
 	//Reorganization of fields after render.
-	$("#id_contact_name").parent(".form-group").appendTo("#contact-subform")
-	$("#id_contact_number").parent(".form-group").appendTo("#contact-subform")
-	$("#id_contact_email").parent(".form-group").appendTo("#contact-subform")
-	$("#id_contact_link").parent(".form-group").appendTo("#contact-subform")
+	$("#id_contact_name").parent(".form-group").appendTo("#contact-subform");
+	$("#id_contact_number").parent(".form-group").appendTo("#contact-subform");
+	$("#id_contact_email").parent(".form-group").appendTo("#contact-subform");
+	$("#id_contact_link").parent(".form-group").appendTo("#contact-subform");
+	toggle_display("id_contact_name");
+	toggle_display("id_contact_number");
+	toggle_display("id_contact_email");
+	toggle_display("id_contact_link");	
 
-	//Location Subform.
-	$("#id_location").parent(".form-group").appendTo("#location-subform")
-	$("#id_geo_location_lat").parent(".form-group").appendTo("#location-subform")
-	$("#id_geo_location_long").parent(".form-group").appendTo("#location-subform")	
+	$("#label_id_geo_location_lat").remove();
+	$("#label_id_geo_location_long").remove();
+	$("#label_id_location").remove();
+	$("#id_geo_location_lat").parent(".form-group").css("display", "inline-block").css("margin-right", "2.5px").attr("disabled", true).appendTo("#location-coordinates");
+	$("#id_geo_location_long").parent(".form-group").css("display", "inline-block").css("margin-left", "2.5px").attr("disabled", true).appendTo("#location-coordinates");
+	$("#id_location").parent(".form-group").appendTo("#location-coordinates");
+	toggle_display("location-coordinates");
+	toggle_display("location-map");
+
+	$("#id_microchip_id").parent(".form-group").appendTo("#microchip-subform");
+	$("#label_id_microchip_id").remove();
+	toggle_display("id_microchip_id");
+
+	var map;
+	$("#location-box").click(function(){	
+		toggle_display("location-coordinates");		
+		toggle_display("location-map");	
+
+		if (map != undefined)
+			map.remove();
+
+		map = new L.map('location-map').setView([PETREPORT_LOCATION_LAT, PETREPORT_LOCATION_LNG], 10);	
+		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6IjZjNmRjNzk3ZmE2MTcwOTEwMGY0MzU3YjUzOWFmNWZhIn0.Y8bhBaUMqFiPrDRW9hieoQ', {
+			maxZoom: 18,
+			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+			id: 'mapbox.streets'
+		}).addTo(map);	
+
+		var markersLayer = new L.LayerGroup();
+		map.addLayer(markersLayer);
+
+		map.on("move", function(e){
+			var latlng = map.getCenter();
+			$("#id_geo_location_lat").val(latlng.lat);
+			$("#id_geo_location_long").val(latlng.lng);
+		});
+
+		new L.Control.GeoSearch({
+			provider: new L.GeoSearch.Provider.Google(),
+			showMarker:false
+		}).addTo(map);
+
+		$("#leaflet-control-geosearch-qry").keyup(function(){
+			$("#id_location").val($("#leaflet-control-geosearch-qry").val());
+		})
+
+		//Place marker when map click occurs.
+		var marker;
+		map.on('click', function(e){
+			if (marker != null)
+				map.removeLayer(marker);
+			$("#id_geo_location_lat").val(e.latlng.lat);
+			$("#id_geo_location_long").val(e.latlng.lng);
+			marker = new L.Marker(e.latlng);
+			map.addLayer(marker);
+		});
+	});
 
 });
+
+function toggle_display(field){
+	$("#label_" + field).toggleClass("hidden");
+	$("#" + field).toggleClass("hidden");
+}
 
 //Load up the pet breeds here.
 function load_pet_breeds (pet_type){

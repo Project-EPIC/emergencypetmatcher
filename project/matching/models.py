@@ -69,6 +69,30 @@ class PetMatch(models.Model):
                     "num_upvotes"           : self.up_votes.count(),
                     "num_downvotes"         : self.down_votes.count() }
 
+    def get_display_fields(self):
+        return [
+            {"attr": "pet_name", "label": "Pet Name", "lost_pet_value": self.lost_pet.pet_name, "found_pet_value": self.found_pet.pet_name},
+            {"attr": "pet_type", "label": "Pet Type", "lost_pet_value": self.lost_pet.pet_type, "found_pet_value": self.found_pet.pet_type},
+            {"attr": "status", "label": "Lost/Found", "lost_pet_value": self.lost_pet.status, "found_pet_value": self.found_pet.status},
+            {"attr": "date_lost_or_found", "label": "Date Lost/Found", "lost_pet_value": self.lost_pet.date_lost_or_found.strftime("%B %d, %Y"), "found_pet_value": self.found_pet.date_lost_or_found.strftime("%B %d, %Y")},
+            {"attr": "proposed_by_username", "label": "Contact", "lost_pet_value": self.lost_pet.proposed_by.user.username, "found_pet_value": self.found_pet.proposed_by.user.username},
+            {"attr": "location", "label": "Location", "lost_pet_value": self.lost_pet.location, "found_pet_value": self.found_pet.location},
+            {"attr": "microchip_id", "label": "Microchipped?", "lost_pet_value": "Yes" if (self.lost_pet.microchip_id != "") else "No", "found_pet_value": "Yes" if (self.found_pet.microchip_id != "") else "No"},
+            {"attr": "spayed_or_neutered", "label": "Spayed/Neutered", "lost_pet_value": self.lost_pet.spayed_or_neutered, "found_pet_value": self.found_pet.spayed_or_neutered},
+            {"attr": "age", "label": "Age", "lost_pet_value": self.lost_pet.age, "found_pet_value": self.found_pet.age},
+            {"attr": "sex", "label": "Sex", "lost_pet_value": self.lost_pet.sex, "found_pet_value": self.found_pet.sex},
+            {"attr": "breed", "label": "Breed", "lost_pet_value": self.lost_pet.breed, "found_pet_value": self.found_pet.breed},
+            {"attr": "color", "label": "Color", "lost_pet_value": self.lost_pet.color, "found_pet_value": self.found_pet.color},
+            {"attr": "size", "label": "Size", "lost_pet_value": self.lost_pet.size, "found_pet_value": self.found_pet.size},
+            {"attr": "tag_info", "label": "Tag and Collar Information", "lost_pet_value": self.lost_pet.tag_info, "found_pet_value": self.found_pet.tag_info},
+            {"attr": "description", "label": "Description", "lost_pet_value": self.lost_pet.description, "found_pet_value": self.found_pet.description},
+            {"attr": "contact_name", "label": "Alternate Contact Name", "lost_pet_value": self.lost_pet.contact_name, "found_pet_value": self.found_pet.contact_name},
+            {"attr": "contact_number", "label": "Alternate Contact Number", "lost_pet_value": self.lost_pet.contact_number, "found_pet_value": self.found_pet.contact_number},
+            {"attr": "contact_email", "label": "Alternate Contact Email Address", "lost_pet_value": self.lost_pet.contact_email, "found_pet_value": self.found_pet.contact_email},
+            {"attr": "contact_link", "label": "Alternate Link to Pet", "lost_pet_value": self.lost_pet.contact_link, "found_pet_value": self.found_pet.contact_link},
+        ]        
+
+
     def to_JSON(self):
         return json.dumps(self.to_DICT())        
 

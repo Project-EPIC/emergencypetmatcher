@@ -18,7 +18,13 @@
 
 {% block form_action %}
   <div class="form-actions">
+    <a href="/" id = "id_cancel" class="btn btn-default" type="button">Cancel</a>
     <input id = "id_submit" class="btn btn-primary" type="button" value="Update This Pet"/>
   </div>
 {% endblock form_action %}
+
+<script type="text/javascript">
+  var PETREPORT_LOCATION_LAT = {{ pet_report.geo_location_lat }};
+  var PETREPORT_LOCATION_LNG = {{ pet_report.geo_location_long }};
+</script>
 

@@ -45,20 +45,20 @@ def get_PetMatch(request, petmatch_id):
     elif pm.is_being_checked() == True:
         messages.info(request, "These pet reports are currently being checked by their owners! Votes are closed.")
 
-    fields = pm.pack_PetReport_fields()
-
     if request.is_ajax() == True:
         html = HTML_PMDP
     else:
         html = HTML_PMDP_FULL    
 
-    return render_to_response(html, {  "petmatch": pm,
-                                        "site_domain":Site.objects.get_current().domain,
-                                        "pet_fields": fields,
-                                        "num_voters": len(voters), 
-                                        "user_has_voted": user_has_voted, 
-                                        "num_upvotes":num_upvotes, 
-                                        "num_downvotes":num_downvotes}, RequestContext(request))  
+    return render_to_response(html, {  
+        "petmatch": pm,
+        "site_domain":Site.objects.get_current().domain,
+        "petreport_fields": pm.get_display_fields(),
+        "num_voters": len(voters), 
+        "user_has_voted": user_has_voted, 
+        "num_upvotes":num_upvotes, 
+        "num_downvotes":num_downvotes
+    }, RequestContext(request))  
 
 #Vote on the PetMatch    
 @login_required
@@ -122,19 +122,23 @@ def get_candidate_PetReports(request):
         page = int(request.GET["page"])
         petreport = get_object_or_404(PetReport, pk=petreport_id)
         candidates = petreport.get_candidate_PetReports()
-        #Get the candidate count for pagination purposes.
-        candidates_count = len(candidates)                 
-        paged_candidates = petreport.get_ranked_PetReports(candidates=candidates, page=page)  
-        paged_candidates = [{   "ID": pr.id, 
-                                "proposed_by_username": pr.proposed_by.user.username,
-                                "pet_name": pr.pet_name, 
-                                "pet_type": pr.pet_type, 
-                                "img_path": pr.img_path.name } for pr in paged_candidates]
+        candidates_count = len(candidates) #Get the candidate count for pagination purposes.
+        paged_candidates = petreport.get_ranked_candidate_PetReports(candidates=candidates, page=page)  
+        paged_candidates = [{
+            "ID": pr.id, 
+            "status":pr.status,
+            "proposed_by_username": pr.proposed_by.user.username,
+            "pet_name": pr.pet_name, 
+            "pet_type": pr.pet_type, 
+            "img_path": pr.img_path.name 
+        } for pr in paged_candidates]
 
         #Serialize the PetReport into JSON for easy accessing.
-        payload = json.dumps ({ "pet_reports_list":paged_candidates, 
-                                "count":len(paged_candidates), 
-                                "total_count": candidates_count})
+        payload = json.dumps ({ 
+            "pet_reports_list":paged_candidates, 
+            "count":len(paged_candidates), 
+            "total_count": candidates_count
+        })
         return HttpResponse(payload, mimetype="application/json")   
     else:
         raise Http404
@@ -145,37 +149,32 @@ def match(request, petreport_id):
     if request.method == "GET":
         target_petreport = get_object_or_404(PetReport, pk=petreport_id)
         #Are there any candidates?
-        candidates = target_petreport.get_candidate_PetReports()
+        candidates_count = len(target_petreport.get_candidate_PetReports())
         #Add the UserProfile to the PetReport's workers list.
         target_petreport.workers.add(request.user.userprofile)
 
-        if not candidates:
+        if candidates_count == 0:
             messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added as a worker for this pet.")
             return redirect(URL_HOME)            
 
-        #Get the candidate count for pagination purposes.
-        candidates_count = len(candidates)
-
-        #Serialize the PetReport into JSON for easy accessing.
-        target_pr_json = target_petreport.to_JSON()
-        pet_fields = target_petreport.pack_PetReport_fields()
-        return render_to_response (HTML_MATCHING, { 'pet_fields': pet_fields,
-                                                    "target_petreport":target_petreport, 
-                                                    "candidates_count":candidates_count}, RequestContext(request))
+        return render_to_response (HTML_MATCHING, { 
+            'target_petreport': target_petreport,
+            'petreport_fields': target_petreport.get_display_fields(),
+            "candidates_count":candidates_count
+        }, RequestContext(request))
     else:
         raise Http404
 
 @login_required
 def propose(request, target_petreport_id, candidate_petreport_id):
     print_info_msg ("PROPOSE MATCH: target:%s candidate:%s" % (target_petreport_id, candidate_petreport_id))
-
     #Grab the Target and Candidate PetReports first.
     target = get_object_or_404(PetReport, pk=target_petreport_id)
     candidate = get_object_or_404(PetReport, pk=candidate_petreport_id)
 
     if request.method == "POST" and request.POST["g-recaptcha-response"]:
         recaptcha = request.POST["g-recaptcha-response"]
-        query_data = urllib.urlencode({"secret":settings.RECAPTCHA_SECRET, "response":recaptcha})
+        query_data = urllib.urlencode({"secret":settings.RECAPTCHA_SERVER_SECRET, "response":recaptcha})
         response = urllib2.urlopen(settings.RECAPTCHA_SITEVERIFY, query_data)
         status = json.loads(response.read())
 
@@ -256,14 +255,16 @@ def propose(request, target_petreport_id, candidate_petreport_id):
         else:
             html = HTML_PROPOSE_MATCH_FULL
 
-        if (target.pet_type != candidate.pet_type) or (target.status == candidate.status) or (target.proposed_by == candidate.proposed_by):
+        if (target.pet_type != candidate.pet_type) or (target.status == candidate.status):
             messages.error(request, "This proposal is invalid! Please try another one.")
             return redirect(URL_MATCHING + str(target.id))
 
-        pet_fields = target.pack_PetReport_fields(other_pet=candidate)
-        return render_to_response(html, { 'target':target, 
-                                                             'candidate':candidate,
-                                                             'pet_fields': pet_fields }, RequestContext(request))
+        return render_to_response(html, { 
+            'RECAPTCHA_CLIENT_SECRET': settings.RECAPTCHA_CLIENT_SECRET,
+            'target': target,
+            'candidate': candidate,
+            'petreport_fields': [{'attr':a['attr'], 'label':a['label'], 'lost_pet_value':a['value'], 'found_pet_value':b['value']} for a,b in zip(target.get_display_fields(), candidate.get_display_fields())]
+        }, RequestContext(request))
 
 
 
