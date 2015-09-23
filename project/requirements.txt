@@ -1,4 +1,4 @@
-django == 1.6.2
+django
 lorem-ipsum-generator
 django-registration
 python-social-auth

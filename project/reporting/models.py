@@ -28,20 +28,20 @@ class PetReport(models.Model):
     #Location where found
     location = models.CharField(max_length=PETREPORT_LOCATION_LENGTH, null=True)
     #Lat/Long Geo-coordinates of Location
-    geo_location_lat = models.DecimalField(max_digits=12, decimal_places=8, null=True, default=0)
-    geo_location_long = models.DecimalField(max_digits=12, decimal_places=8, null=True, default=0)
+    geo_location_lat = models.FloatField(null=True, default=0.0)
+    geo_location_long = models.FloatField(null=True, default=0.0)
     #Microchip ID of Pet
     microchip_id = models.CharField(max_length=PETREPORT_MICROCHIP_ID_LENGTH, null=True)
     #Pet Tag Information (if available)
     tag_info = models.CharField(max_length=PETREPORT_TAG_INFO_LENGTH, null=True, default="")
     #Contact Name of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
-    contact_name = models.CharField(max_length=PETREPORT_CONTACT_NAME_LENGTH, null=True)
+    contact_name = models.CharField(max_length=PETREPORT_CONTACT_NAME_LENGTH, null=True, default="None")
     #Contact Phone Number of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
-    contact_number = models.CharField(max_length=PETREPORT_CONTACT_NUMBER_LENGTH, null=True)
+    contact_number = models.CharField(max_length=PETREPORT_CONTACT_NUMBER_LENGTH, null=True, default="None")
     #Contact Email Address of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
-    contact_email = models.CharField(max_length=PETREPORT_CONTACT_EMAIL_LENGTH, null=True)        
+    contact_email = models.CharField(max_length=PETREPORT_CONTACT_EMAIL_LENGTH, null=True, default="None")        
     #Contact Link for cross-referencing pet report.
-    contact_link = models.CharField(max_length=PETREPORT_CONTACT_LINK_LENGTH, null=True)
+    contact_link = models.CharField(max_length=PETREPORT_CONTACT_LINK_LENGTH, null=True, default="None")
     #Img of Pet
     img_path = models.ImageField(upload_to=PETREPORT_IMG_PATH, null=True)
     #Thumbnail Img of Pet
@@ -59,9 +59,9 @@ class PetReport(models.Model):
     #Description of Pet
     description   = models.CharField(max_length=PETREPORT_DESCRIPTION_LENGTH, null=True, default="")
     #The UserProfiles who are working on this PetReport (Many-to-Many relationship with User)
-    workers = models.ManyToManyField("socializing.UserProfile", null=True, related_name='workers_related')
+    workers = models.ManyToManyField("socializing.UserProfile", related_name='workers_related')
     #The UserProfiles who have bookmarked this PetReport
-    bookmarked_by = models.ManyToManyField("socializing.UserProfile", null=True, related_name='bookmarks_related')
+    bookmarked_by = models.ManyToManyField("socializing.UserProfile", related_name='bookmarks_related')
     #A pet report is closed once it has been successfully matched
     closed = models.BooleanField(default=False)
     revision_number = models.IntegerField(null=True) #update revision using view
@@ -392,8 +392,8 @@ class PetReportForm (ModelForm):
     sex                 = forms.ChoiceField(label="Sex", choices = SEX_CHOICES, required = False, widget = forms.Select(attrs={"class":"form-control", "style":"width:100px"}))
     size                = forms.ChoiceField(label="Size of Pet", choices = SIZE_CHOICES, required = False, widget=forms.Select(attrs={"class":"form-control", "style":"width:200px"}))
     location            = forms.CharField(label="Location", help_text="(Location where pet was lost/found)", max_length = PETREPORT_LOCATION_LENGTH , required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:500px; margin-bottom:10px;", "placeholder": "Write in general information, such as 'Boulder, CO'"}))
-    geo_location_lat    = forms.DecimalField(label="Geo Location Lat", help_text="(Latitude coordinate)", max_digits=12, decimal_places=5, initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:245px; margin-bottom:10px;", "placeholder": "Latitude (Lat)"}))
-    geo_location_long   = forms.DecimalField(label="Geo Location Long", help_text="(Longitude coordinate)", max_digits=12, decimal_places=5, initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:245px; margin-bottom:10px;", "placeholder": "Longitude (Long)"}))
+    geo_location_lat    = forms.FloatField(label="Geo Location Lat", help_text="(Latitude coordinate)", initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:245px; margin-bottom:10px;", "placeholder": "Latitude (Lat)"}))
+    geo_location_long   = forms.FloatField(label="Geo Location Long", help_text="(Longitude coordinate)", initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:245px; margin-bottom:10px;", "placeholder": "Longitude (Long)"}))
     microchip_id        = forms.CharField(label="Microchip ID", max_length = PETREPORT_MICROCHIP_ID_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:380px", "placeholder": "Pet Microchip ID"}))
     tag_info            = forms.CharField(label="Tag and Collar Information", max_length = PETREPORT_TAG_INFO_LENGTH, required=False, widget=Textarea(attrs={"class":"form-control", "placeholder":"(Please write tag collar information only if is available)", "style":"max-width:400px; max-height:300px;"}))
     contact_name        = forms.CharField(label="Contact Name", max_length=PETREPORT_CONTACT_NAME_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:200px; margin-bottom:10px;"}))

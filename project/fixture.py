@@ -1,4 +1,5 @@
-import os
+import os, django
+django.setup()
 os.environ['DJANGO_SETTINGS_MODULE']='project.settings'
 from django.test.client import Client
 from django.conf import settings

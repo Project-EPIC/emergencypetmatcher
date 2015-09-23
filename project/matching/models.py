@@ -20,8 +20,8 @@ class PetMatch(models.Model):
     has_failed = models.BooleanField(null=False, default=False)
     #Field to capture successful PetMatches.
     is_successful = models.BooleanField(default=False)
-    up_votes = models.ManyToManyField("socializing.UserProfile", null=True, related_name='up_votes_related')
-    down_votes = models.ManyToManyField("socializing.UserProfile", null=True, related_name='down_votes_related')
+    up_votes = models.ManyToManyField("socializing.UserProfile", related_name='up_votes_related')
+    down_votes = models.ManyToManyField("socializing.UserProfile", related_name='down_votes_related')
 
     '''Because of the Uniqueness constraint that the PetMatch must uphold, we override the save method'''
     def save(self, *args, **kwargs):

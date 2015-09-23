@@ -15,14 +15,13 @@ framework.
 """
 
 import os, sys, django
-import site
 from django.core.wsgi import get_wsgi_application
 
 os.environ ["DJANGO_SETTINGS_MODULE"] = "project.settings"
 
 #Path Constants (relative to project directory) - edit this to reflect changes in project WSGI script.
 PROJECT_NAME = '/project'
-SITE_PACKAGES = '/lib/python2.7/site-packages'
+# SITE_PACKAGES = '/lib/python2.7/site-packages'
 
 #This is the project_settings folder (django 1.4) that hosts the settings.py, urls.py, and ''this'' file.
 project_settings_folder = os.path.dirname(__file__)
@@ -42,12 +41,12 @@ sys.path.append(project_folder)
 sys.path.append(project_settings_folder)
 
 #We need to make sure we add in all of our local Python modules here.
-site.addsitedir(workspace + SITE_PACKAGES)
+# site.addsitedir(workspace + SITE_PACKAGES)
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
-application = django.core.handlers.wsgi.WSGIHandler()
+application = get_wsgi_application()
 
 #This is how you can test if its working. You should get a "Hello World!" to the browser screen.
 #def application(environ, start_response):

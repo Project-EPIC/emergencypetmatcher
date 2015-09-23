@@ -1,6 +1,7 @@
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.db import models, IntegrityError
 from django.db.models import Min
 from django.contrib import messages
@@ -22,7 +23,36 @@ from verifying.models import PetCheck
 from utilities.utils import *
 from constants import *
 from home.constants import *
-import datetime, re, json, pdb, urllib, urllib2
+import datetime, re, json, pdb, urllib, urllib2, ssl
+
+#Given a PetMatch ID, just return the PetMatch JSON.
+def get_PetMatch_JSON(request, petmatch_id):
+    if (request.method == "GET") and (request.is_ajax() == True):
+        petmatch = get_object_or_404(PetMatch, pk=petmatch_id)
+        return JsonResponse({"petmatch":petmatch.to_DICT()}, safe=False)
+    else:
+        raise Http404  
+
+def get_PetMatches_JSON(request):
+    if request.is_ajax() == True:
+        successful_petmatches = True if request.GET["successful_petmatches"] == "true" else False
+        page = int(request.GET["page"])
+        filtered_matches = PetMatch.objects.filter(is_successful=successful_petmatches, has_failed=False).order_by("id").reverse()
+        pet_matches = get_objects_by_page(filtered_matches, page, limit=NUM_PETMATCHES_HOMEPAGE)
+
+        #Get the petmatch count for pagination purposes.
+        petmatch_count = len(filtered_matches)
+        #Zip it up in JSON and ship it out as an HTTP Response.
+        pet_matches = [{"ID"                    : pm.id, 
+                        "proposed_by_username"  : pm.proposed_by.user.username,
+                        "lost_pet_name"         : pm.lost_pet.pet_name, 
+                        "found_pet_name"        : pm.found_pet.pet_name, 
+                        "lost_pet_img_path"     : pm.lost_pet.thumb_path.name,
+                        "found_pet_img_path"    : pm.found_pet.thumb_path.name } for pm in pet_matches]
+
+        return JsonResponse({"pet_matches_list":pet_matches, "count":len(pet_matches), "total_count": petmatch_count}, safe=False)
+    else:
+        raise Http404
 
 #Display the PetMatch object
 def get_PetMatch(request, petmatch_id):
@@ -104,12 +134,14 @@ def vote(request):
             
         num_upvotes = len(pm.up_votes.all())
         num_downvotes = len(pm.down_votes.all())
-        payload = json.dumps ({ "vote":vote, 
-                                "message":message, 
-                                "threshold_reached": threshold_reached, 
-                                "num_downvotes":num_downvotes, 
-                                "num_upvotes":num_upvotes })
-        return HttpResponse(payload, mimetype="application/json")
+
+        return JsonResponse({ 
+            "vote":vote, 
+            "message":message, 
+            "threshold_reached": threshold_reached, 
+            "num_downvotes":num_downvotes, 
+            "num_upvotes":num_upvotes 
+        }, safe=False)
 
     else:
         raise Http404
@@ -133,13 +165,11 @@ def get_candidate_PetReports(request):
             "img_path": pr.img_path.name 
         } for pr in paged_candidates]
 
-        #Serialize the PetReport into JSON for easy accessing.
-        payload = json.dumps ({ 
+        return JsonResponse({ 
             "pet_reports_list":paged_candidates, 
             "count":len(paged_candidates), 
-            "total_count": candidates_count
-        })
-        return HttpResponse(payload, mimetype="application/json")   
+            "total_count": candidates_count 
+        }, safe=False)   
     else:
         raise Http404
 
@@ -175,7 +205,7 @@ def propose(request, target_petreport_id, candidate_petreport_id):
     if request.method == "POST" and request.POST["g-recaptcha-response"]:
         recaptcha = request.POST["g-recaptcha-response"]
         query_data = urllib.urlencode({"secret":settings.RECAPTCHA_SERVER_SECRET, "response":recaptcha})
-        response = urllib2.urlopen(settings.RECAPTCHA_SITEVERIFY, query_data)
+        response = urllib.urlopen(settings.RECAPTCHA_SITEVERIFY, query_data, context=ssl._create_unverified_context())
         status = json.loads(response.read())
 
         if status["success"] != True:

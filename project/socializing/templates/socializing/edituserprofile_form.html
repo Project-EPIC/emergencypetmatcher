@@ -46,7 +46,7 @@
 					<label for="{{ field.label }}" style="display:block;">{{ field.label }}</label>	
 					{% for error in field.errors %} <span class="field-error-message">{{ error }}</span>{% endfor %}					
 					<div class="userprofile-img-wrapper">	
-						<img src="{{ MEDIA_URL }}{{ user.get_profile.img_path }}"/>	
+						<img src="{{ MEDIA_URL }}{{ user.userprofile.img_path }}"/>	
 					</div>				
 					<input id="img_path" name="{{ field.name }}" type="file"/>
 					{{ field.help_text }}	
@@ -54,7 +54,7 @@
 				{% elif field.label == "Describe Yourself" %}
 					<label for="{{ field.label }}" style="display:block;">{{ field.label }}</label>
 					{% for error in field.errors %} <span class="field-error-message">{{ error }}</span>{% endfor %}							
-					<textarea class="form-control" name="{{ field.name }}" maxlength="{{ USERPROFILE_DESCRIPTION_LENGTH }}" rows="5" cols="20" placeholder="Say Something About Yourself..." style="width:400px; max-width:400px; max-height:200px;">{{ user.get_profile.description }}</textarea>
+					<textarea class="form-control" name="{{ field.name }}" maxlength="{{ USERPROFILE_DESCRIPTION_LENGTH }}" rows="5" cols="20" placeholder="Say Something About Yourself..." style="width:400px; max-width:400px; max-height:200px;">{{ user.userprofile.description }}</textarea>
 				{% endif %}
 			</div>
 		{% endfor %}
@@ -82,7 +82,7 @@
 		</form>	
 	{% endif %}
 
-	<a class="btn btn-default" href="{% url 'get_UserProfile_page' user.get_profile.id %}">Back to Profile</a>
+	<a class="btn btn-default" href="{% url 'get_UserProfile_page' user.userprofile.id %}">Back to Profile</a>
 	<form method="post" action="{% url 'delete_userprofile' %}" onsubmit="return confirm(CONFIRM);" style="display:inline-block;">
 		{% csrf_token %}
 		<input type="submit" class="btn btn-link" value="Delete Profile"/>
@@ -95,7 +95,7 @@
 	<script type = 'text/javascript'> 
 		var USER_ID = "{{ user.id }}";
 		var CONFIRM = "Are you sure you want to delete your profile? Selecting OK will remove all pet reports, matches, and votes that are tied to you. Is this okay?";
-		var USERPROFILE_ID = "{{ user.get_profile.id }}"; 
+		var USERPROFILE_ID = "{{ user.userprofile.id }}"; 
 	</script>
 	<script src={% static "socializing/js/epm-edituserprofile_form.js" %} type = 'text/javascript'></script> 
 {% endblock js %}

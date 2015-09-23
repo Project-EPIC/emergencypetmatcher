@@ -9,7 +9,6 @@ from django import forms
 from django.forms import ModelForm, Textarea
 from django.template.loader import render_to_string
 from django.dispatch import receiver
-from registration.models import RegistrationProfile
 from registration.forms import RegistrationFormTermsOfService
 from django.core.exceptions import MultipleObjectsReturned
 from django.db.models.signals import post_save, pre_save, pre_delete, post_delete, m2m_changed
@@ -29,7 +28,7 @@ class UserProfile (models.Model):
     img_path = models.ImageField(upload_to=USERPROFILE_IMG_PATH, default=USERPROFILE_IMG_PATH_DEFAULT, null=True)
     thumb_path = models.ImageField(upload_to=USERPROFILE_THUMBNAIL_PATH, default=USERPROFILE_THUMBNAIL_PATH_DEFAULT, null=True)
     last_logout = models.DateTimeField(null=True, auto_now_add=True)
-    following = models.ManyToManyField('self', null=True, symmetrical=False, related_name='followers')
+    following = models.ManyToManyField('self', symmetrical=False, related_name='followers')
     reputation = models.FloatField(default=0, null=True)
     description   = models.CharField(max_length=USERPROFILE_DESCRIPTION_LENGTH, null=True, default="")
     social_profile = models.BooleanField(default=False)

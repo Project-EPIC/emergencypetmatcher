@@ -121,7 +121,7 @@ function fetch_PetReports(page, clear){
 	//AJAX Away.
 	$.ajax({
 		type:"GET",
-		url: HOME_URLS["PETREPORTS_DATA"],
+		url: REPORTING_URLS["PETREPORTS_JSON"],
 		data:{"page":page, "pet_name":options["pet_name"], "status":options["status"], "pet_type":options["pet_type"]},
 		success: function(data){
 			var petreports = data.pet_reports_list;
@@ -168,7 +168,7 @@ function fetch_PetMatches(page, successful_petmatches, clear){
 	//AJAX Away.
 	$.ajax({
 		type:"GET",
-		url: HOME_URLS["PETMATCHES_DATA"],
+		url: MATCHING_URLS["PETMATCHES_JSON"],
 		data: {"successful_petmatches": successful_petmatches, "page":page},
 		success: function(data){
 			var matches = data.pet_matches_list;

@@ -3,9 +3,6 @@ HOME_URLS = {
     "HOME":                 "/",
     "LOGIN":                "/login",
     "ACTIVITIES_DATA":      "/get_activities/",
-    "PETMATCHES_DATA":      "/get_PetMatches/",
-    "PETREPORT_DATA":       "/get_PetReport/",
-    "PETREPORTS_DATA":      "/get_PetReports/",
     "BOOKMARKS_DATA":       "/get_bookmarks/",    
 }
 
@@ -14,12 +11,16 @@ SOCIALIZING_URLS = {
 }
 
 REPORTING_URLS = {
+    "PETREPORT_JSON":       "/reporting/get_PetReport_JSON/",
+    "PETREPORTS_JSON":      "/reporting/get_PetReports_JSON/",    
     "PETREPORT":            "/reporting/",
     "PET_BREEDS":           "/reporting/get_pet_breeds/",
     "BOOKMARK":             "/reporting/bookmark/",
 }
 
 MATCHING_URLS = {
+    "PETMATCH_JSON":        "/matching/get_PetMatch_JSON/",    
+    "PETMATCHES_JSON":      "/matching/get_PetMatches_JSON/",    
     "PETMATCH":             "/matching/",
     "CANDIDATE_PETREPORTS": "/matching/get_candidate_PetReports",
     "MATCH":                "/matching/new/",

@@ -3,6 +3,7 @@ Hi there,
 Congratulations! The digital volunteers on EmergencyPetMatcher.com have found a likely pet match for the {{ pet.status }} {{ pet.breed }} {{ pet.pet_type }} ({{ pet.pet_name }}) that you reported.
 
 Here are the next few steps that are taken in order to get the pet officially checked with its rightful owner:
+
 	- Emails have been sent to the original contacts of both pet reports, which includes the contact email address that you have put on the pet report for {{ pet.pet_name }}.
 	- These contacts will coordinate with each other and come to a final decision as to whether the pet match is successful. You also belong in that conversation. Since you have registered for EPM, you have the privilege of officially determining whether the match is a success. Please notify everyone at EPM by making the final decision on your crossposted owner's behalf!
 	- The final decision can be viewed on the "pet check" page here: http://{{ site.domain }}{% url 'verify' petcheck_id %}.

@@ -5,6 +5,7 @@ from django.contrib.auth.forms import *
 from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect
+from django.http import JsonResponse
 from django.contrib.messages.api import get_messages
 from django.core.mail import EmailMessage
 from django.db import IntegrityError
@@ -41,15 +42,17 @@ def home (request):
     petreport_count = len(PetReport.objects.filter(closed=False))
     petmatch_count = len(PetMatch.objects.filter(petcheck=None))
     successful_petmatch_count = len(PetMatch.objects.filter(is_successful=True))
-    context =  {'petreport_count':petreport_count,
-                'petmatch_count':petmatch_count,
-                'successful_petmatch_count': successful_petmatch_count}
+    context = {
+        'petreport_count':petreport_count,
+        'petmatch_count':petmatch_count,
+        'successful_petmatch_count': successful_petmatch_count
+    }
 
     #Also get bookmark count for pagination purposes.
     if request.user.is_authenticated() == True:    
         up = request.user.userprofile
         bookmark_count = len(up.bookmarks_related.all())
-        context.update({ "bookmark_count": bookmark_count })
+        context.update({"bookmark_count": bookmark_count})
 
     return render_to_response(HTML_HOME, context, RequestContext(request))
 
@@ -67,55 +70,19 @@ def get_activities(request):
             activities = Activity.get_Activities_for_feed(page=page, since_date=None, userprofile=None)
 
         #Zip it up in JSON and ship it out as an HTTP Response.
-        activities = [{ "activity"          : activity.activity,
-                        "date_posted"       : activity.date_posted.ctime(),
-                        "profile"           : activity.userprofile.to_DICT(),
-                        "source"            : activity.get_source_DICT(),
-                        "text"              : activity.text } for activity in activities]
+        activities = [{ 
+            "activity"          : activity.activity,
+            "date_posted"       : activity.date_posted.ctime(),
+            "profile"           : activity.userprofile.to_DICT(),
+            "source"            : activity.get_source_DICT(),
+            "text"              : activity.text 
+        } for activity in activities]
 
-        payload = json.dumps ({"activities":activities})
-        return HttpResponse(payload, mimetype="application/json")     
-
+        return JsonResponse({"activities":activities}, safe=False)     
     else:
         print_error_msg ("Request for get_activities not an AJAX request!")
         raise Http404           
-
-
-#Given a PetReport ID, just return the PetReport JSON.
-def get_PetReport(request):
-    if (request.method == "GET") and (request.is_ajax() == True):
-        petreport_id = int(request.GET["petreport_id"])
-        petreport = get_object_or_404(PetReport, pk=petreport_id)
-        payload = json.dumps ({"petreport":petreport.to_DICT()})
-        return HttpResponse(payload, mimetype="application/json")
-    else:
-        raise Http404        
-
-#Given a Page Number, return a list of PetReports.
-def get_PetReports(request):
-    if request.is_ajax() == True:
-        page = int(request.GET["page"])
-
-        #Grab Pets by Filter Options.
-        pet_reports = PetReport.filter(request.GET).filter(closed = False).order_by("id").reverse()
-
-        #Get the petreport count for pagination purposes.
-        petreport_count = len(pet_reports)
-        #Now get just a page of PetReports if page # is available.
-        pet_reports = get_objects_by_page(pet_reports, page, limit=NUM_PETREPORTS_HOMEPAGE)
-        #Zip it up in JSON and ship it out as an HTTP Response.
-        pet_reports = [{"ID"                    : pr.id, 
-                        "proposed_by_username"  : pr.proposed_by.user.username,
-                        "pet_name"              : pr.pet_name, 
-                        "pet_type"              : pr.pet_type, 
-                        "status"                : pr.status,
-                        "img_path"              : pr.thumb_path.name } for pr in pet_reports]
-
-        payload = json.dumps ({"pet_reports_list":pet_reports, "count":len(pet_reports), "total_count": petreport_count})
-        return HttpResponse(payload, mimetype="application/json")
-    else:
-        raise Http404     
-
+        
 @login_required
 def get_bookmarks(request):
     if request.is_ajax() == True:
@@ -127,49 +94,18 @@ def get_bookmarks(request):
         #Now get just a page of bookmarks if page # is available.
         bookmarks = get_objects_by_page(bookmarks, page, limit=NUM_BOOKMARKS_HOMEPAGE)
         #Zip it up in JSON and ship it out as an HTTP Response.
-        bookmarks = [{  "ID"                    : pr.id, 
-                        "proposed_by_username"  : pr.proposed_by.user.username,
-                        "pet_name"              : pr.pet_name, 
-                        "pet_type"              : pr.pet_type, 
-                        "status"                : pr.status,
-                        "img_path"              : pr.thumb_path.name } for pr in bookmarks]
+        bookmarks = [{  
+            "ID"                    : pr.id, 
+            "proposed_by_username"  : pr.proposed_by.user.username,
+            "pet_name"              : pr.pet_name, 
+            "pet_type"              : pr.pet_type, 
+            "status"                : pr.status,
+            "img_path"              : pr.thumb_path.name 
+        } for pr in bookmarks]
 
-        bookmarks = json.dumps ({"bookmarks_list":bookmarks, "count":len(bookmarks), "total_count": bookmarks_count})
-        return HttpResponse(bookmarks, mimetype="application/json")
+        return JsonResponse({"bookmarks_list":bookmarks, "count":len(bookmarks), "total_count": bookmarks_count}, safe=False)
     else:
         raise Http404        
-
-
-#Given a PetMatch ID, just return the PetMatch JSON.
-def get_PetMatch(request, petmatch_id):
-    if (request.method == "GET") and (request.is_ajax() == True):
-        petmatch = get_object_or_404(PetMatch, pk=petmatch_id)
-        payload = json.dumps ({"petmatch":petmatch.to_DICT()})
-        return HttpResponse(payload, mimetype="application/json")
-    else:
-        raise Http404  
-
-def get_PetMatches(request):
-    if request.is_ajax() == True:
-        successful_petmatches = True if request.GET["successful_petmatches"] == "true" else False
-        page = int(request.GET["page"])
-        filtered_matches = PetMatch.objects.filter(is_successful=successful_petmatches, has_failed=False).order_by("id").reverse()
-        pet_matches = get_objects_by_page(filtered_matches, page, limit=NUM_PETMATCHES_HOMEPAGE)
-
-        #Get the petmatch count for pagination purposes.
-        petmatch_count = len(filtered_matches)
-        #Zip it up in JSON and ship it out as an HTTP Response.
-        pet_matches = [{"ID"                    : pm.id, 
-                        "proposed_by_username"  : pm.proposed_by.user.username,
-                        "lost_pet_name"         : pm.lost_pet.pet_name, 
-                        "found_pet_name"        : pm.found_pet.pet_name, 
-                        "lost_pet_img_path"     : pm.lost_pet.thumb_path.name,
-                        "found_pet_img_path"    : pm.found_pet.thumb_path.name } for pm in pet_matches]
-
-        payload = json.dumps ({"pet_matches_list":pet_matches, "count":len(pet_matches), "total_count": petmatch_count})
-        return HttpResponse(payload, mimetype="application/json")
-    else:
-        raise Http404
 
 def login_User(request):
     if request.method == "POST":

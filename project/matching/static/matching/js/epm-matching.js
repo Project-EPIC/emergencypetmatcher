@@ -105,7 +105,7 @@ function moveImage(item, container) {
 	//Make an AJAX Call to get attributes for the Candidate PetReport.
 	perform_AJAX_call({
 		type: "GET",
-		url: HOME_URLS["PETREPORT_DATA"],
+		url: REPORTING_URLS["PETREPORT_JSON"],
 		data: {"petreport_id": petreport_id},
 		success: function(data){
 			//Show the details of a candidate petreport after dropping its image to the droppable container

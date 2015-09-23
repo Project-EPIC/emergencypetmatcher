@@ -6,12 +6,8 @@ from socializing.models import UserProfile
 from django.contrib.auth import views as auth_views
 
 urlpatterns = patterns('home.views',
-
 	url (r'^$', 'home', name='home'),
-	url (r'^get_activities/$', 'get_activities', name="get_activities"),
-	url (r'^get_PetReport/$', 'get_PetReport', name="get_PetReport"),	
-	url (r'^get_PetReports/$', 'get_PetReports', name="get_PetReports"),
-	url (r'^get_PetMatches/$', 'get_PetMatches', name="get_PetMatches"),	
+	url (r'^get_activities/$', 'get_activities', name="get_activities"),	
 	url (r'^get_bookmarks/$','get_bookmarks',name='get_bookmarks'),
 	url (r'^login$', 'login_User', name='login_User'),
 	url (r'^logout$', 'logout_User', name='logout_User'),
@@ -39,5 +35,3 @@ urlpatterns = patterns('home.views',
 	url (r'^accounts/', include('registration.backends.default.urls'))
 	
 )
-
-# urlpatterns += staticfiles_urlpatterns()

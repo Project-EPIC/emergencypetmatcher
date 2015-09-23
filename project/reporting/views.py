@@ -1,9 +1,9 @@
-from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, login, authenticate 
 from django.contrib.auth.forms import *
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect
+from django.http import JsonResponse
 from django.contrib.messages.api import get_messages
 from django.db.models import Min
 from django.contrib.messages.api import get_messages
@@ -27,7 +27,41 @@ from PIL import Image
 from utilities.utils import *
 from constants import *
 from home.constants import *
-import datetime, re, time, json, pdb, urllib, urllib2
+import datetime, re, time, json, pdb, urllib, urllib2, ssl
+
+#Given a PetReport ID, just return the PetReport JSON.
+def get_PetReport_JSON(request):
+    if (request.method == "GET") and (request.is_ajax() == True):
+        petreport_id = int(request.GET["petreport_id"])
+        petreport = get_object_or_404(PetReport, pk=petreport_id)
+        return JsonResponse({"petreport":petreport.to_DICT()}, safe=False)
+    else:
+        raise Http404        
+
+#Given a Page Number, return a list of PetReports.
+def get_PetReports_JSON(request):
+    if request.is_ajax() == True:
+        page = int(request.GET["page"])
+        #Grab Pets by Filter Options.
+        pet_reports = PetReport.filter(request.GET).filter(closed = False).order_by("id").reverse()
+        #Get the petreport count for pagination purposes.
+        petreport_count = len(pet_reports)
+        #Now get just a page of PetReports if page # is available.
+        pet_reports = get_objects_by_page(pet_reports, page, limit=NUM_PETREPORTS_HOMEPAGE)
+        #Zip it up in JSON and ship it out as an HTTP Response.
+        pet_reports = [{
+            "ID"                    : pr.id, 
+            "proposed_by_username"  : pr.proposed_by.user.username,
+            "pet_name"              : pr.pet_name, 
+            "pet_type"              : pr.pet_type, 
+            "status"                : pr.status,
+            "img_path"              : pr.thumb_path.name 
+        } for pr in pet_reports]
+
+        return JsonResponse({"pet_reports_list":pet_reports, "count":len(pet_reports), "total_count": petreport_count}, safe=False)
+    else:
+        raise Http404     
+
 
 def get_PetReport(request, petreport_id):
     #Grab the PetReport.
@@ -85,7 +119,7 @@ def submit(request):
     if request.method == "POST" and request.POST["g-recaptcha-response"]:
         recaptcha = request.POST["g-recaptcha-response"]
         query_data = urllib.urlencode({"secret":settings.RECAPTCHA_SERVER_SECRET, "response":recaptcha})
-        response = urllib2.urlopen(settings.RECAPTCHA_SITEVERIFY, query_data)
+        response = urllib.urlopen(settings.RECAPTCHA_SITEVERIFY, query_data, context=ssl._create_unverified_context())
         status = json.loads(response.read())
 
         if status["success"] != True:
@@ -110,8 +144,6 @@ def submit(request):
             #Create (but do not save) the Pet Report Object associated with this form data.
             pr.proposed_by = request.user.userprofile
             img_rotation = 0
-
-            #if email_re.match(pr.contact_email) == None:
             
             #Deal with Contact Information.
             if pr.contact_name.strip() == "":
@@ -142,6 +174,7 @@ def submit(request):
             return redirect(URL_HOME)
 
         else:
+            messages.error(request, "Something went wrong. Please check the fields and try again.")
             print_error_msg ("Pet Report not submitted successfully")
             print_error_msg (form.errors)
             print_error_msg (form.non_field_errors())
@@ -182,6 +215,8 @@ def edit(request, petreport_id):
             pet_report.update_fields(pr, request=request.POST)
             messages.success(request, "You've successfully updated your pet report.")
             return redirect(URL_HOME)
+        form = PetReportForm(instance=pet_report)
+        messages.error(request, "Something went wrong. Please check the fields and try again.")
     else:
         raise Http404
 
@@ -217,7 +252,7 @@ def get_pet_breeds(request, pet_type=0):
         elif pet_type == "7":
             f = PETREPORT_BREED_OTHER_FILE
         else:
-            return HttpResponse("", mimetype="application/json") #nothing to return.
+            return JsonResponse("", safe=False) #nothing to return.
 
         with open(f) as read_file:
             data = read_file.readlines()
@@ -226,8 +261,7 @@ def get_pet_breeds(request, pet_type=0):
         for index, breed in enumerate(data):
             breeds.append({"id":breed, "text":breed})
 
-        payload = json.dumps({"breeds":breeds})
-        return HttpResponse(payload, mimetype="application/json")
+        return JsonResponse({"breeds":breeds}, safe=False)
 
     else:
         raise Http404
@@ -272,8 +306,7 @@ def bookmark(request):
             print_info_msg ("User has bookmarked the pet: " + str(petreport.UserProfile_has_bookmarked(profile)))
             message = "Unable to "+ action + "!"
             text = action
-        payload = json.dumps ({"message":message, "text":text})
-        return HttpResponse(payload, mimetype="application/json")
+        return JsonResponse({"message":message, "text":text}, safe=False)
     else:
         raise Http404
 
