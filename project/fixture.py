@@ -349,8 +349,8 @@ def setup_objects(delete_all_objects=True, create_users=True, num_users=NUMBER_O
 	#Setup the Site (if it hasn't yet been done)
 	site = Site.objects.get_current()
 	if (settings.DEBUG == True) and (site.domain != "localhost:8888"):
-		site.domain ="localhost:8888"
-		site.name = "localhost:8888"
+		site.domain ="localhost:8000"
+		site.name = "localhost:8000"
 		site.save()
 		print_success_msg("Localhost Site successfully setup @ localhost:8888. Make sure Nginx has port 8888 configured in proxy.conf settings.")
 	

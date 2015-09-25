@@ -8,7 +8,7 @@
 	<div id="content" style="width:800px;">
 
 		{% block content_subtitle %} 
-			<h3> Login below, or use Twitter to login. If you haven't signed up for an account yet, please register below.</h3>
+			<h3> Login below, or use Twitter to login. If you haven't signed up for an account yet, please <a href="{% url 'registration_register' %}">register</a>.</h3>
 		{% endblock content_subtitle %}
 
 		{% block messages %}
