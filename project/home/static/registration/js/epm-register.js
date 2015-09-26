@@ -32,20 +32,24 @@ $(document).ready(function(){
 
 	function determine_consent(age){
 		age = (new Date() - new Date(age)) / 1000 / 60 / 60 / 24 / 365.25
-		if (age > 12 && age < 18){
-			$("#register-age").text("You will be considered an under-aged participant in this study.")
-			$("#tos-container").removeClass("hidden")
-			$("#tos-minor-container").removeClass('hidden')
-			$("#tos-adult-container").addClass('hidden')
+		if (age > 6 && age < 18){
+			$("#register-age").text("You will be considered an under-aged participant in this study.");
+			$("#tos-container").removeClass("hidden");
+			$("#tos-minor-container").removeClass('hidden');
+			$("#tos-adult-container").addClass('hidden');
 		}
 		else if (age > 18){
-			$("#register-age").text("You will be considered an adult participant for this study.")
-			$("#tos-container").removeClass("hidden")
-			$("#tos-adult-container").removeClass('hidden')
-			$("#tos-minor-container").addClass('hidden')
+			$("#register-age").text("You will be considered an adult participant for this study.");
+			$("#tos-container").removeClass("hidden");
+			$("#tos-adult-container").removeClass('hidden');
+			$("#tos-minor-container").addClass('hidden');
 		}
-
-		$("#register-tos-link").removeClass("hidden")
+		else {
+			$("#register-age").text("Sorry, you must be at least 6 years of age for this study.");	
+			$("#tos-container").addClass("hidden");
+			$("#tos-adult-container").addClass('hidden');
+			$("#tos-minor-container").addClass('hidden');					
+		}
 	}
 
 

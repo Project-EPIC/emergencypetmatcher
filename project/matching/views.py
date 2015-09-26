@@ -111,7 +111,7 @@ def vote(request):
             pm.down_votes.remove(userprofile)
 
             Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", userprofile, source=pm)
-            message = "You have upvoted this PetMatch and earned %d Pet Points!" % (ACTIVITIES["ACTIVITY_PETMATCH_UPVOTE"]["reward"])
+            message = "You have upvoted this PetMatch!"
 
         elif vote == "downvote":
             # If the user is voting for the 1st time, add reputation points
@@ -121,7 +121,7 @@ def vote(request):
             pm.down_votes.add(userprofile)
             pm.up_votes.remove(userprofile)
             Activity.log_activity("ACTIVITY_PETMATCH_DOWNVOTE", userprofile, source=pm)
-            message = "You have downvoted this PetMatch and earned %d Pet Points!" % (ACTIVITIES["ACTIVITY_PETMATCH_DOWNVOTE"]["reward"])
+            message = "You have downvoted this PetMatch!"
 
         #Was the petmatch triggered for verification? Check here.
         threshold_reached = pm.has_reached_threshold() 
@@ -247,7 +247,7 @@ def propose(request, target_petreport_id, candidate_petreport_id):
                 Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", proposed_by, source=result)
 
             elif outcome == PETMATCH_OUTCOME_NEW_PETMATCH:
-                messages.success(request, "Congratulations - The pet match was successful - You have earned %d Pet Points! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile. Help spread the word about your match!" % ACTIVITIES["ACTIVITY_PETMATCH_PROPOSED"]["reward"])
+                messages.success(request, "Congratulations, The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile. Help spread the word about your match!")
                 Activity.log_activity("ACTIVITY_PETMATCH_PROPOSED", proposed_by, source=result)
                 # add reputation points for proposing a new petmatch
                 proposed_by.update_reputation("ACTIVITY_PETMATCH_PROPOSED")

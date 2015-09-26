@@ -156,7 +156,7 @@ def update_User_info(request):
             user_changed = True
             photo = request.FILES.get("photo")
             profile.set_images(photo)
-            messages.success(request, "Looking good! +%d Pet Points for a nice portrait!" % ACTIVITIES["ACTIVITY_USER_SET_PHOTO"]["reward"])
+            messages.success(request, "Looking good!")
             Activity.log_activity("ACTIVITY_USER_SET_PHOTO", profile)
             profile.update_reputation("ACTIVITY_USER_SET_PHOTO")
 

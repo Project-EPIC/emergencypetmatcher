@@ -162,7 +162,7 @@ def submit(request):
 
             #Add reputation points for submitting a pet report
             request.user.userprofile.update_reputation("ACTIVITY_PETREPORT_SUBMITTED")
-            message = "Thank you for your submission! You have earned %d Pet Points! " % ACTIVITIES["ACTIVITY_PETREPORT_SUBMITTED"]["reward"]
+            message = "Thank you for your submission! "
             if pr.status == 'Lost':
                 messages.success (request, message + "Your contribution will go a long way towards helping people find your lost pet.")
             else:
