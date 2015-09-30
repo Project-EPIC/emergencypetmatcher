@@ -187,6 +187,17 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 	pr.color = generate_string(PETREPORT_COLOR_LENGTH)
 	pr.age = random.choice(AGE_CHOICES)[0]
 
+	#Load breeds in memory.
+	breeds = {
+		PETREPORT_PET_TYPE_DOG: PetReport.get_pet_breeds(PETREPORT_PET_TYPE_DOG),
+	  PETREPORT_PET_TYPE_CAT: PetReport.get_pet_breeds(PETREPORT_PET_TYPE_CAT),
+	 	PETREPORT_PET_TYPE_HORSE: PetReport.get_pet_breeds(PETREPORT_PET_TYPE_HORSE),
+	 	PETREPORT_PET_TYPE_BIRD: PetReport.get_pet_breeds(PETREPORT_PET_TYPE_BIRD),
+	  PETREPORT_PET_TYPE_RABBIT: PetReport.get_pet_breeds(PETREPORT_PET_TYPE_RABBIT),
+	  PETREPORT_PET_TYPE_TURTLE: PetReport.get_pet_breeds(PETREPORT_PET_TYPE_TURTLE),
+	  PETREPORT_PET_TYPE_SNAKE: PetReport.get_pet_breeds(PETREPORT_PET_TYPE_SNAKE),
+	}
+
 	#Majority of PetReports are cross-posted, so let's add contact information in.
 	random_var = random.random()
 	if random_var < 0.60:
@@ -203,7 +214,7 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 			pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH) 
 			pr.tag_info = generate_string(PETREPORT_TAG_INFO_LENGTH)
 		if random.random() > 0.3:
-			pr.breed = generate_string(PETREPORT_BREED_LENGTH) 
+			pr.breed = random.sample(breeds[pr.pet_type], 1)[0]
 		if random.random() > 0.25:
 			pr.geo_location_long = random.randrange(-180.0, 180.0)
 			pr.geo_location_lat = random.randrange(-90.0, 90.0)
@@ -212,7 +223,7 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 	else:
 		pr.pet_name = random.choice(PETREPORT_NAMES)
 		pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH)
-		pr.breed = generate_string(PETREPORT_BREED_LENGTH)
+		pr.breed = random.sample(breeds[pr.pet_type], 1)[0]
 		pr.tag_info = generate_string(PETREPORT_TAG_INFO_LENGTH)
 
 	#Need to handle the cases where the contact might/might not have a photo for this PetReport!

@@ -42,8 +42,11 @@ def get_PetReport_JSON(request):
 def get_PetReports_JSON(request):
     if request.is_ajax() == True:
         page = int(request.GET["page"])
+        filters = dict(request.GET)
+        filters.pop("page")
+        filters = {k:v[0].strip() for k,v in filters.items()}
         #Grab Pets by Filter Options.
-        pet_reports = PetReport.filter(request.GET).filter(closed = False).order_by("id").reverse()
+        pet_reports = PetReport.objects.filter(**filters).filter(closed = False).order_by("id").reverse()
         #Get the petreport count for pagination purposes.
         petreport_count = len(pet_reports)
         #Now get just a page of PetReports if page # is available.
@@ -162,11 +165,11 @@ def submit(request):
 
             #Add reputation points for submitting a pet report
             request.user.userprofile.update_reputation("ACTIVITY_PETREPORT_SUBMITTED")
-            message = "Thank you for your submission! "
+            message = "Thank you for your submission. %s %s (%s) is front row on the gallery! " % (pr.status, pr.pet_type, pr.pet_name)
             if pr.status == 'Lost':
-                messages.success (request, message + "Your contribution will go a long way towards helping people find your lost pet.")
+                messages.success (request, message + "Your contribution will go a long way towards helping volunteers find your lost pet.")
             else:
-                messages.success (request, message + "Your contribution will go a long way towards helping others match lost and found pets.")                
+                messages.success (request, message + "Your contribution will go a long way towards helping volunteers match your found pet.")                
 
             #Log the PetReport submission for this UserProfile
             Activity.log_activity("ACTIVITY_PETREPORT_SUBMITTED", request.user.userprofile, source=pr)
@@ -232,37 +235,20 @@ def edit(request, petreport_id):
     }, RequestContext(request))
 
 @login_required
-def get_pet_breeds(request, pet_type=0):
+def get_pet_breeds(request, pet_type="0"):
     if request.is_ajax() == True:
-        if pet_type == "0":
-            f = PETREPORT_BREED_DOG_FILE
-        elif pet_type == "1":
-            f = PETREPORT_BREED_CAT_FILE
-        elif pet_type == "2":
-            f = PETREPORT_BREED_HORSE_FILE
-        elif pet_type == "3":
-            f = PETREPORT_BREED_BIRD_FILE
-        elif pet_type == "4":
-            f = PETREPORT_BREED_RABBIT_FILE
-        elif pet_type == "5":
-            f = PETREPORT_BREED_TURTLE_FILE
-        elif pet_type == "6":
-            f = PETREPORT_BREED_SNAKE_FILE
-        #If Other, Load Other Breeds (Nothing)
-        elif pet_type == "7":
-            f = PETREPORT_BREED_OTHER_FILE
-        else:
-            return JsonResponse("", safe=False) #nothing to return.
-
-        with open(f) as read_file:
-            data = read_file.readlines()
-
-        breeds = []
-        for index, breed in enumerate(data):
-            breeds.append({"id":breed, "text":breed})
-
+        pet_types = {
+            "0": PETREPORT_PET_TYPE_DOG,
+            "1": PETREPORT_PET_TYPE_CAT,
+            "2": PETREPORT_PET_TYPE_HORSE,
+            "3": PETREPORT_PET_TYPE_BIRD,
+            "4": PETREPORT_PET_TYPE_RABBIT,
+            "5": PETREPORT_PET_TYPE_TURTLE,
+            "6": PETREPORT_PET_TYPE_SNAKE,
+        }
+        breeds = PetReport.get_pet_breeds(pet_types[str(pet_type)])
+        breeds = [{"id": breed, "text":breed} for index, breed in enumerate(breeds)]
         return JsonResponse({"breeds":breeds}, safe=False)
-
     else:
         raise Http404
 

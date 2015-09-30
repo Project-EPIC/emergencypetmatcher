@@ -351,7 +351,50 @@ function perform_AJAX_call(options){
         success: options["success"],
         error: options["error"]
     });
+}
 
+//Load up the pet breeds here.
+function load_pet_breeds (pet_type){
+    id = 0;
+    if (pet_type == "Dog")
+        id = 0;
+    else if (pet_type == "Cat")
+        id = 1;
+    else if (pet_type == "Horse")
+        id = 2; 
+    else if (pet_type == "Bird")
+        id = 3;
+    else if (pet_type == "Rabbit")
+        id = 4;
+    else if (pet_type == "Turtle")
+        id = 5;
+    else if (pet_type == "Snake")
+        id = 6;
+    else
+        id = 7; //Other
+
+    $.ajax ({
+        type:"GET",
+        url: REPORTING_URLS["PET_BREEDS"] + id, 
+        success: function(data){
+            $(".breed-filter").select2({ 
+                tags: data.breeds,
+                allowClear:true,
+                maximumSelectionSize:1,
+                placeholder:"Choose a breed here",
+                initSelection: function(element, callback){}
+            });
+
+            //If The Breed Element has already been populated upon load, 
+            //then put its value in the select statement.
+            //(Only used for The Edit PetReport page).
+            if ($("#id_breed").attr("value") != undefined)
+                $("#s2id_id_breed .select2-chosen").html($("#id_breed").attr("value"));
+        },
+        error: function (data){
+            return [];
+        }
+    });
 }
 
 

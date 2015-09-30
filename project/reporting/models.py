@@ -7,7 +7,7 @@ from django.core.files.images import ImageFile
 from constants import *
 from pprint import pprint
 from utilities.utils import *
-import json, datetime
+import json, datetime, pdb
 
 class PetReport(models.Model):
     '''Required Fields'''
@@ -258,6 +258,31 @@ class PetReport(models.Model):
         except PetReport.DoesNotExist:
             return None
 
+    @staticmethod
+    def get_pet_breeds(pet_type):
+        if pet_type == PETREPORT_PET_TYPE_DOG:
+            f = PETREPORT_BREED_DOG_FILE
+        elif pet_type == PETREPORT_PET_TYPE_CAT:
+            f = PETREPORT_BREED_CAT_FILE
+        elif pet_type == PETREPORT_PET_TYPE_HORSE:
+            f = PETREPORT_BREED_HORSE_FILE
+        elif pet_type == PETREPORT_PET_TYPE_BIRD:
+            f = PETREPORT_BREED_BIRD_FILE
+        elif pet_type == PETREPORT_PET_TYPE_RABBIT:
+            f = PETREPORT_BREED_RABBIT_FILE
+        elif pet_type == PETREPORT_PET_TYPE_TURTLE:
+            f = PETREPORT_BREED_TURTLE_FILE
+        elif pet_type == PETREPORT_PET_TYPE_SNAKE:
+            f = PETREPORT_BREED_SNAKE_FILE
+        else:
+            return JsonResponse("", safe=False) #nothing to return.
+
+        with open(f) as read_file:
+            data = read_file.readlines()
+
+        breeds = [breed.split("\n")[0] for breed in data]
+        return breeds
+
     def get_display_fields(self):
         return [
             {"attr": "pet_name", "label": "Pet Name", "value": self.pet_name},
@@ -387,7 +412,7 @@ class PetReportForm (ModelForm):
     '''Non-Required Fields'''
     pet_name            = forms.CharField(label="Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:150px", "placeholder":"If Available"})) 
     age                 = forms.ChoiceField(label="Age", choices=AGE_CHOICES,required = False, widget = forms.Select(attrs={"class":"form-control", "style":"width:100px"}))
-    breed               = forms.CharField(label="Breed", max_length = PETREPORT_BREED_LENGTH, required = False, widget=forms.TextInput(attrs={"style":"width:200px; display:block;"}))
+    breed               = forms.CharField(label="Breed", max_length = PETREPORT_BREED_LENGTH, required = False, widget=forms.TextInput(attrs={"class": "breed-filter", "style":"width:200px; display:block;"}))
     color               = forms.CharField(label="Coat Color(s)", max_length = PETREPORT_COLOR_LENGTH, required = False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:200px", "placeholder":"Example: Brown, White"}))    
     sex                 = forms.ChoiceField(label="Sex", choices = SEX_CHOICES, required = False, widget = forms.Select(attrs={"class":"form-control", "style":"width:100px"}))
     size                = forms.ChoiceField(label="Size of Pet", choices = SIZE_CHOICES, required = False, widget=forms.Select(attrs={"class":"form-control", "style":"width:200px"}))

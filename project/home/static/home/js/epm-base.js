@@ -20,12 +20,12 @@ $(document).ready(function(){
 			break;
 
 			case "epm-choices-reunited-pets":
-			$("#pet-report-filter-form").css("display", "block");
+			$("#pet-report-filter-form").css("display", "none");
 			fetch_PetMatches(pageNum++, true, true);
 			break;
 
 			case "epm-choices-bookmarked":
-			$("#pet-report-filter-form").css("display", "block");
+			$("#pet-report-filter-form").css("display", "none");
 			fetch_bookmarks(pageNum++, true);
 			break;
 
@@ -71,10 +71,16 @@ $(document).ready(function(){
 	//Refresh.
 	refresh_layout(); 		
 
-	$(".pet-filter").change(function(){
+	$("#filter-submit").click(function(){
 		pageNum = 1;
 		fetch_PetReports(pageNum++, true);
 	});
+
+	//Listen for a change in the pet type. If the user selects a pet type, load the breeds for that pet type!
+	$("#filter-type").change(function(){
+		var pet_type = this.value;
+		load_pet_breeds(pet_type);
+	});		
 
 }); //END document.ready()
 
@@ -85,10 +91,11 @@ function get_pet_report_filter_options(){
 	options = {	
 		"pet_name": $("#filter-name").val(), 
 		"status": $("#filter-status").val(), 
-		"pet_type": $("#filter-type").val() 
+		"pet_type": $("#filter-type").val(),
+		"breed": $(".select2-search-choice div").html()
 	};
 	$.each(options, function(key, value){
-    if (value === "" || value === null)
+    if (value === "" || value === null || value == undefined || value == "All")
         delete options[key];
     });
 	return options;
@@ -122,7 +129,7 @@ function fetch_PetReports(page, clear){
 	$.ajax({
 		type:"GET",
 		url: REPORTING_URLS["PETREPORTS_JSON"],
-		data:{"page":page, "pet_name":options["pet_name"], "status":options["status"], "pet_type":options["pet_type"]},
+		data:{"page":page, "pet_name":options["pet_name"], "status":options["status"], "pet_type":options["pet_type"], "breed":options["breed"]},
 		success: function(data){
 			var petreports = data.pet_reports_list;
 			var count = data.count;
