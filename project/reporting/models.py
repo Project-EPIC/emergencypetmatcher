@@ -300,10 +300,10 @@ class PetReport(models.Model):
             {"attr": "size", "label": "Size", "value": self.size},
             {"attr": "tag_info", "label": "Tag and Collar Information", "value": self.tag_info},
             {"attr": "description", "label": "Description", "value": self.description},
-            {"attr": "contact_name", "label": "Alternate Contact Name", "value": self.contact_name},
-            {"attr": "contact_number", "label": "Alternate Contact Number", "value": self.contact_number},
-            {"attr": "contact_email", "label": "Alternate Contact Email Address", "value": self.contact_email},
-            {"attr": "contact_link", "label": "Alternate Link to Pet", "value": self.contact_link},
+            {"attr": "contact_name", "label": "Original Contact Name", "value": self.contact_name},
+            {"attr": "contact_number", "label": "Original Contact Number", "value": self.contact_number},
+            {"attr": "contact_email", "label": "Original Contact Email Address", "value": self.contact_email},
+            {"attr": "contact_link", "label": "Original Link to Pet", "value": self.contact_link},
         ]
 
 
