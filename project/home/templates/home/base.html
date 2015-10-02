@@ -9,50 +9,55 @@
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<title>{% block head_title %} EmergencyPetMatcher{% endblock head_title %}</title>
-		<meta name="keywords" content="pet-family reunification, emergency, research, software engineering, disaster"/>
+		<meta name="keywords" content="pet-family reunification, emergency, research, software engineering, disaster, CU Boulder"/>
 		<meta name="description" content="" />
+		<meta property="og:title" content="EmergencyPetMatcher" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="http://www.emergencypetmatcher.com" />
+		<meta property="og:description" content="EmergencyPetMatcher is a crowdsourcing website designed to help pet advocates and lovers report, match, and verify lost and found pets during and after disaster events." />		
+		<meta property="og:image" content="{{ MEDIA_URL }}epm-logo.jpg" />		
+
+		<!-- CSS -->
+		<link rel="stylesheet" href={% static "home/css/style.css" %} type="text/css"></link>
+		<link rel="stylesheet" href={% static "home/css/bootstrap.min.css" %} type="text/css"></link>	
+		<link rel="stylesheet" href={% static "home/css/datepicker.css" %} type="text/css"></link>	
+		<link rel="stylesheet" href={% static "reporting/css/select2.css" %} type="text/css"></link>
+		<link rel="stylesheet" href={% static "reporting/css/select2-bootstrap.css" %} type="text/css"></link>		
+		<link rel="shortcut icon" type="image/png" href="{{ MEDIA_URL }}/favicon.ico"/>
+		
+		<!-- Javascript & JQuery -->
+		<script src={% static "home/js/jquery-1.9.1.min.js" %} type="text/javascript"></script>
+		<script src={% static "home/js/bootstrap.min.js" %} type="text/javascript"></script>
+		<!-- Include the wookmark plug-in -->
+		<script src={% static "home/js/jquery-wookmark.js" %} type="text/javascript"></script>
+		<script src={% static "home/js/bootstrap-datepicker.js" %} type="text/javascript"></script>
+		<script src={% static "reporting/js/select2.js" %} type='text/javascript'></script>
+
+		<!-- Global, inheritable JS goes here -->
+		<script src = {% static "home/js/epm.js" %} type='text/javascript'></script>
+
+		{% block css %}{% endblock css %}
+		{% block js %}		
+		<!-- Page-specific JS goes in this block -->
+		<script src = {% static "home/js/epm-base.js" %} type='text/javascript'></script>
+	
+		<script type="text/javascript">
+			//Setting up parameters for sharing on facebook and twitter
+			var STATIC_URL = "{{ STATIC_URL }}";
+			var MEDIA_URL = "{{ MEDIA_URL }}";
+			var USER_ID = "{{ user.id }}";
+			var HOME_URL = "http://epm.cs.colorado.edu/";
+			var HOME_IMAGE = "http://epm.cs.colorado.edu{{ STATIC_URL }}images/epm.jpg";
+			var HOME_TITLE = 'EmergencyPetMatcher';
+			var HOME_CAPTION ='EmergencyPetMatcher';
+			var HOME_SUMMARY = 'EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.';
+			var ACTIVITY_COUNT = "{{ activity_count }}";
+			var PETREPORT_COUNT = "{{ petreport_count }}";
+			var PETMATCH_COUNT = "{{ petmatch_count }}";
+			var BOOKMARK_COUNT = "{{ bookmark_count }}";
+	    </script>
+		{% endblock js %}	
 	</head>	
-
-	<!-- CSS -->
-	<link rel="stylesheet" href={% static "home/css/style.css" %} type="text/css"></link>
-	<link rel="stylesheet" href={% static "home/css/bootstrap.min.css" %} type="text/css"></link>	
-	<link rel="stylesheet" href={% static "home/css/datepicker.css" %} type="text/css"></link>	
-	<link rel="stylesheet" href={% static "reporting/css/select2.css" %} type="text/css"></link>
-	<link rel="stylesheet" href={% static "reporting/css/select2-bootstrap.css" %} type="text/css"></link>		
-	<link rel="shortcut icon" type="image/png" href="{{ MEDIA_URL }}/favicon.ico"/>
-	
-	<!-- Javascript & JQuery -->
-	<script src={% static "home/js/jquery-1.9.1.min.js" %} type="text/javascript"></script>
-	<script src={% static "home/js/bootstrap.min.js" %} type="text/javascript"></script>
-	<!-- Include the wookmark plug-in -->
-	<script src={% static "home/js/jquery-wookmark.js" %} type="text/javascript"></script>
-	<script src={% static "home/js/bootstrap-datepicker.js" %} type="text/javascript"></script>
-	<script src={% static "reporting/js/select2.js" %} type='text/javascript'></script>
-
-	<!-- Global, inheritable JS goes here -->
-	<script src = {% static "home/js/epm.js" %} type='text/javascript'></script>
-
-	{% block css %}{% endblock css %}
-	{% block js %}		
-	<!-- Page-specific JS goes in this block -->
-	<script src = {% static "home/js/epm-base.js" %} type='text/javascript'></script>
-	
-	<script type="text/javascript">
-		//Setting up parameters for sharing on facebook and twitter
-		var STATIC_URL = "{{ STATIC_URL }}";
-		var MEDIA_URL = "{{ MEDIA_URL }}";
-		var USER_ID = "{{ user.id }}";
-		var HOME_URL = "http://epm.cs.colorado.edu/";
-		var HOME_IMAGE = "http://epm.cs.colorado.edu{{ STATIC_URL }}images/epm.jpg";
-		var HOME_TITLE = 'EmergencyPetMatcher';
-		var HOME_CAPTION ='EmergencyPetMatcher';
-		var HOME_SUMMARY = 'EmergencyPetMatcher Website is part of Project EPIC at University of Colorado at Boulder.';
-		var ACTIVITY_COUNT = "{{ activity_count }}";
-		var PETREPORT_COUNT = "{{ petreport_count }}";
-		var PETMATCH_COUNT = "{{ petmatch_count }}";
-		var BOOKMARK_COUNT = "{{ bookmark_count }}";
-    </script>
-	{% endblock js %}	
 
 	<body id="epm-body">
 		<!-- EPM Modal Dialog Box -->
