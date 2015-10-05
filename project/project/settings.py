@@ -82,7 +82,7 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '2wmzko%to)il=3(6@0mf_qd8vwh!=%@uti4ml^w9z7rs&amp;xfc0e'
@@ -98,6 +98,7 @@ PIPELINE_CSS = {
             'reporting/css/select2-bootstrap.css'
         ),
         'output_filename': 'css/vendor.css',
+        'variant':'datauri',
     },
     'global': {
         'source_filenames': (
@@ -120,7 +121,7 @@ PIPELINE_JS = {
             'home/js/jquery-imagesloaded.js',
             'home/js/jquery-rotate.min.js',
             'home/js/jquery-wookmark.js',
-            'home/js/jquery-zoom.js',
+            'home/js/jquery.zoom.min.js',
         ),
         'output_filename': 'js/vendor.js'
     },
@@ -131,6 +132,9 @@ PIPELINE_JS = {
         'output_filename': 'js/epm-global.js'
     },    
 }
+
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.yuglify.YuglifyCompressor'
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.yuglify.YuglifyCompressor'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (

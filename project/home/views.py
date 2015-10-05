@@ -109,7 +109,6 @@ def get_bookmarks(request):
 
 def login_User(request):
     if request.method == "POST":
-        pprint(request.POST)
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
