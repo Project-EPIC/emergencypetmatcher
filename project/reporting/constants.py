@@ -17,10 +17,10 @@ HTML_EDIT_PETREPORT = "reporting/edit_petreport.html"
 HTML_PRDP_FULL = "reporting/petreport_full.html"
 
 #number of pet reports on the home page
-NUM_PETREPORTS_HOMEPAGE = 50
+NUM_PETREPORTS_HOMEPAGE = 25
 
 #number of bookmarks on the home page
-NUM_BOOKMARKS_HOMEPAGE = 50
+NUM_BOOKMARKS_HOMEPAGE = 25
 
 #Lower and Upper bounds for Lost and Found Dates
 DATE_LOWER_BOUND = "2012-01-01"
@@ -36,11 +36,11 @@ AGE_CHOICES = [('Baby','Baby'),('Young','Young'),('Adult','Adult'),('Senior','Se
 
 PETREPORT_NAMES = ['Sparky', 'Nugget', 'Sydney', 'Missy', 'Marley', 'Fousey', 'Daisy', 'Libby', 'Apollo', 'Buster', 'Izzy', 'Bentley', 'Scruffy', 'Dandy', 'Candy', 'Mark', 'Baby', 'Toodle', 'Princess' ,'Prince', 'Guss', 'Rocket', 'Darling']
 
-
 PETREPORT_PET_TYPE_LENGTH = 10
 PETREPORT_STATUS_LENGTH = 5
 PETREPORT_SEX_LENGTH = 6
 PETREPORT_SIZE_LENGTH = 30
+PETREPORT_EVENT_TAG_LENGTH = 100
 PETREPORT_LOCATION_LENGTH = 100
 PETREPORT_PET_NAME_LENGTH = 30 
 PETREPORT_MICROCHIP_ID_LENGTH = 40

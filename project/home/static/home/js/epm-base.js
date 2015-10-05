@@ -1,7 +1,6 @@
 //This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
 	$("#epm-nav-links .nav-link-home").toggleClass("active");
-	
 	var pageNum = 1;
 
 	//Retrieve Items!
@@ -11,29 +10,33 @@ $(document).ready(function(){
 		switch(id){
 			case "epm-choices-petreports":
 			$("#pet-report-filter-form").css("display", "block");
-			fetch_PetReports(pageNum++, true);
+			fetch_PetReports(id, pageNum++, true);
 			break;
 
 			case "epm-choices-petmatches":
 			$("#pet-report-filter-form").css("display", "none");
-			fetch_PetMatches(pageNum++, false, true);
+			fetch_PetMatches(id, pageNum++, false, true);
 			break;
 
 			case "epm-choices-reunited-pets":
 			$("#pet-report-filter-form").css("display", "none");
-			fetch_PetMatches(pageNum++, true, true);
+			fetch_PetMatches(id, pageNum++, true, true);
 			break;
 
 			case "epm-choices-bookmarked":
 			$("#pet-report-filter-form").css("display", "none");
-			fetch_bookmarks(pageNum++, true);
+			fetch_bookmarks(id, pageNum++, true);
 			break;
 
 			case "epm-choices-activity":
 			$("#pet-report-filter-form").css("display", "none");
-			fetch_activities(pageNum++, true);
+			fetch_activities(id, pageNum++, true);
 			break;
-		}		
+		}
+
+		//Toggle the active nav tab inactive, and toggle the pets tab active.
+		$("#epm-choices li.active").toggleClass("active");
+		$("#" + id).toggleClass("active");
 	});
 
 	//Add more items when user scrolls down!
@@ -42,25 +45,29 @@ $(document).ready(function(){
 			id = $("#epm-choices li.active").attr("id");
 			switch(id){
 				case "epm-choices-petreports":
-				fetch_PetReports(pageNum++, false);
+				fetch_PetReports(id, pageNum++, false);
 				break;
 
 				case "epm-choices-petmatches":
-				fetch_PetMatches(pageNum++, false, false);
+				fetch_PetMatches(id, pageNum++, false, false);
 				break;
 
 				case "epm-choices-reunited-pets":
-				fetch_PetMatches(pageNum++, true, false);
+				fetch_PetMatches(id, pageNum++, true, false);
 				break;
 
 				case "epm-choices-bookmarked":
-				fetch_bookmarks(pageNum++, false);
+				fetch_bookmarks(id, pageNum++, false);
 				break;
 
 				case "epm-choices-activity":
-				fetch_activities(pageNum++, false);
+				fetch_activities(id, pageNum++, false);
 				break;
 			}
+
+			//Toggle the active nav tab inactive, and toggle the pets tab active.
+			$("#epm-choices li.active").toggleClass("active");
+			$("#" + id).toggleClass("active");
 		}
 	});	
 
@@ -73,13 +80,38 @@ $(document).ready(function(){
 
 	$("#filter-submit").click(function(){
 		pageNum = 1;
-		fetch_PetReports(pageNum++, true);
+		fetch_PetReports("epm-choices-petreports", pageNum++, true);
+	});
+
+	//Grab Event Tags.
+	perform_AJAX_call({
+		type:"GET",
+		url:REPORTING_URLS["EVENT_TAGS"],
+		data: {},
+		success: function(data){
+			$("#filter-event-tag").select2({
+				tags: true,
+				tags: data.event_tags,
+				maximumSelectionSize:1,
+			});
+		}
 	});
 
 	//Listen for a change in the pet type. If the user selects a pet type, load the breeds for that pet type!
 	$("#filter-type").change(function(){
-		var pet_type = this.value;
-		load_pet_breeds(pet_type);
+		var pet_type = $(this).val();
+		if (pet_type != "All"){
+			load_pet_breeds(pet_type, function(data){
+				$("#filter-breed").html("").select2({data: {id:null, text: null}});
+				$("#filter-breed").select2({ 
+					tags: data.breeds,
+					maximumSelectionSize:1,
+				});
+			});
+			$("#filter-breed").toggleClass("hidden");			
+		}
+		else
+			$("#filter-breed").addClass("hidden");
 	});		
 
 }); //END document.ready()
@@ -91,8 +123,9 @@ function get_pet_report_filter_options(){
 	options = {	
 		"pet_name": $("#filter-name").val(), 
 		"status": $("#filter-status").val(), 
+		"event_tag": $("#filter-event-tag").val(),
 		"pet_type": $("#filter-type").val(),
-		"breed": $(".select2-search-choice div").html()
+		"breed": $("#filter-breed").val(),
 	};
 	$.each(options, function(key, value){
     if (value === "" || value === null || value == undefined || value == "All")
@@ -110,26 +143,28 @@ function refresh_layout(offset){
 		autoResize: true, // This will auto-update the layout when the browser window is resized.
 		container: $('#tiles'), // Optional, used for some extra CSS styling
 		outerOffset: 20,
+		verticalOffset:5,
 		offset: offset, // Optional, the distance between grid items
 	};
 
 	// Now we're ready to call some wookmarking and update layout.
-	var handler = $("#tiles li");
-	handler.wookmark(options);
+	$("#tiles li").wookmark(options);
 }
 
-function fetch_PetReports(page, clear){
+function fetch_PetReports(tab, page, clear){
 	if (clear == true)
 		$("#tiles li").remove();		
 
 	$("#tiles-wait").css("display", "block");
 	options = get_pet_report_filter_options() //get pet report filter values.
+	data = {"page":page}
+	for (var attr in options){ data[attr] = options[attr]} //Merge options.
 
 	//AJAX Away.
 	$.ajax({
 		type:"GET",
 		url: REPORTING_URLS["PETREPORTS_JSON"],
-		data:{"page":page, "pet_name":options["pet_name"], "status":options["status"], "pet_type":options["pet_type"], "breed":options["breed"]},
+		data: data,
 		success: function(data){
 			var petreports = data.pet_reports_list;
 			var count = data.count;
@@ -143,10 +178,6 @@ function fetch_PetReports(page, clear){
 				//Finally, add this item to the tiles.
 				$("#tiles").append(item);		
 			}
-
-			//Toggle the active nav tab inactive, and toggle the pets tab active.
-			$("#epm-choices li.active").toggleClass("active");
-			$("#epm-choices-petreports").toggleClass("active");
 
 			if (petreports.length == 0 && page == 1)
 				$(".tab-subtitle").text("No Pets Available Yet!");
@@ -166,7 +197,7 @@ function fetch_PetReports(page, clear){
 		});
 }
 
-function fetch_PetMatches(page, successful_petmatches, clear){
+function fetch_PetMatches(tab, page, successful_petmatches, clear){
 	if (clear == true)
 		$("#tiles li").remove();		
 
@@ -192,13 +223,6 @@ function fetch_PetMatches(page, successful_petmatches, clear){
 				//Finally, add this item to the tiles.
 				$("#tiles").append(item);		
 			}
-			//Toggle the active nav tab inactive, and toggle the petmatches (or successful PetMatches) tab active.
-			$("#epm-choices li.active").toggleClass("active");
-
-			if (successful_petmatches == true)
-				$("#epm-choices-reunited-pets").toggleClass("active");
-			else
-				$("#epm-choices-petmatches").toggleClass("active");
 
 			if (matches.length == 0 && page == 1)
 				$(".tab-subtitle").text("No Pet Matches Available Yet!");
@@ -223,7 +247,7 @@ function fetch_PetMatches(page, successful_petmatches, clear){
 
 
 //Function to fetch the local activities using AJAX GET
-function fetch_activities(page, clear){
+function fetch_activities(tab, page, clear){
 	if (clear == true)
 		$("#tiles li").remove();		
 
@@ -250,10 +274,6 @@ function fetch_activities(page, clear){
 		 		activity_list.append(li);
 		 	}
 
-			//Toggle the active nav tab inactive, and toggle the Activities tab active.
-			$("#epm-choices li.active").toggleClass("active");		 	
-			$("#epm-choices-activity").toggleClass("active");			
-
 		 	if (activities.length == 0 && page == 1)
 		 		$(".tab-subtitle").text("No Activities Yet.");
 		 	else {
@@ -269,7 +289,7 @@ function fetch_activities(page, clear){
 	});
 }
 
-function fetch_bookmarks(page, clear){
+function fetch_bookmarks(tab, page, clear){
 	if (clear == true)
 		$("#tiles li").remove();		
 
@@ -322,10 +342,6 @@ function fetch_bookmarks(page, clear){
 				$("#tiles").append(item);		
 			}
 
-			//Toggle the active nav tab inactive, and toggle the pets tab active.
-			$("#epm-choices li.active").toggleClass("active");
-			$("#epm-choices-bookmarked").toggleClass("active");
-
 			if (bookmarks.length == 0 && page == 1)
 				$(".tab-subtitle").text("No Pets Available Yet!");
 			else
@@ -348,21 +364,18 @@ function remove_bookmark(petreport_id, parent){
 		var user_id = USER_ID;
 		var csrf_value = $("input[name='csrfmiddlewaretoken']").attr("value");
 
-		//ajax request to remove the bookmark
-		$.ajax({ 
+		perform_AJAX_call({ 
 			type:"POST",
 			url: REPORTING_URLS["BOOKMARK"],
 			data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":petreport_id, "user_id": user_id, "action":"Remove Bookmark"},
-
 			success: function(data){
-	    	$("#messages").html("<li class='success'>" + data.message + "</li>");
+				add_flash_message("success", data.message);
 	    	parent.remove();
 	    	refresh_layout();			            	
 	    	return true;
 	    },
-
 	    error: function(data){
-	    	alert("An unexpected error occurred when trying to bookmark this Pet. Please try again."); 
+	    	add_flash_message("danger", "An unexpected error occurred when trying to bookmark this Pet. Please try again.")
 	    	return false;
 	    }
 	  });

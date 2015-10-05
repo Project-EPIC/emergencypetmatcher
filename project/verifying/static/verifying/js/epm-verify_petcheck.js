@@ -1,16 +1,7 @@
 $(document).ready(function(){
 
-  $("#lost-prdp-link").click(function(){ 
-    launch_dialog($("#epm-modal"), URL_PRDP + LOST_PETREPORT_ID); 
-  });
-
-  $("#found-prdp-link").click(function(){ 
-    launch_dialog($("#epm-modal"), URL_PRDP + FOUND_PETREPORT_ID); 
-  });
-
-  if(USER_HAS_VERIFIED == "True"){
-    $("#messages").append("<li class='info'>You have already submitted a response for this Pet Match!</li>");
-  }
+  if(USER_HAS_VERIFIED == "True")
+    add_flash_message("info", "You have already submitted a response for this Pet Match!")
 
   /***** Start things off. *****/
 
@@ -28,5 +19,4 @@ $(document).ready(function(){
 
   //Highlight the matches.
   highlight_field_matches ($("#pmdp-info-table"));
-    
 });

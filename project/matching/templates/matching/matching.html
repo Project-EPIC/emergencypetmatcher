@@ -1,10 +1,34 @@
 {% extends "home/index.html" %}
 {% load staticfiles %}
 
+{% block css %}
+	<link rel="stylesheet" href={% static "home/css/style.css" %} type="text/css"></link>
+	<link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>
+	<link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
+{% endblock css %}
+
+{% block js %}
+	<script type='text/javascript'>
+		var TARGET_PETREPORT_ID = "{{ target_petreport.id }}";
+		var CANDIDATE_PETREPORT_ID = null;
+		var CANDIDATE_COUNT = "{{ candidates_count }}";
+		var STATIC_URL = "{{ STATIC_URL }}";
+		var MEDIA_URL = "{{ MEDIA_URL }}";
+	</script>
+	<script src = {% static "matching/js/epm-matching.js" %} type = 'text/javascript'></script>
+{% endblock js %}
+
 {% block head_title %}EPM - Match a Pet{% endblock head_title %}
 
 {% block content %}
-
+	<!-- EPM Modal Dialog Box -->
+	<div id="epm-modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-lg">
+	    <div class="modal-content">
+	    </div>
+	  </div>
+	</div>
+	
 	{% block messages %}
 	<ul id="messages">
 		{% for message in messages %}
@@ -13,14 +37,18 @@
 	</ul>
 	{% endblock messages %}	
 
-	<div id="matching-page" style="text-align:center;">
+	<div id="matching-page" style="text-align:center; min-width:1220px;">
 		<!-- Workspace for Placing Pet Report Candidate Matches-->
 		<div id="matching-workspace">
 			{% block content_title %} <span class="tab-subtitle">Match {{ target_petreport.pet_name }}</span>{% endblock content_title %}
 
 			<!-- PetReport Target and Candidates -->
 			<div id="matching-workspace-images">
-				<div id="matching-workspace-target-img" class="pet_img"> <img src="{{ MEDIA_URL }}{{ target_petreport.img_path }}"/></div>
+				<div id="matching-workspace-target-img" class="pet_img"> 
+					<a href="{% url 'get_PetReport' target_petreport.id %}">
+						<img src="{{ MEDIA_URL }}{{ target_petreport.img_path }}"/>
+					</a>
+				</div>
 				<div id="matching-workspace-candidate-img" class="pet_img">
 					<strong style="width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;"> Click and Drag a Pet Here </strong>		
 				</div>
@@ -28,24 +56,21 @@
 
 			<!--Buttons -->
 			<div id="matching-workspace-actions">
-		   		<button id="button_propose_match" class="btn btn-primary" disabled>Propose Match</button>
-		   		<button id="button_clear_candidate" class="btn btn-default" disabled>Clear Pet </button>
-		   	</div>	
+	   		<button id="button_propose_match" class="btn btn-primary" disabled>Propose Match</button>
+	   		<button id="button_clear_candidate" class="btn btn-default" disabled>Clear Pet </button>
+		  </div>	
 
-		   	<div>
-			   	<!-- Pet Info -->
-			   	<table id="matching-info-table" class="epm-table table table-hover">
-			        <tbody>
-			        {% for field in petreport_fields %}
-			        	<tr>
-			        		<td class="pet-info-header" attr="{{ field.attr }}"> {{ field.label }}</td>
-			        		<td class="pet-info-data">{{ field.value }}</td>
-			        		<td class="pet-info-data"></td>
-			        	</tr>
-			        {% endfor %}
-			        </tbody>
-			    </table>
-			  </div>
+	   	<table id="matching-info-table" class="epm-table table table-hover">
+				<tbody>
+				  {% for field in petreport_fields %}
+				    <tr>
+				      <td class="pet-info-header" attr="{{ field.attr }}"> {{ field.label }}</td>
+				      <td class="pet-info-data">{{ field.value }}</td>
+				      <td class="pet-info-data"></td>
+				    </tr>
+				  {% endfor %}
+				</tbody>
+	    </table>
 		</div>
 
 	  <!-- Candidate Pet Reports -->
@@ -54,24 +79,4 @@
 			<ul id="tiles" class="matching-candidates-tiles"></ul>
 		</div>
 	</div>
-
-	{% block chat %}
-	{% endblock chat %}
 {% endblock content %}
-
-{% block css %}
-	<link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>
-	<link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
-{% endblock css %}
-
-{% block js %}
-    <!-- Page-specific JS goes in this block -->
-	<script src = {% static "matching/js/epm-matching.js" %} type = 'text/javascript'></script>
-	<script type='text/javascript'>
-		var TARGET_PETREPORT_ID = "{{ target_petreport.id }}";
-		var CANDIDATE_PETREPORT_ID = null;
-		var CANDIDATE_COUNT = "{{ candidates_count }}";
-		var STATIC_URL = "{{ STATIC_URL }}";
-		var MEDIA_URL = "{{ MEDIA_URL }}";
-	</script>
-{% endblock js %}

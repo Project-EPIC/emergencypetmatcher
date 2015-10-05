@@ -113,7 +113,29 @@ $(document).ready(function(){
 	});
 
 	/******** Kick Things Off *********/
-	load_pet_breeds("Dog");
+	load_pet_breeds(PET_TYPE, function(data){
+    $("#id_breed").html("").select2({data: {id:null, text: null}});
+    $("#id_breed").select2({ 
+        tags: data.breeds,
+        maximumSelectionSize:1,
+    });
+    if (PET_BREED != undefined)
+    	$("#id_breed").val(PET_BREED).trigger("change");
+	});
+
+	//Grab Event Tags.
+	perform_AJAX_call({
+		type:"GET",
+		url:REPORTING_URLS["EVENT_TAGS"],
+		data: {},
+		success: function(data){
+			$("#id_event_tag").select2({
+				tags: data.event_tags,
+				placeholder:"Select Event Tag",
+				maximumSelectionSize:1,
+			});
+		}
+	});	
 
 	//Required Red Markers for Labels.
 	$("label[for=id_status]").append("<b class='required-field-symbol'>*</b>")

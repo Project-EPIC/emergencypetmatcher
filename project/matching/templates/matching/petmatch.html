@@ -75,16 +75,6 @@
           {% endfor %}        
         </tbody>
       </table>
-    </div>
-
-    <!-- Messages -->
-    {% block messages %}
-    <ul id="messages" class="pmdp_messages"> 
-      {% for message in messages %} 
-      <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li> 
-      {% endfor %}
-    </ul>
-    {% endblock messages %}     
 
     <div class="modal-footer">
       {% if not petmatch.is_successful %}

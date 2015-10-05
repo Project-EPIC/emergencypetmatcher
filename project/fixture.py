@@ -185,6 +185,7 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 	pr.size = random.choice(SIZE_CHOICES)[0] 
 	pr.location = generate_string(PETREPORT_LOCATION_LENGTH) 
 	pr.color = generate_string(PETREPORT_COLOR_LENGTH)
+	pr.event_tag = random.choice(["Valley Fires", "Butte Fires", "Charleston Floods (SC)", "Washington Wildfires"])
 	pr.age = random.choice(AGE_CHOICES)[0]
 
 	#Load breeds in memory.
@@ -196,6 +197,7 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 	  PETREPORT_PET_TYPE_RABBIT: PetReport.get_pet_breeds(PETREPORT_PET_TYPE_RABBIT),
 	  PETREPORT_PET_TYPE_TURTLE: PetReport.get_pet_breeds(PETREPORT_PET_TYPE_TURTLE),
 	  PETREPORT_PET_TYPE_SNAKE: PetReport.get_pet_breeds(PETREPORT_PET_TYPE_SNAKE),
+	  PETREPORT_PET_TYPE_OTHER: "Other",
 	}
 
 	#Majority of PetReports are cross-posted, so let's add contact information in.
@@ -214,7 +216,7 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 			pr.description = generate_lipsum_paragraph(PETREPORT_DESCRIPTION_LENGTH) 
 			pr.tag_info = generate_string(PETREPORT_TAG_INFO_LENGTH)
 		if random.random() > 0.3:
-			pr.breed = random.sample(breeds[pr.pet_type], 1)[0]
+			pr.breed = random.choice(breeds[pr.pet_type])
 		if random.random() > 0.25:
 			pr.geo_location_long = random.randrange(-180.0, 180.0)
 			pr.geo_location_lat = random.randrange(-90.0, 90.0)
@@ -248,8 +250,7 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 			pr.img_path = pr.thumb_path = PETREPORT_UPLOADS_DEFAULT_OTHER_IMAGE
 
 	else:
-		#Set the img and thumb paths.
-		pr.set_images (None, save=False)
+		pr.set_images (None, save=False) #Set the img and thumb paths.
 
 	#Need to save (most of the time).
 	if save == False:

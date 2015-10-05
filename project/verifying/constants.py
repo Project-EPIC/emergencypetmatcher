@@ -2,7 +2,6 @@ VERIFICATION_DEFAULT_THRESHOLD = 5
 
 #HTML
 HTML_VERIFY_PETCHECK = "verifying/verify_petcheck.html"
-HTML_VERIFY_PETCHECK_FULL = "verifying/verify_petcheck_full.html"
 
 #URLs
 URL_VERIFY_PETCHECK = "/verifying/verify_PetCheck/"

@@ -1,0 +1,271 @@
+@font-face {
+  font-family:epm-font;
+  src: url(../fonts/Nobile-Regular.ttf);
+}
+
+@font-face {
+  font-family:epm-font-bolder;
+  src: url(../fonts/Nobile-Medium.ttf);
+}
+
+@font-face {
+  font-family:epm-font-boldest;
+  src: url(../fonts/Nobile-Bold.ttf);
+}
+
+b {
+  font-family:epm-font-bolder;
+}
+
+#epm-body {
+  font-family:epm-font;
+  padding-top:70px;
+  background: url(../backgrounds/background.png);
+}
+
+/** General page styling **/
+#epm-container {
+  background-size: 100%;  
+  margin: 0 auto;
+  min-width:1000px;
+}
+
+#epm-modal {}
+
+#content {
+  box-shadow: 0px 5px 20px #686868;
+  background: #E8E8E8;
+  border-radius:10px;
+  margin:0px auto 50px auto;
+  padding:15px;
+}
+
+#header {
+  padding:0px 10px 100px 10px;
+}
+
+.epm-alert {
+  text-align:center;
+  font-size:1.5em;
+  position:fixed;
+  width:100vw;
+  z-index:10000;
+  top:70px;
+}
+
+header h1 {
+  text-align: center;
+  font-size: 24px;
+  font-weight: normal;
+  margin: 30px 0 3px 0;
+}
+
+header p {
+  text-align: center;
+  font-size: 13px;
+  color: #777;
+  margin: 0;
+}
+
+/* EPM Brand */
+
+#epm-brand {
+  width:340px;
+}
+
+#epm-brand-title {
+  margin: 0;
+  font-size: 36px;
+  height:40px;
+  padding:10px 0px 0px 0px;
+  text-transform: lowercase;
+  letter-spacing: -2px;
+  font-weight: normal;
+  color: #F0E68C;
+}
+
+#epm-brand-epic-title {
+  font-size: 16px;
+  display: block;
+  text-decoration: none;
+  color: white;
+}
+
+#epm-brand-epic-title:hover {
+  text-decoration: underline;
+}
+
+#epm-nav {
+  padding:5px;
+}
+
+#epm-nav-links {}
+
+#epm-nav-user-thumb {
+  margin-left:10px;
+  width:30px;
+  height:30px;
+}
+
+#epm-nav-links a:hover {
+}
+
+#epm-nav-links li:active {
+  color:blue;
+}
+
+/****** Messages *******/
+#messages {
+  list-style: none;
+  height: auto;
+  margin-top:25px;
+  margin-bottom: 10px;
+  padding: 2px;
+  text-align:left;
+  font-size: 14px;
+
+}
+
+#messages .error {
+  border-radius:5px;
+  padding: 3px;
+  background-color:#FFB6C1;
+  border: 2px solid #B22222;
+  text-align:center;
+}
+
+#messages .success {
+  padding: 3px;
+  border-radius:5px;
+  background-color:#90EE90;
+  border: 2px solid #006400;
+  text-align:center;
+}
+
+#messages .info {
+  border-radius:5px;
+  padding: 3px;
+  background-color:#87CEFA;
+  border: 2px solid #00008B;
+  text-align:center;
+}
+
+.errorlist {
+  list-style: none;
+  border-radius:5px;
+  height: auto;
+  margin-top:5px;
+  margin-bottom: 10px;
+  text-align:left;
+  font-size: 14px;
+  padding: 3px;
+  background-color:#FFB6C1;
+  border: 2px solid #B22222;
+}
+
+/**** Other useful styles ***/
+.epm-table {
+  padding:5px;
+  margin:0 auto;
+  vertical-align: top;
+  word-wrap: break-word;
+  overflow-y:auto;
+  overflow-x:auto;
+}
+
+.img-wrapper {
+  display:inline-block;
+  overflow:hidden;
+}
+
+.img-wrapper img {
+  height:295px;
+  width: 275px;
+}
+
+.thumb-wrapper {
+  background: white;  
+  border: 1px solid gray;
+  margin:5px;
+  padding:5px;
+  height: 100px;
+  display:inline-block;
+  cursor:pointer; 
+}
+
+.thumb-wrapper:hover{ 
+  border:1px solid yellow;
+}
+
+.thumb-wrapper a {
+  text-decoration: none;
+  color: black;
+  font-size: 12px;  
+}
+
+.thumb-wrapper img {
+  vertical-align: baseline;
+  margin:0 auto;
+}
+
+.thumb-wrapper strong {
+  text-align: center;
+  display: block;
+  height:15px;
+  margin-bottom:5px;
+}
+
+.hidden {
+  display:none;
+}
+
+.required-field-symbol {
+  color:red;
+  margin-left:10px;
+}
+
+.field-error-message {
+  color:darkred;
+  display:block;
+}
+
+.pet_img {
+  vertical-align: middle;
+  display:inline-block;
+  width:204px;
+  height:204px; 
+}
+
+.pet_img img{
+  width:200px;
+  height:200px;
+}
+
+.pet_img img:hover{
+  cursor:pointer;
+}
+
+.droppable {
+  float:right;
+  border:2px dashed gray;
+}
+
+.epm-dialog-title {
+  font-size:24px; 
+  text-align:center;
+  display:block;
+}
+
+footer {
+  height: 30px;
+  text-align: center;
+  font-size: 10px;
+  color: black;
+  text-transform: uppercase;
+  font-family: Tahoma, Arial, Helvetica, sans-serif;
+}
+
+footer a {
+  color: black;
+}
+

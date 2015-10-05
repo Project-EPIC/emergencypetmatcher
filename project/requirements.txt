@@ -1,4 +1,5 @@
 django
+django-pipeline
 lorem-ipsum-generator
 django-registration
 python-social-auth

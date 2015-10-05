@@ -243,11 +243,11 @@ def propose(request, target_petreport_id, candidate_petreport_id):
 
                 result.up_votes.add(proposed_by)
                 result.save()
-                messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match. Help spread the word about this match!")
+                messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully up-voted the existing pet match. Help spread the word about this match!")
                 Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", proposed_by, source=result)
 
             elif outcome == PETMATCH_OUTCOME_NEW_PETMATCH:
-                messages.success(request, "Congratulations, The pet match was successful! Thank you for your contribution in helping to match this pet. You can view your pet match in the home page and in your profile. Help spread the word about your match!")
+                messages.success(request, "Congratulations, The pet match was successful! You can view your pet match in the home page and in your profile. Help spread the word about your match!")
                 Activity.log_activity("ACTIVITY_PETMATCH_PROPOSED", proposed_by, source=result)
                 # add reputation points for proposing a new petmatch
                 proposed_by.update_reputation("ACTIVITY_PETMATCH_PROPOSED")
@@ -268,7 +268,7 @@ def propose(request, target_petreport_id, candidate_petreport_id):
 
                 result.up_votes.add(proposed_by)
                 result.save()          
-                messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully upvoted the existing pet match. Help spread the word about this match!")
+                messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully up-voted the existing pet match. Help spread the word about this match!")
                 Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", proposed_by, source=result)
             else:                
                 messages.error(request, "A Problem was found when trying to propose the PetMatch. We have been notified of the issue and will fix it as soon as possible.")            

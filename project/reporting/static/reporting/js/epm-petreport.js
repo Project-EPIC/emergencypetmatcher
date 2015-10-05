@@ -23,7 +23,9 @@ $(document).ready(function(){
     bookmark_button.attr("title","Bookmark this Pet");
   }
 
-  $(".thumb-wrapper a").click(function(){ launch_dialog($("#epm-modal"), $(this).attr("link")); });
+  $(".thumb-wrapper a").attr("href", function(){
+    return $(this).attr('link');
+  }); 
 
   //Update the share buttons' click event.
   $("#facebook_share_pr").click(function(){
@@ -54,12 +56,12 @@ $(document).ready(function(){
       },
       success: function(data){
         bookmark_button.text(data.text);
-        bookmark_button.attr("title",data.text);
-        $(".prdp_messages").html("<li class='success'>" + data.message + "</li>");
+        bookmark_button.attr("title", data.text);
+        add_flash_message("success", data.message)
         return true;
       },
       error: function(data){
-        alert("An unexpected error occurred when trying to bookmark this Pet Report. Please try again."); 
+        add_flash_message("danger", "An unexpected error occurred when trying to bookmark this Pet Report. Please try again.")
         return false;
       }
     });
@@ -67,7 +69,5 @@ $(document).ready(function(){
   }    
 
 });
-
-
 
 //@ sourceURL=epm-petreport.js

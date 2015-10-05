@@ -10,7 +10,8 @@ urlpatterns = patterns('reporting.views',
   url (r'^edit/(?P<petreport_id>\d+)/$', 'edit', name='edit'),
 	url (r'^new', 'submit', name='submit'),
 	url (r'^bookmark','bookmark', name='bookmark'),
-  url (r'^get_pet_breeds/(?P<pet_type>\d+)/$', 'get_pet_breeds', name="get_pet_breeds"),
+  url (r'^get_pet_breeds/$', 'get_pet_breeds', name="get_pet_breeds"),
+  url (r'^get_event_tags/$', 'get_event_tags', name='get_event_tags'),
 )
 
 

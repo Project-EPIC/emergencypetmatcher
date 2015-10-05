@@ -1,0 +1,10 @@
+<table id="prdp-info-table" class="epm-table table table-hover">
+  <tbody>
+    {% for field in fields %}
+      <tr>
+        <td class="pet-info-header" attr="{{ field.attr }}"> {{ field.label }}</td>      
+        <td class="pet-info-data">{{ field.value }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

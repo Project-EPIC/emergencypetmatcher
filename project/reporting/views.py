@@ -234,24 +234,31 @@ def edit(request, petreport_id):
         "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH 
     }, RequestContext(request))
 
-@login_required
-def get_pet_breeds(request, pet_type="0"):
+def get_pet_breeds(request):
     if request.is_ajax() == True:
+        pet_type = request.GET["pet_type"]
         pet_types = {
-            "0": PETREPORT_PET_TYPE_DOG,
-            "1": PETREPORT_PET_TYPE_CAT,
-            "2": PETREPORT_PET_TYPE_HORSE,
-            "3": PETREPORT_PET_TYPE_BIRD,
-            "4": PETREPORT_PET_TYPE_RABBIT,
-            "5": PETREPORT_PET_TYPE_TURTLE,
-            "6": PETREPORT_PET_TYPE_SNAKE,
+            "Dog": PETREPORT_PET_TYPE_DOG,
+            "Cat": PETREPORT_PET_TYPE_CAT,
+            "Horse": PETREPORT_PET_TYPE_HORSE,
+            "Bird": PETREPORT_PET_TYPE_BIRD,
+            "Rabbit": PETREPORT_PET_TYPE_RABBIT,
+            "Turtle": PETREPORT_PET_TYPE_TURTLE,
+            "Snake": PETREPORT_PET_TYPE_SNAKE,
+            "Other": PETREPORT_PET_TYPE_OTHER
         }
-        breeds = PetReport.get_pet_breeds(pet_types[str(pet_type)])
+        breeds = PetReport.get_pet_breeds(pet_types[pet_type])
         breeds = [{"id": breed, "text":breed} for index, breed in enumerate(breeds)]
         return JsonResponse({"breeds":breeds}, safe=False)
     else:
         raise Http404
 
+def get_event_tags(request):
+    if request.is_ajax() == True:
+        event_tags = [{"id": event_tag, "text":event_tag} for event_tag in PetReport.get_event_tags()]
+        return JsonResponse({"event_tags":event_tags}, safe=False)
+    else:
+        raise Http404
     
 #AJAX Request to bookmark a PetReport
 @login_required

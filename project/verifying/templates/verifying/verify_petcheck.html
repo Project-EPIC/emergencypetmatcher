@@ -1,5 +1,28 @@
 {% extends "home/index.html" %}
 {% load staticfiles %}
+{% load petmatch_tags %}
+
+{% block css %}
+  <link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>
+  <link rel="stylesheet" href={% static "verifying/css/style.css" %} type="text/css"></link>
+  <link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
+{% endblock css %}
+
+{% block js %}
+  <script src={% static "verifying/js/epm-verify_petcheck.js" %} type="text/javascript"></script>
+  <script type="text/javascript">
+    var STATIC_URL = "{{ STATIC_URL }}";
+    var USER_ID = "{{ user.id }}";
+    var PETMATCH_ID = "{{ petmatch.id }}"
+    var USER_HAS_VERIFIED = "{{ user_has_verified }}";
+    var USER_HAS_VOTED = "{{ user_has_voted }}";
+    var NUM_DOWNVOTES = "{{ num_downvotes }}";
+    var NUM_UPVOTES = "{{ num_upvotes }}";
+    var USER_IS_OWNER = "{{ user_is_owner }}";
+    var LOST_PETREPORT_ID = "{{ lost_petreport_id }}";
+    var FOUND_PETREPORT_ID = "{{ found_petreport_id }}";
+  </script>
+{% endblock js %}
 
 {% block content %}
 <div id="content" style="width:900px;">    
@@ -7,9 +30,10 @@
   <!-- PMDP Title -->
   <a class="epm-dialog-title" href="/">EmergencyPetMatcher</a>
   <strong class="epm-dialog-title" style="font-size:24px; margin-bottom:10px;">
-    <a id="lost-prdp-link" href="#">{{ petmatch.lost_pet.pet_name }}</a> and 
-    <a id="found-prdp-link" href="#">{{ petmatch.found_pet.pet_name }}</a>
-  </strong>      
+    <a id="lost-prdp-link" href="{% url 'get_PetReport' petmatch.lost_pet.id %}">{{ petmatch.lost_pet.pet_name }}</a> and 
+    <a id="found-prdp-link" href="{% url 'get_PetReport' petmatch.found_pet.id %}">{{ petmatch.found_pet.pet_name }}</a>
+  </strong>        
+  
   <!-- Proposed_by link -->
   <span style="text-align:center; display:block">
     Proposed by <a href="{% url 'get_UserProfile_page' petmatch.proposed_by.id %}">{{ petmatch.proposed_by.user.username }}</a>
@@ -33,15 +57,6 @@
       Nobody has voted on this match yet.
     {% endif %}  
   </span>          
-
-  <!-- Messages -->
-  {% block messages %}
-  <ul id="messages" class="pmdp_messages"> 
-    {% for message in messages %} 
-    <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li> 
-    {% endfor %}
-  </ul>
-  {% endblock messages %} 
                   
   <!-- Pet Pictures -->
   <div id="pmdp-pics">
@@ -53,18 +68,7 @@
     </div>                  
   </div>
 
-  <!-- Pet Info -->
-  <table id="pmdp-info-table" class="epm-table table table-hover">
-    <tbody>
-      {% for field in petreport_fields %}
-        <tr>
-          <td class="pet-info-header" attr="{{ field.attr }}"> {{ field.label }}</td>
-          <td class="pet-info-data">{{ field.lost_pet_value }}</td>
-          <td class="pet-info-data">{{ field.found_pet_value }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>  
+  {% show_petmatch_table petreport_fields %}
 
   <div class="modal-footer">
   {% if profile in contacts %}
@@ -87,29 +91,3 @@
   </div>
 </div>
 {% endblock content %}
-
-{% block css %}
-  <link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>
-  <link rel="stylesheet" href={% static "verifying/css/style.css" %} type="text/css"></link>
-  <link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
-{% endblock css %}
-
-{% block js %}
-  <!-- Page-specific JS goes in this block -->
-  <script src={% static "verifying/js/epm-verify_petcheck.js" %} type="text/javascript"></script>
-  <script src={% static "home/js/jquery-zoom.js" %} type="text/javascript"></script>  
-
-  <script type="text/javascript">
-      //Must have these django-rendered variables as global javascript variables in order to refer to them!
-      var STATIC_URL = "{{ STATIC_URL }}";
-      var USER_ID = "{{ user.id }}";
-      var PETMATCH_ID = "{{ petmatch.id }}"
-      var USER_HAS_VERIFIED = "{{ user_has_verified }}";
-      var USER_HAS_VOTED = "{{ user_has_voted }}";
-      var NUM_DOWNVOTES = "{{ num_downvotes }}";
-      var NUM_UPVOTES = "{{ num_upvotes }}";
-      var USER_IS_OWNER = "{{ user_is_owner }}";
-      var LOST_PETREPORT_ID = "{{ lost_petreport_id }}";
-      var FOUND_PETREPORT_ID = "{{ found_petreport_id }}";
-  </script>
-{% endblock js %}

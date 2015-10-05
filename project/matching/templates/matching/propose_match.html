@@ -19,15 +19,6 @@
 
     <div id="pmdp-container" class="modal-body">
 
-      <!-- Messages -->
-      {% block messages %}
-      <ul id="messages" class="prdp_messages"> 
-        {% for message in messages %} 
-        <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li> 
-        {% endfor %}
-      </ul>
-      {% endblock messages %} 
-
       <strong id="pmdp-title"> Please examine the two pet reports carefully. Proposing this match means that everyone can vote on it. Are you sure this is match that you want to propose? </strong>
 
       <!-- PetReport Target and Candidate Pictures -->
@@ -82,9 +73,6 @@
 
     <!-- Include the wookmark plug-in -->
   <script src={% static "home/js/jquery-wookmark.js" %} type="text/javascript"></script>
-
-    <!-- Include the SimplePagination Plug-in -->
-  <script src={% static "home/js/jquery-simplePagination.js" %} type="text/javascript"></script>
 
   <!-- Global, inheritable JS goes here -->
   <script src={% static "home/js/epm.js" %} type='text/javascript'></script>  

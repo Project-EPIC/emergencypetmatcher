@@ -1,4 +1,3 @@
-//This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
 	var pageNum = 1;
 	var resizeTimer;
@@ -23,13 +22,6 @@ $(document).ready(function(){
 	});
 
 	/***** Start things off. *****/
-
-	//Click Handler for Target. 
-	$("#matching-workspace-target-img img").click(function(){
-		$("#epm-modal").modal({
-			"remote": REPORTING_URLS["PETREPORT"] + TARGET_PETREPORT_ID
-		}); 
-	});
 
 	//Need to subscribe to several DnD events.
 	$("#matching-workspace-candidate-img").on("dragenter", handleDragEnter);
@@ -116,7 +108,10 @@ function moveImage(item, container) {
 			var w = container.width();
 			var h = container.height();
 			petreport_img.animate({height: h, width: w});
-			$(container).html(petreport_img);		
+			pet_link = document.createElement("a");
+			$(pet_link).attr("href", REPORTING_URLS["PETREPORT"] + CANDIDATE_PETREPORT_ID);
+			$(pet_link).html(petreport_img);
+			$(container).html(pet_link);		
 
 			//Enable the Propose Match and Clear buttons.
 			$("#button_propose_match").removeAttr("disabled");
@@ -164,8 +159,8 @@ function fetch_PetReports(page){
 				var report = petreports [i];
 
 				//Setup PetReport Tile here.
-				var item = setup_petreport_item(report, $("#epm-modal"));
-				$(item).css("cursor", "move");
+				var item = setup_petreport_item(report);
+				$(item).find("a").css("cursor", "move");
 
 				//Finally, add this item to the tiles.
 				$("#tiles").append(item);		

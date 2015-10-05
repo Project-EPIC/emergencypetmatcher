@@ -18,12 +18,10 @@ URL_SOCIAL_AUTH_COMPLETE = "/complete/"
 
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"
-HTML_BOOKMARKS = "home/bookmarks.html"
 HTML_ABOUT = "home/about.html"
 HTML_LOGIN = "home/login.html"
 HTML_REGISTRATION_FORM = "registration/register.html"
 HTML_SOCIAL_AUTH_FORM = "registration/social_auth_form.html"
-
 
 #E-mail Constants
 EMAIL_SUBJECT_PETMATCH_PROPOSER='EmergencyPetMatcher: Your pet match is close to being successful!'
@@ -55,42 +53,44 @@ NUM_ACTIVITIES_HOMEPAGE = 20
 ACTIVITY_LOG_DIRECTORY = LOGS_DIRECTORY + "activity_logs/"
 
 #Activities with their reward points attached.
-ACTIVITIES = {  "ACTIVITY_ACCOUNT_CREATED"                : {"reward": 10,  "source":"userprofile"},
-                "ACTIVITY_LOGIN"                          : {"reward":  0,  "source":"userprofile"},
-                "ACTIVITY_LOGOUT"                         : {"reward":  0,  "source":"userprofile"},
-                "ACTIVITY_USER_CHANGED_USERNAME"          : {"reward":  0,  "source":"userprofile"},
-                "ACTIVITY_USER_SET_PHOTO"                 : {"reward":  2,  "source":"userprofile"},
-                "ACTIVITY_SOCIAL_FOLLOW"                  : {"reward":  5,  "source":"userprofile"},
-                "ACTIVITY_SOCIAL_UNFOLLOW"                : {"reward":  0,  "source":"userprofile"},
-                "ACTIVITY_SOCIAL_SEND_MESSAGE_TO_USER"    : {"reward":  0,  "source":"userprofile"},                
-                "ACTIVITY_PETREPORT_SUBMITTED"            : {"reward": 10,  "source":"petreport"},
-                "ACTIVITY_PETREPORT_ADD_BOOKMARK"         : {"reward":  0,  "source":"petreport"},
-                "ACTIVITY_PETREPORT_REMOVE_BOOKMARK"      : {"reward":  0,  "source":"petreport"},
-                "ACTIVITY_PETMATCH_PROPOSED"              : {"reward": 15,  "source":"petmatch"},
-                "ACTIVITY_PETMATCH_UPVOTE"                : {"reward":  2,  "source":"petmatch"},
-                "ACTIVITY_PETMATCH_DOWNVOTE"              : {"reward":  2,  "source":"petmatch"},
-                "ACTIVITY_PETCHECK_VERIFY"                : {"reward":  5,  "source":"petcheck"},
-                "ACTIVITY_PETCHECK_VERIFY_SUCCESS"        : {"reward": 20,  "source":"petcheck"},
-                "ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER"  : {"reward": 40,  "source":"petcheck"},
-                "ACTIVITY_PETCHECK_VERIFY_FAIL"           : {"reward": 10,  "source":"petcheck"}
-              }
+ACTIVITIES = {  
+  "ACTIVITY_ACCOUNT_CREATED"                : {"reward": 10,  "source":"userprofile"},
+  "ACTIVITY_LOGIN"                          : {"reward":  0,  "source":"userprofile"},
+  "ACTIVITY_LOGOUT"                         : {"reward":  0,  "source":"userprofile"},
+  "ACTIVITY_USER_CHANGED_USERNAME"          : {"reward":  0,  "source":"userprofile"},
+  "ACTIVITY_USER_SET_PHOTO"                 : {"reward":  2,  "source":"userprofile"},
+  "ACTIVITY_SOCIAL_FOLLOW"                  : {"reward":  5,  "source":"userprofile"},
+  "ACTIVITY_SOCIAL_UNFOLLOW"                : {"reward":  0,  "source":"userprofile"},
+  "ACTIVITY_SOCIAL_SEND_MESSAGE_TO_USER"    : {"reward":  0,  "source":"userprofile"},                
+  "ACTIVITY_PETREPORT_SUBMITTED"            : {"reward": 10,  "source":"petreport"},
+  "ACTIVITY_PETREPORT_ADD_BOOKMARK"         : {"reward":  0,  "source":"petreport"},
+  "ACTIVITY_PETREPORT_REMOVE_BOOKMARK"      : {"reward":  0,  "source":"petreport"},
+  "ACTIVITY_PETMATCH_PROPOSED"              : {"reward": 15,  "source":"petmatch"},
+  "ACTIVITY_PETMATCH_UPVOTE"                : {"reward":  2,  "source":"petmatch"},
+  "ACTIVITY_PETMATCH_DOWNVOTE"              : {"reward":  2,  "source":"petmatch"},
+  "ACTIVITY_PETCHECK_VERIFY"                : {"reward":  5,  "source":"petcheck"},
+  "ACTIVITY_PETCHECK_VERIFY_SUCCESS"        : {"reward": 20,  "source":"petcheck"},
+  "ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER"  : {"reward": 40,  "source":"petcheck"},
+  "ACTIVITY_PETCHECK_VERIFY_FAIL"           : {"reward": 10,  "source":"petcheck"}
+}
 
-ACTIVITY_SOCIAL_ACTIVITIES = ["ACTIVITY_ACCOUNT_CREATED",
-                              "ACTIVITY_USER_CHANGED_USERNAME",
-                              "ACTIVITY_USER_SET_PHOTO",
-                              "ACTIVITY_PETREPORT_SUBMITTED", 
-                              "ACTIVITY_PETMATCH_PROPOSED", 
-                              "ACTIVITY_PETMATCH_UPVOTE", 
-                              "ACTIVITY_PETMATCH_DOWNVOTE",
-                              "ACTIVITY_PETCHECK_VERIFY",
-                              "ACTIVITY_PETCHECK_VERIFY_SUCCESS",
-                              "ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER",
-                              "ACTIVITY_PETCHECK_VERIFY_FAIL",
-                              "ACTIVITY_SOCIAL_FOLLOW"]
+ACTIVITY_SOCIAL_ACTIVITIES = [
+  "ACTIVITY_ACCOUNT_CREATED",
+  "ACTIVITY_USER_CHANGED_USERNAME",
+  "ACTIVITY_USER_SET_PHOTO",
+  "ACTIVITY_PETREPORT_SUBMITTED", 
+  "ACTIVITY_PETMATCH_PROPOSED", 
+  "ACTIVITY_PETMATCH_UPVOTE", 
+  "ACTIVITY_PETMATCH_DOWNVOTE",
+  "ACTIVITY_PETCHECK_VERIFY",
+  "ACTIVITY_PETCHECK_VERIFY_SUCCESS",
+  "ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER",
+  "ACTIVITY_PETCHECK_VERIFY_FAIL",
+  "ACTIVITY_SOCIAL_FOLLOW"
+]
 
 #Activity Model Field Length
 ACTIVITIES_MAX_LENGTH = 50                              
-
 
 CONSENT_FORM_MINOR_TEXT = """Welcome to EmergencyPetMatcher! 
 

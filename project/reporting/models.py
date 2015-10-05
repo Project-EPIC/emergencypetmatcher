@@ -21,6 +21,8 @@ class PetReport(models.Model):
     proposed_by = models.ForeignKey("socializing.UserProfile", null=False, default=None, related_name='proposed_related')
 
     '''Non-Required Fields'''
+    #Event tag
+    event_tag = models.CharField(max_length=PETREPORT_EVENT_TAG_LENGTH, null=True)
     #Sex of the Pet
     sex = models.CharField(max_length=PETREPORT_SEX_LENGTH, choices=SEX_CHOICES, null=True)
     #Size of the Pet, in ranges
@@ -86,6 +88,7 @@ class PetReport(models.Model):
         "proposed_by_id"        : self.proposed_by.id,
         "sex"                   : self.sex,
         "size"                  : self.size,
+        "event_tag"             : self.event_tag,
         "location"              : self.location,
         "geo_lat"               : str(self.geo_location_lat),
         "geo_long"              : str(self.geo_location_long),
@@ -136,7 +139,8 @@ class PetReport(models.Model):
         self.size               = pr.size
         self.age                = pr.age
         self.color              = pr.color
-        self.breed              = pr.breed        
+        self.breed              = pr.breed  
+        self.event_tag          = pr.event_tag
         self.location           = pr.location
         self.geo_location_lat   = pr.geo_location_lat
         self.geo_location_long  = pr.geo_location_long
@@ -283,6 +287,11 @@ class PetReport(models.Model):
         breeds = [breed.split("\n")[0] for breed in data]
         return breeds
 
+    @staticmethod
+    def get_event_tags():
+        events = PetReport.objects.values_list("event_tag", flat=True).distinct()
+        return [event for event in events if event is not None]
+
     def get_display_fields(self):
         return [
             {"attr": "pet_name", "label": "Pet Name", "value": self.pet_name},
@@ -290,6 +299,7 @@ class PetReport(models.Model):
             {"attr": "status", "label": "Lost/Found", "value": self.status},
             {"attr": "date_lost_or_found", "label": "Date Lost/Found", "value": self.date_lost_or_found.strftime("%B %d, %Y")},
             {"attr": "proposed_by_username", "label": "Contact", "value": self.proposed_by.user.username},
+            {"attr": "event_tag", "label":"Event Tag", "value": self.event_tag},
             {"attr": "location", "label": "Location", "value": self.location},
             {"attr": "microchip_id", "label": "Microchipped?", "value": "Yes" if (self.microchip_id != "") else "No"},
             {"attr": "spayed_or_neutered", "label": "Spayed/Neutered", "value": self.spayed_or_neutered},
@@ -305,18 +315,6 @@ class PetReport(models.Model):
             {"attr": "contact_email", "label": "Original Contact Email Address", "value": self.contact_email},
             {"attr": "contact_link", "label": "Original Link to Pet", "value": self.contact_link},
         ]
-
-
-    @staticmethod
-    def filter(options):
-        pet_reports = PetReport.objects
-        if options.get("status"):
-            pet_reports = pet_reports.filter(status=options["status"])
-        if options.get("pet_type"):
-            pet_reports = pet_reports.filter(pet_type=options["pet_type"])
-        if options.get("pet_name"):
-            pet_reports = pet_reports.filter(pet_name=options["pet_name"])
-        return pet_reports
 
     #Return a count of candidate PetReports that could potentially be matches for this PetReport.
     def get_candidate_PetReports(self):
@@ -336,6 +334,11 @@ class PetReport(models.Model):
         if round(self.geo_location_lat, 2) == round(petreport.geo_location_lat, 2):
             if round(self.geo_location_long, 2) == round(petreport.geo_location_long, 2):
                 rank += 2
+
+        #Event Tag
+        if self.event_tag == petreport.event_tag:
+            rank += 1
+
         #Location
         if self.location.lower() == petreport.location.lower():
             rank += 2
@@ -412,10 +415,11 @@ class PetReportForm (ModelForm):
     '''Non-Required Fields'''
     pet_name            = forms.CharField(label="Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:150px", "placeholder":"If Available"})) 
     age                 = forms.ChoiceField(label="Age", choices=AGE_CHOICES,required = False, widget = forms.Select(attrs={"class":"form-control", "style":"width:100px"}))
-    breed               = forms.CharField(label="Breed", max_length = PETREPORT_BREED_LENGTH, required = False, widget=forms.TextInput(attrs={"class": "breed-filter", "style":"width:200px; display:block;"}))
+    breed               = forms.CharField(label="Breed", max_length = PETREPORT_BREED_LENGTH, required = False, widget=forms.Select(attrs={"class": "breed-filter", "style":"width:200px; display:block;"}))
     color               = forms.CharField(label="Coat Color(s)", max_length = PETREPORT_COLOR_LENGTH, required = False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:200px", "placeholder":"Example: Brown, White"}))    
     sex                 = forms.ChoiceField(label="Sex", choices = SEX_CHOICES, required = False, widget = forms.Select(attrs={"class":"form-control", "style":"width:100px"}))
     size                = forms.ChoiceField(label="Size of Pet", choices = SIZE_CHOICES, required = False, widget=forms.Select(attrs={"class":"form-control", "style":"width:200px"}))
+    event_tag           = forms.CharField(label="Event Tag", help_text="(tag your report to associate your pet with an event)", max_length = PETREPORT_EVENT_TAG_LENGTH , required=False, widget=forms.Select(attrs={"class":"form-control", "style":"width:300px; margin-bottom:10px;", "placeholder": "Event Tag"}))    
     location            = forms.CharField(label="Location", help_text="(Location where pet was lost/found)", max_length = PETREPORT_LOCATION_LENGTH , required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:500px; margin-bottom:10px;", "placeholder": "Write in general information, such as 'Boulder, CO'"}))
     geo_location_lat    = forms.FloatField(label="Geo Location Lat", help_text="(Latitude coordinate)", initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:245px; margin-bottom:10px;", "placeholder": "Latitude (Lat)"}))
     geo_location_long   = forms.FloatField(label="Geo Location Long", help_text="(Longitude coordinate)", initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:245px; margin-bottom:10px;", "placeholder": "Longitude (Long)"}))
@@ -432,5 +436,5 @@ class PetReportForm (ModelForm):
     class Meta:
         model = PetReport
         #exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by','closed', 'thumb_path')
-        fields = ("status", "date_lost_or_found", "pet_type", "pet_name",  "breed", "age", "color", "sex", "spayed_or_neutered", "size", "microchip_id", "img_path", "description", "location", "geo_location_lat", "geo_location_long", "tag_info", "contact_name", "contact_number", "contact_email", "contact_link")
+        fields = ("status", "date_lost_or_found", "pet_type", "pet_name", "breed", "age", "color", "sex", "spayed_or_neutered", "size", "microchip_id", "img_path", "description", "event_tag", "location", "geo_location_lat", "geo_location_long", "tag_info", "contact_name", "contact_number", "contact_email", "contact_link")
 

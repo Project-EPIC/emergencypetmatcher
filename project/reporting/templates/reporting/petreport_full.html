@@ -1,13 +1,40 @@
 {% extends "home/index.html" %}
 {% load staticfiles %}
+{% load petreport_tags %}
+
+{% block css %}
+  <link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
+  <link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>
+{% endblock css %}
+
+{% block js %} 
+  <script type="text/javascript">
+    var BOOKMARKED = "{{ user_has_bookmarked }}";
+    var USER_ID = "{{ user.id }}";
+    var PETREPORT_ID =  "{{ pet_report.id }}";
+    var PETREPORT_URL = 'http://{{ site_domain }}/reporting/{{ pet_report.id }}';
+    var PETREPORT_IMAGE = 'http://{{ site_domain }}{{ STATIC_URL }}{{ pet_report.img_path }}';
+    var PETREPORT_TITLE = 'Pet reporting on #emergencypetmatcher';
+    var PETREPORT_CAPTION ='EmergencyPetMatcher';
+    var PETREPORT_SUMMARY = '{{ pet_report.status }} {{ pet_report.pet_type }} (Name: {{ pet_report.pet_name }}) is now listed online.';
+  </script>    
+  <script src = {% static "reporting/js/epm-petreport.js" %} type='text/javascript'></script>       
+{% endblock js %} 
+{% block headers %} {% endblock headers %} 
 
 {% block content %}
   <div id="content" style="width:800px;">   
     <!-- Title -->
     <a class="epm-dialog-title" href="/">EmergencyPetMatcher</a>
-    <strong class="epm-dialog-title" style="font-size:24px; margin-bottom:10px;"> 
+    <strong class="epm-dialog-title"> 
       {% if pet_report.pet_name != "" %}{{ pet_report.pet_name }}{% else %} Unknown {% endif %}
     </strong>
+
+    {% if pet_report.event_tag != None %}
+      <strong class="epm-dialog-title" style='margin-bottom:10px;'>
+        <span class="label label-primary">{{ pet_report.event_tag }}</span>
+      </strong>    
+    {% endif %}
 
     <!-- Some logic to give nice header for number of workers -->
     <span style="display:block; text-align:center; color:gray;"> 
@@ -39,35 +66,13 @@
 
     {% if not user.is_authenticated %}
       <h4 style="text-align:center;"> You need to be logged in to match this pet.</h4>
-    {% endif %}      
-
-    <!-- Messages -->
-    {% block messages %}
-    <ul id="messages" class="prdp_messages"> 
-      {% for message in messages %} 
-      <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li> 
-      {% endfor %}
-    </ul>
-    {% endblock messages %}       
+    {% endif %}          
 
     <div id="prdp-overview">
       <!-- PRDP Image -->
-      <div class="img-wrapper">
-          <img src="{{ MEDIA_URL }}{{ pet_report.img_path }}"/>
-      </div>
-      
-      <!-- Information pertaining to the PRDP -->
+      <div class="img-wrapper"><img src="{{ MEDIA_URL }}{{ pet_report.img_path }}"/></div>
       <!-- Pet Info -->
-      <table id="prdp-info-table" class="epm-table table table-hover">
-        <tbody>
-          {% for field in petreport_fields %}
-            <tr>
-              <td class="pet-info-header" attr="{{ field.attr }}"> {{ field.label }}</td>
-              <td class="pet-info-data">{{ field.value }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      {% show_petreport_table petreport_fields %}
     </div>
 
     <!-- Proposed Pet Matches -->
@@ -100,36 +105,5 @@
     </div>   
   </div>
 {% endblock content %}
-
-  <!-- CSS -->
-  {% block css %}
-    <link rel="stylesheet" href={% static "home/css/style.css" %} type="text/css"></link>
-    <link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
-    <link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>
-  {% endblock css %}
-  
-  <!-- Javascript & JQuery -->
-  <script src={% static "home/js/jquery-1.9.1.min.js" %} type="text/javascript"></script>
-  <script src={% static "home/js/bootstrap.min.js" %} type="text/javascript"></script>
-
-  <!-- Include the imagesLoaded plug-in -->
-  <script src={% static "home/js/jquery-imagesloaded.js" %} type="text/javascript"></script>
-  <script src={% static "home/js/jquery-zoom.js" %} type="text/javascript"></script>  
-  
-  {% block js %} 
-    <!-- Page-specific JS goes in this block -->   
-    <script src = {% static "reporting/js/epm-petreport.js" %} type='text/javascript'></script>     
-    <script type="text/javascript">
-      var BOOKMARKED = "{{ user_has_bookmarked }}";
-      var USER_ID = "{{ user.id }}";
-      var PETREPORT_ID =  "{{ pet_report.id }}";
-      var PETREPORT_URL = 'http://{{ site_domain }}/reporting/{{ pet_report.id }}';
-      var PETREPORT_IMAGE = 'http://{{ site_domain }}{{ STATIC_URL }}{{ pet_report.img_path }}';
-      var PETREPORT_TITLE = 'Pet reporting on #emergencypetmatcher';
-      var PETREPORT_CAPTION ='EmergencyPetMatcher';
-      var PETREPORT_SUMMARY = '{{ pet_report.status }} {{ pet_report.pet_type }} (Name: {{ pet_report.pet_name }}) is now listed online.';
-    </script>    
-  {% endblock js %} 
-  {% block headers %} {% endblock headers %} 
 
 

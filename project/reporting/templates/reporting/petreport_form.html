@@ -1,6 +1,24 @@
 {% extends 'home/index.html' %}
 {% load staticfiles %}
 
+{% block js %}
+  <script src={% static "reporting/js/epm-petreport_form.js" %} type='text/javascript'></script>
+  <script src='https://www.google.com/recaptcha/api.js'></script>
+
+  <script type="text/javascript">
+    var PETREPORT_TAG_INFO_LENGTH = {{ PETREPORT_TAG_INFO_LENGTH }}
+    var PETREPORT_DESCRIPTION_LENGTH = {{ PETREPORT_DESCRIPTION_LENGTH }}
+    var PET_TYPE = "Dog";
+    var PET_BREED = undefined;
+    var PETREPORT_LOCATION_LAT = 40.00605;
+    var PETREPORT_LOCATION_LNG = -105.26413;
+  </script>
+{% endblock js %}
+
+{% block css %}
+  <link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>  
+{% endblock css %}
+
 {% block head_title %}Report a Lost/Found Pet{% endblock head_title %}
 
 {% block content %}
@@ -31,7 +49,7 @@
       {% for field in form %}
       <div class="form-group">
         {{ field.errors }}
-        <label id="label_{{ field.id_for_label }}" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <label id="label_{{ field.id_for_label }}" for="{{ field.id_for_label }}" style="display:block;">{{ field.label }}</label>
 
         {% if "Upload an Image" in field.label %}
           <div id="preview_img">
@@ -80,32 +98,6 @@
 		</form>
 	</div>
 {% endblock content %}
-
-
-{% block js %}
-	<script src={% static "reporting/js/epm-petreport_form.js" %} type='text/javascript'></script>
-	<script src={% static "reporting/js/jquery-rotate.min.js" %} type='text/javascript'></script>
-  <script src={% static "reporting/js/leaflet.js" %} type='text/javascript'></script>
-  <script src={% static "reporting/js/l.control.geosearch.js" %} type='text/javascript'></script>
-  <script src={% static "reporting/js/l.geosearch.provider.google.js" %} type='text/javascript'></script>
-	<script src={% static "reporting/js/select2.js" %} type='text/javascript'></script>
-	<script src='https://www.google.com/recaptcha/api.js'></script>
-
-	<script type="text/javascript">
-		var PETREPORT_TAG_INFO_LENGTH = {{ PETREPORT_TAG_INFO_LENGTH }}
-		var PETREPORT_DESCRIPTION_LENGTH = {{ PETREPORT_DESCRIPTION_LENGTH }}
-    var PETREPORT_LOCATION_LAT = 40.00605;
-    var PETREPORT_LOCATION_LNG = -105.26413;
-	</script>
-{% endblock js %}
-
-{% block css %}
-	<link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>	
-  <link rel="stylesheet" href={% static "reporting/css/leaflet.css" %} type="text/css"></link>
-  <link rel="stylesheet" href={% static "reporting/css/l.geosearch.css" %} type="text/css"></link>
-	<link rel="stylesheet" href={% static "reporting/css/select2.css" %} type="text/css"></link>
-	<link rel="stylesheet" href={% static "reporting/css/select2-bootstrap.css" %} type="text/css"></link>	
-{% endblock css %}
 
 
 

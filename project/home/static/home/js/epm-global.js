@@ -16,6 +16,7 @@ REPORTING_URLS = {
     "PETREPORT":            "/reporting/",
     "PET_BREEDS":           "/reporting/get_pet_breeds/",
     "BOOKMARK":             "/reporting/bookmark/",
+    "EVENT_TAGS":           "/reporting/get_event_tags/",
 }
 
 MATCHING_URLS = {
@@ -30,19 +31,34 @@ MATCHING_URLS = {
 
 
 /******************************* Utility functions *******************************************/
+
 $(document).ready(function(){
-    $('#epm-modal').on('hidden.bs.modal', function () { $(this).find(".modal-content").html(""); }); 
+    flash_message()
 });
 
-function launch_dialog(modal_element, url){
-    $(modal_element).modal({
-        "remote": url,
-        "data": "dialog"
-    });
-    $(".modal-backdrop:not(:first)").remove();
+function flash_message(){
+    $(".epm-alert").removeClass("hidden").delay(3500).fadeOut();
 }
 
-//GLOBAL JS Functions
+function add_flash_message(status, message){
+    msg = document.createElement("div");
+    $(msg).html(message);
+    $(msg).addClass("alert epm-alert hidden");
+    switch(status){
+        case "success":
+        $(msg).addClass("alert-success");
+        break;
+        case "danger":
+        $(msg).addClass("alert-danger");
+        break;
+        default:
+        $(msg).addClass("alert-info");
+        break;
+    }
+    $("#messages").append(msg);
+    flash_message()
+}
+
 function share_on_facebook(url, image, title, caption, summary) {
     var obj = {
         method: 'feed',
@@ -73,7 +89,7 @@ function share_on_twitter(url, image, title, summary){
 }
 
 //Helper for setting up PetReport Tile.
-function setup_petreport_item(report, modal_element){
+function setup_petreport_item(report){
     var item = document.createElement("li");
     var alink = document.createElement("a");
     var pet_img = document.createElement("img");
@@ -83,7 +99,7 @@ function setup_petreport_item(report, modal_element){
     //Link attributes.
     $(item).addClass("pet-item");
     $(alink).attr("identity", report.ID);    
-    $(alink).on("click", function(){ launch_dialog(modal_element, REPORTING_URLS["PETREPORT"] + report.ID); });
+    $(alink).attr("href", (REPORTING_URLS["PETREPORT"] + report.ID));
 
     //Pet Img attributes.
     $(pet_img).attr("src", MEDIA_URL + report.img_path);
@@ -116,7 +132,7 @@ function setup_petreport_item(report, modal_element){
 } 
 
 //Helper for setting up PetMatch Tile.
-function setup_petmatch_item (match, modal_element){
+function setup_petmatch_item (match){
     var item = document.createElement("li");
     var alink = document.createElement("a");
     var lost_pet_img = document.createElement("img");
@@ -124,7 +140,7 @@ function setup_petmatch_item (match, modal_element){
 
     //Deal with Attributes.
     $(item).addClass("pet-item");
-    $(alink).on("click", function(){ launch_dialog(modal_element, MATCHING_URLS["PETMATCH"] + match.ID); });
+    $(alink).attr("href", MATCHING_URLS["PETMATCH"] + match.ID);
 
     $(lost_pet_img).attr("src", MEDIA_URL + match.lost_pet_img_path);
     $(found_pet_img).attr("src", MEDIA_URL + match.found_pet_img_path);
@@ -149,7 +165,7 @@ function setup_petmatch_item (match, modal_element){
 }
 
 //Helper for setting up Activity Item Tile.
-function setup_activity_item (activity, modal_element){
+function setup_activity_item (activity){
     //Deal with Activity Attributes and Elements.
     var activity_type       = activity.activity;
     var source_id           = null;
@@ -190,12 +206,13 @@ function setup_activity_item (activity, modal_element){
     }
 
     //Use this for PetMatch activity item preparation.
-    var petmatch_options = {    "item": item,
-                                "text": text,
-                                "source_id": source_id,
-                                "source_img_div": source_img_div,
-                                "text_element": text_element,
-                                "modal": modal_element };    
+    var petmatch_options = {    
+        "item": item,
+        "text": text,
+        "source_id": source_id,
+        "source_img_div": source_img_div,
+        "text_element": text_element
+    };    
 
     //Now create the activity.
     switch(activity_type){
@@ -226,8 +243,7 @@ function setup_activity_item (activity, modal_element){
         pet_name = text.split(" ")[6];
         text = text.split(" ").slice(1, 6).join(" ");
         pet_link = document.createElement("a");
-        $(pet_link).attr("href", "#");
-        $(pet_link).on("click", function(){ launch_dialog(modal_element, REPORTING_URLS["PETREPORT"] + source_id); });
+        $(pet_link).attr("href", REPORTING_URLS["PETREPORT"] + source_id);
         $(pet_link).html(pet_name);
         $(text_element).append(" ");
         $(text_element).append(text);
@@ -290,8 +306,7 @@ function setup_petmatch_activity_item(options){
     text            = text.split(" ").slice(1, options["name_offset"]).join(" ");
     petmatch_link   = document.createElement("a");
 
-    $(petmatch_link).attr("href", "#");
-    $(petmatch_link).on("click", function(){ launch_dialog(options["modal"], MATCHING_URLS["PETMATCH"] + options["source_id"]); });
+    $(petmatch_link).attr("href", MATCHING_URLS["PETMATCH"] + options["source_id"]);
     $(petmatch_link).html(petmatch_name);
     $(text_element).append(" ");
     $(text_element).append(text);
@@ -342,7 +357,7 @@ function highlight_field_matches(table){
 
 function perform_AJAX_call(options){
     if (options["error"] == undefined || options["error"] == null)
-        options["error"] = function(data){ alert("Oops! Something went wrong. Please try again!");}
+        options["error"] = function(data){ add_flash_message("danger", "Oops! Something went wrong. Please try again!");}
 
     $.ajax({
         type:options["type"],
@@ -353,47 +368,13 @@ function perform_AJAX_call(options){
     });
 }
 
-//Load up the pet breeds here.
-function load_pet_breeds (pet_type){
-    id = 0;
-    if (pet_type == "Dog")
-        id = 0;
-    else if (pet_type == "Cat")
-        id = 1;
-    else if (pet_type == "Horse")
-        id = 2; 
-    else if (pet_type == "Bird")
-        id = 3;
-    else if (pet_type == "Rabbit")
-        id = 4;
-    else if (pet_type == "Turtle")
-        id = 5;
-    else if (pet_type == "Snake")
-        id = 6;
-    else
-        id = 7; //Other
-
-    $.ajax ({
+function load_pet_breeds (pet_type, callback){
+    perform_AJAX_call ({
         type:"GET",
-        url: REPORTING_URLS["PET_BREEDS"] + id, 
-        success: function(data){
-            $(".breed-filter").select2({ 
-                tags: data.breeds,
-                allowClear:true,
-                maximumSelectionSize:1,
-                placeholder:"Choose a breed here",
-                initSelection: function(element, callback){}
-            });
-
-            //If The Breed Element has already been populated upon load, 
-            //then put its value in the select statement.
-            //(Only used for The Edit PetReport page).
-            if ($("#id_breed").attr("value") != undefined)
-                $("#s2id_id_breed .select2-chosen").html($("#id_breed").attr("value"));
-        },
-        error: function (data){
-            return [];
-        }
+        url: REPORTING_URLS["PET_BREEDS"],
+        data: {"pet_type": pet_type},
+        success: function(data){ callback(data);},
+        error: function (data){ return [];}
     });
 }
 

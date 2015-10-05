@@ -27,11 +27,13 @@ class PetCheck(models.Model):
 
 
 	def to_DICT(self):
-		return	{	"id"									: self.id,
-							"petmatch"						: self.petmatch.to_DICT(),
-							"img_path"            : [self.petmatch.lost_pet.img_path.name, self.petmatch.found_pet.img_path.name],
-							"thumb_path"          : [self.petmatch.lost_pet.thumb_path.name, self.petmatch.found_pet.thumb_path.name],
-							"verification_votes"	: self.verification_votes }
+		return	{	
+			"id"									: self.id,
+			"petmatch"						: self.petmatch.to_DICT(),
+			"img_path"            : [self.petmatch.lost_pet.img_path.name, self.petmatch.found_pet.img_path.name],
+			"thumb_path"          : [self.petmatch.lost_pet.thumb_path.name, self.petmatch.found_pet.thumb_path.name],
+			"verification_votes"	: self.verification_votes 
+		}
 
 	def to_JSON(self):
 		return json.dumps(self.to_DICT())
@@ -149,7 +151,7 @@ class PetCheck(models.Model):
 			self.save()    
 			lost_pet.save()
 			found_pet.save()
-			message = "Thanks for your response, and congratulations on the successful match! You have earned %s Pet Points. The reunited match can be found in the 'Reunited Pets' Tab." % ACTIVITIES["ACTIVITY_PETCHECK_VERIFY_SUCCESS"]["reward"]
+			message = "Thanks for your response, and congratulations on the successful match! The reunited match can be found in the 'Reunited Pets' Tab." % ACTIVITIES["ACTIVITY_PETCHECK_VERIFY_SUCCESS"]["reward"]
 
 			if lost_pet.UserProfile_is_owner(lost_pet_contact) == True:
 				Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER", lost_pet_contact, source=self)			
@@ -170,7 +172,7 @@ class PetCheck(models.Model):
 
 		#If not successful, delete the PetCheck object, award pet points, and notify.
 		else:
-			message = "Unfortunately, this Pet Match was not successful. The pet contacts have agreed that this wasn't the right match. You have earned %d Pet Points. Please try other matches!" % ACTIVITIES["ACTIVITY_PETCHECK_VERIFY_FAIL"]["reward"]
+			message = "Unfortunately, this Pet Match was not successful. The pet contacts have agreed that this wasn't the right match. Please try other matches!" % ACTIVITIES["ACTIVITY_PETCHECK_VERIFY_FAIL"]["reward"]
 			petmatch.has_failed = True
 			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_FAIL", lost_pet_contact, source=self)
 			Activity.log_activity("ACTIVITY_PETCHECK_VERIFY_FAIL", found_pet_contact, source=self)	

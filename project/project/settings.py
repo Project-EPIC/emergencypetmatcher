@@ -30,7 +30,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'America/Denver'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -50,34 +50,21 @@ USE_L10N = True
 USE_TZ = False
 
 #Absolute filesystem path to the project directory. Use for creating relative paths.
-#PROJECT_ROOT = "/vagrant/project"
 PROJECT_ROOT = "/Users/mbarrenecheajr/Documents/Development/code/epm/project"
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-#MEDIA_ROOT = '/vagrant/media/'
 MEDIA_ROOT = "/Users/mbarrenecheajr/Documents/Development/code/epm/media/"
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-#MEDIA_URL = '/vagrant/media/'
-MEDIA_URL = "/Users/mbarrenecheajr/Documents/Development/code/epm/media/"
+MEDIA_URL = "/media/"
 
-if DEBUG == False:
-    # Absolute path to the directory static files should be collected to.
-    # Don't put anything in this directory yourself; store your static files
-    # in apps' "static/" subdirectories and in STATICFILES_DIRS.
-    # Example: "/home/media/media.lawrence.com/static/"
-    STATIC_ROOT = '/vagrant/deployment/static/'
-    # URL prefix for static files.
-    # Example: "http://media.lawrence.com/static/"
-    STATIC_URL = '/vagrant/deployment/static/' 
-else:
-    STATIC_ROOT = '/vagrant/static/'
-    # URL prefix for static files.
-    # Example: "http://media.lawrence.com/static/"
-    STATIC_URL = '/vagrant/static/'
+STATIC_ROOT = '/Users/mbarrenecheajr/Documents/Development/code/epm/deployment/static/'
+# URL prefix for static files.
+# Example: "http://media.lawrence.com/static/"
+STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -91,11 +78,59 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder'
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
+STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
+
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '2wmzko%to)il=3(6@0mf_qd8vwh!=%@uti4ml^w9z7rs&amp;xfc0e'
+
+PIPELINE_CSS = {
+    'vendor': {
+        'source_filenames': (
+            'home/css/bootstrap.min.css',
+            'home/css/datepicker.css',
+            'reporting/css/leaflet.css',
+            'reporting/css/select2.min.css',
+            'reporting/css/l.geosearch.css',
+            'reporting/css/select2-bootstrap.css'
+        ),
+        'output_filename': 'css/vendor.css',
+    },
+    'global': {
+        'source_filenames': (
+            'home/css/epm-global.css',
+        ),
+        'output_filename': 'css/epm-global.css',
+    },
+}
+
+PIPELINE_JS = {
+    'vendor':{
+        'source_filenames':(
+            'home/js/jquery-1.9.1.min.js',
+            'home/js/bootstrap.min.js',
+            'home/js/bootstrap-datepicker.js',
+            'reporting/js/select2.full.min.js',
+            'reporting/js/leaflet.js',
+            'reporting/js/l.control.geosearch.js',
+            'reporting/js/l.geosearch.provider.google.js',
+            'home/js/jquery-imagesloaded.js',
+            'home/js/jquery-rotate.min.js',
+            'home/js/jquery-wookmark.js',
+            'home/js/jquery-zoom.js',
+        ),
+        'output_filename': 'js/vendor.js'
+    },
+    'global': {
+        'source_filenames': (
+            'home/js/epm-global.js',
+        ),
+        'output_filename': 'js/epm-global.js'
+    },    
+}
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -152,6 +187,7 @@ INSTALLED_APPS = (
     'reporting',
     'verifying',
     'registration',
+    'pipeline',
     'social.apps.django_app.default',
     'analysis',
     # Uncomment the next line to enable the admin:

@@ -9,15 +9,7 @@
 
 		{% block content_subtitle %} 
 			<h3> Login below, or use Twitter to login. If you haven't signed up for an account yet, please <a href="{% url 'registration_register' %}">register</a>.</h3>
-		{% endblock content_subtitle %}
-
-		{% block messages %}
-		<ul id="messages">
-			{% for message in messages %}
-		    <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
-		    {% endfor %}
-		</ul>
-		{% endblock messages %}			
+		{% endblock content_subtitle %}		
 
 		<form id="login-form" role="form" method="post" action= "{% url 'login_User' %}">
 			{% csrf_token %}	
