@@ -97,7 +97,13 @@ $(document).ready(function(){
 	//Listen for a change in the pet type. If the user selects a pet type, load the breeds for that pet type!
 	$("#id_pet_type").change(function(){
 		var pet_type = this.value;
-		load_pet_breeds(pet_type);
+		load_pet_breeds(pet_type, function(data){
+    	$("#id_breed").html("").select2({data: {id:null, text: null}});
+    	$("#id_breed").select2({ 
+        tags: data.breeds,
+        maximumSelectionSize:1,
+    	});
+    });
 	});	
 
 	//Toggle Display of Contact fields if Contact Box gets clicked.
