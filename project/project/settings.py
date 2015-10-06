@@ -99,13 +99,7 @@ PIPELINE_CSS = {
         ),
         'output_filename': 'css/vendor.css',
         'variant':'datauri',
-    },
-    'global': {
-        'source_filenames': (
-            'home/css/epm-global.css',
-        ),
-        'output_filename': 'css/epm-global.css',
-    },
+    }
 }
 
 PIPELINE_JS = {
@@ -124,17 +118,11 @@ PIPELINE_JS = {
             'home/js/jquery.zoom.min.js',
         ),
         'output_filename': 'js/vendor.js'
-    },
-    'global': {
-        'source_filenames': (
-            'home/js/epm-global.js',
-        ),
-        'output_filename': 'js/epm-global.js'
-    },    
+    }
 }
 
-PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.yuglify.YuglifyCompressor'
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.yuglify.YuglifyCompressor'
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.yui.YUICompressor'
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.yui.YUICompressor'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (

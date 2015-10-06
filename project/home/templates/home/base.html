@@ -20,10 +20,13 @@
 		<link rel="shortcut icon" type="image/png" href="{{ MEDIA_URL }}favicon.ico"/>
 
 		{% load pipeline %}
+		{% load staticfiles %}
 		{% javascript 'vendor' %}
 		{% stylesheet 'vendor' %}
-		{% javascript 'global' %}
-		{% stylesheet 'global' %}			
+
+		<!-- Include Global EPM Static files -->
+		<link rel="stylesheet" href={% static "home/css/epm-global.css" %} type="text/css"></link>
+		<script src = {% static "home/js/epm-global.js" %} type='text/javascript'></script>
 
 		{% block css %}{% endblock css %}
 		{% block js %}{% endblock js %}

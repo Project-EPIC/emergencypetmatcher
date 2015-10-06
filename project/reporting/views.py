@@ -158,6 +158,7 @@ def submit(request):
             if pr.contact_link.strip() == "":
                 pr.contact_link = None
 
+            pr.breed = pr.breed.strip()
             print_info_msg ("Pet Report Image Path: %s" % pr.img_path)
 
             #Make and save images from img_path and thumb_path AND save the PetReport.
@@ -181,13 +182,15 @@ def submit(request):
             print_error_msg ("Pet Report not submitted successfully")
             print_error_msg (form.errors)
             print_error_msg (form.non_field_errors())
-            return render_to_response(HTML_SUBMIT_PETREPORT, {  'form':form,
-                                                                "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
-                                                                "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
-                                                                "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
-                                                                "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
-                                                                "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
-                                                                "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH }, RequestContext(request))
+            return render_to_response(HTML_SUBMIT_PETREPORT, {  
+                'form':form,
+                "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
+                "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
+                "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
+                "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
+                "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
+                "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH 
+            }, RequestContext(request))
     else:
         if request.method == "POST" and not request.POST["g-recaptcha-response"]:
             messages.error (request, "Please fill in the RECAPTCHA.")        

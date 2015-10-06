@@ -57,7 +57,7 @@ class PetReport(models.Model):
     #Color(s) of Pet
     color = models.CharField(max_length=PETREPORT_COLOR_LENGTH, null=True,default='Color(s) unknown')
     #Breed of Pet
-    breed = models.CharField(max_length=PETREPORT_BREED_LENGTH, null=True,default='Breed unknown')
+    breed = models.CharField(max_length=PETREPORT_BREED_LENGTH, null=True, default='Breed unknown')
     #Description of Pet
     description   = models.CharField(max_length=PETREPORT_DESCRIPTION_LENGTH, null=True, default="")
     #The UserProfiles who are working on this PetReport (Many-to-Many relationship with User)
@@ -139,7 +139,7 @@ class PetReport(models.Model):
         self.size               = pr.size
         self.age                = pr.age
         self.color              = pr.color
-        self.breed              = pr.breed  
+        self.breed              = pr.breed.strip()
         self.event_tag          = pr.event_tag
         self.location           = pr.location
         self.geo_location_lat   = pr.geo_location_lat
