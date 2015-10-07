@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <style>
+    ul { list-style-type:none;}
+    label { font-weight:bold;}
+    </style>
+  </head>
+  <body>
+    <h1>EmergencyPetMatcher Stats</h1>
+    <ul>
+      <li>
+        <label>Number of Users</label>
+        <p>{{ results.num_users }}</p>
+      </li>
+      <li>
+        <label>Number of PetReports</label>
+        <p>{{ results.num_petreports }}</p>
+      </li>      
+      <li>
+        <label>Number of Lost PetReports</label>
+        <p>{{ results.num_lost_petreports }}</p>
+      </li>      
+      <li>
+        <label>Number of Found PetReports</label>
+        <p>{{ results.num_found_petreports }}</p>
+      </li>            
+      <li>
+        <label>Number of PetMatches</label>
+        <p>{{ results.num_petmatches }}</p>
+      </li>                  
+    </ul>
+  </body>
+</html>
