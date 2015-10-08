@@ -14,13 +14,6 @@ $(document).ready(function(){
 		}, 250);
 	});
 
-	//Click Handler for the Propose Match button.
-	$("#button_propose_match").click(function(){
-		$("#epm-modal").modal({
-			"remote": MATCHING_URLS["PROPOSE"] + TARGET_PETREPORT_ID + "/" + CANDIDATE_PETREPORT_ID + "/"
-		});
-	});
-
 	/***** Start things off. *****/
 
 	//Need to subscribe to several DnD events.
@@ -115,6 +108,7 @@ function moveImage(item, container) {
 
 			//Enable the Propose Match and Clear buttons.
 			$("#button_propose_match").removeAttr("disabled");
+			$("#button_propose_match").attr("href", "/matching/propose/" + TARGET_PETREPORT_ID + "/" + CANDIDATE_PETREPORT_ID);
 			$("#button_clear_candidate").removeAttr("disabled");
 
 			//Clear button to remove Candidate from droppable container.
@@ -123,7 +117,7 @@ function moveImage(item, container) {
 				$(container).append("<strong style='width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;'> Click and Drag a Pet Here </strong>");
 				clear_PetReport_fields_to_table(1, $("#matching-info-table"));
 				$("#target_prdpfields li").each(function(){ $(this).css("color", "black"); });
-				$("#button_propose_match").prop("disabled", true);
+				$("#button_propose_match").attr("disabled", true);
 				$(this).prop("disabled", true);
 			});
 
