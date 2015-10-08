@@ -3,10 +3,13 @@
     <style>
     ul { list-style-type:none;}
     label { font-weight:bold;}
+    legend { text-decoration: underline;}
     </style>
   </head>
   <body>
     <h1>EmergencyPetMatcher Stats</h1>
+
+    <legend> Basic Stats</legend>
     <ul>
       <li>
         <label>Number of Users</label>
@@ -28,6 +31,12 @@
         <label>Number of PetMatches</label>
         <p>{{ results.num_petmatches }}</p>
       </li>                  
+    </ul>
+    <legend> Top 5 Pet Reporters </legend>
+    <ul>
+      {% for reporter in results.top_5_reporters %}
+      <li> <b>{{ reporter.user.username }}</b> - {{ reporter.num_reports }}</li>
+      {% endfor %}
     </ul>
   </body>
 </html>
