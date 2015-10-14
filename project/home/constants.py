@@ -19,6 +19,8 @@ URL_SOCIAL_AUTH_COMPLETE = "/complete/"
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"
 HTML_ABOUT = "home/about.html"
+HTML_404 = "home/404.html"
+HTML_500 = "home/500.html"
 HTML_LOGIN = "home/login.html"
 HTML_REGISTRATION_FORM = "registration/register.html"
 HTML_SOCIAL_AUTH_FORM = "registration/social_auth_form.html"

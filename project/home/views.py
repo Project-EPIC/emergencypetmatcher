@@ -277,36 +277,15 @@ def social_auth_get_details (request):
     print_info_msg("at home.views.social_auth_get_details")
    
 
-'''
-def social_auth_login(request, backend):
-    """
-        This view is a wrapper to social_auths auth
-        It is required, because social_auth just throws ValueError and gets user to 500 error
-        after every unexpected action. This view handles exceptions in human friendly way.
-        See https://convore.com/django-social-auth/best-way-to-handle-exceptions/
-    """
-    """
-    Q: How can I add messages.success(request, 'Welcome, %s!' % (username)) in ths function?
-    """
-    print_info_msg("At home.views.social_auth_login()")
-    try:
-        # if everything is ok, then original view gets returned, no problem
-         return auth(request, backend)
-    except IntegrityError, error:
-        return render_to_response(HTML_SOCIAL_AUTH_FORM, locals(), RequestContext(request))
-
-
-def social_auth_disallowed (request):
-    messages.error (request, "Sorry, we can not accept your social registration. Please try again later.")
-    return home(request)
-
-
-'''
-
-
 def about (request):
     petreports = PetReport.objects.filter(closed = False).order_by("?")[:50]
     return render_to_response(HTML_ABOUT, {'petreports':petreports}, RequestContext(request))
+
+def page_not_found(request):
+        return render_to_response(HTML_404)
+
+def error(request):
+        return render_to_response(HTML_500)
 
 class RemoteUserMiddleware(object):
     def process_response(self, request, response):

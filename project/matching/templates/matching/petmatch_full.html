@@ -20,10 +20,10 @@
     var FOUND_PETREPORT_ID = "{{ petmatch.found_pet.id }}";
     var UPVOTE = "upvote";
     var DOWNVOTE = "downvote";
-    var DOWNVOTE_BUTTON_ACTIVE_LINK = "{{ STATIC_URL}}home/icons/button_downvote_active.png";
-    var DOWNVOTE_BUTTON_INACTIVE_LINK = "{{ STATIC_URL }}home/icons/button_downvote_inactive.png";
-    var UPVOTE_BUTTON_ACTIVE_LINK = "{{ STATIC_URL }}home/icons/button_upvote_active.png";
-    var UPVOTE_BUTTON_INACTIVE_LINK = "{{ STATIC_URL }}home/icons/button_upvote_inactive.png";
+    var DOWNVOTE_BUTTON_ACTIVE_LINK = "{{ STATIC_URL}}matching/images/button_downvote_active.png";
+    var DOWNVOTE_BUTTON_INACTIVE_LINK = "{{ STATIC_URL }}matching/images/button_downvote_inactive.png";
+    var UPVOTE_BUTTON_ACTIVE_LINK = "{{ STATIC_URL }}matching/images/button_upvote_active.png";
+    var UPVOTE_BUTTON_INACTIVE_LINK = "{{ STATIC_URL }}matching/images/button_upvote_inactive.png";
 
     //Setting up parameters for sharing on facebook and twitter
     var PETMATCH_URL = 'http://{{ site_domain }}/matching/{{ petmatch.id }}';
@@ -99,14 +99,14 @@
           <div class="pmdp_vote_box" style="display:inline-block;"> 
             <strong id="pmdp_downvote_number" style="text-align:center; font-size:18px;">{{ num_downvotes }} </strong>          
             {% if num_downvotes == 1 %} Downvote {% else %} Downvotes {% endif %}
-            <img id= "pmdp_downvote_button" src={% static "home/icons/button_downvote_active.png" %} alt="Downvote this Pet Match"/>
+            <img id= "pmdp_downvote_button" src={% static "matching/images/button_downvote_active.png" %} alt="Downvote this Pet Match"/>
           </div> 
 
           <!-- Upvote Button -->
           <div class="pmdp_vote_box" style="display:inline-block;"> 
             <strong id="pmdp_upvote_number" style="text-align:center; font-size:18px;">{{ num_upvotes }} </strong>          
             {% if num_upvotes == 1 %} Upvote {% else %} Upvotes {% endif %}
-            <img id = "pmdp_upvote_button" src={% static "home/icons/button_upvote_active.png" %} alt="Upvote this Pet Match"/>
+            <img id = "pmdp_upvote_button" src={% static "matching/images/button_upvote_active.png" %} alt="Upvote this Pet Match"/>
           </div>
       
         </form>
