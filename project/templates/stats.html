@@ -1,42 +1,71 @@
 <html>
   <head>
     <style>
-    ul { list-style-type:none;}
-    label { font-weight:bold;}
-    legend { text-decoration: underline;}
+      h1 {font-size:3em;}
+      ul { list-style-type:none;}
+      p { font-size:2em;}
+      label { font-size:1.5em; font-weight:bold;}
+      legend { font-size:2em; text-decoration: underline;}
+      .stats {
+        vertical-align: top;
+        display:inline-block; 
+        margin:15px; 
+        border-left:1px 
+        solid black; 
+        padding:50px;
+      }
+
     </style>
   </head>
   <body>
     <h1>EmergencyPetMatcher Stats</h1>
-
-    <legend> Basic Stats</legend>
-    <ul>
-      <li>
-        <label>Number of Users</label>
-        <p>{{ results.num_users }}</p>
-      </li>
-      <li>
-        <label>Number of PetReports</label>
-        <p>{{ results.num_petreports }}</p>
-      </li>      
-      <li>
-        <label>Number of Lost PetReports</label>
-        <p>{{ results.num_lost_petreports }}</p>
-      </li>      
-      <li>
-        <label>Number of Found PetReports</label>
-        <p>{{ results.num_found_petreports }}</p>
-      </li>            
-      <li>
-        <label>Number of PetMatches</label>
-        <p>{{ results.num_petmatches }}</p>
-      </li>                  
-    </ul>
-    <legend> Top 5 Pet Reporters </legend>
-    <ul>
-      {% for reporter in results.top_5_reporters %}
-      <li> <b>{{ reporter.user.username }}</b> - {{ reporter.num_reports }}</li>
-      {% endfor %}
-    </ul>
+    <div class="stats" style="border-left:none;">
+      <legend>Basic Stats</legend>
+      <ul>
+        <li><p>Number of Users: <b>{{ results.num_users }}</b></p></li>
+        <li><p>Number of PetReports: <b>{{ results.num_petreports }}</b></p></li>
+        <li><p>Number of Lost PetReports: <b>{{ results.num_lost_petreports }}</b></p></li>      
+        <li><p>Number of Found PetReports: <b>{{ results.num_found_petreports }}</b></p></li>
+        <li><p>Number of PetMatches: <b>{{ results.num_petmatches }}</b></p></li>
+      </ul>
+    </div>
+    <div class="stats">
+      <legend>PetReports</legend>
+      <p>Top 5 Reporters</p>
+      <ul>
+        {% for reporter in results.top_5_reporters %}
+          <li><p>{{ reporter.user.username }}: <b>{{ reporter.num_reports }}</b></p></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="stats">
+      <legend>PetMatches</legend>
+      <p>Top 5 Matchers</p>
+      <ul>
+        {% for matcher in results.top_5_matchers %}
+          <li><p>{{ matcher.user.username }}: <b>{{ matcher.num_matches }}</b></p></li>
+        {% endfor %}
+      </ul>
+      <p>Votes</p>
+      <ul>
+        <li><p>Number of Total Upvotes: <b>{{ results.num_upvotes.up_votes__count }}</b></p></li>
+        <li><p>Number of Total Downvotes: <b>{{ results.num_downvotes.down_votes__count }}</b></p></li>
+      </ul>
+    </div>    
   </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

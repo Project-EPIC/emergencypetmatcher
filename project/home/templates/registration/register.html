@@ -10,14 +10,6 @@
 
 	<form enctype="multipart/form-data" method = "post" id= "register-form" role="form"  action="{% url 'registration_register' %}">
 		{% csrf_token %}
-
-		{% block messages %}
-		<ul id="messages">
-			{% for message in messages %}
-		    <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
-		    {% endfor %}
-		</ul>
-		{% endblock messages %}	
 	
 		<div style="margin-bottom:20px;">
 			{% for error in form.non_field_errors %} <span class="field-error-message"> {{ error }} </span>{% endfor %}
