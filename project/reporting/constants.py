@@ -14,7 +14,6 @@ URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
 HTML_SUBMIT_PETREPORT = "reporting/petreport_form.html"
 HTML_PRDP = "reporting/petreport.html"
 HTML_EDIT_PETREPORT = "reporting/edit_petreport.html"
-HTML_PRDP_FULL = "reporting/petreport_full.html"
 
 #number of pet reports on the home page
 NUM_PETREPORTS_HOMEPAGE = 25

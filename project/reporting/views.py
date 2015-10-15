@@ -99,12 +99,7 @@ def get_PetReport(request, petreport_id):
     if pet_has_been_successfully_matched == True:
         messages.success(request, "This pet has been successfully matched with its owner! Thank you digital volunteers!")
 
-    if request.is_ajax() == True:
-        html = HTML_PRDP
-    else:
-        html = HTML_PRDP_FULL
-
-    return render_to_response(html, {
+    return render_to_response(HTML_PRDP, {
         'pet_report': pet_report,
         'petreport_fields': pet_report.get_display_fields(),
         'edit_petreport': edit_petreport,

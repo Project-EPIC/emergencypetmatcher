@@ -4,6 +4,8 @@ SOCIAL_AUTH_TWITTER_SECRET     = 'XgYnjnsp0eyQgKOCNEJT8c1dETON3p5Uv6mopbAEI'
 FACEBOOK_APP_ID             = '315409715220911'
 FACEBOOK_API_SECRET         = '0d6dccfbd7f042c31a29904222df78a2'
 
+
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 SOCIAL_AUTH_ERROR_KEY = 'social_errors'
 SOCIAL_AUTH_COMPLETE_URL_NAME  = 'socialauth_complete'
 SOCIAL_AUTH_ASSOCIATE_URL_NAME = 'socialauth_associate_complete'

@@ -10,27 +10,27 @@ $(document).ready(function(){
 		switch(id){
 			case "epm-choices-petreports":
 			$("#pet-report-filter-form").css("display", "block");
-			fetch_PetReports(id, pageNum++, true);
+			fetch_PetReports(id, pageNum++, clear=true);
 			break;
 
 			case "epm-choices-petmatches":
 			$("#pet-report-filter-form").css("display", "none");
-			fetch_PetMatches(id, pageNum++, false, true);
+			fetch_PetMatches(id, pageNum++, clear=true, successful=false);
 			break;
 
 			case "epm-choices-reunited-pets":
 			$("#pet-report-filter-form").css("display", "none");
-			fetch_PetMatches(id, pageNum++, true, true);
+			fetch_PetMatches(id, pageNum++, clear=true, successful=true);
 			break;
 
 			case "epm-choices-bookmarked":
 			$("#pet-report-filter-form").css("display", "none");
-			fetch_bookmarks(id, pageNum++, true);
+			fetch_bookmarks(id, pageNum++, clear=true);
 			break;
 
 			case "epm-choices-activity":
 			$("#pet-report-filter-form").css("display", "none");
-			fetch_activities(id, pageNum++, true);
+			fetch_activities(id, pageNum++, clear=true);
 			break;
 		}
 
@@ -45,23 +45,23 @@ $(document).ready(function(){
 			id = $("#epm-choices li.active").attr("id");
 			switch(id){
 				case "epm-choices-petreports":
-				fetch_PetReports(id, pageNum++, false);
+				fetch_PetReports(id, pageNum++, clear=false);
 				break;
 
 				case "epm-choices-petmatches":
-				fetch_PetMatches(id, pageNum++, false, false);
+				fetch_PetMatches(id, pageNum++, clear=false, successful=false);
 				break;
 
 				case "epm-choices-reunited-pets":
-				fetch_PetMatches(id, pageNum++, true, false);
+				fetch_PetMatches(id, pageNum++, clear=true, successful=true);
 				break;
 
 				case "epm-choices-bookmarked":
-				fetch_bookmarks(id, pageNum++, false);
+				fetch_bookmarks(id, pageNum++, clear=false);
 				break;
 
 				case "epm-choices-activity":
-				fetch_activities(id, pageNum++, false);
+				fetch_activities(id, pageNum++, clear=false);
 				break;
 			}
 
@@ -160,8 +160,7 @@ function fetch_PetReports(tab, page, clear){
 	data = {"page":page}
 	for (var attr in options){ data[attr] = options[attr]} //Merge options.
 
-	//AJAX Away.
-	$.ajax({
+	perform_AJAX_call({
 		type:"GET",
 		url: REPORTING_URLS["PETREPORTS_JSON"],
 		data: data,
@@ -197,17 +196,16 @@ function fetch_PetReports(tab, page, clear){
 		});
 }
 
-function fetch_PetMatches(tab, page, successful_petmatches, clear){
+function fetch_PetMatches(tab, page, clear, successful){
 	if (clear == true)
 		$("#tiles li").remove();		
 
 	$("#tiles-wait").css("display", "block");
 
-	//AJAX Away.
-	$.ajax({
+	perform_AJAX_call({
 		type:"GET",
 		url: MATCHING_URLS["PETMATCHES_JSON"],
-		data: {"successful_petmatches": successful_petmatches, "page":page},
+		data: {"successful_petmatches": successful, "page":page},
 		success: function(data){
 			var matches = data.pet_matches_list;
 			var count = data.count;
@@ -227,7 +225,7 @@ function fetch_PetMatches(tab, page, successful_petmatches, clear){
 			if (matches.length == 0 && page == 1)
 				$(".tab-subtitle").text("No Pet Matches Available Yet!");
 			else {
-				if (successful_petmatches == true)
+				if (successful == true)
 					$(".tab-subtitle").text("Welcome Home, Reunited Pets!");		
 				else
 					$(".tab-subtitle").text("Click on a Pet Match to Vote on it. Scroll down to see more matches!");			
@@ -252,9 +250,9 @@ function fetch_activities(tab, page, clear){
 		$("#tiles li").remove();		
 
 	$("#tiles-wait").css("display", "block");
-
 	activity_list = $("#tiles");
-	$.ajax ({
+
+	perform_AJAX_call({
 		type:"GET",
 		url: HOME_URLS["ACTIVITIES_DATA"],
 		data: {"page": page},
@@ -295,7 +293,7 @@ function fetch_bookmarks(tab, page, clear){
 
 	$("#tiles-wait").css("display", "block");
 
-	$.ajax({
+	perform_AJAX_call({
 		type:"GET",
 		url: HOME_URLS["BOOKMARKS_DATA"],
 		data: {"page": page},

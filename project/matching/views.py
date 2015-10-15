@@ -75,12 +75,7 @@ def get_PetMatch(request, petmatch_id):
     elif pm.is_being_checked() == True:
         messages.info(request, "These pet reports are currently being checked by their owners! Votes are closed.")
 
-    if request.is_ajax() == True:
-        html = HTML_PMDP
-    else:
-        html = HTML_PMDP_FULL    
-
-    return render_to_response(html, {  
+    return render_to_response(HTML_PMDP, {  
         "petmatch": pm,
         "site_domain":Site.objects.get_current().domain,
         "petreport_fields": pm.get_display_fields(),
@@ -280,16 +275,11 @@ def propose(request, target_petreport_id, candidate_petreport_id):
         if request.method == "POST" and not request.POST["g-recaptcha-response"]:
             messages.error(request, "Please Fill in the RECAPTCHA.")
 
-        if request.is_ajax() == True:
-            html = HTML_PROPOSE_MATCH
-        else:
-            html = HTML_PROPOSE_MATCH_FULL
-
         if (target.pet_type != candidate.pet_type) or (target.status == candidate.status):
             messages.error(request, "This proposal is invalid! Please try another one.")
             return redirect(URL_MATCHING + str(target.id))
 
-        return render_to_response(html, { 
+        return render_to_response(HTML_PROPOSE_MATCH, { 
             'RECAPTCHA_CLIENT_SECRET': settings.RECAPTCHA_CLIENT_SECRET,
             'target': target,
             'candidate': candidate,

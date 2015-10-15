@@ -424,14 +424,14 @@ class PetReportForm (ModelForm):
     geo_location_lat    = forms.FloatField(label="Geo Location Lat", help_text="(Latitude coordinate)", initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:245px; margin-bottom:10px;", "placeholder": "Latitude (Lat)"}))
     geo_location_long   = forms.FloatField(label="Geo Location Long", help_text="(Longitude coordinate)", initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:245px; margin-bottom:10px;", "placeholder": "Longitude (Long)"}))
     microchip_id        = forms.CharField(label="Microchip ID", max_length = PETREPORT_MICROCHIP_ID_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:380px", "placeholder": "Pet Microchip ID"}))
-    tag_info            = forms.CharField(label="Collar Tag Information", max_length = PETREPORT_TAG_INFO_LENGTH, required=False, widget=Textarea(attrs={"class":"form-control", "placeholder":"(Please write collar tag information only if is available)", "style":"max-width:400px; max-height:300px;"}))
+    tag_info            = forms.CharField(label="Collar Tag Information", max_length = PETREPORT_TAG_INFO_LENGTH, required=False, widget=Textarea(attrs={"class":"form-control", "placeholder":"(Please write collar tag information only if is available)", "style":"max-width:400px; max-height:100px;"}))
     contact_name        = forms.CharField(label="Contact Name", max_length=PETREPORT_CONTACT_NAME_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:200px; margin-bottom:10px;"}))
     contact_number      = forms.CharField(label="Contact Phone Number", max_length=PETREPORT_CONTACT_NUMBER_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:250px; margin-bottom:10px;"}))
     contact_email       = forms.CharField(label="Contact Email Address", max_length=PETREPORT_CONTACT_EMAIL_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:200px; margin-bottom:10px;"}))
     contact_link        = forms.CharField(label="Contact Alternative link to Pet Posting", max_length=PETREPORT_CONTACT_LINK_LENGTH, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"font-family:monospace; width:500px"}))
     img_path            = forms.ImageField(label="Upload an Image", help_text="(*.jpg, *.png, *.bmp), 3MB maximum", required = False, widget=forms.FileInput)
     spayed_or_neutered  = forms.ChoiceField(label="Spayed/Neutered", choices=SPAYED_OR_NEUTERED_CHOICES, required=False, widget=forms.Select(attrs={"class":"form-control", "style":"width:200px"}))
-    description         = forms.CharField(label="Pet Description", max_length = PETREPORT_DESCRIPTION_LENGTH, required = False, widget=forms.Textarea(attrs={"class":"form-control", "placeholder": "(Please describe the pet as accurately as possible)", "style":"max-width:400px; max-height:300px;"}))
+    description         = forms.CharField(label="Pet Description", max_length = PETREPORT_DESCRIPTION_LENGTH, required = False, widget=forms.Textarea(attrs={"class":"form-control", "placeholder": "(Please describe the pet as accurately as possible)", "style":"max-width:400px; max-height:150px;"}))
 
     class Meta:
         model = PetReport

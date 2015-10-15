@@ -1,11 +1,13 @@
+{% extends "home/index.html" %}
 {% load staticfiles %}
 {% load petreport_tags %}
 
-{% block dialog_css %}
+{% block css %}
   <link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
-{% endblock dialog_css %}
+  <link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>
+{% endblock css %}
 
-{% block dialog_js %} 
+{% block js %} 
   <script type="text/javascript">
     var BOOKMARKED = "{{ user_has_bookmarked }}";
     var USER_ID = "{{ user.id }}";
@@ -16,24 +18,23 @@
     var PETREPORT_CAPTION ='EmergencyPetMatcher';
     var PETREPORT_SUMMARY = '{{ pet_report.status }} {{ pet_report.pet_type }} (Name: {{ pet_report.pet_name }}) is now listed online.';
   </script>    
-  <script src = {% static "reporting/js/epm-petreport.js" %} type='text/javascript'></script>    
-{% endblock dialog_js %} 
+  <script src = {% static "reporting/js/epm-petreport.js" %} type='text/javascript'></script>       
+{% endblock js %} 
+{% block headers %} {% endblock headers %} 
 
-{% block dialog_title %}
-  <h4 class="modal-title">{{ pet_report.status }} {{ pet_report.pet_type }}{% if pet_report.pet_name != "" %}: {{ pet_report.pet_name }} {% endif %} {% if pet_has_been_successfully_matched %} - <b style="color:#428bca">Matched! </b> {% endif %}</h4>
-{% endblock dialog_title %}
-
-{% block dialog_content %}
-  <div id="prdp-container">  
+{% block content %}
+  <div id="content" style="width:800px;">   
     <!-- Title -->
     <a class="epm-dialog-title" href="/">EmergencyPetMatcher</a>
     <strong class="epm-dialog-title"> 
       {% if pet_report.pet_name != "" %}{{ pet_report.pet_name }}{% else %} Unknown {% endif %}
-    </strong>   
-
-    <strong class="epm-dialog-title" style='margin-bottom:10px;'>
-      <span class="label label-primary">{{ pet_report.event_tag }}</span>
     </strong>
+
+    {% if pet_report.event_tag != None %}
+      <strong class="epm-dialog-title" style='margin-bottom:10px;'>
+        <span class="label label-primary">{{ pet_report.event_tag }}</span>
+      </strong>    
+    {% endif %}
 
     <!-- Some logic to give nice header for number of workers -->
     <span style="display:block; text-align:center; color:gray;"> 
@@ -61,24 +62,16 @@
       {% else %}
         Proposed by <a href="{% url 'get_UserProfile_page' pet_report.proposed_by.id %}">{{ pet_report.proposed_by.user.username }}</a>
       {% endif %}
-    </span>         
+    </span>      
 
     {% if not user.is_authenticated %}
       <h4 style="text-align:center;"> You need to be logged in to match this pet.</h4>
-    {% endif %}      
-
-    <!-- Messages -->
-    {% block messages %}
-    <ul id="messages" class="prdp_messages"> 
-      {% for message in messages %} 
-      <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li> 
-      {% endfor %}
-    </ul>
-    {% endblock messages %}       
+    {% endif %}          
 
     <div id="prdp-overview">
-      <!-- Image -->
-      <div class="img-wrapper"><img src="{{ MEDIA_URL }}{{ pet_report.img_path }}"/></div>      
+      <!-- PRDP Image -->
+      <div class="img-wrapper"><img src="{{ MEDIA_URL }}{{ pet_report.img_path }}"/></div>
+      <!-- Pet Info -->
       {% show_petreport_table petreport_fields %}
     </div>
 
@@ -99,18 +92,18 @@
         {% endfor %}
       </div>
     {% endif %}        
-  </div>
-{% endblock dialog_content %}
 
-{% block dialog_footer %}
-  <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-  <button id="prdp-share" type="button" class="btn btn-info btn-lg">Share</button>
-  {% if user.is_authenticated %}
-    {% csrf_token %}
-    <button id="prdp-bookmark" type="button" class="btn btn-success btn-lg">Bookmark</button>
-    {% if not pet_has_been_successfully_matched %}
-      <a href="{% url 'match' pet_report.id %}" type="button" class="btn btn-primary btn-lg">Match this Pet</a>
-    {% endif %}
-  {% endif %}
-{% endblock dialog_footer %}
+    <div class="modal-footer" >
+      <button id="prdp-share" type="button" class="btn btn-info btn-lg">Share</button>
+      {% if user.is_authenticated %}
+        {% csrf_token %}
+        <button id="prdp-bookmark" type="button" class="btn btn-success btn-lg">Bookmark</button>
+        {% if not pet_has_been_successfully_matched %}
+          <a href="{% url 'match' pet_report.id%}" type="button" class="btn btn-primary btn-lg">Match this Pet</a>
+        {% endif %}
+      {% endif %}
+    </div>   
+  </div>
+{% endblock content %}
+
 

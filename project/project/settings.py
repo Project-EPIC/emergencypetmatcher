@@ -106,7 +106,6 @@ PIPELINE_JS = {
     'vendor':{
         'source_filenames':(
             'home/js/jquery-1.9.1.min.js',
-            'home/js/bootstrap.min.js',
             'home/js/bootstrap-datepicker.js',
             'reporting/js/select2.full.min.js',
             'reporting/js/leaflet.js',
@@ -121,8 +120,8 @@ PIPELINE_JS = {
     }
 }
 
-PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.yui.YUICompressor'
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.yui.YUICompressor'
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.yuglify.YuglifyCompressor'
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.yuglify.YuglifyCompressor'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
