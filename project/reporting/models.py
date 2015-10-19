@@ -92,7 +92,7 @@ class PetReport(models.Model):
         "location"              : self.location,
         "geo_lat"               : str(self.geo_location_lat),
         "geo_long"              : str(self.geo_location_long),
-        "microchip_id"          : "Yes" if (self.microchip_id != "") else "No" ,
+        "microchipped"          : "Yes" if (self.microchip_id not in ["", None]) else "No" ,
         "tag_info"              : self.tag_info,
         "contact_name"          : self.contact_name,
         "contact_number"        : self.contact_number,
@@ -256,9 +256,7 @@ class PetReport(models.Model):
                 existing_pet = PetReport.objects.get(status=status, pet_type=pet_type, pet_name=pet_name)
             else:
                 existing_pet = PetReport.objects.get(status=status, pet_type=pet_type)
-
             return existing_pet
-
         except PetReport.DoesNotExist:
             return None
 
@@ -301,7 +299,7 @@ class PetReport(models.Model):
             {"attr": "proposed_by_username", "label": "Contact", "value": self.proposed_by.user.username},
             {"attr": "event_tag", "label":"Event Tag", "value": self.event_tag},
             {"attr": "location", "label": "Location", "value": self.location},
-            {"attr": "microchip_id", "label": "Microchipped?", "value": "Yes" if (self.microchip_id != "") else "No"},
+            {"attr": "microchip_id", "label": "Microchipped?", "value": "Yes" if (self.microchip_id not in ["", None]) else "No"},
             {"attr": "spayed_or_neutered", "label": "Spayed/Neutered", "value": self.spayed_or_neutered},
             {"attr": "age", "label": "Age", "value": self.age},
             {"attr": "sex", "label": "Sex", "value": self.sex},
@@ -329,41 +327,27 @@ class PetReport(models.Model):
     def compare(self, petreport):
         assert isinstance (petreport, PetReport)
         rank = 0
-
-        #Lat & Long
-        if round(self.geo_location_lat, 2) == round(petreport.geo_location_lat, 2):
+        if round(self.geo_location_lat, 2) == round(petreport.geo_location_lat, 2): #Lat & Long
             if round(self.geo_location_long, 2) == round(petreport.geo_location_long, 2):
                 rank += 2
-
-        #Event Tag
-        if self.event_tag == petreport.event_tag:
+        if self.event_tag == petreport.event_tag: #Event Tag
             rank += 1
-
-        #Location
-        if self.location.lower() == petreport.location.lower():
+        if self.location.lower() == petreport.location.lower(): #Location
             rank += 2
-        #Sex
-        if self.sex == petreport.sex:
+        if self.sex == petreport.sex: #Sex
             rank += 1
-        #Size
-        if self.size == petreport.size:
+        if self.size == petreport.size: #Size
             rank += 1
-        #Spayed/Neutered
-        if self.spayed_or_neutered == petreport.spayed_or_neutered:
+        if self.spayed_or_neutered == petreport.spayed_or_neutered: #Spayed/Neutered
             rank += 1
-        #Pet Name
-        if self.pet_name.lower() == petreport.pet_name.lower():
+        if self.pet_name.lower() == petreport.pet_name.lower(): #Pet Name
             rank += 1
-        #Breed
-        if self.breed.lower() == petreport.breed.lower():
+        if self.breed.lower() == petreport.breed.lower(): #Breed
             rank += 1
-        #Age
-        if self.age == petreport.age:
+        if self.age == petreport.age: #Age
             rank += 1
-        #Color
-        if self.color.lower() == petreport.color.lower():
+        if self.color.lower() == petreport.color.lower(): #Color
             rank += 1
-
         return rank  
 
     #This method returns a ranked list of all PetReports found in the input specified list. This ranking is based on the PetReport compare() method.

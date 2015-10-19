@@ -15,7 +15,6 @@ urlpatterns = patterns('home.views',
 
 	#Python-Social-Auth
 	url(r'^', include('social.apps.django_app.urls', namespace='social')),
-	url(r'^social_auth_get_details/$', 'social_auth_get_details', name='social_auth_get_details'),
 
 	#registration-related URLs that have been customized.
 	url(r'^activate/complete/$', "registration_activation_complete", name='registration_activation_complete'),
@@ -32,6 +31,6 @@ urlpatterns = patterns('home.views',
 	url(r'^accounts/activate/guardian/(?P<guardian_activation_key>\w+)/$', "registration_guardian_activate", name="registration_guardian_activate"),
  	url(r'^accounts/password/reset/complete/$', 'password_reset_complete', name="password_reset_complete"),
  	url(r'^accounts/password/reset/done/$', 'password_reset_done', name="password_reset_done"),
-	url (r'^accounts/', include('registration.backends.default.urls'))
-	
+ 	url(r'^accounts/password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$', auth_views.password_reset_confirm, name='auth_password_reset_confirm'), 	
+	url(r'^accounts/', include('registration.backends.default.urls')),
 )
