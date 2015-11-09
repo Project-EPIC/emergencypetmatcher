@@ -4,7 +4,7 @@ $(document).ready(function(){
   var upvote_button = $("#pmdp_upvote_button");
 
   //When the User clicks on the DOWNVOTE Button...
-  downvote_button.click(function(){ 
+  downvote_button.click(function(){
     //If the button hasn't been pushed yet.
     if ($(this).attr("src") != DOWNVOTE_BUTTON_INACTIVE_LINK){
 
@@ -21,7 +21,7 @@ $(document).ready(function(){
   });
 
   //When the User clicks on the UPVOTE Button...
-  upvote_button.click(function(){ 
+  upvote_button.click(function(){
     //If the button hasn't been pushed yet.
     if ($(this).attr("src") != UPVOTE_BUTTON_INACTIVE_LINK){
 
@@ -35,15 +35,6 @@ $(document).ready(function(){
         downvote_button.css("cursor", "pointer");
       }
     }
-  });
-
-  //Update the share buttons' click event.
-  $("#facebook_share_pm").click(function(){
-    share_on_facebook(PETMATCH_URL, PETMATCH_IMAGE, PETMATCH_TITLE, PETMATCH_CAPTION, PETMATCH_SUMMARY);
-  });
-
-  $("#pmdp-share").click(function(){
-    share_on_twitter(PETMATCH_URL, PETMATCH_IMAGE, PETMATCH_TITLE, PETMATCH_SUMMARY);
   });
 
   /***** Start things off. *****/
@@ -66,7 +57,7 @@ $(document).ready(function(){
   $("#lost_pet_pic_wrapper img").on("mouseover", function(){
     $(this).parent().zoom();
     $("#lost_pet_pic_wrapper img:not(:first)").remove();
-  });    
+  });
 
   //Use the Zoom plugin to zoom Found pet pic.
   $("#found_pet_pic_wrapper img").on("mouseover", function(){
@@ -88,20 +79,13 @@ $(document).ready(function(){
 
 //The voting AJAX POST call. Requires a string with either "up" or "down".
 function vote (user_vote){
-  //Check if the user has logged in.
-  if (USER_ID == "None"){
-    $(".pmdp_messages").html("<li class='error'> You cannot vote for this Pet Match because you are not logged in! <a href='"+ HOME_URLS["LOGIN"] + "'>Log in Here.</a></li>");
-    return false;
-  }
-
-  //This is the value for the CSRF Token that must be passed into the POST request.
   var csrf_value = $("input").attr("value");
 
   perform_AJAX_call({
     type:"POST",
-    url: MATCHING_URLS["VOTE"],
-    data: {"csrfmiddlewaretoken": csrf_value, "vote":user_vote, "match_id":PETMATCH_ID, "user_id":USER_ID},
-    success: function(data){        
+    url: MATCHING_URLS["VOTE"] + PETMATCH_ID,
+    data: {"csrfmiddlewaretoken": csrf_value, "vote":user_vote},
+    success: function(data){
       add_flash_message("success", data.message);
       $("#pmdp_downvote_number").html(data.num_downvotes);
       $("#pmdp_upvote_number").html(data.num_upvotes);
@@ -116,12 +100,7 @@ function vote (user_vote){
 
       return true;
     },
-    error: function(data){
-      add_flash_message("danger", "An unexpected error occurred when trying to " + user_vote +" this PetMatch. Please try again.")
-      return false;
-    }
-  });                  
+    error: function(data){add_flash_message("danger", "An unexpected error occurred when trying to " + user_vote +" this PetMatch. Please try again.")}
+  });
   return true;
 }
-
-//@ sourceURL=epm-petmatch.js

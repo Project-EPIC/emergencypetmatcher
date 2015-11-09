@@ -16,14 +16,10 @@
 
 {% block head_title %}Edit Your Pet Report{% endblock head_title %}
 
-{% block content_subtitle %} 
+{% block content_subtitle %}
   <h3> Edit your Pet Report </h3>
   <p>The fields marked with <b style="margin:0;" class="required-field-symbol">*</b> are required. </p>
-{% endblock content_subtitle %} 
-
-{% block form %}
-  <form enctype="multipart/form-data" id="petreport_form" method="POST" action="{% url 'edit' petreport.id %}">
-{% endblock form %}
+{% endblock content_subtitle %}
 
 {% block img_path %}
   <img src="{{ MEDIA_URL }}{{ field.value }}"/>
@@ -33,5 +29,8 @@
   <div class="form-actions">
     <a href="/" id = "id_cancel" class="btn btn-default" type="button">Cancel</a>
     <input id = "id_submit" class="btn btn-primary" type="button" value="Update This Pet"/>
+    {% if not petreport.closed %}
+      <a href="{% url 'close_PetReport' petreport.id %}" id="id_close" >Close Pet Report</a>
+    {% endif %}
   </div>
 {% endblock form_action %}

@@ -10,9 +10,9 @@ $(document).ready(function(){
 	var curYear = new Date().getUTCFullYear();
 	$("#id_date_lost_or_found").datepicker({
 		format: "mm/dd/yyyy",
-		changeMonth: true, 
+		changeMonth: true,
 		showOn:"focus",
-		changeYear: true, 
+		changeYear: true,
 		yearRange: '1900:curYear',
 		startDate:"01/01/1950",
 		endDate:"0d"
@@ -34,7 +34,7 @@ $(document).ready(function(){
 			else {
 				var reader = new FileReader();
 				reader.onload = function (e) {
-					//Create an image element, tack on the source, fit it into the container for preview, 
+					//Create an image element, tack on the source, fit it into the container for preview,
 					//and keep tabs on rotation parameter. It will be sent off for POST.
 					var img = document.createElement("img");
 					$(img).attr("src", e.target.result);
@@ -60,12 +60,12 @@ $(document).ready(function(){
 		var count = PETREPORT_TAG_INFO_LENGTH - this.value.length;
 		$("#id_tag_collar_info_count").html(count + " characters remaining");
 	});
-	
+
 	//Character Counters
 	$("#id_description").keyup(function(){
 		var count = PETREPORT_DESCRIPTION_LENGTH - this.value.length;
 		$("#id_description_count").html(count + " characters remaining");
-	});		
+	});
 
 	$("#id_submit").click(function(){
 			var conditions = true;
@@ -84,9 +84,9 @@ $(document).ready(function(){
 			}
 
 			if (img_size > 3.0) {
-				conditions = false;				
+				conditions = false;
 				issues += (++num_issues)+". Image size should be less that 3MB.\n";
-			}	
+			}
 
 			if(conditions == true)
 				document.forms['petreport_form'].submit();
@@ -99,19 +99,19 @@ $(document).ready(function(){
 		var pet_type = this.value;
 		load_pet_breeds(pet_type, function(data){
     	$("#id_breed").html("").select2({data: {id:null, text: null}});
-    	$("#id_breed").select2({ 
+    	$("#id_breed").select2({
         tags: data.breeds,
         maximumSelectionSize:1,
     	});
     });
-	});	
+	});
 
 	//Toggle Display of Contact fields if Contact Box gets clicked.
 	$("#contact-box").click(function(){
 		toggle_display("id_contact_name");
 		toggle_display("id_contact_number");
 		toggle_display("id_contact_email");
-		toggle_display("id_contact_link");		
+		toggle_display("id_contact_link");
 	});
 
 	$("#microchip-box").click(function(){
@@ -121,7 +121,7 @@ $(document).ready(function(){
 	/******** Kick Things Off *********/
 	load_pet_breeds(PET_TYPE, function(data){
     $("#id_breed").html("").select2({data: {id:null, text: null}});
-    $("#id_breed").select2({ 
+    $("#id_breed").select2({
         tags: data.breeds,
         maximumSelectionSize:1,
     });
@@ -141,7 +141,7 @@ $(document).ready(function(){
 				maximumSelectionSize:1,
 			});
 		}
-	});	
+	});
 
 	//Required Red Markers for Labels.
 	$("label[for=id_status]").append("<b class='required-field-symbol'>*</b>")
@@ -156,7 +156,7 @@ $(document).ready(function(){
 	toggle_display("id_contact_name");
 	toggle_display("id_contact_number");
 	toggle_display("id_contact_email");
-	toggle_display("id_contact_link");	
+	toggle_display("id_contact_link");
 
 	$("#label_id_geo_location_lat").remove();
 	$("#label_id_geo_location_long").remove();
@@ -172,21 +172,21 @@ $(document).ready(function(){
 	toggle_display("id_microchip_id");
 
 	var map;
-	$("#location-box").click(function(){	
-		toggle_display("location-coordinates");		
-		toggle_display("location-map");	
+	$("#location-box").click(function(){
+		toggle_display("location-coordinates");
+		toggle_display("location-map");
 
 		if (map != undefined)
 			map.remove();
 
-		map = new L.map('location-map').setView([PETREPORT_LOCATION_LAT, PETREPORT_LOCATION_LNG], 10);	
+		map = new L.map('location-map').setView([PETREPORT_LOCATION_LAT, PETREPORT_LOCATION_LNG], 10);
 		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6IjZjNmRjNzk3ZmE2MTcwOTEwMGY0MzU3YjUzOWFmNWZhIn0.Y8bhBaUMqFiPrDRW9hieoQ', {
 			maxZoom: 18,
 			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
 				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
 				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
 			id: 'mapbox.streets'
-		}).addTo(map);	
+		}).addTo(map);
 
 		var markersLayer = new L.LayerGroup();
 		map.addLayer(markersLayer);
@@ -224,18 +224,3 @@ function toggle_display(field){
 	$("#label_" + field).toggleClass("hidden");
 	$("#" + field).toggleClass("hidden");
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

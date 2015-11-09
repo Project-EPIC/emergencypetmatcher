@@ -5,7 +5,6 @@ from utilities.utils import *
 from constants import *
 import pdb
 
-
 #The Activity Object Model
 class Activity(models.Model):
   userprofile = models.ForeignKey("socializing.UserProfile", null=False, default=None)
@@ -18,7 +17,7 @@ class Activity(models.Model):
     from socializing.models import UserProfile
     from reporting.models import PetReport
     from matching.models import PetMatch
-    from verifying.models import PetCheck
+    from verifying.models import PetReunion, PetMatchCheck
 
     try:
       if ACTIVITIES[self.activity]["source"] == "userprofile":
@@ -27,8 +26,10 @@ class Activity(models.Model):
         source = PetReport.objects.get(pk=self.source_id)
       elif ACTIVITIES[self.activity]["source"] == "petmatch":
         source = PetMatch.objects.get(pk=self.source_id)
-      elif ACTIVITIES[self.activity]["source"] == "petcheck":
-        source = PetCheck.objects.get(pk=self.source_id)
+      elif ACTIVITIES[self.activity]["source"] == "petmatchcheck":
+        source = PetMatchCheck.objects.get(pk=self.source_id)
+      elif ACTIVITIES[self.activity]["source"] == "petreunion":
+        source = PetReunion.objects.get(pk=self.source_id)
       else:
         return None
     except ObjectDoesNotExist:
@@ -92,7 +93,15 @@ class Activity(models.Model):
     elif activity == "ACTIVITY_SOCIAL_FOLLOW":
       new_activity.activity = "ACTIVITY_SOCIAL_FOLLOW"
       new_activity.text = "%s is now following %s." % (userprofile.user.username, source.user.username)           
-      
+
+    elif activity == "ACTIVITY_SOCIAL_UNFOLLOW":
+      new_activity.activity = "ACTIVITY_SOCIAL_UNFOLLOW"
+      new_activity.text = "%s is no longer following %s." % (userprofile.user.username, source.user.username)                 
+
+    elif activity == "ACTIVITY_SOCIAL_SEND_MESSAGE_TO_USER":
+      new_activity.activity = "ACTIVITY_SOCIAL_SEND_MESSAGE_TO_USER"
+      new_activity.text = "%s sent a message to %s." % (userprofile.user.username, source.user.username)                       
+
     # ============================= [PetReport Activities] =============================
     elif activity == "ACTIVITY_PETREPORT_SUBMITTED":
       new_activity.activity = "ACTIVITY_PETREPORT_SUBMITTED"    
@@ -112,37 +121,36 @@ class Activity(models.Model):
       new_activity.text = "%s created a match with two %ss." % (userprofile.user.username, source.lost_pet.pet_type)           
       
     elif activity == "ACTIVITY_PETMATCH_UPVOTE":
+      if Activity.objects.filter(source_id=source.id, userprofile=userprofile, activity=activity).exists() == True:
+        return False
       new_activity.activity = "ACTIVITY_PETMATCH_UPVOTE"
       new_activity.text = "%s voted on a match with two %ss." % (userprofile.user.username, source.lost_pet.pet_type)
       
     elif activity == "ACTIVITY_PETMATCH_DOWNVOTE":
+      if Activity.objects.filter(source_id=source.id, userprofile=userprofile, activity=activity).exists() == True:
+        return False      
       new_activity.activity = "ACTIVITY_PETMATCH_DOWNVOTE"
       new_activity.text = "%s voted on a match with two %ss." % (userprofile.user.username, source.lost_pet.pet_type)
       
-    # ============================= [PetCheck Activities] =============================
-    elif activity == "ACTIVITY_PETCHECK_VERIFY":
-      new_activity.activity = "ACTIVITY_PETCHECK_VERIFY"    
-      new_activity.text = "%s triggered pet checking for a match with two %ss." % (userprofile.user.username, source.petmatch.lost_pet.pet_type)
+    # ============================= [PetMatchCheck Activities] =============================
+    elif activity == "ACTIVITY_PETMATCHCHECK_VERIFY":
+      new_activity.activity = "ACTIVITY_PETMATCHCHECK_VERIFY"    
+      new_activity.text = "%s triggered pet match checking for a match with two %ss." % (userprofile.user.username, source.petmatch.lost_pet.pet_type)
           
-    elif activity == "ACTIVITY_PETCHECK_VERIFY_SUCCESS":
+    elif activity == "ACTIVITY_PETMATCHCHECK_VERIFY_SUCCESS":
       lost_pet = source.petmatch.lost_pet
-      new_activity.activity = "ACTIVITY_PETCHECK_VERIFY_SUCCESS" 
-      new_activity.text = "%s has reunited a %s %s named %s with its original owner! Congratulations!" % (userprofile.user.username,
-                                                                                                          lost_pet.status,
-                                                                                                          lost_pet.pet_type,
-                                                                                                          lost_pet.pet_name)
-    elif activity == "ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER":
-      lost_pet = source.petmatch.lost_pet
-      new_activity.activity = "ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER"
-      new_activity.text = "%s has been reunited with the %s %s named %s! Congratulations!" % (userprofile.user.username, 
-                                                                                              lost_pet.status, 
-                                                                                              lost_pet.pet_type, 
-                                                                                              lost_pet.pet_name)
-    elif activity == "ACTIVITY_PETCHECK_VERIFY_FAIL":
-      new_activity.activity = "ACTIVITY_PETCHECK_VERIFY_FAIL" 
-      new_activity.text = "%s unfortunately didn't match %s with %s successfully. Keep trying!" % ( userprofile.user.username,
-                                                                                                    source.petmatch.lost_pet.pet_name, 
-                                                                                                    source.petmatch.found_pet.pet_name)
+      new_activity.activity = "ACTIVITY_PETMATCHCHECK_VERIFY_SUCCESS" 
+      new_activity.text = "%s has reunited a %s %s named %s with its original owner! Congratulations!" % (userprofile.user.username, lost_pet.status, lost_pet.pet_type, lost_pet.pet_name)
+    
+    elif activity == "ACTIVITY_PETMATCHCHECK_VERIFY_FAIL":
+      new_activity.activity = "ACTIVITY_PETMATCHCHECK_VERIFY_FAIL" 
+      new_activity.text = "%s unfortunately didn't match %s with %s successfully. Keep trying!" % ( userprofile.user.username, source.petmatch.lost_pet.pet_name, source.petmatch.found_pet.pet_name)
+    
+  # ============================= [PetReunion Activities] =============================  
+    elif activity == "ACTIVITY_PETREUNION_CREATED":
+      new_activity.activity = "ACTIVITY_PETREUNION_CREATED"
+      new_activity.text = "%s has closed the pet report for %s." % (userprofile.user.username, source.petreport.pet_name)
+
     else:
       print_error_msg("Activity Type %s is not supported." % activity)
       return None

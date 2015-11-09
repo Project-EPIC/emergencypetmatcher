@@ -1,0 +1,71 @@
+{% extends "reporting/petreport_form.html" %}
+{% load staticfiles %}
+
+{% block js %}
+  <script src={% static "verifying/js/epm-petreunion_form.js" %} type='text/javascript'></script>
+  <script src='https://www.google.com/recaptcha/api.js'></script>
+{% endblock js %}
+
+{% block css %}
+  <link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
+{% endblock css %}
+
+{% block head_title %}Close a PetReport{% endblock head_title %}
+
+{% block content %}
+  <div id="content" style="width:700px;">
+    {% block content_subtitle %}
+      <h3> Close a Pet Report </h3>
+      <p> To close a pet report, please fill in the following fields to the best of your knowledge. Once you have finished, click the 'Submit' button at the end of the form. The fields marked with <b style="margin:0;" class="required-field-symbol">*</b> are required. </p>
+    {% endblock content_subtitle %}
+
+    {% block form %}
+    <form enctype="multipart/form-data" id="petreunion_form" method="POST" action="{% url 'close_PetReport' petreport.id %}">
+      {% csrf_token %}
+
+      <div style="margin-bottom:20px;">
+        {% for error in form.non_field_errors %} <span class="field-error-message"> {{ error }} </span>{% endfor %}
+      </div>
+
+      {% for field in form %}
+      <div class="form-group">
+        {{ field.errors }}
+        <label id="label_{{ field.id_for_label }}" for="{{ field.id_for_label }}" style="display:block;">{{ field.label }}</label>
+
+        {% if "Reason for Closing" in field.label %}
+        <select id="id_reason" name="reason">
+          <option disabled selected>Select a Reason</option>
+          <option>This pet has been reunited with its original owner</option>
+          <option>This pet has been rehomed with a new owner</option>
+          <option>This pet has passed away</option>
+          <option>Other</option>
+        </select>
+        {% elif "Upload an Image" in field.label %}
+          <p style="margin:5px auto 5px auto;">If appropriate, please provide a new picture of the pet.</p>
+          <div id="preview_img">
+            {% block img_path %}
+              <strong style="width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;">Pet Picture Preview</strong>
+            {% endblock img_path %}
+          </div>
+          <p style="margin:5px auto 5px auto;">(*.jpg, *.png, *.bmp), 3MB maximum</p>
+          <strong id="rotate_instructions" style="display:none; margin:5px auto 5px auto;">Click on the image to rotate it</strong>
+          <input id="id_img_rotation" name="img_rotation" type="hidden" value="0"/>
+          {{ field }}
+        {% else %}
+          {{ field }}
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      {% block form_action %}
+      <hr/>
+      <div class="form-actions">
+        <label>Please verify your submission via RECAPTCHA</label>
+        <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_CLIENT_SECRET }}" data-callback="recaptcha_done" style="margin-bottom:20px;"></div>
+        <input id="id_submit" type="submit" class="btn btn-primary" value="Submit" disabled>
+      </div>
+      {% endblock form_action %}
+    </form>
+    {% endblock form %}
+  </div>
+{% endblock content %}

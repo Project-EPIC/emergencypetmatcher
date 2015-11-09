@@ -1,0 +1,78 @@
+{% extends "home/index.html" %}
+{% load staticfiles %}
+{% load petreunion_tags %}
+{% block head_title %}{{ pet_report.pet_name }} - {{ reason }}{% endblock head_title %}
+
+{% block meta %}
+  <meta property="og:title" content="{{ pet_report.pet_name }} - {{ reason }}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.emergencypetmatcher.com/verifying/{{ pet_reunion.id }}" />
+  <meta property="og:description" content="{{ long_reason }}" />
+  <meta property="og:image" content="{{ MEDIA_URL }}{{ pet_reunion.img_path }}" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="400" />
+  <meta property="og:image:height" content="300" />
+{% endblock meta %}
+
+{% block css %}
+  <link rel="stylesheet" href={% static "verifying/css/style.css" %} type="text/css"></link>
+  <link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
+{% endblock css %}
+{% block js %}
+  <script src = {% static "verifying/js/epm-petreunion.js" %} type='text/javascript'></script>
+{% endblock js %}
+
+{% block headers %} {% endblock headers %}
+
+{% block content %}
+  <div id="content" style="width:800px;">
+
+    <div id='share'>
+      <a style="padding:0px;" class="twitter-share-button share-button" href="https://twitter.com/intent/tweet?url=http://www.emergencypetmatcher.com/verifying/{{ pet_reunion.id}}" data-counturl="http://emergencypetmatcher.com/verifying/{{ pet_reunion.id }}">Tweet</a>
+      <div class="btn fb-share-button share-button" data-href="https://emergencypetmatcher.com/verifying/{{ pet_reunion.id }}" data-layout="button_count"></div>
+    </div>
+
+    <!-- Title -->
+    <strong class="epm-dialog-title">
+      <a href="{% url 'get_PetReport' pet_report.id %}">{% if pet_report.pet_name != "" %}{{ pet_report.pet_name }}{% else %} Unknown {% endif %}</a>
+    </strong>
+
+    <!-- Some logic to give nice header for number of workers -->
+    <span style="display:block; text-align:center; color:gray;">
+      {% if num_workers > 1 %}
+        {% if user_is_worker %}
+          You and <strong style="font-size:18px;">{{ num_workers|add:"-1" }}</strong> people have worked on this pet.
+        {% else %}
+          <strong style="font-size:18px;">{{ num_workers }}</strong> people have worked on this pet.
+        {% endif %}
+      {% elif num_workers == 1 %}
+        {% if user_is_worker %}
+          You are working on this pet.
+        {% else %}
+          <strong style="font-size:18px;">{{ num_workers }}</strong> person has worked on this pet.
+        {% endif %}
+      {% else %}
+      {% endif %}
+    </span>
+
+    {% if pet_reunion.matched_petreport %}
+      <span style="display:block; text-align:center; color:gray;">
+        This pet was matched with <a href="{% url 'get_PetReport' pet_reunion.matched_petreport.id %}">{{ pet_reunion.matched_petreport.pet_name }}</a>.
+      </span>
+    {% endif %}
+
+    <!-- Proposed_by link -->
+    <span style="text-align:center; display:block">
+      Proposed by <a href="{% url 'get_UserProfile' pet_report.proposed_by.id %}">{{ pet_report.proposed_by.user.username }}</a>
+    </span>
+
+    <div class="alert alert-success" role="alert" style="font-weight:bold; text-align:center; margin:20px;"> {{ long_reason }}</div>
+
+    <div id="prdp-overview">
+      <div class="img-wrapper"><img src="{{ MEDIA_URL }}{{ pet_reunion.img_path }}"/></div>
+      {% show_petreunion_table petreunion_fields %}
+    </div>
+
+    <hr/>
+  </div>
+{% endblock content %}

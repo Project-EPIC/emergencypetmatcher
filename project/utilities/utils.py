@@ -4,7 +4,7 @@ from datetime import datetime
 from django.core.validators import validate_email
 from reporting.constants import *
 from django.conf import settings
-import os, re, hashlib, random, string, sys, time, lipsum, traceback
+import os, re, hashlib, random, string, sys, time, json, lipsum, traceback, urllib, urllib2, ssl
 
 '''===================================================================================
 utils.py: Utility Functions for EPM Utility and Testing
@@ -23,12 +23,6 @@ LIPSUM.paragraph_sigma = 1
 
 #SHA1 Compiler.
 SHA1_RE = re.compile('^[a-f0-9]{40}$')
-
-def print_testing_name(test_name, single_test=False):
-	if single_test == True:
-		print "\n[TEST]: Testing {%s}\n" % (test_name)
-	else:
-		print "\n[TEST]: Testing {%s} for %s iterations\n" % (test_name, NUMBER_OF_TESTS)
 
 def print_info_msg (string):
 	print "[INFO]: %s" % string
@@ -100,12 +94,6 @@ def generate_lipsum_paragraph(max_length):
 	else:
 		return result
 
-#Keep the user/tester updated.
-def output_update (i, iterations=NUMBER_OF_TESTS):	
-	output = "%d of %d iterations complete\n\n" % (i, iterations)
-	sys.stdout.write("\r\x1b[K"+output.__str__())
-	sys.stdout.flush()
-
 #Given an image path, create an Image and return it, catching and ignoring any errors.
 def open_image(img_path):
 	try:
@@ -140,10 +128,6 @@ def generate_random_date(start, end, format, prop):
     ptime = stime + prop * (etime - stime)
     return time.strftime(format, time.localtime(ptime))
 
-#Give the lap time (and AVG) for a 'critical section'.
-def performance_report(total_time):
-	print '\tTotal Time: %s sec' % (total_time)
-	print '\tAVG Time Taken for a Single Test: %s sec\n' % (total_time/NUMBER_OF_TESTS)
 
 #Place sample petreport image lists in memory. Used for generating random PetReports with sample images.
 def load_PetReport_sample_images():
@@ -168,6 +152,14 @@ def load_PetReport_sample_images():
 	for img in os.listdir(PETREPORT_SAMPLES_TURTLE_DIRECTORY):
 		if img != ".DS_Store" and img != ".anchor":
 			PETREPORT_SAMPLE_TURTLE_IMAGES.append("petreport/samples/turtle/" + img)
+
+def recaptcha_ok(response):
+	query_data = urllib.urlencode({"secret":settings.RECAPTCHA_SERVER_SECRET, "response":response})
+	response = urllib.urlopen(settings.RECAPTCHA_SITEVERIFY, query_data, context=ssl._create_unverified_context())
+	status = json.loads(response.read())
+	if status["success"] == True or (settings.RECAPTCHA_SERVER_SECRET == settings.TEST_RECAPTCHA_SERVER_SECRET):
+		return True
+	return False
 
 
 

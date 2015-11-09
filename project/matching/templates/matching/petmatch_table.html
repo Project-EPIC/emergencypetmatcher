@@ -2,9 +2,21 @@
   <tbody>
     {% for field in fields %}
       <tr>
-        <td class="pet-info-header" attr="{{ field.attr }}"> {{ field.label }}</td>      
-        <td class="pet-info-data">{{ field.lost_pet_value }}</td>
-        <td class="pet-info-data">{{ field.found_pet_value }}</td>
+        <td class="pet-info-header" attr="{{ field.attr }}"> {{ field.label }}</td>    
+
+        <!-- Event Tag -->
+        {% if field.label == "Event Tag" %}
+          <td class="pet-info-data"><span class="label label-default" style="font-size:1em;">{{ field.lost_pet_value }}</span></td>
+          <td class="pet-info-data"><span class="label label-default" style="font-size:1em;">{{ field.found_pet_value }}</span></td>
+
+        <!-- Status -->
+        {% elif field.label == "Lost/Found" %}
+            <td class="pet-info-data"><span class="label label-{{ field.lost_pet_value }}" style="font-size:1em;">{{ field.lost_pet_value }}</span></td>
+            <td class="pet-info-data"><span class="label label-{{ field.found_pet_value }}" style="font-size:1em;">{{ field.found_pet_value }}</span></td>
+        {% else %}
+          <td class="pet-info-data">{{ field.lost_pet_value }}</td>
+          <td class="pet-info-data">{{ field.found_pet_value }}</td>
+        {% endif %}
       </tr>
     {% endfor %}
   </tbody>

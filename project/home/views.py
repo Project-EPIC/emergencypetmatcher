@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth import logout, login, authenticate 
+from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import *
 from django.contrib.sites.models import Site
@@ -22,6 +22,7 @@ from django.utils.timezone import now as datetime_now
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from django.db.models import Count
 from registration.models import RegistrationProfile
 from registration.forms import RegistrationFormTermsOfService
 from datetime import datetime
@@ -29,6 +30,7 @@ from models import Activity
 from socializing.models import UserProfile
 from reporting.models import PetReport
 from matching.models import PetMatch
+from verifying.models import PetReunion, PetMatchCheck
 from constants import *
 from reporting.constants import NUM_PETREPORTS_HOMEPAGE, NUM_BOOKMARKS_HOMEPAGE
 from matching.constants import NUM_PETMATCHES_HOMEPAGE
@@ -36,53 +38,33 @@ from utilities.utils import *
 from pprint import pprint
 import oauth2 as oauth, json, pdb, random, urllib, hashlib, random, re, project.settings, registration
 
-#Home view
 def home (request):
-    #Get the petreport and petmatch count for pagination purposes.
-    petreport_count = len(PetReport.objects.filter(closed=False))
-    petmatch_count = len(PetMatch.objects.filter(petcheck=None))
-    successful_petmatch_count = len(PetMatch.objects.filter(is_successful=True))
-    context = {
-        'petreport_count':petreport_count,
-        'petmatch_count':petmatch_count,
-        'successful_petmatch_count': successful_petmatch_count
-    }
-
-    #Also get bookmark count for pagination purposes.
-    if request.user.is_authenticated() == True:    
-        up = request.user.userprofile
-        bookmark_count = len(up.bookmarks_related.all())
-        context.update({"bookmark_count": bookmark_count})
-
-    return render_to_response(HTML_HOME, context, RequestContext(request))
+    return render_to_response(HTML_HOME, {}, RequestContext(request))
 
 def get_activities(request):
     if request.is_ajax() == True:
-        page = int(request.GET["page"])
+        page = request.GET.get("page") or 0
 
         #Let's populate the activity feed based upon whether the user is logged in.
         if request.user.is_authenticated() == True:
             print_info_msg ("get_activities(): Authenticated User - recent activities...")
-            current_userprofile = request.user.userprofile      
-            # activities = Activity.get_activities_for_feed(page=page, since_date=current_userprofile.last_logout, userprofile=current_userprofile)            
-            activities = Activity.get_Activities_for_feed(page=page, since_date=None, userprofile=None)
-        else:
-            activities = Activity.get_Activities_for_feed(page=page, since_date=None, userprofile=None)
+            current_userprofile = request.user.userprofile
 
+        activities = Activity.get_Activities_for_feed(page=page, since_date=None, userprofile=None)
         #Zip it up in JSON and ship it out as an HTTP Response.
-        activities = [{ 
+        activities = [{
             "activity"          : activity.activity,
             "date_posted"       : activity.date_posted.ctime(),
             "profile"           : activity.userprofile.to_DICT(),
             "source"            : activity.get_source_DICT(),
-            "text"              : activity.text 
+            "text"              : activity.text
         } for activity in activities]
 
-        return JsonResponse({"activities":activities}, safe=False)     
+        return JsonResponse({"activities":activities}, safe=False)
     else:
         print_error_msg ("Request for get_activities not an AJAX request!")
-        raise Http404           
-        
+        raise Http404
+
 @login_required
 def get_bookmarks(request):
     if request.is_ajax() == True:
@@ -94,18 +76,18 @@ def get_bookmarks(request):
         #Now get just a page of bookmarks if page # is available.
         bookmarks = get_objects_by_page(bookmarks, page, limit=NUM_BOOKMARKS_HOMEPAGE)
         #Zip it up in JSON and ship it out as an HTTP Response.
-        bookmarks = [{  
-            "ID"                    : pr.id, 
+        bookmarks = [{
+            "ID"                    : pr.id,
             "proposed_by_username"  : pr.proposed_by.user.username,
-            "pet_name"              : pr.pet_name, 
-            "pet_type"              : pr.pet_type, 
+            "pet_name"              : pr.pet_name,
+            "pet_type"              : pr.pet_type,
             "status"                : pr.status,
-            "img_path"              : pr.thumb_path.name 
+            "img_path"              : pr.thumb_path.name
         } for pr in bookmarks]
 
         return JsonResponse({"bookmarks_list":bookmarks, "count":len(bookmarks), "total_count": bookmarks_count}, safe=False)
     else:
-        raise Http404        
+        raise Http404
 
 def login_User(request):
     if request.method == "POST":
@@ -131,7 +113,7 @@ def login_User(request):
         else:
             messages.error(request, 'Invalid Login credentials. Please try again.')
 
-    try: 
+    try:
         next = request.REQUEST ['next']
     except KeyError: #This only happens if the user tries to plug in the login URL without a 'next' parameter...
         next = URL_HOME
@@ -146,7 +128,7 @@ def logout_User(request):
     user = get_object_or_404(UserProfile, pk=request.user.userprofile.id)
     user.last_logout = datetime.now()
     user.save()
- 
+
     Activity.log_activity("ACTIVITY_LOGOUT", request.user.userprofile)
     messages.success(request, "See you next time!")
     logout(request)
@@ -154,7 +136,7 @@ def logout_User(request):
 
 def registration_activate (request, activation_key=None, backend=None):
     print_info_msg ("Activation Key: %s" % activation_key)
-    #Does the activation key exist within a RegistrationProfile? 
+    #Does the activation key exist within a RegistrationProfile?
     #(i.e. is somebody actually trying to activate an account or resurrect an old activation link?)
     try:
         rp = RegistrationProfile.objects.get(activation_key=activation_key)
@@ -188,19 +170,19 @@ def registration_guardian_activate (request, guardian_activation_key):
     registration_profile = RegistrationProfile.objects.get(user=profile.user)
     email_subject = render_to_string(TEXTFILE_EMAIL_POST_GUARDIAN_ACTIVATION_SUBJECT, {})
     email_body = render_to_string(TEXTFILE_EMAIL_POST_GUARDIAN_ACTIVATION_BODY, {"activation_key": registration_profile.activation_key, "site": Site.objects.get_current() })
-    send_mail(email_subject, email_body, None, [profile.user.email])    
+    send_mail(email_subject, email_body, None, [profile.user.email])
 
     messages.success(request, "All done! Thank you for supporting your child in participating in EmergencyPetMatcher!")
     return redirect(URL_HOME)
 
 def registration_activation_complete (request):
     messages.success (request, "Alright, you are all set registering! You may now login to EPM.")
-    return redirect (URL_LOGIN)     
+    return redirect (URL_LOGIN)
 
 def registration_register (request):
     #Requesting the Registration Form Page
     if request.method == "GET":
-        return render_to_response (HTML_REGISTRATION_FORM, 
+        return render_to_response (HTML_REGISTRATION_FORM,
             {   "form":RegistrationFormTermsOfService(),
                 "consent_form_minor_text":CONSENT_FORM_MINOR_TEXT,
                 "consent_form_adult_text":CONSENT_FORM_ADULT_TEXT,
@@ -215,18 +197,18 @@ def registration_register (request):
 
         if success == False:
             messages.error(request, message)
-            return render_to_response(HTML_REGISTRATION_FORM, 
+            return render_to_response(HTML_REGISTRATION_FORM,
                 {   "form": form,
                     "consent_form_minor_text":CONSENT_FORM_MINOR_TEXT,
                     "consent_form_adult_text":CONSENT_FORM_ADULT_TEXT,
                 }, RequestContext (request))
-        
+
         #Create a RegistrationProfile object, populate the potential User object, and be ready for activation.
-        user = RegistrationProfile.objects.create_inactive_user(request.POST["username"], 
-                                                                request.POST["email"], 
-                                                                request.POST["password1"], 
+        user = RegistrationProfile.objects.create_inactive_user(request.POST["username"],
+                                                                request.POST["email"],
+                                                                request.POST["password1"],
                                                                 Site.objects.get_current())
-        
+
         #Grab the UserProfile object.
         profile = user.userprofile
 
@@ -243,7 +225,7 @@ def registration_register (request):
                                                                             "guardian_activation_key": profile.guardian_activation_key,
                                                                             "consent_form_guardian_text": CONSENT_FORM_GUARDIAN_TEXT,
                                                                             "site": Site.objects.get_current() })
-            
+
             send_mail(email_subject, email_body, None, [profile.guardian_email])
 
         user.first_name = request.POST.get("first_name")
@@ -275,17 +257,35 @@ def password_reset_done (request):
 
 def social_auth_get_details (request):
     print_info_msg("at home.views.social_auth_get_details")
-   
+
 
 def about (request):
     petreports = PetReport.objects.filter(closed = False).order_by("?")[:50]
     return render_to_response(HTML_ABOUT, {'petreports':petreports}, RequestContext(request))
 
 def page_not_found(request):
-        return render_to_response(HTML_404)
+    return render_to_response(HTML_404)
 
 def error(request):
-        return render_to_response(HTML_500)
+    return render_to_response(HTML_500)
+
+def stats(request):
+    return render_to_response(HTML_STATS, {
+        "num_users": User.objects.count(),
+        "num_petreports": PetReport.objects.count(),
+        "num_lost_petreports": PetReport.objects.filter(status="Lost").count(),
+        "num_found_petreports": PetReport.objects.filter(status="Found").count(),
+        "num_petmatches": PetMatch.objects.count(),
+        #Top 5 Users who have reported the most Pet Reports
+        "top_5_reporters": UserProfile.objects.annotate(num_reports=Count("proposed_related")).order_by('-num_reports')[:5],
+        #Top 5 Users who have matched the most pets
+        "top_5_matchers": UserProfile.objects.annotate(num_matches=Count("proposed_by_related")).order_by('-num_matches')[:5],
+        #Number of Upvotes
+        "num_upvotes": PetMatch.objects.aggregate(Count("up_votes")),
+        #Number of Downvotes
+        "num_downvotes": PetMatch.objects.aggregate(Count("down_votes")),
+        "num_petreunions": PetReunion.objects.count()
+    }, RequestContext(request))
 
 class RemoteUserMiddleware(object):
     def process_response(self, request, response):

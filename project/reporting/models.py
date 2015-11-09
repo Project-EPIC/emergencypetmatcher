@@ -4,6 +4,7 @@ from socializing.models import UserProfile
 from django.forms import ModelForm, Textarea
 from django import forms
 from django.core.files.images import ImageFile
+from django.core.exceptions import ObjectDoesNotExist
 from constants import *
 from pprint import pprint
 from utilities.utils import *
@@ -41,7 +42,7 @@ class PetReport(models.Model):
     #Contact Phone Number of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
     contact_number = models.CharField(max_length=PETREPORT_CONTACT_NUMBER_LENGTH, null=True, default="None")
     #Contact Email Address of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
-    contact_email = models.CharField(max_length=PETREPORT_CONTACT_EMAIL_LENGTH, null=True, default="None")        
+    contact_email = models.CharField(max_length=PETREPORT_CONTACT_EMAIL_LENGTH, null=True, default="None")
     #Contact Link for cross-referencing pet report.
     contact_link = models.CharField(max_length=PETREPORT_CONTACT_LINK_LENGTH, null=True, default="None")
     #Img of Pet
@@ -51,7 +52,7 @@ class PetReport(models.Model):
     #Spayed or Neutered?
     spayed_or_neutered = models.CharField(max_length=PETREPORT_SPAYED_OR_NEUTERED_LENGTH, choices=SPAYED_OR_NEUTERED_CHOICES, null=True, default="Not Known")
     #Pet Name (if available)
-    pet_name = models.CharField(max_length=PETREPORT_PET_NAME_LENGTH, null=True, default='unknown') 
+    pet_name = models.CharField(max_length=PETREPORT_PET_NAME_LENGTH, null=True, default='unknown')
     #Pet Age (if known/available)
     age = models.CharField(max_length=PETREPORT_AGE_LENGTH, null=True, choices=AGE_CHOICES,default="Age unknown")
     #Color(s) of Pet
@@ -64,9 +65,8 @@ class PetReport(models.Model):
     workers = models.ManyToManyField("socializing.UserProfile", related_name='workers_related')
     #The UserProfiles who have bookmarked this PetReport
     bookmarked_by = models.ManyToManyField("socializing.UserProfile", related_name='bookmarks_related')
-    #A pet report is closed once it has been successfully matched
+    #A pet report is closed once it has been successfully matched or closed
     closed = models.BooleanField(default=False)
-    revision_number = models.IntegerField(null=True) #update revision using view
 
     #Override the save method for this model
     def save(self, *args, **kwargs):
@@ -74,43 +74,43 @@ class PetReport(models.Model):
         if self.pet_name == None or self.pet_name.strip() == "":
             self.pet_name = "unknown"
 
-        super(PetReport, self).save(args, kwargs) 
-        print_success_msg ("{%s} has been saved by %s!" % (self, self.proposed_by))           
+        super(PetReport, self).save(args, kwargs)
+        print_success_msg ("{%s} has been saved by %s!" % (self, self.proposed_by))
         return self
 
-    def to_DICT(self, ):
-        return {    
-        "id"                    : self.id,
-        "pet_type"              : self.pet_type,
-        "status"                : self.status,
-        "date_lost_or_found"    : self.date_lost_or_found.strftime("%B %d, %Y"),
-        "proposed_by_username"  : self.proposed_by.user.username,
-        "proposed_by_id"        : self.proposed_by.id,
-        "sex"                   : self.sex,
-        "size"                  : self.size,
-        "event_tag"             : self.event_tag,
-        "location"              : self.location,
-        "geo_lat"               : str(self.geo_location_lat),
-        "geo_long"              : str(self.geo_location_long),
-        "microchipped"          : "Yes" if (self.microchip_id not in ["", None]) else "No" ,
-        "tag_info"              : self.tag_info,
-        "contact_name"          : self.contact_name,
-        "contact_number"        : self.contact_number,
-        "contact_email"         : self.contact_email,
-        "contact_link"          : self.contact_link,
-        "img_path"              : self.img_path.name,
-        "thumb_path"            : self.thumb_path.name,
-        "spayed_or_neutered"    : self.spayed_or_neutered,
-        "pet_name"              : self.pet_name,
-        "age"                   : self.age,
-        "color"                 : self.color,
-        "breed"                 : self.breed,
-        "description"           : self.description,
-        "closed"                : self.closed 
+    def to_DICT(self):
+        return {
+            "id"                    : self.id,
+            "pet_type"              : self.pet_type,
+            "status"                : self.status,
+            "date_lost_or_found"    : self.date_lost_or_found.strftime("%B %d, %Y"),
+            "proposed_by_username"  : self.proposed_by.user.username,
+            "proposed_by_id"        : self.proposed_by.id,
+            "sex"                   : self.sex,
+            "size"                  : self.size,
+            "event_tag"             : self.event_tag,
+            "location"              : self.location,
+            "geo_lat"               : str(self.geo_location_lat),
+            "geo_long"              : str(self.geo_location_long),
+            "microchipped"          : "Yes" if (self.microchip_id not in ["", None]) else "No" ,
+            "tag_info"              : self.tag_info,
+            "contact_name"          : self.contact_name,
+            "contact_number"        : self.contact_number,
+            "contact_email"         : self.contact_email,
+            "contact_link"          : self.contact_link,
+            "img_path"              : self.img_path.name,
+            "thumb_path"            : self.thumb_path.name,
+            "spayed_or_neutered"    : self.spayed_or_neutered,
+            "pet_name"              : self.pet_name,
+            "age"                   : self.age,
+            "color"                 : self.color,
+            "breed"                 : self.breed,
+            "description"           : self.description,
+            "closed"                : self.closed
         }
 
     def to_JSON(self):
-        return json.dumps(self.to_DICT())                  
+        return json.dumps(self.to_DICT())
 
     #Determine if the input UserProfile (user) has bookmarked this PetReport already
     def UserProfile_has_bookmarked(self, user_profile):
@@ -158,62 +158,75 @@ class PetReport(models.Model):
         else:
             self.save()
 
-    #Make and save images from img_path and thumb_path AND save the PetReport.
-    # pr.set_images(pr.img_path, save=True, rotation=img_rotation)
-
-
-    #This function returns True if any marked-successful PetCheck object has been set involving this PetReport, False otherwise.
+    #This function returns True if any marked-successful PetMatchCheck object has been set involving this PetReport, False otherwise.
     def has_been_successfully_matched(self):
-        for pm in self.get_all_PetMatches():
-            if pm.is_being_checked() == True:
-                if pm.petcheck.is_successful == True:
-                    return True
+        pmc = self.get_PetMatchCheck()
+        if pmc != None:
+            return pmc.is_successful
         return False
 
-    def get_all_PetMatches(self):
-        if self.status == "Lost":
-            return list(models.get_model("matching", "PetMatch").objects.filter(lost_pet=self))
-        elif self.status == "Found":
-            return list(models.get_model("matching", "PetMatch").objects.filter(found_pet=self))
+    #Return the PetReport that was successfully matched with this one.
+    def get_matched_PetReport(self):
+        pmc = self.get_PetMatchCheck()
+        if pmc.petmatch.lost_pet != self:
+            return pmc.petmatch.found_pet
+        elif pmc.petmatch.found_pet != self:
+            return pmc.petmatch.lost_pet
         else:
-            return None      
-    
+            return None
+
+    def get_PetMatchCheck(self):
+        for pm in self.get_all_PetMatches():
+            if pm.is_being_checked() == True:
+                return pm.petmatchcheck
+        return None
+
+    def get_PetReunion(self):
+        from verifying.models import PetReunion
+        try:
+            return self.petreunion
+        except ObjectDoesNotExist:
+            pr = PetReunion.objects.filter(matched_petreport=self)
+            if pr:
+                return pr[0]
+        return None
+
+    def get_all_PetMatches(self):
+        from matching.models import PetMatch
+        if self.status == "Lost":
+            return PetMatch.objects.filter(lost_pet=self)
+        elif self.status == "Found":
+            return PetMatch.objects.filter(found_pet=self)
+        else:
+            return None
+
     #set_img_path(): Sets the image path and thumb path for this PetReport. Save is optional.
     def set_images(self, img_path, save=True, rotation=None):
-        #Deal with the 'None' case.
-        if img_path == None:
+        if img_path == None: #Deal with the 'None' case.
             if self.pet_type == PETREPORT_PET_TYPE_DOG:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_DOG_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_DOG_IMAGE
-
             elif self.pet_type == PETREPORT_PET_TYPE_CAT:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_CAT_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_CAT_IMAGE
-
             elif self.pet_type == PETREPORT_PET_TYPE_BIRD:
-                self.img_path = PETREPORT_UPLOADS_DEFAULT_BIRD_IMAGE                    
+                self.img_path = PETREPORT_UPLOADS_DEFAULT_BIRD_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_BIRD_IMAGE
-
             elif self.pet_type == PETREPORT_PET_TYPE_HORSE:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_HORSE_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_HORSE_IMAGE
-
             elif self.pet_type == PETREPORT_PET_TYPE_RABBIT:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_RABBIT_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_RABBIT_IMAGE
-
             elif self.pet_type == PETREPORT_PET_TYPE_SNAKE:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_SNAKE_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_SNAKE_IMAGE
-
             elif self.pet_type == PETREPORT_PET_TYPE_TURTLE:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_TURTLE_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_TURTLE_IMAGE
-                
             else:
                 self.img_path = PETREPORT_UPLOADS_DEFAULT_OTHER_IMAGE
                 self.thumb_path = PETREPORT_THUMBNAILS_DEFAULT_OTHER_IMAGE
-
             if save == True:
                 self.save()
         else:
@@ -232,7 +245,7 @@ class PetReport(models.Model):
                 #Perform rotation (if it applies)
                 if rotation != None:
                     img = img.rotate(-int(rotation))
-                
+
                 self.img_path = PETREPORT_IMG_PATH + unique_img_name
                 self.thumb_path = PETREPORT_THUMBNAIL_PATH + unique_img_name
                 img.save(PETREPORT_UPLOADS_DIRECTORY + unique_img_name, "JPEG", quality=75)
@@ -246,7 +259,7 @@ class PetReport(models.Model):
                 self.img_path = img_path
                 self.thumb_path = img_path
 
-        
+
     @staticmethod
     def get_PetReport(status, pet_type, pet_name=None, petreport_id=None):
         try:
@@ -282,7 +295,7 @@ class PetReport(models.Model):
         with open(f) as read_file:
             data = read_file.readlines()
 
-        breeds = [breed.split("\n")[0] for breed in data]
+        breeds = [breed.split("\n")[0].replace('\r', '') for breed in data]
         return breeds
 
     @staticmethod
@@ -316,12 +329,23 @@ class PetReport(models.Model):
 
     #Return a count of candidate PetReports that could potentially be matches for this PetReport.
     def get_candidate_PetReports(self):
-        pets = PetReport.objects.exclude(status=self.status).filter(pet_type=self.pet_type, closed=False)
+        pets = PetReport.objects.exclude(status=self.status).filter(pet_type=self.pet_type).filter(closed=False)
         if (self.contact_email): #If this pet has an alternate contact, then all pets are fair game to match.
             return pets
 
         #otherwise, exclude pets that have the same proposer and no alternate contacts.
         return pets.exclude(proposed_by=self.proposed_by, contact_email=None)
+
+    #This method returns a ranked list of all PetReports found in the input specified list. This ranking is based on the PetReport compare() method.
+    def get_ranked_candidate_PetReports(self, candidates, page=None):
+        #Begin criteria ranking process: Sort/Rank based on how many similar PetReport features occur between target and candidate.
+        results = []
+        for candidate in candidates:
+            results.append((candidate, self.compare(candidate)))
+
+        #Perform sort w.r.t rankings.
+        results = [x for (x,y) in sorted(results, reverse=True, key=lambda x: x[1])]
+        return get_objects_by_page(results, page, limit=NUM_PETREPORTS_HOMEPAGE)
 
     #this function compares attributes of both pets and returns the number of matching attributes.
     def compare(self, petreport):
@@ -348,18 +372,7 @@ class PetReport(models.Model):
             rank += 1
         if self.color.lower() == petreport.color.lower(): #Color
             rank += 1
-        return rank  
-
-    #This method returns a ranked list of all PetReports found in the input specified list. This ranking is based on the PetReport compare() method.
-    def get_ranked_candidate_PetReports(self, candidates, page=None):
-        #Begin criteria ranking process: Sort/Rank based on how many similar PetReport features occur between target and candidate.
-        results = []            
-        for candidate in candidates:
-            results.append((candidate, self.compare(candidate))) 
-
-        #Perform sort w.r.t rankings.
-        results = [x for (x,y) in sorted(results, reverse=True, key=lambda x: x[1])]
-        return get_objects_by_page(results, page, limit=NUM_PETREPORTS_HOMEPAGE)
+        return rank
 
     #Determine if the input UserProfile (user) is a worker for this PetReport.
     def UserProfile_is_worker(self, user_profile):
@@ -376,7 +389,7 @@ class PetReport(models.Model):
         return True
 
     def __unicode__(self):
-        return '{ID{%s} %s %s name:%s}' % (self.id, self.status, self.pet_type, self.pet_name)
+        return '{ID{%s} %s %s name: %s, proposed_by: %s}' % (self.id, self.status, self.pet_type, self.pet_name, self.proposed_by.user.username)
 
     def long_unicode (self):
         str = "PetReport {\n\tpet_type: %s\n\tstatus: %s\n\tproposed_by: %s\n\t" % (self.pet_type, self.status, self.proposed_by)
@@ -386,24 +399,24 @@ class PetReport(models.Model):
 
     def convert_date_to_string(self):
         string = str(self.date_lost_or_found)
-        return str    
+        return str
 
 #The PetReport ModelForm
 class PetReportForm (ModelForm):
 
     '''Required Fields'''
-    pet_type            = forms.ChoiceField(label='Pet Type', choices = PET_TYPE_CHOICES, required = True, widget=forms.Select(attrs={"class":"form-control", "style":"width:100px"}))  
+    pet_type            = forms.ChoiceField(label='Pet Type', choices = PET_TYPE_CHOICES, required = True, widget=forms.Select(attrs={"class":"form-control", "style":"width:100px"}))
     status              = forms.ChoiceField(label="Pet Status", help_text="(Lost/Found)", choices = STATUS_CHOICES, required = True, widget=forms.Select(attrs={"class":"form-control","style":"width:100px"}))
     date_lost_or_found  = forms.DateField(label="Date Lost/Found", required = True,  widget = forms.DateInput(attrs={"class":"form-control", "style":"width:200px"}))
 
     '''Non-Required Fields'''
-    pet_name            = forms.CharField(label="Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:150px", "placeholder":"If Available"})) 
+    pet_name            = forms.CharField(label="Pet Name", max_length=PETREPORT_PET_NAME_LENGTH, required = False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:150px", "placeholder":"If Available"}))
     age                 = forms.ChoiceField(label="Age", choices=AGE_CHOICES,required = False, widget = forms.Select(attrs={"class":"form-control", "style":"width:100px"}))
     breed               = forms.CharField(label="Breed", max_length = PETREPORT_BREED_LENGTH, required = False, widget=forms.Select(attrs={"class": "breed-filter", "style":"width:200px; display:block;"}))
-    color               = forms.CharField(label="Coat Color(s)", max_length = PETREPORT_COLOR_LENGTH, required = False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:200px", "placeholder":"Example: Brown, White"}))    
+    color               = forms.CharField(label="Coat Color(s)", max_length = PETREPORT_COLOR_LENGTH, required = False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:200px", "placeholder":"Example: Brown, White"}))
     sex                 = forms.ChoiceField(label="Sex", choices = SEX_CHOICES, required = False, widget = forms.Select(attrs={"class":"form-control", "style":"width:100px"}))
     size                = forms.ChoiceField(label="Size of Pet", choices = SIZE_CHOICES, required = False, widget=forms.Select(attrs={"class":"form-control", "style":"width:200px"}))
-    event_tag           = forms.CharField(label="Event Tag", help_text="(tag your report to associate your pet with an event)", max_length = PETREPORT_EVENT_TAG_LENGTH , required=False, widget=forms.Select(attrs={"class":"form-control", "style":"width:300px; margin-bottom:10px;", "placeholder": "Event Tag"}))    
+    event_tag           = forms.CharField(label="Event Tag", help_text="(tag your report to associate your pet with an event)", max_length = PETREPORT_EVENT_TAG_LENGTH , required=False, widget=forms.Select(attrs={"class":"form-control", "style":"width:300px; margin-bottom:10px;", "placeholder": "Event Tag"}))
     location            = forms.CharField(label="Location", help_text="(Location where pet was lost/found)", max_length = PETREPORT_LOCATION_LENGTH , required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:500px; margin-bottom:10px;", "placeholder": "Write in general information, such as 'Boulder, CO'"}))
     geo_location_lat    = forms.FloatField(label="Geo Location Lat", help_text="(Latitude coordinate)", initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:245px; margin-bottom:10px;", "placeholder": "Latitude (Lat)"}))
     geo_location_long   = forms.FloatField(label="Geo Location Long", help_text="(Longitude coordinate)", initial=None, required=False, widget=forms.TextInput(attrs={"class":"form-control", "style":"width:245px; margin-bottom:10px;", "placeholder": "Longitude (Long)"}))
@@ -421,4 +434,3 @@ class PetReportForm (ModelForm):
         model = PetReport
         #exclude = ('revision_number', 'workers', 'proposed_by','bookmarked_by','closed', 'thumb_path')
         fields = ("status", "date_lost_or_found", "pet_type", "pet_name", "breed", "age", "color", "sex", "spayed_or_neutered", "size", "microchip_id", "img_path", "description", "event_tag", "location", "geo_location_lat", "geo_location_long", "tag_info", "contact_name", "contact_number", "contact_email", "contact_link")
-

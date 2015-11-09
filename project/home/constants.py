@@ -1,20 +1,17 @@
 import os
 from project.settings import STATIC_URL
 
-#Number of Tests
-NUMBER_OF_TESTS = 10
-
 #URLS - use for redirect calls
 URL_HOME = '/'
-URL_GET_ACTIVITIES = "/get_activities_json"
-URL_GET_BOOKMARKS = "/get_bookmarks"
+URL_GET_ACTIVITIES_JSON = "/get_activities"
+URL_GET_BOOKMARKS_JSON = "/get_bookmarks"
 URL_LOGIN = '/login'
+URL_LOGOUT = '/logout'
 URL_REGISTRATION = "/accounts/register/"
 URL_REGISTRATION_COMPLETE = "/register/complete/"
 URL_ACTIVATION_COMPLETE = "/accounts/activate/complete/"
 URL_SOCIAL_AUTH_GET_DETAILS = "/social_auth_get_details"
 URL_SOCIAL_AUTH_COMPLETE = "/complete/"
-
 
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"
@@ -24,6 +21,7 @@ HTML_500 = "home/500.html"
 HTML_LOGIN = "home/login.html"
 HTML_REGISTRATION_FORM = "registration/register.html"
 HTML_SOCIAL_AUTH_FORM = "registration/social_auth_form.html"
+HTML_STATS = "home/stats.html"
 
 #E-mail Constants
 EMAIL_SUBJECT_PETMATCH_PROPOSER='EmergencyPetMatcher: Your pet match is close to being successful!'
@@ -70,10 +68,10 @@ ACTIVITIES = {
   "ACTIVITY_PETMATCH_PROPOSED"              : {"reward": 15,  "source":"petmatch"},
   "ACTIVITY_PETMATCH_UPVOTE"                : {"reward":  2,  "source":"petmatch"},
   "ACTIVITY_PETMATCH_DOWNVOTE"              : {"reward":  2,  "source":"petmatch"},
-  "ACTIVITY_PETCHECK_VERIFY"                : {"reward":  5,  "source":"petcheck"},
-  "ACTIVITY_PETCHECK_VERIFY_SUCCESS"        : {"reward": 20,  "source":"petcheck"},
-  "ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER"  : {"reward": 40,  "source":"petcheck"},
-  "ACTIVITY_PETCHECK_VERIFY_FAIL"           : {"reward": 10,  "source":"petcheck"}
+  "ACTIVITY_PETMATCHCHECK_VERIFY"           : {"reward":  5,  "source":"petmatchcheck"},
+  "ACTIVITY_PETMATCHCHECK_VERIFY_SUCCESS"   : {"reward": 20,  "source":"petmatchcheck"},
+  "ACTIVITY_PETMATCHCHECK_VERIFY_FAIL"      : {"reward": 10,  "source":"petmatchcheck"},
+  "ACTIVITY_PETREUNION_CREATED"             : {"reward": 10,  "source":"petreunion"}
 }
 
 ACTIVITY_SOCIAL_ACTIVITIES = [
@@ -84,11 +82,11 @@ ACTIVITY_SOCIAL_ACTIVITIES = [
   "ACTIVITY_PETMATCH_PROPOSED", 
   "ACTIVITY_PETMATCH_UPVOTE", 
   "ACTIVITY_PETMATCH_DOWNVOTE",
-  "ACTIVITY_PETCHECK_VERIFY",
-  "ACTIVITY_PETCHECK_VERIFY_SUCCESS",
-  "ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER",
-  "ACTIVITY_PETCHECK_VERIFY_FAIL",
-  "ACTIVITY_SOCIAL_FOLLOW"
+  "ACTIVITY_PETMATCHCHECK_VERIFY",
+  "ACTIVITY_PETMATCHCHECK_VERIFY_SUCCESS",
+  "ACTIVITY_PETMATCHCHECK_VERIFY_FAIL",
+  "ACTIVITY_SOCIAL_FOLLOW",
+  "ACTIVITY_PETREUNION_CREATED"
 ]
 
 #Activity Model Field Length

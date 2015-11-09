@@ -1,13 +1,11 @@
-/*CSS for the edit profile page*/
-
-
 #userprofile-dashboard {
 	margin: 10px auto;
-	width: 720px;
+	border-top:1px solid lightgray;
+	border-bottom:1px solid lightgray;
+	padding:5px 0px;	
 }
 
 #userprofile-dashboard-info {
-	width:480px;
 	display:inline-block;
 	margin-left:10px;
 	vertical-align:top;
@@ -18,10 +16,8 @@
 }
 
 #user-info-table {
-	height:150px;
+	height:260px;
 	display:inline-block;
-	border:1px solid darkgrey;
-	border-radius:5px;
 }
 
 #user-info-table .user-info-header {
@@ -43,7 +39,7 @@
 	margin:10px auto 30px auto;
 	min-width: 200px;
 	border-bottom:1px solid lightgray;
-	height: 125px;
+	/*height: 125px;*/
 	overflow: auto;
 	overflow-y:hidden;
 	white-space: nowrap;	
@@ -58,13 +54,12 @@
 }
 
 .userprofile-img-wrapper {
-	max-height: 250px;
 	display:inline-block;
 }
 
 .userprofile-img-wrapper img {
-	max-height:245px;
-	width:225px;
+	height:260px;
+	width:240px;
 }
 
 

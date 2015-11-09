@@ -1,0 +1,15 @@
+<table id="user-info-table" class="epm-table table table-hover">
+  <tbody>
+    <tr><td class="user-info-header">Description</td><td class="user-info-data">{{ show_profile.description }}</td></tr> 
+    <tr><td class="user-info-header">Pet Points</td><td class="user-info-data">{{ show_profile.reputation }}</td></tr>                           
+    <tr><td class="user-info-header">Pet Reports Created</td><td class="user-info-data">{{ show_profile.get_reported_PetReports|length }}</td></tr>             
+    <tr><td class="user-info-header">Pet Matches Proposed</td><td class="user-info-data">{{ show_profile.get_proposed_PetMatches|length }}</td></tr>             
+    <tr><td class="user-info-header">Pet Matches Voted</td><td class="user-info-data">{{ show_profile.get_voted_PetMatches|length }}</td></tr>             
+
+    {% if show_profile.id == userprofile.id %} 
+      <tr><td class="user-info-header">First Name</td><td class="user-info-data">{{ show_profile.user.first_name }}</td></tr>
+      <tr><td class="user-info-header">Last Name</td><td class="user-info-data">{{ show_profile.user.last_name }}</td></tr>             
+      <tr><td class="user-info-header">Email</td><td class="user-info-data">{{ show_profile.user.email }}</td></tr>             
+    {% endif %}
+  </tbody>        
+</table>      

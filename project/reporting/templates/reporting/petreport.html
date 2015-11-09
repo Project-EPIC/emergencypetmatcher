@@ -2,42 +2,55 @@
 {% load staticfiles %}
 {% load petreport_tags %}
 
+{% block head_title %}{{ pet_report.pet_name }} - {{ pet_report.status }} {{ pet_report.pet_type }}{% endblock head_title %}
+
+{% block meta %}
+  <meta property="og:title" content="{{ pet_report.pet_name }} - {{ pet_report.status }} {{ pet_report.pet_type }}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.emergencypetmatcher.com/reporting/{{ pet_report.id }}" />
+  <meta property="og:description" content="{{ pet_report.description }}" />
+  <meta property="og:image" content="{{ MEDIA_URL }}{{ pet_report.img_path }}" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="400" />
+  <meta property="og:image:height" content="300" />
+{% endblock meta %}
+
 {% block css %}
   <link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
   <link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>
 {% endblock css %}
 
-{% block js %} 
+{% block js %}
   <script type="text/javascript">
     var BOOKMARKED = "{{ user_has_bookmarked }}";
     var USER_ID = "{{ user.id }}";
     var PETREPORT_ID =  "{{ pet_report.id }}";
-    var PETREPORT_URL = 'http://{{ site_domain }}/reporting/{{ pet_report.id }}';
-    var PETREPORT_IMAGE = 'http://{{ site_domain }}{{ STATIC_URL }}{{ pet_report.img_path }}';
-    var PETREPORT_TITLE = 'Pet reporting on #emergencypetmatcher';
-    var PETREPORT_CAPTION ='EmergencyPetMatcher';
-    var PETREPORT_SUMMARY = '{{ pet_report.status }} {{ pet_report.pet_type }} (Name: {{ pet_report.pet_name }}) is now listed online.';
-  </script>    
-  <script src = {% static "reporting/js/epm-petreport.js" %} type='text/javascript'></script>       
-{% endblock js %} 
-{% block headers %} {% endblock headers %} 
+  </script>
+  <script src = {% static "reporting/js/epm-petreport.js" %} type='text/javascript'></script>
+{% endblock js %}
+{% block headers %} {% endblock headers %}
 
 {% block content %}
-  <div id="content" style="width:800px;">   
+  <div id="content" style="width:800px;">
+
+    <div id='share'>
+      <a style="padding:0px;" class="twitter-share-button share-button" href="https://twitter.com/intent/tweet?url=http://www.emergencypetmatcher.com/reporting/{{ pet_report.id}}" data-counturl="http://emergencypetmatcher.com/reporting/{{ pet_report.id }}">Tweet</a>
+      <div class="btn fb-share-button share-button" data-href="https://emergencypetmatcher.com/reporting/{{ pet_report.id }}" data-layout="button_count"></div>
+    </div>
+
     <!-- Title -->
-    <a class="epm-dialog-title" href="/">EmergencyPetMatcher</a>
-    <strong class="epm-dialog-title"> 
+    <strong class="epm-dialog-title">
       {% if pet_report.pet_name != "" %}{{ pet_report.pet_name }}{% else %} Unknown {% endif %}
     </strong>
 
-    {% if pet_report.event_tag != None %}
+    {% if pet_reunion %}
       <strong class="epm-dialog-title" style='margin-bottom:10px;'>
-        <span class="label label-primary">{{ pet_report.event_tag }}</span>
-      </strong>    
+        <label class="label label-{{ pet_reunion.get_display_reason }}"> {{ pet_reunion.get_display_reason }}</label>
+      </strong>
     {% endif %}
 
     <!-- Some logic to give nice header for number of workers -->
-    <span style="display:block; text-align:center; color:gray;"> 
+    <span style="display:block; text-align:center; color:gray;">
       {% if num_workers > 1 %}
         {% if user_is_worker %}
           You and <strong style="font-size:18px;">{{ num_workers|add:"-1" }}</strong> people are working on this pet.
@@ -52,21 +65,26 @@
         {% endif %}
       {% else %}
         Nobody is working on this pet yet.
-      {% endif %}  
+      {% endif %}
     </span>
 
     <!-- Proposed_by link -->
     <span style="text-align:center; display:block">
       {% if edit_petreport %}
-        <a href="{% url 'edit' pet_report.id %}">Edit This Pet Report </a>
+        <a href="{% url 'edit_PetReport' pet_report.id %}">Edit This Pet Report </a>
       {% else %}
-        Proposed by <a href="{% url 'get_UserProfile_page' pet_report.proposed_by.id %}">{{ pet_report.proposed_by.user.username }}</a>
+        Proposed by <a href="{% url 'get_UserProfile' pet_report.proposed_by.id %}">{{ pet_report.proposed_by.user.username }}</a>
       {% endif %}
-    </span>      
+    </span>
 
-    {% if not user.is_authenticated %}
+    {% if not user.is_authenticated and not pet_report.closed %}
       <h4 style="text-align:center;"> You need to be logged in to match this pet.</h4>
-    {% endif %}          
+    {% endif %}
+
+    {% if pet_report.closed %}
+      <div class="alert alert-info" role="alert" style="font-weight:bold; text-align:center; margin:20px;">
+      This Pet Report has been <a href="{% url 'get_PetReunion' pet_reunion.id %}">closed</a>.</div>
+    {% endif %}
 
     <div id="prdp-overview">
       <!-- PRDP Image -->
@@ -76,11 +94,10 @@
     </div>
 
     <!-- Proposed Pet Matches -->
-    {% if matches %}    
-      <hr/>
-      <h4 style="text-align:center;"> Proposed Pet Matches </h4> 
-      <div id="prdp_pet_thumb_container" class="pet_thumb_container" style="margin-left:auto; margin-right:auto;"> 
-        {% for pet_match in matches %} 
+    {% if matches %}
+      <h4 style="text-align:center;"> Proposed Pet Matches </h4>
+      <div id="prdp_pet_thumb_container" class="pet_thumb_container" style="margin-left:auto; margin-right:auto;">
+        {% for pet_match in matches %}
           <div class="thumb-wrapper">
               <a link = "{% url 'get_PetMatch' pet_match.id %}" name = "{{ pet_match.lost_pet.pet_name }} and {{ pet_match.found_pet.pet_name }}"
                 title="{{ pet_match.lost_pet.pet_name }}: Lost {{ pet_match.lost_pet.pet_type }} / {{ pet_match.found_pet.pet_name }}: Found {{ pet_match.found_pet.pet_type }}">
@@ -91,19 +108,18 @@
           </div>
         {% endfor %}
       </div>
-    {% endif %}        
+      <hr/>
+    {% endif %}
 
-    <div class="modal-footer" >
-      <button id="prdp-share" type="button" class="btn btn-info btn-lg">Share</button>
+
+    <div class="modal-footer">
       {% if user.is_authenticated %}
         {% csrf_token %}
-        <button id="prdp-bookmark" type="button" class="btn btn-success btn-lg">Bookmark</button>
-        {% if not pet_has_been_successfully_matched %}
-          <a href="{% url 'match' pet_report.id%}" type="button" class="btn btn-primary btn-lg">Match this Pet</a>
+        <button id="prdp-bookmark" type="button" class="btn btn-default btn-lg">Bookmark</button>
+        {% if not pet_report.closed %}
+          <a href="{% url 'match_PetMatch' pet_report.id%}" type="button" class="btn btn-primary btn-lg" style="margin-left:0px;">Match this Pet</a>
         {% endif %}
       {% endif %}
-    </div>   
+    </div>
   </div>
 {% endblock content %}
-
-

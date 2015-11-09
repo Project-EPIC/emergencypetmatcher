@@ -1,17 +1,16 @@
 from project.settings import MEDIA_ROOT
 
-#Number of Tests
-NUMBER_OF_TESTS = 10
-
 #URLs
-URL_GET_PETREPORTS = "/get_PetReports"
+URL_GET_PETREPORTS_JSON = "/reporting/get_PetReports_JSON"
 URL_PRDP = '/reporting/'
-URL_SUBMIT_PETREPORT ='/reporting/new'
+URL_PETREPORT_FORM ='/reporting/new'
+URL_SUBMIT_PETREPORT="/reporting/new"
 URL_EDIT_PETREPORT ='/reporting/edit/'
-URL_GET_PET_BREEDS = "/reporting/get_pet_breeds/"
-URL_BOOKMARK_PETREPORT = "/reporting/bookmark_PetReport"
+URL_GET_PET_BREEDS = "/reporting/get_pet_breeds"
+URL_BOOKMARK_PETREPORT = "/reporting/bookmark"
+URL_CLOSE_PETREPORT = "/reporting/close/"
 
-HTML_SUBMIT_PETREPORT = "reporting/petreport_form.html"
+HTML_PETREPORT_FORM = "reporting/petreport_form.html"
 HTML_PRDP = "reporting/petreport.html"
 HTML_EDIT_PETREPORT = "reporting/edit_petreport.html"
 
@@ -62,7 +61,6 @@ PETREPORT_PET_TYPE_RABBIT = "Rabbit"
 PETREPORT_PET_TYPE_SNAKE = "Snake"
 PETREPORT_PET_TYPE_TURTLE = "Turtle"
 PETREPORT_PET_TYPE_OTHER = "Other"
-
 
 #PetReport Image Paths
 PETREPORT_IMG_PATH = "petreport/uploads/"

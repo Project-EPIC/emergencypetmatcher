@@ -1,8 +1,8 @@
-Hi there, 
+Hi there,
 
 This message is to inform you that you have changed your email on your account on the EmergencyPetMatcher system. Please verify your email by clicking on the link below:
 
-http://{{ site.domain }}{% url 'email_verification_complete' activation_key %}
+http://{{ site.domain }}{% url 'email_verification_complete_UserProfile' activation_key %}
 
 The link is valid for {{ expiration_days }} day(s).
 

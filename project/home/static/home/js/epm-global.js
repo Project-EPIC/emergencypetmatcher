@@ -2,8 +2,8 @@
 HOME_URLS = {
     "HOME":                 "/",
     "LOGIN":                "/login",
-    "ACTIVITIES_DATA":      "/get_activities/",
-    "BOOKMARKS_DATA":       "/get_bookmarks/",    
+    "ACTIVITIES_DATA":      "/get_activities",
+    "BOOKMARKS_DATA":       "/get_bookmarks",
 }
 
 SOCIALIZING_URLS = {
@@ -11,30 +11,74 @@ SOCIALIZING_URLS = {
 }
 
 REPORTING_URLS = {
-    "PETREPORT_JSON":       "/reporting/get_PetReport_JSON/",
-    "PETREPORTS_JSON":      "/reporting/get_PetReports_JSON/",    
+    "PETREPORT_JSON":       "/reporting/get_PetReport_JSON",
+    "PETREPORTS_JSON":      "/reporting/get_PetReports_JSON",
     "PETREPORT":            "/reporting/",
-    "PET_BREEDS":           "/reporting/get_pet_breeds/",
+    "PET_BREEDS":           "/reporting/get_pet_breeds",
     "BOOKMARK":             "/reporting/bookmark/",
-    "EVENT_TAGS":           "/reporting/get_event_tags/",
+    "EVENT_TAGS":           "/reporting/get_event_tags",
 }
 
 MATCHING_URLS = {
-    "PETMATCH_JSON":        "/matching/get_PetMatch_JSON/",    
-    "PETMATCHES_JSON":      "/matching/get_PetMatches_JSON/",    
+    "PETMATCH_JSON":        "/matching/get_PetMatch_JSON",
+    "PETMATCHES_JSON":      "/matching/get_PetMatches_JSON",
     "PETMATCH":             "/matching/",
-    "CANDIDATE_PETREPORTS": "/matching/get_candidate_PetReports",
+    "CANDIDATE_PETREPORTS": "/matching/get_candidate_PetReports_JSON",
     "MATCH":                "/matching/new/",
     "PROPOSE":              "/matching/propose/",
     "VOTE":                 "/matching/vote/",
 }
 
+VERIFYING_URLS = {
+    "PETREUNIONS_JSON":     "/verifying/get_PetReunions_JSON",
+    "PETREUNION":           "/verifying/"
+}
+
+//Twitter Asynchronous loading for Sharing.
+window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+    t._e.push(f);
+  };
+  return t;
+}(document, "script", "twitter-wjs"));
+
+//Facebook asynchronous loading for sharing.
+(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5&appId=315409715220911";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+
 
 /******************************* Utility functions *******************************************/
 
 $(document).ready(function(){
-    flash_message()
+    flash_message();
+
+    //Reunion Labels
+    $(".label-Reunited").addClass("label-success");
+    $(".label-Rehomed").addClass("label-primary");
+    $(".label-RIP").addClass("label-default");
+    $(".label-Closed").addClass("label-default");
+    $(".label-Lost").addClass("label-danger");
+    $(".label-Found").addClass("label-warning");
+
 });
+
+function recaptcha_done(){
+    $('#id_submit').removeAttr('disabled');
+}
 
 function flash_message(){
     $(".epm-alert").removeClass("hidden").delay(3500).fadeOut();
@@ -59,35 +103,6 @@ function add_flash_message(status, message){
     flash_message()
 }
 
-function share_on_facebook(url, image, title, caption, summary) {
-    var obj = {
-        method: 'feed',
-        redirect_uri: url,
-        link: url,
-        picture: image,
-        name: title,
-        caption: caption,
-        description: summary           
-    };
-
-    function callback(response) {
-        if (response && response.post_id){
-            alert('The callback function returned a response!');
-        }
-        else{
-            alert("You clicked Cancel button!");
-        }
-    }
-    FB.ui(obj, callback);
-    return false;
-}
-
-function share_on_twitter(url, image, title, summary){
-    title = escape(title);
-    summary = escape(summary);
-	window.open('http://twitter.com/share?url=' + url + '&text=' + title + ': ' + summary, 'newWindow', 'width=700, height=430');
-}
-
 //Helper for setting up PetReport Tile.
 function setup_petreport_item(report){
     var item = document.createElement("li");
@@ -98,7 +113,7 @@ function setup_petreport_item(report){
 
     //Link attributes.
     $(item).addClass("pet-item");
-    $(alink).attr("identity", report.ID);    
+    $(alink).attr("identity", report.ID);
     $(alink).attr("href", (REPORTING_URLS["PETREPORT"] + report.ID));
 
     //Pet Img attributes.
@@ -125,11 +140,61 @@ function setup_petreport_item(report){
     $(title).append("<b>" + report.pet_name + "</b>");
     $(title).append(ribbon);
     $(alink).append(title);
-    $(alink).append("<span style='display:block; text-align:center;'>Contact: " + report.proposed_by_username + "</span>");                 
+    $(alink).append("<span style='display:block; text-align:center;'>Contact: " + report.proposed_by_username + "</span>");
     $(alink).append(pet_img);
-    $(item).append(alink);                 
+    $(item).append(alink);
     return item;
-} 
+}
+
+//Helper for setting up PetReunion Tile.
+function setup_petreunion_item(reunion){
+    var item = document.createElement("li");
+    var alink = document.createElement("a");
+    var pet_img = document.createElement("img");
+    var ribbon = document.createElement("span");
+    var title = document.createElement("div");
+
+    //Link attributes.
+    $(item).addClass("pet-item");
+    $(alink).attr("identity", reunion.ID);
+    $(alink).attr("href", (VERIFYING_URLS["PETREUNION"] + reunion.ID));
+
+    //Pet Img attributes.
+    $(pet_img).attr("src", MEDIA_URL + reunion.img_path);
+    $(pet_img).width(150);
+    $(pet_img).height(150);
+    $(pet_img).css("margin", "0 auto");
+    $(pet_img).css("display", "block");
+
+    //Ribbon Attributes.
+    $(title).css("text-align", "center");
+    $(title).css("margin-bottom", "5px");
+    switch(reunion.reason){
+        case "Reunited":
+        $(ribbon).addClass("label label-success");
+        break;
+        case "Rehomed":
+        $(ribbon).addClass("label label-primary");
+        break;
+        case "RIP":
+        $(ribbon).addClass("label label-default");
+        break;
+        case "Closed":
+        $(ribbon).addClass("label label-default");
+        break;
+    }
+
+    $(ribbon).html(reunion.reason);
+
+    //Appends
+    $(title).append("<b>" + reunion.pet_name + "</b>");
+    $(title).append(ribbon);
+    $(alink).append(title);
+    $(alink).append("<span style='display:block; text-align:center;'>Contact: " + reunion.proposed_by_username + "</span>");
+    $(alink).append(pet_img);
+    $(item).append(alink);
+    return item;
+}
 
 //Helper for setting up PetMatch Tile.
 function setup_petmatch_item (match){
@@ -147,31 +212,31 @@ function setup_petmatch_item (match){
     $(lost_pet_img).width(150);
     $(lost_pet_img).height(150);
     $(lost_pet_img).css("margin", "5px auto");
-    $(lost_pet_img).css("display", "block");    
+    $(lost_pet_img).css("display", "block");
     $(found_pet_img).width(150);
     $(found_pet_img).height(150);
     $(found_pet_img).css("margin", "5px auto");
-    $(found_pet_img).css("display", "block");   
+    $(found_pet_img).css("display", "block");
     $(lost_pet_img).css("border", "white solid 1px");
     $(found_pet_img).css("border", "white solid 1px");
 
     //Appends
     $(alink).append("<b style='display:block; text-align:center;'>" + match.lost_pet_name + " with " + match.found_pet_name + "</b>");
-    $(alink).append("<span style='display:block; text-align:center;'>Contact: " + match.proposed_by_username + "</span>");                  
+    $(alink).append("<span style='display:block; text-align:center;'>Contact: " + match.proposed_by_username + "</span>");
     $(alink).append(lost_pet_img);
     $(alink).append(found_pet_img);
-    $(item).append(alink);              
+    $(item).append(alink);
     return item;
 }
 
 //Helper for setting up Activity Item Tile.
 function setup_activity_item (activity){
-    //Deal with Activity Attributes and Elements.
     var activity_type       = activity.activity;
     var source_id           = null;
     var source_thumb_path   = null;
     var text                = activity.text;
-    var username            = text.split(" ")[0];
+    var text_slices         = text.split(" ");
+    var username            = text_slices[0];
 
     if (activity.source != null){
         source_id           = activity.source.id
@@ -185,12 +250,12 @@ function setup_activity_item (activity){
     var date            = document.createElement("div");
     var text_element    = document.createElement("p");
 
-    $(item).addClass("activity-item");  
+    $(item).addClass("activity-item");
     $(profile_link).attr("href", SOCIALIZING_URLS["USERPROFILE"] + activity.profile.id).html(activity.profile.username);
     $(profile_img).attr("src", MEDIA_URL + activity.profile.thumb_path);
     $(date).addClass("date").html(activity.date_posted);
     $(item).append(profile_img);
-    $(text_element).append(profile_link);    
+    $(text_element).append(profile_link);
 
     //Grab image paths and organize them.
     if (source_thumb_path != null){
@@ -199,38 +264,38 @@ function setup_activity_item (activity){
             source_thumb_path = [source_thumb_path];
 
         for (var i = 0; i < source_thumb_path.length; i++){
-            source_img = document.createElement("img");    
+            source_img = document.createElement("img");
             $(source_img).attr("src", MEDIA_URL + source_thumb_path[i]);
             $(source_img_div).append(source_img);
         }
     }
 
     //Use this for PetMatch activity item preparation.
-    var petmatch_options = {    
+    var petmatch_options = {
         "item": item,
         "text": text,
         "source_id": source_id,
         "source_img_div": source_img_div,
         "text_element": text_element
-    };    
+    };
 
     //Now create the activity.
     switch(activity_type){
         case "ACTIVITY_ACCOUNT_CREATED":
         case "ACTIVITY_USER_SET_PHOTO":
         case "ACTIVITY_USER_CHANGED_USERNAME":
-        text = text.split(" ").slice(1).join(" ");
+        text = text_slices.slice(1).join(" ");
         $(text_element).append(" ");
         $(text_element).append(text);
         $(item).append(text_element);
-        break;        
+        break;
 
         case "ACTIVITY_SOCIAL_FOLLOW":
-        followed_username = text.split(" ")[4];
-        text = text.split(" ").slice(1, 4).join(" ");
+        followed_username = text_slices[4];
+        text = text_slices.slice(1, 4).join(" ");
         follow_link = document.createElement("a");
         $(follow_link).attr("href", SOCIALIZING_URLS["USERPROFILE"] + source_id);
-        $(follow_link).html(followed_username);        
+        $(follow_link).html(followed_username);
         $(text_element).append(" ");
         $(text_element).append(text);
         $(text_element).append(" ");
@@ -240,8 +305,8 @@ function setup_activity_item (activity){
         break;
 
         case "ACTIVITY_PETREPORT_SUBMITTED":
-        pet_name = text.split(" ")[6];
-        text = text.split(" ").slice(1, 6).join(" ");
+        pet_name = text_slices[6];
+        text = text_slices.slice(1, 6).join(" ");
         pet_link = document.createElement("a");
         $(pet_link).attr("href", REPORTING_URLS["PETREPORT"] + source_id);
         $(pet_link).html(pet_name);
@@ -264,31 +329,48 @@ function setup_activity_item (activity){
         setup_petmatch_activity_item(petmatch_options);
         break;
 
-        case "ACTIVITY_PETCHECK_VERIFY":
+        case "ACTIVITY_PETMATCHCHECK_VERIFY":
         petmatch_options["source_id"] = activity.source.petmatch.id
         petmatch_options["name_offset"] = 6;
         setup_petmatch_activity_item(petmatch_options);
         break;
 
-        case "ACTIVITY_PETCHECK_VERIFY_SUCCESS":
+        case "ACTIVITY_PETMATCHCHECK_VERIFY_SUCCESS":
         petmatch_options["source_id"] = activity.source.petmatch.id
         petmatch_options["name_offset"] = 6
         setup_petmatch_activity_item(petmatch_options);
         break;
 
-        case "ACTIVITY_PETCHECK_VERIFY_SUCCESS_OWNER":
+        case "ACTIVITY_PETMATCHCHECK_VERIFY_SUCCESS_OWNER":
         petmatch_options["source_id"] = activity.source.petmatch.id
         petmatch_options["name_offset"] = 6
         setup_petmatch_activity_item(petmatch_options);
-        break;        
+        break;
 
-        case "ACTIVITY_PETCHECK_VERIFY_FAIL":
+        case "ACTIVITY_PETMATCHCHECK_VERIFY_FAIL":
         petmatch_options["source_id"] = activity.source.petmatch.id
         petmatch_options["name_offset"] = 7
         setup_petmatch_activity_item(petmatch_options);
         break;
 
-        default: 
+        case "ACTIVITY_PETREUNION_CREATED":
+        petreunion = text_slices.slice(2, 6).join(" ");
+        pet_name = text_slices[7];
+        pet_reunion_link = document.createElement("a");
+        pet_link = document.createElement("a");
+        $(pet_reunion_link).attr("href", VERIFYING_URLS["PETREUNION"] + source_id);
+        $(pet_reunion_link).html(petreunion);
+        $(pet_link).attr("href", REPORTING_URLS["PETREPORT"] + activity.source.petreport_id);
+        $(pet_link).html(pet_name);
+        $(text_element).append(" " + text_slices[1] + " ");
+        $(text_element).append(pet_reunion_link);
+        $(text_element).append(" " + text_slices[6] + " ");
+        $(text_element).append(pet_link);
+        $(item).append(text_element);
+        $(item).append(source_img_div);
+        break;
+
+        default:
         $(text_element).html(text);
         $(item).append(text_element);
     }
@@ -342,15 +424,18 @@ function highlight_field_matches(table){
     var rows = $(table).find("tbody tr")
     $(rows).each(function(index, row){
         var pet_rows = $(row).find(".pet-info-data")
-        var first_pet_info = pet_rows[0]
-        var second_pet_info = pet_rows[1]
+        if (pet_rows [0] == undefined || pet_rows [1] == undefined)
+            return true;
+
+        var first_pet_info = pet_rows [0];
+        var second_pet_info = pet_rows [1];
         if (first_pet_info.innerHTML.trim() == second_pet_info.innerHTML.trim()){
-            $(first_pet_info).css("color", "#428bca")
-            $(second_pet_info).css("color", "#428bca")
+            $(first_pet_info).css("color", "deepskyblue")
+            $(second_pet_info).css("color", "deepskyblue")
         }
         else {
             $(first_pet_info).css("color", "black")
-            $(second_pet_info).css("color", "black")            
+            $(second_pet_info).css("color", "black")
         }
     });
 }
@@ -377,12 +462,3 @@ function load_pet_breeds (pet_type, callback){
         error: function (data){ return [];}
     });
 }
-
-
-
-
-
-
-
-
-

@@ -1,3 +1,8 @@
+#share {
+	width:100%;
+	float:right;
+}
+
 .prdp-thumb {
 	height:70px;
 	width:70px;
@@ -5,6 +10,16 @@
 
 #petreport_form .form-group label{
 	font-family:epm-font-bolder;
+}
+
+#reunion_description {
+	width:400px;
+	height:100px;
+	margin: 20px auto;
+}
+
+#id_close {
+	float:right;
 }
 
 #preview_img {
@@ -48,7 +63,9 @@
 #prdp-overview {
 	margin:10px auto 20px auto;
 	text-align: center;
-
+	border-top:1px solid lightgray;
+	border-bottom:1px solid lightgray;
+	padding:5px 0px;
 }
 
 #prdp-info-list {
@@ -79,7 +96,6 @@
 #prdp-info-table {
 	width: 480px;
 	height:300px;
-	border:1px solid darkgrey;
 	border-radius:5px;
 	display:inline-block;
 }

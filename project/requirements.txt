@@ -2,6 +2,7 @@ django
 django-pipeline
 lorem-ipsum-generator
 django-registration
+django-rainbowtests
 python-social-auth
 oauth2
 psycopg2

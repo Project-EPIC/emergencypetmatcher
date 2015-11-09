@@ -7,7 +7,7 @@ from django.db.models import Min
 from django.contrib import messages
 from django.contrib.messages.api import get_messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout, login, authenticate 
+from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.forms import *
 from django.core import mail
 from django.contrib.sites.models import Site
@@ -19,10 +19,11 @@ from pprint import pprint
 from home.models import Activity
 from reporting.models import PetReport
 from matching.models import PetMatch
-from verifying.models import PetCheck
+from verifying.models import PetMatchCheck
 from utilities.utils import *
 from constants import *
 from home.constants import *
+from matching.decorators import *
 import datetime, re, json, pdb, urllib, urllib2, ssl
 
 #Given a PetMatch ID, just return the PetMatch JSON.
@@ -31,24 +32,30 @@ def get_PetMatch_JSON(request, petmatch_id):
         petmatch = get_object_or_404(PetMatch, pk=petmatch_id)
         return JsonResponse({"petmatch":petmatch.to_DICT()}, safe=False)
     else:
-        raise Http404  
+        raise Http404
 
 def get_PetMatches_JSON(request):
     if request.is_ajax() == True:
-        successful_petmatches = True if request.GET["successful_petmatches"] == "true" else False
         page = int(request.GET["page"])
-        filtered_matches = PetMatch.objects.filter(is_successful=successful_petmatches, has_failed=False).order_by("id").reverse()
-        pet_matches = get_objects_by_page(filtered_matches, page, limit=NUM_PETMATCHES_HOMEPAGE)
-
+        if page < 1:
+            page = 1
+        filters = dict(request.GET)
+        filters.pop("page")
+        filters = {k:v[0].strip() for k,v in filters.items()}
+        pet_matches = PetMatch.objects.filter(**filters).filter(has_failed=False).order_by("id").reverse()
         #Get the petmatch count for pagination purposes.
-        petmatch_count = len(filtered_matches)
+        petmatch_count = len(pet_matches)
+        #Now get just a page of PetMatches if page # is available.
+        pet_matches = get_objects_by_page(pet_matches, page, limit=NUM_PETMATCHES_HOMEPAGE)
         #Zip it up in JSON and ship it out as an HTTP Response.
-        pet_matches = [{"ID"                    : pm.id, 
-                        "proposed_by_username"  : pm.proposed_by.user.username,
-                        "lost_pet_name"         : pm.lost_pet.pet_name, 
-                        "found_pet_name"        : pm.found_pet.pet_name, 
-                        "lost_pet_img_path"     : pm.lost_pet.thumb_path.name,
-                        "found_pet_img_path"    : pm.found_pet.thumb_path.name } for pm in pet_matches]
+        pet_matches = [{
+            "ID"                    : pm.id,
+            "proposed_by_username"  : pm.proposed_by.user.username,
+            "lost_pet_name"         : pm.lost_pet.pet_name,
+            "found_pet_name"        : pm.found_pet.pet_name,
+            "lost_pet_img_path"     : pm.lost_pet.thumb_path.name,
+            "found_pet_img_path"    : pm.found_pet.thumb_path.name
+        } for pm in pet_matches]
 
         return JsonResponse({"pet_matches_list":pet_matches, "count":len(pet_matches), "total_count": petmatch_count}, safe=False)
     else:
@@ -68,108 +75,95 @@ def get_PetMatch(request, petmatch_id):
     num_upvotes = len(pm.up_votes.all())
     num_downvotes = len(pm.down_votes.all())
 
-    if pm.is_successful == True:
-        messages.success(request, "These pet reports have been matched! Thank you digital volunteers!")
-    elif pm.has_failed == True:
-        messages.info(request, "Sorry, this match did not succeed in reuniting pet and pet owner.")
-    elif pm.is_being_checked() == True:
-        messages.info(request, "These pet reports are currently being checked by their owners! Votes are closed.")
-
-    return render_to_response(HTML_PMDP, {  
+    return render_to_response(HTML_PMDP, {
         "petmatch": pm,
         "site_domain":Site.objects.get_current().domain,
         "petreport_fields": pm.get_display_fields(),
-        "num_voters": len(voters), 
-        "user_has_voted": user_has_voted, 
-        "num_upvotes":num_upvotes, 
+        "num_voters": len(voters),
+        "user_has_voted": user_has_voted,
+        "num_upvotes":num_upvotes,
         "num_downvotes":num_downvotes
-    }, RequestContext(request))  
+    }, RequestContext(request))
 
-#Vote on the PetMatch    
 @login_required
-def vote(request):
+@allow_only_before_closing
+def vote(request, petmatch_id):
     if request.method == "POST":
         userprofile = request.user.userprofile
         vote = request.POST ['vote']
-        pm = get_object_or_404(PetMatch, pk=request.POST["match_id"])
-
-        print_info_msg ("VOTE: %s" % vote)
-        print_info_msg ("#UPVOTES: %d" % len(pm.up_votes.all()))
-        print_info_msg ("#DOWNVOTES: %d" % len(pm.down_votes.all()))
+        pm = get_object_or_404(PetMatch, pk=petmatch_id)
 
         if vote == "upvote":
-            # If the user is voting for the 1st time, add reputation points
-            if pm.UserProfile_has_voted(userprofile) is False:
+            if pm.UserProfile_has_voted(userprofile) is False: # If the user is voting for the 1st time, add reputation points
                 userprofile.update_reputation("ACTIVITY_PETMATCH_UPVOTE")
-            
+
             pm.up_votes.add(userprofile)
             pm.down_votes.remove(userprofile)
-
             Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", userprofile, source=pm)
             message = "You have upvoted this PetMatch!"
 
         elif vote == "downvote":
-            # If the user is voting for the 1st time, add reputation points
-            if pm.UserProfile_has_voted(userprofile) is False:
+            if pm.UserProfile_has_voted(userprofile) is False: # If the user is voting for the 1st time, add reputation points
                 userprofile.update_reputation("ACTIVITY_PETMATCH_DOWNVOTE")
-                
+
             pm.down_votes.add(userprofile)
             pm.up_votes.remove(userprofile)
             Activity.log_activity("ACTIVITY_PETMATCH_DOWNVOTE", userprofile, source=pm)
             message = "You have downvoted this PetMatch!"
 
         #Was the petmatch triggered for verification? Check here.
-        threshold_reached = pm.has_reached_threshold() 
-        
+        threshold_reached = pm.has_reached_threshold()
+
         #If the votes reach the threshold, prepare for pet checking!
         if threshold_reached == True:
-            new_check = PetCheck.objects.create(petmatch=pm)
-            Activity.log_activity("ACTIVITY_PETCHECK_VERIFY", userprofile, source=new_check)
-            message = new_check.verify_PetMatch()
-            
+            new_check = PetMatchCheck.objects.create(petmatch=pm)
+            Activity.log_activity("ACTIVITY_PETMATCHCHECK_VERIFY", userprofile, source=new_check)
+            message = new_check.send_messages_to_contacts()
+
         num_upvotes = len(pm.up_votes.all())
         num_downvotes = len(pm.down_votes.all())
 
-        return JsonResponse({ 
-            "vote":vote, 
-            "message":message, 
-            "threshold_reached": threshold_reached, 
-            "num_downvotes":num_downvotes, 
-            "num_upvotes":num_upvotes 
+        return JsonResponse({
+            "vote":vote,
+            "message":message,
+            "threshold_reached": threshold_reached,
+            "num_downvotes":num_downvotes,
+            "num_upvotes":num_upvotes
         }, safe=False)
 
     else:
         raise Http404
-
 
 @login_required
 def get_candidate_PetReports(request):
     if request.method == "GET" and request.is_ajax() == True:
         petreport_id = int(request.GET["target_petreport_id"])
         page = int(request.GET["page"])
+        if page < 1:
+            page = 1
         petreport = get_object_or_404(PetReport, pk=petreport_id)
         candidates = petreport.get_candidate_PetReports()
         candidates_count = len(candidates) #Get the candidate count for pagination purposes.
-        paged_candidates = petreport.get_ranked_candidate_PetReports(candidates=candidates, page=page)  
+        paged_candidates = petreport.get_ranked_candidate_PetReports(candidates=candidates, page=page)
         paged_candidates = [{
-            "ID": pr.id, 
+            "ID": pr.id,
             "status":pr.status,
             "proposed_by_username": pr.proposed_by.user.username,
-            "pet_name": pr.pet_name, 
-            "pet_type": pr.pet_type, 
-            "img_path": pr.img_path.name 
+            "pet_name": pr.pet_name,
+            "pet_type": pr.pet_type,
+            "img_path": pr.img_path.name
         } for pr in paged_candidates]
 
-        return JsonResponse({ 
-            "pet_reports_list":paged_candidates, 
-            "count":len(paged_candidates), 
-            "total_count": candidates_count 
-        }, safe=False)   
+        return JsonResponse({
+            "pet_reports_list":paged_candidates,
+            "count":len(paged_candidates),
+            "total_count": candidates_count
+        }, safe=False)
     else:
         raise Http404
 
-
 @login_required
+@disallow_closed_petreports
 def match(request, petreport_id):
     if request.method == "GET":
         target_petreport = get_object_or_404(PetReport, pk=petreport_id)
@@ -180,9 +174,9 @@ def match(request, petreport_id):
 
         if candidates_count == 0:
             messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added as a worker for this pet.")
-            return redirect(URL_HOME)            
+            return redirect(URL_HOME)
 
-        return render_to_response (HTML_MATCHING, { 
+        return render_to_response (HTML_MATCHING, {
             'target_petreport': target_petreport,
             'petreport_fields': target_petreport.get_display_fields(),
             "candidates_count":candidates_count
@@ -191,22 +185,16 @@ def match(request, petreport_id):
         raise Http404
 
 @login_required
-def propose(request, target_petreport_id, candidate_petreport_id):
-    print_info_msg ("PROPOSE MATCH: target:%s candidate:%s" % (target_petreport_id, candidate_petreport_id))
-    #Grab the Target and Candidate PetReports first.
-    target = get_object_or_404(PetReport, pk=target_petreport_id)
-    candidate = get_object_or_404(PetReport, pk=candidate_petreport_id)
+@disallow_closed_petreports
+@disallow_incompatible_petreports
+def propose(request, target_id, candidate_id):
+    target = get_object_or_404(PetReport, pk=target_id)
+    candidate = get_object_or_404(PetReport, pk=candidate_id)
 
-    if request.method == "POST" and request.POST["g-recaptcha-response"]:
-        recaptcha = request.POST["g-recaptcha-response"]
-        query_data = urllib.urlencode({"secret":settings.RECAPTCHA_SERVER_SECRET, "response":recaptcha})
-        response = urllib.urlopen(settings.RECAPTCHA_SITEVERIFY, query_data, context=ssl._create_unverified_context())
-        status = json.loads(response.read())
-
-        if status["success"] != True:
+    if request.method == "POST" and request.POST.get("g-recaptcha-response"):
+        if not recaptcha_ok(request.POST["g-recaptcha-response"]):
             messages.error(request, "CAPTCHA was not correct. Please try again.")
-            return redirect(URL_MATCHING)
-
+            return redirect(request.path)
         proposed_by = request.user.userprofile
 
         if target.status == "Lost":
@@ -223,13 +211,13 @@ def propose(request, target_petreport_id, candidate_petreport_id):
         (result, outcome) = pm.save()
 
         if result != None:
-            if outcome == PETMATCH_OUTCOME_UPDATE: 
+            if outcome == PETMATCH_OUTCOME_UPDATE:
                 #Has the user voted for this PetMatch before?
                 user_has_voted = result.UserProfile_has_voted(proposed_by)
 
                 if user_has_voted == UPVOTE or user_has_voted == DOWNVOTE:
                     messages.error(request, "This Pet Match has already been proposed, and you have voted for it already!")
-                    return redirect(URL_MATCHING + target_petreport_id + "/")
+                    return redirect(URL_MATCHING + target_id + "/")
 
                 # add voting reputation points if the user didn't vote before for this duplicate petmatch
                 # if (proposed_by not in result.up_votes.all()) and (proposed_by not in result.down_votes.all()):
@@ -242,7 +230,7 @@ def propose(request, target_petreport_id, candidate_petreport_id):
                 Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", proposed_by, source=result)
 
             elif outcome == PETMATCH_OUTCOME_NEW_PETMATCH:
-                messages.success(request, "Congratulations, The pet match was successful! You can view your pet match in the home page and in your profile. Help spread the word about your match!")
+                messages.success(request, "Congratulations, the pet match was successful! You can view your pet match in the home page and in your profile. Help spread the word about your match!")
                 Activity.log_activity("ACTIVITY_PETMATCH_PROPOSED", proposed_by, source=result)
                 # add reputation points for proposing a new petmatch
                 proposed_by.update_reputation("ACTIVITY_PETMATCH_PROPOSED")
@@ -255,22 +243,22 @@ def propose(request, target_petreport_id, candidate_petreport_id):
 
                 if user_has_voted == UPVOTE or user_has_voted == DOWNVOTE:
                     messages.error(request, "This Pet Match has already been proposed, and you have voted for it already!")
-                    return redirect(URL_MATCHING + target_petreport_id + "/")
+                    return redirect(URL_MATCHING + target_id + "/")
 
                 # add voting reputation points if the user didn't vote before for this duplicate petmatch
                 if user_has_voted == False:
                     proposed_by.update_reputation("ACTIVITY_PETMATCH_UPVOTE")
 
                 result.up_votes.add(proposed_by)
-                result.save()          
+                result.save()
                 messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully up-voted the existing pet match. Help spread the word about this match!")
                 Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", proposed_by, source=result)
-            else:                
-                messages.error(request, "A Problem was found when trying to propose the PetMatch. We have been notified of the issue and will fix it as soon as possible.")            
+            else:
+                messages.error(request, "A Problem was found when trying to propose the PetMatch. We have been notified of the issue and will fix it as soon as possible.")
 
-        #Finally, return the redirect.            
+        #Finally, return the redirect.
         return redirect(URL_HOME)
-    
+
     else:
         if request.method == "POST" and not request.POST["g-recaptcha-response"]:
             messages.error(request, "Please Fill in the RECAPTCHA.")
@@ -279,18 +267,9 @@ def propose(request, target_petreport_id, candidate_petreport_id):
             messages.error(request, "This proposal is invalid! Please try another one.")
             return redirect(URL_MATCHING + str(target.id))
 
-        return render_to_response(HTML_PROPOSE_MATCH, { 
+        return render_to_response(HTML_PROPOSE_MATCH, {
             'RECAPTCHA_CLIENT_SECRET': settings.RECAPTCHA_CLIENT_SECRET,
             'target': target,
             'candidate': candidate,
             'petreport_fields': [{'attr':a['attr'], 'label':a['label'], 'lost_pet_value':a['value'], 'found_pet_value':b['value']} for a,b in zip(target.get_display_fields(), candidate.get_display_fields())]
         }, RequestContext(request))
-
-
-
-
-
-
-
-
-

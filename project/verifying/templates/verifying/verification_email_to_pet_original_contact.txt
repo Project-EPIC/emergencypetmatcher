@@ -1,16 +1,16 @@
-Hi there, 
+Hi there,
 
-Congratulations! The digital volunteers on EmergencyPetMatcher.com have found a likely pet match for your {{ pet.status }} {{ pet.breed }} {{ pet.pet_type }} ({{ pet.pet_name }}). 
+Congratulations! The digital volunteers on EmergencyPetMatcher.com have found a likely pet match for your {{ pet.status }} {{ pet.breed }} {{ pet.pet_type }} ({{ pet.pet_name }}).
 
 People all over the world using EmergencyPetMatcher helped bring this match to your attention:
-	{{ cross_posting_phrase }} 
+	{{ cross_posting_phrase }}
 	- A volunteer by the name of {{ other_contact.name }} reported on a {{ other_pet.status }} {{ other_pet.breed }} {{ other_pet.pet_type }} ({{ other_pet.pet_name }}).
-	- {{ petmatcher.user.username }} then matched that pet with the one that was submitted under your email address. 
+	- {{ petmatcher.user.username }} then matched that pet with the one that was submitted under your email address.
 	- Finally, the EmergencyPetMatcher community voted on the match enough times for contact information to be shared. Now is the time to check if these pets are a match!
 
 To do this, please reach out to {{ other_contact.name }} at {{ other_contact.email }} and coordinate time to meet to determine if this indeed is a match! {{ cross_posting_reach_out }}
 
-Finally, visit the following link to see the pet match ready for pet-checking. Here, both parties will make the decision as to whether this pet match is successful: http://{{ site.domain }}{% url 'verify' petcheck_id %}
+Finally, visit the following link to see the pet match ready for pet-checking. Here, both parties will make the decision as to whether this pet match is successful: http://{{ site.domain }}{% url 'verify_PetMatchCheck' petmatchcheck_id %}
 
 Good Luck!
 ---------------------

@@ -3,14 +3,7 @@ $(document).ready(function(){
   var bookmark_button = $("#prdp-bookmark");
 
   //Bookmark click handler.
-  $(bookmark_button).click(function(){ 
-    if (USER_ID == "None"){
-      login_link = "Log in <a href="+ HOME_URLS["LOGIN"] +"?next={% firstof request.path '/' %} > here.</a>";
-      $(".prdp_messages").html("<li class='error'> You cannot bookmark this Pet Report because you are not logged in! "+login_link+ "</li>");
-    } 
-    else 
-      bookmark(); 
-  });
+  $(bookmark_button).click(function(){ bookmark(); });
 
   //user is authenticated and has bookmarked this pet 
   if (BOOKMARKED == "True"){
@@ -35,7 +28,6 @@ $(document).ready(function(){
   $("#prdp-share").click(function(){
     share_on_twitter(PETREPORT_URL, PETREPORT_IMAGE, PETREPORT_TITLE, PETREPORT_SUMMARY);
   });
-
 
   //Use the Zoom plugin to zoom into pictures.
   $(".img-wrapper img").on("mouseover", function(){

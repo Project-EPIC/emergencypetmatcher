@@ -15,125 +15,99 @@ from django.shortcuts import get_object_or_404, render_to_response, redirect
 from home.models import Activity
 from datetime import datetime
 from constants import *
+from socializing.decorators import *
 from home.constants import *
 from utilities.utils import *
 from pprint import pprint
+import pdb
 
 @login_required
-def get_UserProfile_page(request, userprofile_id):
+def get(request, userprofile_id):
     #Be aware of what you show other authenticated users in contrast to the *same* authenticated user.
-    request_profile = request.user.userprofile   
+    request_profile = request.user.userprofile
     show_profile = get_object_or_404(UserProfile, pk=userprofile_id)
     context = {"show_profile": show_profile}
 
     if request_profile.id == show_profile.id:
-        #Grab the following list.
         context["following_list"] = show_profile.following.all()
-        #Grab the followers list.
-        context["followers_list"] = show_profile.followers.all()        
+        context["followers_list"] = show_profile.followers.all()
 
-    #Grab Proposed PetReports.
     context["proposed_petreports"] = show_profile.proposed_related.all()
-    #Grab Proposed PetMatches.
     context["proposed_petmatches"] = show_profile.proposed_by_related.all()
 
     return render_to_response(HTML_USERPROFILE, context, RequestContext(request))
 
 @login_required
-def follow_UserProfile(request): 
+def follow(request):
     if request.method == "POST":
         userprofile = request.user.userprofile
         target_userprofile_id = request.POST["target_userprofile_id"]
         target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
 
-        #If the userprofile IDs do not match...
         if userprofile.id != target_userprofile.id:
-            #Has this UserProfile already followed this target UserProfile?
             if target_userprofile in userprofile.following.all():
                 messages.error(request, "You are already following " + str(target_userprofile.user.username) + ".")
-
             else:
                 userprofile.following.add(target_userprofile)
-                # add points to the user who is being followed (i.e. the target_userprofile) 
                 target_userprofile.update_reputation("ACTIVITY_SOCIAL_FOLLOW")
-                messages.success(request, "You are now following " + str(target_userprofile.user.username) + ".")     
-
-                # Log the following activity for this UserProfile
+                messages.success(request, "You are now following " + str(target_userprofile.user.username) + ".")
                 Activity.log_activity("ACTIVITY_SOCIAL_FOLLOW", userprofile, source=target_userprofile)
-
             return redirect (URL_USERPROFILE + str(target_userprofile.id))
-
-    else:
-        raise Http404
+    raise Http404
 
 @login_required
-def unfollow_UserProfile(request): 
+def unfollow(request):
     if request.method == "POST":
         userprofile = request.user.userprofile
         target_userprofile_id = request.POST["target_userprofile_id"]
         target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
 
-        #If the userprofile IDs do not match...
         if userprofile.id != target_userprofile.id:
-
-            #If this UserProfile is actually following the target UserProfile...
             if target_userprofile in userprofile.following.all():
                 userprofile.following.remove(target_userprofile)
-                # remove points to the use who has been unfollowed (i.e. the target_userprofile)
                 target_userprofile.update_reputation("ACTIVITY_SOCIAL_UNFOLLOW")
-                messages.success(request, "You are no longer following " + str(target_userprofile.user.username) + ".") 
-                # Log the unfollowing activity for this UserProfile
+                messages.success(request, "You are no longer following " + str(target_userprofile.user.username) + ".")
                 Activity.log_activity("ACTIVITY_SOCIAL_UNFOLLOW", userprofile, source=target_userprofile)
                 return redirect(URL_USERPROFILE + str(target_userprofile.id))
-
-            else:
-                raise Http404
-        else:
-            raise Http404
-    else:
-        raise Http404
+    raise Http404
 
 @login_required
-def message_UserProfile(request):
+def message(request):
     if request.method == "POST":
-        #Collect Text of Message
         message = request.POST ["message"]
         target_userprofile_id = request.POST ["target_userprofile_id"]
         target_userprofile = get_object_or_404(UserProfile, pk=target_userprofile_id)
         from_userprofile = request.user.userprofile
 
-        #You cannot send a message to yourself!
+        if len(message) > USERPROFILE_MESSAGE_LENGTH:
+            messages.error(request, "Message size is too big. Please try again.")
+            return redirect(URL_USERPROFILE + str(target_userprofile_id))
+
         if from_userprofile.id == target_userprofile.id:
             messages.error (request, "You cannot send a message to yourself.")
             return redirect(URL_USERPROFILE + str(from_userprofile.id))
 
         print_info_msg ("Sending an email message from %s to %s" % (from_userprofile.user.username, target_userprofile.user.username))
-
-        #Send message to UserProfile
         completed = from_userprofile.send_email_message_to_UserProfile(target_userprofile, message, test_email=False)
-
-        if completed == True:
-            messages.success(request, "You have successfully sent your message to %s" % target_userprofile.user.username + ".") 
-        else:
-            messages.error(request, "Sorry, your message could not be sent because this user's email address is invalid.")
-
+        Activity.log_activity("ACTIVITY_SOCIAL_SEND_MESSAGE_TO_USER", from_userprofile, source=target_userprofile)
+        messages.success(request, "You have successfully sent your message to %s" % target_userprofile.user.username + ".")
         return redirect(URL_USERPROFILE + str(target_userprofile_id))
-    
 
 @login_required
-def editUserProfile_page(request):
-    if request.method=='GET':
-        user = request.user
-        form = UserProfileForm(instance=user.userprofile)
-        return render_to_response(HTML_EDITUSERPROFILE_FORM, 
-            {   "form": form, 
-                "USERPROFILE_DESCRIPTION_LENGTH": USERPROFILE_DESCRIPTION_LENGTH, 
-                "password_form": PasswordChangeForm(user) }, RequestContext(request))
+@allow_only_userprofile_owner
+def edit(request, userprofile_id):
+    if request.method == 'GET':
+        form = UserProfileForm(instance=request.user.userprofile)
+        return render_to_response(HTML_EDITUSERPROFILE_FORM, {
+            "form": form,
+            "USERPROFILE_DESCRIPTION_LENGTH": USERPROFILE_DESCRIPTION_LENGTH,
+            "password_form": PasswordChangeForm(request.user)
+        }, RequestContext(request))
     else:
         raise Http404
 
 @login_required
-def update_User_info(request):
+def update_info(request):
     if request.method == "POST":
         user = request.user
         profile = user.userprofile
@@ -143,16 +117,13 @@ def update_User_info(request):
 
         #Check if the form is valid.
         if userprofile_form.is_valid() == False:
-            return render_to_response(HTML_EDITUSERPROFILE_FORM, 
+            return render_to_response(HTML_EDITUSERPROFILE_FORM,
                 {   "form": userprofile_form,
                     "USERPROFILE_DESCRIPTION_LENGTH": USERPROFILE_DESCRIPTION_LENGTH,
                     "password_form": PasswordChangeForm(user) }, RequestContext(request))
 
-        pprint(request.POST)
-        pprint(request.FILES)
-
-        #Change the photo 
-        if request.FILES.get("photo"):           
+        #Change the photo
+        if request.FILES.get("photo"):
             user_changed = True
             photo = request.FILES.get("photo")
             profile.set_images(photo)
@@ -167,6 +138,7 @@ def update_User_info(request):
                 return redirect(URL_EDITUSERPROFILE)
             else:
                 user.username = request.POST["username"]
+                Activity.log_activity("ACTIVITY_USER_CHANGED_USERNAME", profile)
                 user_changed = True
 
         #Check if email has changed.
@@ -188,8 +160,8 @@ def update_User_info(request):
 
             #Prepare the email for verification.
             subject = render_to_string(TEXTFILE_EMAIL_CHANGE_SUBJECT, {})
-            ctx = { "site": Site.objects.get_current(), 
-                    "activation_key":activation_key, 
+            ctx = { "site": Site.objects.get_current(),
+                    "activation_key":activation_key,
                     "expiration_days":settings.ACCOUNT_ACTIVATION_DAYS}
 
             body = render_to_string(TEXTFILE_EMAIL_CHANGE_BODY, ctx)
@@ -225,15 +197,14 @@ def update_User_info(request):
             return redirect(URL_USERPROFILE + str(profile.id))
         else:
             messages.info(request, "Nothing was changed!")
-            return redirect(URL_EDITUSERPROFILE)            
+            return redirect(URL_EDITUSERPROFILE)
 
     else:
         raise Http404
 
 @login_required
-def update_User_password(request):
+def update_password(request):
     if request.method == "POST":
-        # pprint(request.POST)
         user = request.user
         old_password = request.POST ["old_password"]
         new_password = request.POST ["new_password1"]
@@ -250,13 +221,12 @@ def update_User_password(request):
             user.set_password(new_password)
             messages.success(request, "Your password has been changed successfully.")
             user.save()
-        return redirect (URL_EDITUSERPROFILE)
-
+        return redirect (URL_EDITUSERPROFILE + "%d/" % user.userprofile.id)
     else:
         raise Http404
 
 @login_required
-def delete_userprofile(request):
+def delete(request):
     if request.method == "POST":
         profile = request.user.userprofile
         profile.delete()
@@ -266,12 +236,10 @@ def delete_userprofile(request):
     else:
         raise Http404
 
-
 @login_required
 def email_verification_complete (request, activation_key):
     try:
         edituserprofile = EditUserProfile.objects.get(activation_key=activation_key)
-
         #If OK, then save the new email for the user and delete EditUserProfile object.
         if edituserprofile.activation_key_expired() == False:
             edituserprofile.user.email = edituserprofile.new_email
@@ -284,9 +252,4 @@ def email_verification_complete (request, activation_key):
         print_debug_msg(e)
         messages.error (request, "Sorry, that's an invalid activation key. Please try to verify your email address again.")
 
-    return redirect(URL_HOME)        
-
-
-
-
-
+    return redirect(URL_HOME)

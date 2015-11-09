@@ -1,0 +1,15 @@
+<table id="reunion-info-table" class="epm-table table table-hover">
+  <tbody>
+    {% for field in fields %}
+      <tr>
+        <td class="pet-info-header" attr="{{ field.attr }}"> {{ field.label }}</td>      
+        <!-- Event Tag -->
+        {% if field.label == "Event Tag" %}
+          <td class="pet-info-data"><span class="label label-default" style="font-size:1em;">{{ field.value }}</span></td>
+        {% else %}
+          <td class="pet-info-data">{{ field.value }}</td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

@@ -16,31 +16,21 @@
 {% endblock js %}
 
 {% block css %}
-  <link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>  
+  <link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
 {% endblock css %}
 
 {% block head_title %}Report a Lost/Found Pet{% endblock head_title %}
 
 {% block content %}
 	<div id="content" style="width:700px;">
-		{% block content_subtitle %} 
+		{% block content_subtitle %}
 			<h3> Create a Pet Report </h3>
 			<p> To create a pet report, please fill in the following fields to the best of your ability. Once you have finished, click the 'Submit' button at the end of the form. The fields marked with <b style="margin:0;" class="required-field-symbol">*</b> are required. </p>
-		{% endblock content_subtitle %}	
+		{% endblock content_subtitle %}
 
 		{% block form %}
-		<form enctype="multipart/form-data" id="petreport_form" method="POST" action="{% url 'submit' %}">
-		{% endblock form %}
-
+		<form enctype="multipart/form-data" id="petreport_form" method="POST" action="{% url 'submit_PetReport' %}">
 			{% csrf_token %}
-
-			{% block messages %}
-			<ul id="messages">
-				{% for message in messages %}
-					<li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
-			  {% endfor %}
-			</ul>
-			{% endblock messages %}		
 
 			<div style="margin-bottom:20px;">
 				{% for error in form.non_field_errors %} <span class="field-error-message"> {{ error }} </span>{% endfor %}
@@ -90,14 +80,12 @@
 
       {% block form_action %}
 				<div class="form-actions">
-					<label> Please verify your submission via RECAPTCHA</label>	
-					<div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_CLIENT_SECRET }}" style="margin-bottom:20px;"></div>
-					<input id = "id_submit" class="btn btn-primary" type="button" value="Submit"/>
+					<label> Please verify your submission via RECAPTCHA</label>
+					<div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_CLIENT_SECRET }}" data-callback="recaptcha_done" style="margin-bottom:20px;"></div>
+					<input id = "id_submit" class="btn btn-primary" type="button" disabled value="Submit"/>
 				</div>
 			{% endblock form_action %}
 		</form>
+    {% endblock form %}
 	</div>
 {% endblock content %}
-
-
-

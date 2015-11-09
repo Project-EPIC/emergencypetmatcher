@@ -1,0 +1,43 @@
+{% extends 'home/base.html' %}
+
+{% block content %}   
+<div id="content" style="width:500px;">  
+  {% block content_title %}<h2>EmergencyPetMatcher Stats</h2>{% endblock content_title %}
+  {% block content_subtitle %}{% endblock content_subtitle %}        
+
+  <div class="stats">
+    <legend>Basic Stats</legend>
+    <ul>
+      <li><p>Number of Users: <b>{{ num_users }}</b></p></li>
+      <li><p>Number of PetReports: <b>{{ num_petreports }}</b></p></li>
+      <li><p>Number of Lost PetReports: <b>{{ num_lost_petreports }}</b></p></li>      
+      <li><p>Number of Found PetReports: <b>{{ num_found_petreports }}</b></p></li>
+      <li><p>Number of PetMatches: <b>{{ num_petmatches }}</b></p></li>
+      <li><p>Number of PetReunions: <b>{{ num_petreunions }}</b></p></li>
+    </ul>
+  </div>
+  <div class="stats">
+    <legend>PetReports</legend>
+    <p>Top 5 Reporters</p>
+    <ul>
+      {% for reporter in top_5_reporters %}
+        <li><p>{{ reporter.user.username }}: <b>{{ reporter.num_reports }}</b></p></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="stats">
+    <legend>PetMatches</legend>
+    <p>Top 5 Matchers</p>
+    <ul>
+      {% for matcher in top_5_matchers %}
+        <li><p>{{ matcher.user.username }}: <b>{{ matcher.num_matches }}</b></p></li>
+      {% endfor %}
+    </ul>
+    <p>Votes</p>
+    <ul>
+      <li><p>Number of Total Upvotes: <b>{{ num_upvotes.up_votes__count }}</b></p></li>
+      <li><p>Number of Total Downvotes: <b>{{ num_downvotes.down_votes__count }}</b></p></li>
+    </ul>
+  </div> 
+</div>
+{% endblock content %}

@@ -17,6 +17,15 @@ b {
   font-family:epm-font-bolder;
 }
 
+hr {
+  border-top:1px solid lightgray;
+}
+
+.share-button {
+  vertical-align:top;
+  padding:0px;
+}
+
 #epm-body {
   font-family:epm-font;
   padding-top:70px;
@@ -25,7 +34,7 @@ b {
 
 /** General page styling **/
 #epm-container {
-  background-size: 100%;  
+  background-size: 100%;
   margin: 0 auto;
   min-width:1000px;
 }
@@ -152,15 +161,10 @@ header p {
 
 .errorlist {
   list-style: none;
-  border-radius:5px;
-  height: auto;
-  margin-top:5px;
-  margin-bottom: 10px;
-  text-align:left;
-  font-size: 14px;
-  padding: 3px;
-  background-color:#FFB6C1;
-  border: 2px solid #B22222;
+  margin-bottom: 5px;
+  font-size:1em;
+  padding: 0px;
+  color:red;
 }
 
 /**** Other useful styles ***/
@@ -184,23 +188,23 @@ header p {
 }
 
 .thumb-wrapper {
-  background: white;  
+  background: white;
   border: 1px solid gray;
   margin:5px;
   padding:5px;
   height: 100px;
   display:inline-block;
-  cursor:pointer; 
+  cursor:pointer;
 }
 
-.thumb-wrapper:hover{ 
+.thumb-wrapper:hover{
   border:1px solid yellow;
 }
 
 .thumb-wrapper a {
   text-decoration: none;
   color: black;
-  font-size: 12px;  
+  font-size: 12px;
 }
 
 .thumb-wrapper img {
@@ -233,10 +237,10 @@ header p {
   vertical-align: middle;
   display:inline-block;
   width:204px;
-  height:204px; 
+  height:204px;
 }
 
-.pet_img img{
+.pet_img img {
   width:200px;
   height:200px;
 }
@@ -251,10 +255,21 @@ header p {
 }
 
 .epm-dialog-title {
-  font-size:24px; 
+  font-size:24px;
   text-align:center;
   display:block;
 }
+
+.stats {
+  padding:5px;
+  border-top:1px solid lightgray;
+  border-bottom:1px solid lightgray;
+}
+
+.stats ul {
+  list-style-type:none;
+}
+
 
 footer {
   height: 30px;
@@ -268,4 +283,3 @@ footer {
 footer a {
   color: black;
 }
-

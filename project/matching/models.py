@@ -18,8 +18,6 @@ class PetMatch(models.Model):
     proposed_date = models.DateTimeField(null=False, auto_now_add=True)
     #Field to capture failed PetMatches.
     has_failed = models.BooleanField(null=False, default=False)
-    #Field to capture successful PetMatches.
-    is_successful = models.BooleanField(default=False)
     up_votes = models.ManyToManyField("socializing.UserProfile", related_name='up_votes_related')
     down_votes = models.ManyToManyField("socializing.UserProfile", related_name='down_votes_related')
 
@@ -28,13 +26,13 @@ class PetMatch(models.Model):
         #First, try to find an existing PetMatch
         lost_pet = self.lost_pet
         found_pet = self.found_pet
-        
+
         #PetMatch inserted improperly
         if (lost_pet.status != "Lost") or (found_pet.status != "Found"):
             print_error_msg ("The PetMatch was not saved because it was inserted improperly. Check to make sure that the PetMatch consists of one lost and found pet and that they are being assigned to the lost and found fields, respectively.")
             return (None, PETMATCH_OUTCOME_INSERTED_IMPROPERLY)
 
-        existing_match = PetMatch.get_PetMatch(self.lost_pet, self.found_pet)            
+        existing_match = PetMatch.get_PetMatch(self.lost_pet, self.found_pet)
 
         #A PetMatch with the same lost and found pets (and same user who proposed it) already exists - SQL Update
         if existing_match != None:
@@ -52,22 +50,24 @@ class PetMatch(models.Model):
         return (self, PETMATCH_OUTCOME_NEW_PETMATCH)
 
     def to_DICT(self):
-        return {    "id"                    : self.id,
-                    "lost_pet_name"         : self.lost_pet.pet_name,
-                    "lost_pet_type"         : self.lost_pet.pet_type,
-                    "lost_pet_breed"        : self.lost_pet.breed,
-                    "found_pet_name"        : self.found_pet.pet_name,
-                    "found_pet_type"        : self.found_pet.pet_type,
-                    "found_pet_breed"       : self.found_pet.breed,
-                    "img_path"              : [self.lost_pet.img_path.name, self.found_pet.img_path.name],
-                    "thumb_path"            : [self.lost_pet.thumb_path.name, self.found_pet.thumb_path.name],
-                    "proposed_by_username"  : self.proposed_by.user.username,
-                    "proposed_by_id"        : self.proposed_by.id,
-                    "proposed_date"         : self.proposed_date.ctime(),
-                    "has_failed"            : self.has_failed,
-                    "is_successful"         : self.is_successful,
-                    "num_upvotes"           : self.up_votes.count(),
-                    "num_downvotes"         : self.down_votes.count() }
+        return {
+            "id"                    : self.id,
+            "lost_pet_name"         : self.lost_pet.pet_name,
+            "lost_pet_type"         : self.lost_pet.pet_type,
+            "lost_pet_breed"        : self.lost_pet.breed,
+            "found_pet_name"        : self.found_pet.pet_name,
+            "found_pet_type"        : self.found_pet.pet_type,
+            "found_pet_breed"       : self.found_pet.breed,
+            "img_path"              : [self.lost_pet.img_path.name, self.found_pet.img_path.name],
+            "thumb_path"            : [self.lost_pet.thumb_path.name, self.found_pet.thumb_path.name],
+            "proposed_by_username"  : self.proposed_by.user.username,
+            "proposed_by_id"        : self.proposed_by.id,
+            "proposed_date"         : self.proposed_date.ctime(),
+            "has_failed"            : self.has_failed,
+            "is_successful"         : self.is_successful(),
+            "num_upvotes"           : self.up_votes.count(),
+            "num_downvotes"         : self.down_votes.count()
+        }
 
     def get_display_fields(self):
         return [
@@ -76,6 +76,7 @@ class PetMatch(models.Model):
             {"attr": "status", "label": "Lost/Found", "lost_pet_value": self.lost_pet.status, "found_pet_value": self.found_pet.status},
             {"attr": "date_lost_or_found", "label": "Date Lost/Found", "lost_pet_value": self.lost_pet.date_lost_or_found.strftime("%B %d, %Y"), "found_pet_value": self.found_pet.date_lost_or_found.strftime("%B %d, %Y")},
             {"attr": "proposed_by_username", "label": "Contact", "lost_pet_value": self.lost_pet.proposed_by.user.username, "found_pet_value": self.found_pet.proposed_by.user.username},
+            {"attr": "event_tag", "label":"Event Tag", "lost_pet_value": self.lost_pet.event_tag, "found_pet_value": self.found_pet.event_tag},
             {"attr": "location", "label": "Location", "lost_pet_value": self.lost_pet.location, "found_pet_value": self.found_pet.location},
             {"attr": "microchip_id", "label": "Microchipped?", "lost_pet_value": "Yes" if (self.lost_pet.microchip_id != "") else "No", "found_pet_value": "Yes" if (self.found_pet.microchip_id != "") else "No"},
             {"attr": "spayed_or_neutered", "label": "Spayed/Neutered", "lost_pet_value": self.lost_pet.spayed_or_neutered, "found_pet_value": self.found_pet.spayed_or_neutered},
@@ -90,13 +91,21 @@ class PetMatch(models.Model):
             {"attr": "contact_number", "label": "Alternate Contact Number", "lost_pet_value": self.lost_pet.contact_number, "found_pet_value": self.found_pet.contact_number},
             {"attr": "contact_email", "label": "Alternate Contact Email Address", "lost_pet_value": self.lost_pet.contact_email, "found_pet_value": self.found_pet.contact_email},
             {"attr": "contact_link", "label": "Alternate Link to Pet", "lost_pet_value": self.lost_pet.contact_link, "found_pet_value": self.found_pet.contact_link},
-        ]        
+        ]
 
 
     def to_JSON(self):
-        return json.dumps(self.to_DICT())        
+        return json.dumps(self.to_DICT())
 
-    ''' Determine if a PetMatch exists between pr1 and pr2, and if so, return it. Otherwise, return None. '''
+    def is_successful(self):
+        try:
+            if self.petmatchcheck and self.petmatchcheck.is_successful:
+                return True
+        except:
+            pass
+        return False
+
+    #Determine if a PetMatch exists between pr1 and pr2, and if so, return it. Otherwise, return None.
     @staticmethod
     def get_PetMatch(pr1, pr2):
         assert isinstance(pr1, PetReport)
@@ -118,14 +127,14 @@ class PetMatch(models.Model):
         if (page != None and page > 0):
             page = int(page)
             filtered_petmatches = filtered_petmatches [((page-1) * NUM_PETMATCHES_HOMEPAGE):((page-1) * NUM_PETMATCHES_HOMEPAGE + NUM_PETMATCHES_HOMEPAGE)]
-            
+
         #Just return the list of PetReports.
         return filtered_petmatches
 
 
     def is_being_checked(self):
         try:
-            if self.petcheck:
+            if self.petmatchcheck:
                 return True
         except:
             return False
@@ -150,7 +159,7 @@ class PetMatch(models.Model):
             return UPVOTE
         elif (downvote != None):
             return DOWNVOTE
-        return False  
+        return False
 
     def has_reached_threshold(self):
         from django.contrib.auth.models import User
@@ -158,20 +167,19 @@ class PetMatch(models.Model):
         found_pet_contact = self.found_pet.proposed_by
         petmatch_owner = self.proposed_by
 
-        if self.up_votes.count() >= (User.objects.filter(is_active=True).count()/VERIFICATION_DEFAULT_THRESHOLD):
+        if self.up_votes.count() > (User.objects.filter(is_active=True).count()/VERIFICATION_DEFAULT_THRESHOLD):
             print_info_msg("PetMatch %s has reached threshold!")
-            return True            
+            return True
         else:
             return False
+
 
     def __unicode__ (self):
         return '{ID{%s} lost:%s, found:%s, proposed_by:%s}' % (self.id, self.lost_pet, self.found_pet, self.proposed_by)
 
-#Create a pre-delete signal function to delete the corresponding PetCheck object for the underlying PetMatch object.
+#Create a pre-delete signal function to delete the corresponding PetMatchCheck object for the underlying PetMatch object.
 @receiver (pre_delete, sender=PetMatch)
 def delete_PetMatch(sender, instance=None, **kwargs):
     if instance.is_being_checked() == True:
-        instance.petcheck.delete()
-        print_info_msg("PetCheck %s has been deleted because %s has now been deleted." % (instance.petcheck, instance))
-
-
+        instance.petmatchcheck.delete()
+        print_info_msg("PetMatchCheck %s has been deleted because %s has now been deleted." % (instance.petmatchcheck, instance))

@@ -1,86 +1,28 @@
-//This function allows us to prepare HTML elements and their activites upon load of the HTML page.
 $(document).ready(function(){
 	$("#epm-nav-links .nav-link-home").toggleClass("active");
 	var pageNum = 1;
 
 	//Retrieve Items!
 	$("#epm-choices li").click(function(e){
-		id = $(this).attr("id");
-		pageNum = 1
-		switch(id){
-			case "epm-choices-petreports":
-			$("#pet-report-filter-form").css("display", "block");
-			fetch_PetReports(id, pageNum++, clear=true);
-			break;
-
-			case "epm-choices-petmatches":
-			$("#pet-report-filter-form").css("display", "none");
-			fetch_PetMatches(id, pageNum++, clear=true, successful=false);
-			break;
-
-			case "epm-choices-reunited-pets":
-			$("#pet-report-filter-form").css("display", "none");
-			fetch_PetMatches(id, pageNum++, clear=true, successful=true);
-			break;
-
-			case "epm-choices-bookmarked":
-			$("#pet-report-filter-form").css("display", "none");
-			fetch_bookmarks(id, pageNum++, clear=true);
-			break;
-
-			case "epm-choices-activity":
-			$("#pet-report-filter-form").css("display", "none");
-			fetch_activities(id, pageNum++, clear=true);
-			break;
-		}
-
-		//Toggle the active nav tab inactive, and toggle the pets tab active.
-		$("#epm-choices li.active").toggleClass("active");
-		$("#" + id).toggleClass("active");
+		fetch_pet_data(this, pageNum=1, clear=true);
 	});
 
 	//Add more items when user scrolls down!
 	$(window).scroll(function() {
-		if ($(window).scrollTop() + $(window).height() == $(document).height()) {
-			id = $("#epm-choices li.active").attr("id");
-			switch(id){
-				case "epm-choices-petreports":
-				fetch_PetReports(id, pageNum++, clear=false);
-				break;
-
-				case "epm-choices-petmatches":
-				fetch_PetMatches(id, pageNum++, clear=false, successful=false);
-				break;
-
-				case "epm-choices-reunited-pets":
-				fetch_PetMatches(id, pageNum++, clear=true, successful=true);
-				break;
-
-				case "epm-choices-bookmarked":
-				fetch_bookmarks(id, pageNum++, clear=false);
-				break;
-
-				case "epm-choices-activity":
-				fetch_activities(id, pageNum++, clear=false);
-				break;
-			}
-
-			//Toggle the active nav tab inactive, and toggle the pets tab active.
-			$("#epm-choices li.active").toggleClass("active");
-			$("#" + id).toggleClass("active");
-		}
-	});	
+		if ($(window).scrollTop() + $(window).height() == $(document).height())
+			fetch_pet_data("#epm-choices li.active", ++pageNum, clear=false);
+	});
 
 	/***** Start things off. *****/
+
 	//Trigger the click event to retrieve PetReports.
-	$("#epm-choices-petreports").trigger("click");
-	
+	fetch_pet_data($("#epm-choices-petreports"), pageNum=1, clear=true)
+
 	//Refresh.
-	refresh_layout(); 		
+	refresh_layout();
 
 	$("#filter-submit").click(function(){
-		pageNum = 1;
-		fetch_PetReports("epm-choices-petreports", pageNum++, true);
+		fetch_pet_data("#epm-choices-petreports", pageNum=1, clear=true);
 	});
 
 	//Grab Event Tags.
@@ -103,26 +45,59 @@ $(document).ready(function(){
 		if (pet_type != "All"){
 			load_pet_breeds(pet_type, function(data){
 				$("#filter-breed").html("").select2({data: {id:null, text: null}});
-				$("#filter-breed").select2({ 
+				$("#filter-breed").select2({
 					tags: data.breeds,
 					maximumSelectionSize:1,
 				});
 			});
-			$("#filter-breed").toggleClass("hidden");			
+			$("#filter-breed").toggleClass("hidden");
 		}
 		else
 			$("#filter-breed").addClass("hidden");
-	});		
+	});
 
 }); //END document.ready()
 
 /******************************* Utility functions *******************************************/
 
+function fetch_pet_data(tab, page, clear){
+	id = $(tab).attr("id");
+	switch (id){
+		case "epm-choices-petreports":
+		$("#pet-report-filter-form").css("display", "block");
+		fetch_PetReports(page, clear);
+		break;
+
+		case "epm-choices-petmatches":
+		$("#pet-report-filter-form").css("display", "none");
+		fetch_PetMatches(page, clear);
+		break;
+
+		case "epm-choices-reunited-pets":
+		$("#pet-report-filter-form").css("display", "none");
+		fetch_PetReunions(page, clear);
+		break;
+
+		case "epm-choices-bookmarked":
+		$("#pet-report-filter-form").css("display", "none");
+		fetch_bookmarks(page, clear);
+		break;
+
+		case "epm-choices-activity":
+		$("#pet-report-filter-form").css("display", "none");
+		fetch_activities(page, clear);
+		break;
+	}
+
+	//Toggle the active nav tab inactive, and toggle the pets tab active.
+	$("#epm-choices li.active").toggleClass("active");
+	$("#" + id).toggleClass("active");
+}
 
 function get_pet_report_filter_options(){
-	options = {	
-		"pet_name": $("#filter-name").val(), 
-		"status": $("#filter-status").val(), 
+	options = {
+		"pet_name": $("#filter-name").val(),
+		"status": $("#filter-status").val(),
 		"event_tag": $("#filter-event-tag").val(),
 		"pet_type": $("#filter-type").val(),
 		"breed": $("#filter-breed").val(),
@@ -151,9 +126,9 @@ function refresh_layout(offset){
 	$("#tiles li").wookmark(options);
 }
 
-function fetch_PetReports(tab, page, clear){
+function fetch_PetReports(page, clear){
 	if (clear == true)
-		$("#tiles li").remove();		
+		$("#tiles li").remove();
 
 	$("#tiles-wait").css("display", "block");
 	options = get_pet_report_filter_options() //get pet report filter values.
@@ -169,13 +144,10 @@ function fetch_PetReports(tab, page, clear){
 			var count = data.count;
 			var total_count = data.total_count;
 
-			//Create each tile and its elements.
 			for (var i = 0; i < petreports.length; i++){
 				var report = petreports [i];
-				//Setup PetReport Tile here.
-				var item = setup_petreport_item(report, $("#epm-modal"));
-				//Finally, add this item to the tiles.
-				$("#tiles").append(item);		
+				var item = setup_petreport_item(report);
+				$("#tiles").append(item);
 			}
 
 			if (petreports.length == 0 && page == 1)
@@ -183,29 +155,27 @@ function fetch_PetReports(tab, page, clear){
 			else{
 				$(".tab-subtitle").text("Click on a Pet to Begin Matching. Scroll down to see more pets!");
 			}
-			
-			$("#tiles-wait").css("display", "none");
 
-			//Don't forget to refresh the grid layout.
-			refresh_layout(10);			
+			$("#tiles-wait").css("display", "none");
+			refresh_layout();
 		},
 		error: function(data){
-				alert("An unexpected error occurred when trying to get Pets. Please try again!"); 
+				alert("An unexpected error occurred when trying to get Pets. Please try again!");
 				$(".tab-content .tab-subtitle").text("No Pets Available Yet!");
-			}	
+			}
 		});
 }
 
-function fetch_PetMatches(tab, page, clear, successful){
+function fetch_PetMatches(page, clear){
 	if (clear == true)
-		$("#tiles li").remove();		
+		$("#tiles li").remove();
 
 	$("#tiles-wait").css("display", "block");
 
 	perform_AJAX_call({
 		type:"GET",
 		url: MATCHING_URLS["PETMATCHES_JSON"],
-		data: {"successful_petmatches": successful, "page":page},
+		data: {"page":page},
 		success: function(data){
 			var matches = data.pet_matches_list;
 			var count = data.count;
@@ -214,40 +184,32 @@ function fetch_PetMatches(tab, page, clear, successful){
 			//Create each tile and its elements.
 			for (var i = 0; i < matches.length; i++){
 				var match = matches [i];
-
 				//Setup PetMatch tile here.
-				var item = setup_petmatch_item(match, $("#epm-modal"));			
-
+				var item = setup_petmatch_item(match);
 				//Finally, add this item to the tiles.
-				$("#tiles").append(item);		
+				$("#tiles").append(item);
 			}
 
 			if (matches.length == 0 && page == 1)
 				$(".tab-subtitle").text("No Pet Matches Available Yet!");
-			else {
-				if (successful == true)
-					$(".tab-subtitle").text("Welcome Home, Reunited Pets!");		
-				else
-					$(".tab-subtitle").text("Click on a Pet Match to Vote on it. Scroll down to see more matches!");			
-			}
+			else
+				$(".tab-subtitle").text("Click on a Pet Match to Vote on it. Scroll down to see more matches!");
 
 			$("#tiles-wait").css("display", "none");
-
-			//Don't forget to refresh the grid layout.
 			refresh_layout();
 		},
 		error: function(data){
-			alert("An unexpected error occurred when trying to get Pet Matches. Please try again."); 
+			alert("An unexpected error occurred when trying to get Pet Matches. Please try again.");
 			$(".tab-content .tab-subtitle").text("No Pet Matches Available Yet!");
-		}	
+		}
 	});
 }
 
 
 //Function to fetch the local activities using AJAX GET
-function fetch_activities(tab, page, clear){
+function fetch_activities(page, clear){
 	if (clear == true)
-		$("#tiles li").remove();		
+		$("#tiles li").remove();
 
 	$("#tiles-wait").css("display", "block");
 	activity_list = $("#tiles");
@@ -261,35 +223,30 @@ function fetch_activities(tab, page, clear){
 
 			//Iterate through the activities and append them to the list.
 			for (var i = 0; i < activities.length; i++){
-				
 				var activity = activities[i];
 
 				if (activity.source == null)
 					continue
-				
-		 		//Setup the list item.
-		 		var li = setup_activity_item(activity, $("#epm-modal"));			 		
+
+		 		var li = setup_activity_item(activity);
 		 		activity_list.append(li);
 		 	}
 
 		 	if (activities.length == 0 && page == 1)
 		 		$(".tab-subtitle").text("No Activities Yet.");
-		 	else {
+		 	else
 		 		$(".tab-subtitle").html("Check out what these digital volunteers are doing. Scroll down to see more!")
-		 		refresh_layout(10);	//Don't forget to refresh the grid layout.
-		 	}
+
 		 	$("#tiles-wait").css("display", "none");
+		 	refresh_layout();
 		},
-		error: function(data){
-			alert("An unexpected error occurred when trying to retrieve activities. Please try again."); 
-		 	return false;
-		}						
+		error: function(data){alert("An unexpected error occurred when trying to retrieve activities. Please try again.");}
 	});
 }
 
-function fetch_bookmarks(tab, page, clear){
+function fetch_bookmarks(page, clear){
 	if (clear == true)
-		$("#tiles li").remove();		
+		$("#tiles li").remove();
 
 	$("#tiles-wait").css("display", "block");
 
@@ -307,7 +264,7 @@ function fetch_bookmarks(tab, page, clear){
 				var report = bookmarks [i];
 
 				//Setup PetReport Tile here.
-				var item = setup_petreport_item(report, $("#epm-modal"));
+				var item = setup_petreport_item(report);
 				$(item).attr("petreport_id", report.ID)
 
 				//Setup Mouse-enter and Mouse-leave events.
@@ -326,7 +283,7 @@ function fetch_bookmarks(tab, page, clear){
 					$(img).click(function(){
 						var tile = $(img).parent();
 						remove_bookmark($(tile).attr("petreport_id"), tile);
-					});							
+					});
 
 					//Finally, append img to tile.
 					$(this).append(img);
@@ -336,25 +293,55 @@ function fetch_bookmarks(tab, page, clear){
 					img.remove();
 				});
 
-				//Finally, add this item to the tiles.
-				$("#tiles").append(item);		
+				$("#tiles").append(item);
 			}
 
 			if (bookmarks.length == 0 && page == 1)
 				$(".tab-subtitle").text("No Pets Available Yet!");
 			else
-				$(".tab-subtitle").text("Select a Pet to Begin Matching. Scroll down to see more bookmarks!");			
-			
-			$("#tiles-wait").css("display", "none");
+				$(".tab-subtitle").text("Select a Pet to Begin Matching. Scroll down to see more bookmarks!");
 
-			//Don't forget to refresh the grid layout.
+			$("#tiles-wait").css("display", "none");
 			refresh_layout();
 		},
-		error: function(data){
-				alert("An unexpected error occurred when trying to get bookmarks. Please try again."); 
-		}	
+		error: function(data){ alert("An unexpected error occurred when trying to get bookmarks. Please try again.");}
 	});
 }
+
+function fetch_PetReunions(page, clear){
+	if (clear == true)
+		$("#tiles li").remove();
+	$("#tiles-wait").css("display", "block");
+
+	perform_AJAX_call({
+		type:"GET",
+		url: VERIFYING_URLS["PETREUNIONS_JSON"],
+		data: {"page":page},
+		success: function(data){
+			var petreunions = data.pet_reunions_list;
+			var count = data.count;
+			var total_count = data.total_count;
+
+			//Create each tile and its elements.
+			for (var i = 0; i < petreunions.length; i++){
+				var reunion = petreunions [i];
+				var item = setup_petreunion_item(reunion);
+				$("#tiles").append(item);
+			}
+
+			if (petreunions.length == 0 && page == 1)
+				$(".tab-subtitle").text("No Pet Reunions Available Yet!");
+			else
+				$(".tab-subtitle").text("Welcome Home Pets!");
+
+			$("#tiles-wait").css("display", "none");
+			refresh_layout();
+		},
+		error: function(data){ alert("An unexpected error occurred when trying to get bookmarks. Please try again.");}
+	});
+}
+
+
 
 function remove_bookmark(petreport_id, parent){
 	var c = confirm("Are you sure you want to remove this bookmark?");
@@ -362,14 +349,14 @@ function remove_bookmark(petreport_id, parent){
 		var user_id = USER_ID;
 		var csrf_value = $("input[name='csrfmiddlewaretoken']").attr("value");
 
-		perform_AJAX_call({ 
+		perform_AJAX_call({
 			type:"POST",
 			url: REPORTING_URLS["BOOKMARK"],
 			data: {"csrfmiddlewaretoken":csrf_value, "petreport_id":petreport_id, "user_id": user_id, "action":"Remove Bookmark"},
 			success: function(data){
 				add_flash_message("success", data.message);
 	    	parent.remove();
-	    	refresh_layout();			            	
+	    	refresh_layout();
 	    	return true;
 	    },
 	    error: function(data){
@@ -379,4 +366,3 @@ function remove_bookmark(petreport_id, parent){
 	  });
 	}
 }
-

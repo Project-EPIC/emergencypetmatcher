@@ -1,164 +1,119 @@
 {% extends 'home/index.html' %}
 {% load staticfiles %}
-{% block head_title %}EPM - {{ show_profile.user.username }} {% endblock head_title %}
+{% load userprofile_tags %}
+
+{% block head_title %}{{ show_profile.user.username }} {% endblock head_title %}
 
 {% block js %}
 	<script src = {% static "socializing/js/epm-userprofile.js" %} type = 'text/javascript'></script>
 {% endblock js %}
 
 {% block css %}
-	<link rel="stylesheet" href={% static "socializing/css/style.css" %} type="text/css"></link>	
+	<link rel="stylesheet" href={% static "socializing/css/style.css" %} type="text/css"></link>
 	<link rel="stylesheet" href={% static "reporting/css/style.css" %} type="text/css"></link>
-	<link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>	
+	<link rel="stylesheet" href={% static "matching/css/style.css" %} type="text/css"></link>
 {% endblock css %}
 
 {% block content %}
-<div id="content" style="width:800px;">  
-	<!-- EPM Modal Dialog Box -->
-	<div id="epm-modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-	  <div class="modal-dialog modal-lg">
-	    <div class="modal-content">
-	    </div>
-	  </div>
-	</div>
+<div id="content" style="width:800px;">
 
-	<!-- UserProfile information at the top -->
-	<div id="userprofile-dashboard">
-		<div class="userprofile-img-wrapper">	
-			<img src="{{ MEDIA_URL }}{{ show_profile.img_path }}"/>	
+	<div style='margin-left:25px;'>
+		<h2>{{ show_profile.user.username }}</h2>
+		<div id="userprofile-dashboard">
+			<div class="userprofile-img-wrapper">
+				<img src="{{ MEDIA_URL }}{{ show_profile.img_path }}"/>
+			</div>
+
+			<div id="userprofile-dashboard-info">
+				{% show_userprofile_table show_profile user.userprofile %}
+			</div>
 		</div>
-
-
-		<div id="userprofile-dashboard-info">
-			<h3 style="margin-top:0px;">{{ show_profile.user.username }}</h3>
-			<p style="word-wrap:break;">{{ show_profile.description }}</p>
-			<!-- UserProfile Information: show if the UserProfile looking at this is show_profile OR that show_profile is being followed by this UserProfile -->
-			
-			{% if show_profile.user.id == user.id %}
-				<a style="display:block;" href="{% url 'editUserProfile_page' %}">Edit your Profile</a>
-			{% endif %}
-			<br/>
-			<table id="user-info-table" class="epm-table table table-hover table-condensed">
-	          <tbody>
-	            <tr>
-	              <td class="user-info-header">Pet Points</td>
-	              <td class="user-info-data">{{ show_profile.reputation }}</td>
-	            </tr>	            	            
-	            <tr>
-	              <td class="user-info-header">Pet Reports Created</td>
-	              <td class="user-info-data">{{ show_profile.get_reported_PetReports.count }}</td>
-	            </tr>	            
-	            <tr>
-	              <td class="user-info-header">Pet Matches Proposed</td>
-	              <td class="user-info-data">{{ show_profile.get_proposed_PetMatches.count }}</td>
-	            </tr>	            
-	            <tr>
-	              <td class="user-info-header">Pet Matches Voted</td>
-	              <td class="user-info-data">{{ show_profile.get_voted_PetMatches|length }}</td>
-	            </tr>	            
-	            {% if show_profile.user.id == user.id %}
-	            <tr>
-	              <td class="user-info-header">First Name</td>
-	              <td class="user-info-data">{{ show_profile.user.first_name }}</td>
-	            </tr>
-	            <tr>
-	              <td class="user-info-header">Last Name</td>
-	              <td class="user-info-data">{{ show_profile.user.last_name }}</td>
-	            </tr>	            
-	            <tr>
-	              <td class="user-info-header">Email</td>
-	              <td class="user-info-data">{{ show_profile.user.email }}</td>
-	            </tr>	            
-	            <tr>
-	              <td class="user-info-header">Last Login</td>
-	              <td class="user-info-data">{{ show_profile.user.last_login }}</td>
-	            </tr>
-	            {% endif %}
-	          </tbody>				
-			</table>			
-		</div>	
 
 		<!-- Dashboard Actions -->
 		<div id="userprofile-dashboard-actions">
-		{% if show_profile.user.username != user.username %}
-			<!-- Follow and Message links -->
-			{% if not show_profile in user.userprofile.following.all %}
-			<form action = "{% url 'follow_UserProfile' %}" method="post" style="display:inline-block;">
-				{% csrf_token %}
-				<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
-				<input class="btn btn-primary" type="Submit" value="Follow"/>
-			</form>
-			{% else %}
-			<form action = "{% url 'unfollow_UserProfile' %}" method="post" style="display:inline-block;">
-				{% csrf_token %}
-				<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>						
-				<input class="btn btn-default" type="Submit" value="Unfollow"/>
-			</form>
+			{% if show_profile.user.id == user.id %}
+				<a href="{% url 'edit_UserProfile' user.id %}">Edit your Profile</a>
 			{% endif %}
-			<button id="userprofile-msg-btn" class="btn btn-default">Send a Message</button>
-		{% endif %}			
-		</div>			
 
-		<!-- Message a UserProfile -->
-		<form id="userprofile-message-form" action="{% url 'message_UserProfile' %}" method="post">
-			{% csrf_token %}
-			<textarea class="form-control" name="message" placeholder="Messaging will send an email to this user while keeping email addresses private."></textarea>
-			<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
-			<div class="form-actions">
-				<input type="submit" class="btn btn-primary" style="width:70px; height:40px;" value="Send"/> 
-			</div>
-		</form>
+			{% if show_profile.user.username != user.username %}
+				<!-- Follow and Message links -->
+				{% if not show_profile in user.userprofile.following.all %}
+				<form action = "{% url 'follow_UserProfile' %}" method="post" style="display:inline-block;">
+					{% csrf_token %}
+					<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
+					<input class="btn btn-primary" type="Submit" value="Follow"/>
+				</form>
+				{% else %}
+				<form action = "{% url 'unfollow_UserProfile' %}" method="post" style="display:inline-block;">
+					{% csrf_token %}
+					<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
+					<input class="btn btn-default" type="Submit" value="Unfollow"/>
+				</form>
+				{% endif %}
+				<button id="userprofile-msg-btn" class="btn btn-default">Send a Message</button>
+			{% endif %}
+		</div>
 	</div>
+
+	<!-- Message a UserProfile -->
+	<form id="userprofile-message-form" action="{% url 'message_UserProfile' %}" method="post">
+		{% csrf_token %}
+		<textarea class="form-control" name="message" placeholder="Messaging will send an email to this user while keeping email addresses private."></textarea>
+		<input type="hidden" name = "target_userprofile_id" value="{{ show_profile.id }}"/>
+		<div class="form-actions">
+			<input type="submit" class="btn btn-primary" style="width:70px; height:40px;" value="Send"/>
+		</div>
+	</form>
 	<hr/>
-	
+
 	<!-- Following list -->
 	<legend style="text-align:center;">Users Following</legend>
 	<div class="userprofile-thumb-container">
 		{% for following in show_profile.following.all %}
 		<div class="thumb-wrapper">
-			<a href="{% url 'get_UserProfile_page' following.id %}"
+			<a href="{% url 'get_UserProfile' following.id %}"
 				title="{% if following.user.first_name %} {{ following.user.first_name }} {% endif %}@{{ following.user.username }}">
 				<strong> {{ following.user.username }} </strong>
 				<img class="userprofile-thumb" src="{{ MEDIA_URL }}{{ following.thumb_path }}"/>
 			</a>
 		</div>
 		{% endfor %}
-	</div>					
+	</div>
 
 	{% if followers_list %}
 	<!-- Follower list -->
 	<legend style="text-align:center;">Users Following You</legend>
-	<div class="userprofile-thumb-container">    	
+	<div class="userprofile-thumb-container">
 		{% for follower in show_profile.followers.all %}
-		<div class="thumb-wrapper">	
-			<a href="{% url 'get_UserProfile_page' follower.id %}"
+		<div class="thumb-wrapper">
+			<a href="{% url 'get_UserProfile' follower.id %}"
 			   	title="{% if follower.user.first_name %} {{ follower.user.first_name }} {% endif %}@{{ follower.user.username }}">
 			   	<strong> {{ follower.user.username }} </strong>
 				<img class="userprofile-thumb" src="{{ MEDIA_URL }}{{ follower.thumb_path }}"/>
-			</a>			
+			</a>
 		</div>
 		{% endfor %}
 	</div>
-	{% endif %}																		
+	{% endif %}
 
 	<!-- Submitted Pet Reports -->
 	<legend style="text-align:center;">Submitted Pet Reports</legend>
-    <div id="userprofile-submitted-petreports" class="userprofile-thumb-container">	
+    <div id="userprofile-submitted-petreports" class="userprofile-thumb-container">
 		{% for pet_report in show_profile.proposed_related.all %}
 		<div class="thumb-wrapper">
-			<a href= "{% url 'get_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}" 
+			<a href= "{% url 'get_PetReport' pet_report.id %}" name = "{{ pet_report.pet_name }}"
 				title="{% if pet_report.pet_name %}{{ pet_report.pet_name }}: {% endif %}{{ pet_report.status }} {{ pet_report.pet_type }}">
 				<strong>{{ pet_report.pet_name }}</strong>
 				<img class="prdp-thumb" src="{{ MEDIA_URL }}{{ pet_report.thumb_path }}"/>
 			</a>
 		</div>
 		{% endfor %}
-	</div>	
-	
-	<!-- Proposed Pet Matches -->	
+	</div>
+
+	<!-- Proposed Pet Matches -->
 	<legend style="text-align:center;">Proposed Pet Matches</legend>
 	<div id="userprofile-proposed-petmatches" class="userprofile-thumb-container">
-		{% for pet_match in show_profile.proposed_by_related.all %}	
+		{% for pet_match in show_profile.proposed_by_related.all %}
 			<div class="thumb-wrapper">
 	            <a href = "{% url 'get_PetMatch' pet_match.id %}" name = "{{ pet_match.lost_pet.pet_name }} with {{ pet_match.found_pet.pet_name }}"
 	           		title="{{ pet_match.lost_pet.pet_name }}: Lost {{ pet_match.lost_pet.pet_type }} / {{ pet_match.found_pet.pet_name }}: Found {{ pet_match.found_pet.pet_type }}">
@@ -168,6 +123,6 @@
 	     	    </a>
      		</div>
     	{% endfor %}
-	</div>		
+	</div>
 </div>
 {% endblock content %}

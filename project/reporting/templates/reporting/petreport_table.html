@@ -3,7 +3,22 @@
     {% for field in fields %}
       <tr>
         <td class="pet-info-header" attr="{{ field.attr }}"> {{ field.label }}</td>      
-        <td class="pet-info-data">{{ field.value }}</td>
+
+        <!-- Event Tag -->
+        {% if field.label == "Event Tag" %}
+          <td class="pet-info-data"><span class="label label-default" style="font-size:1em;">{{ field.value }}</span></td>
+
+        <!-- Status -->
+        {% elif field.label == "Lost/Found" %}
+          {% if field.value == "Lost" %}
+            <td class="pet-info-data"><span class="label label-danger" style="font-size:1em;">{{ field.value }}</span></td>
+          {% else %}
+            <td class="pet-info-data"><span class="label label-warning" style="font-size:1em;">{{ field.value }}</span></td>
+          {% endif %}
+
+        {% else %}
+          <td class="pet-info-data">{{ field.value }}</td>
+        {% endif %}
       </tr>
     {% endfor %}
   </tbody>

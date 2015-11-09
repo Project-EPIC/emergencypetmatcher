@@ -1,14 +1,14 @@
 #URLs
-URL_GET_PETMATCHES = "/get_PetMatches"
-URL_GET_SUCCESSFUL_PETMATCHES = "/get_successful_PetMatches"
-URL_PMDP = '/matching/PetMatch/'
-URL_VOTE_MATCH = '/matching/vote'
+URL_GET_PETMATCHES_JSON = "/matching/get_PetMatches_JSON"
+URL_PMDP = '/matching/'
+URL_GET_CANDIDATE_PETREPORTS_JSON="/matching/get_candidate_PetReports_JSON"
+URL_VOTE_PETMATCH = '/matching/vote/'
 URL_MATCHING = "/matching/new/"
-URL_PROPOSE_MATCH = "/matching/propose/"
+URL_PROPOSE_PETMATCH = "/matching/propose/"
 
 HTML_PMDP = "matching/petmatch.html"
 HTML_MATCHING = "matching/matching.html"
-HTML_PROPOSE_MATCH = "matching/propose_match.html"
+HTML_PROPOSE_MATCH = "matching/propose_petmatch.html"
 
 #PetMatch Constants
 PETMATCH_OUTCOME_NEW_PETMATCH = "NEW PETMATCH"
@@ -25,4 +25,3 @@ DOWNVOTE = "downvote"
 
 #number of pet matches on the home page
 NUM_PETMATCHES_HOMEPAGE = 25
-

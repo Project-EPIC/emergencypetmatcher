@@ -1,5 +1,25 @@
 #verify-choice {
 	width: 300px;
 	margin:10px auto 20px auto;
+}
 
+#reunion-info-table {
+  width: 480px;
+  height:300px;
+  border-radius:5px;
+  display:inline-block;
+}
+
+#reunion-info-table .pet-info-header {
+  font-family: epm-font-bolder;
+  display:inline-block;
+  width:150px;
+  font-weight:bold;
+  text-align: right;
+}
+
+#reunion-info-table .pet-info-data {
+  display:inline-block;
+  width:300px;
+  text-align: left;
 }

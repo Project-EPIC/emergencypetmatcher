@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout, login, authenticate 
+from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.forms import *
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect
@@ -27,21 +27,65 @@ from PIL import Image
 from utilities.utils import *
 from constants import *
 from home.constants import *
+from verifying.models import PetReunion, PetReunionForm
+from verifying.constants import *
+from reporting.decorators import *
 import datetime, re, time, json, pdb, urllib, urllib2, ssl
+
+def get(request, petreport_id):
+    pet_report = get_object_or_404(PetReport, pk = petreport_id)
+    user_has_bookmarked = False
+
+    if pet_report.status == 'Lost':
+        matches = PetMatch.objects.all().filter(lost_pet = pet_report)
+    else:
+        matches = PetMatch.objects.all().filter(found_pet = pet_report)
+
+    num_workers = len(pet_report.workers.all())
+    if request.user.is_authenticated() == True:
+        user_is_worker = pet_report.UserProfile_is_worker(request.user.userprofile)
+    else:
+        user_is_worker = False
+
+    if UserProfile.get_UserProfile(username=request.user.username) and (pet_report.proposed_by == request.user.userprofile) and not pet_report.closed:
+        edit_petreport = True
+    else:
+        edit_petreport = False
+
+    if request.user.is_authenticated() == True:
+        userprofile = request.user.userprofile
+        if pet_report.UserProfile_has_bookmarked(userprofile) == True:
+            user_has_bookmarked = True
+
+    #Fetch PetReunion object if it exists.
+    pet_reunion = pet_report.get_PetReunion()
+
+    return render_to_response(HTML_PRDP, {
+        'pet_report': pet_report,
+        'pet_reunion': pet_reunion,
+        'petreport_fields': pet_report.get_display_fields(),
+        'edit_petreport': edit_petreport,
+        'site_domain': Site.objects.get_current().domain,
+        'num_workers':num_workers,
+        'user_is_worker':user_is_worker,
+        'matches': matches,
+        'user_has_bookmarked':user_has_bookmarked
+    }, RequestContext(request))
 
 #Given a PetReport ID, just return the PetReport JSON.
 def get_PetReport_JSON(request):
     if (request.method == "GET") and (request.is_ajax() == True):
-        petreport_id = int(request.GET["petreport_id"])
-        petreport = get_object_or_404(PetReport, pk=petreport_id)
+        petreport = get_object_or_404(PetReport, pk=int(request.GET["petreport_id"]))
         return JsonResponse({"petreport":petreport.to_DICT()}, safe=False)
     else:
-        raise Http404        
+        raise Http404
 
 #Given a Page Number, return a list of PetReports.
 def get_PetReports_JSON(request):
     if request.is_ajax() == True:
         page = int(request.GET["page"])
+        if page < 1:
+            page = 1
         filters = dict(request.GET)
         filters.pop("page")
         filters = {k:v[0].strip() for k,v in filters.items()}
@@ -53,76 +97,24 @@ def get_PetReports_JSON(request):
         pet_reports = get_objects_by_page(pet_reports, page, limit=NUM_PETREPORTS_HOMEPAGE)
         #Zip it up in JSON and ship it out as an HTTP Response.
         pet_reports = [{
-            "ID"                    : pr.id, 
+            "ID"                    : pr.id,
             "proposed_by_username"  : pr.proposed_by.user.username,
-            "pet_name"              : pr.pet_name, 
-            "pet_type"              : pr.pet_type, 
+            "pet_name"              : pr.pet_name,
+            "pet_type"              : pr.pet_type,
             "status"                : pr.status,
-            "img_path"              : pr.thumb_path.name 
+            "img_path"              : pr.thumb_path.name
         } for pr in pet_reports]
 
         return JsonResponse({"pet_reports_list":pet_reports, "count":len(pet_reports), "total_count": petreport_count}, safe=False)
     else:
-        raise Http404     
-
-
-def get_PetReport(request, petreport_id):
-    #Grab the PetReport.
-    pet_report = get_object_or_404(PetReport, pk = petreport_id)
-    user_has_bookmarked = False
-
-    #Get all PetMatches made already for this PetReport object.
-    if pet_report.status == 'Lost':
-        matches = PetMatch.objects.all().filter(lost_pet = pet_report)
-    else:
-        matches = PetMatch.objects.all().filter(found_pet = pet_report)
-
-    #Grab number of workers for this PetReport
-    num_workers = len(pet_report.workers.all())
-    if request.user.is_authenticated() == True:
-        user_is_worker = pet_report.UserProfile_is_worker(request.user.userprofile)
-    else:
-        user_is_worker = False
-
-    if UserProfile.get_UserProfile(username=request.user.username) and (pet_report.proposed_by == request.user.userprofile):
-        edit_petreport = True
-    else:
-        edit_petreport = False        
-    
-    if request.user.is_authenticated() == True:
-        userprofile = request.user.userprofile
-
-        if pet_report.UserProfile_has_bookmarked(userprofile) == True:
-            user_has_bookmarked = True
-
-    pet_has_been_successfully_matched = pet_report.has_been_successfully_matched()
-    if pet_has_been_successfully_matched == True:
-        messages.success(request, "This pet has been successfully matched with its owner! Thank you digital volunteers!")
-
-    return render_to_response(HTML_PRDP, {
-        'pet_report': pet_report,
-        'petreport_fields': pet_report.get_display_fields(),
-        'edit_petreport': edit_petreport,
-        'pet_has_been_successfully_matched': pet_has_been_successfully_matched,
-        'site_domain': Site.objects.get_current().domain,
-        'num_workers':num_workers,
-        'user_is_worker':user_is_worker, 
-        'matches': matches,
-        'user_has_bookmarked':user_has_bookmarked 
-    }, RequestContext(request))
-
+        raise Http404
 
 @login_required
 def submit(request):
     if request.method == "POST" and request.POST["g-recaptcha-response"]:
-        recaptcha = request.POST["g-recaptcha-response"]
-        query_data = urllib.urlencode({"secret":settings.RECAPTCHA_SERVER_SECRET, "response":recaptcha})
-        response = urllib.urlopen(settings.RECAPTCHA_SITEVERIFY, query_data, context=ssl._create_unverified_context())
-        status = json.loads(response.read())
-
-        if status["success"] != True:
+        if not recaptcha_ok(request.POST["g-recaptcha-response"]):
             messages.error(request, "CAPTCHA was not correct. Please try again.")
-            return redirect(URL_SUBMIT_PETREPORT)
+            return redirect(request.path)
 
         #Let's make some adjustments to non-textual form fields before converting to a PetReportForm.
         geo_lat = request.POST ["geo_location_lat"] or ""
@@ -138,11 +130,10 @@ def submit(request):
         form = PetReportForm(request.POST, request.FILES)
 
         if form.is_valid() == True:
-            pr = form.save(commit=False)
             #Create (but do not save) the Pet Report Object associated with this form data.
+            pr = form.save(commit=False)
             pr.proposed_by = request.user.userprofile
-            img_rotation = 0
-            
+
             #Deal with Contact Information.
             if pr.contact_name.strip() == "":
                 pr.contact_name = None
@@ -165,7 +156,7 @@ def submit(request):
             if pr.status == 'Lost':
                 messages.success (request, message + "Your contribution will go a long way towards helping volunteers find your lost pet.")
             else:
-                messages.success (request, message + "Your contribution will go a long way towards helping volunteers match your found pet.")                
+                messages.success (request, message + "Your contribution will go a long way towards helping volunteers match your found pet.")
 
             #Log the PetReport submission for this UserProfile
             Activity.log_activity("ACTIVITY_PETREPORT_SUBMITTED", request.user.userprofile, source=pr)
@@ -177,33 +168,35 @@ def submit(request):
             print_error_msg ("Pet Report not submitted successfully")
             print_error_msg (form.errors)
             print_error_msg (form.non_field_errors())
-            return render_to_response(HTML_SUBMIT_PETREPORT, {  
+            return render_to_response(HTML_PETREPORT_FORM, {
                 'form':form,
-                "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
+                "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH,
                 "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
                 "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
                 "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
                 "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
-                "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH 
+                "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH
             }, RequestContext(request))
     else:
         if request.method == "POST" and not request.POST["g-recaptcha-response"]:
-            messages.error (request, "Please fill in the RECAPTCHA.")        
+            messages.error (request, "Please fill in the RECAPTCHA.")
         form = PetReportForm() #Unbound Form
 
-    return render_to_response(HTML_SUBMIT_PETREPORT, {  
+    return render_to_response(HTML_PETREPORT_FORM, {
         'form':form,
         "RECAPTCHA_CLIENT_SECRET": settings.RECAPTCHA_CLIENT_SECRET,
-        "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
+        "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH,
         "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
         "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
         "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
         "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
-        "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH 
+        "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH
     }, RequestContext(request))
 
 
-@login_required 
+@login_required
+@allow_only_proposer
+@allow_only_before_close
 def edit(request, petreport_id):
     pet_report = get_object_or_404(PetReport, pk=petreport_id)
     if request.method == "GET":
@@ -224,13 +217,58 @@ def edit(request, petreport_id):
     return render_to_response(HTML_EDIT_PETREPORT, {
         "form": form,
         "petreport": pet_report,
-        "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH, 
+        "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH,
         "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
         "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
         "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
         "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
-        "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH 
+        "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH
     }, RequestContext(request))
+
+@login_required
+@allow_only_proposer
+@allow_only_one_close
+def close(request, petreport_id):
+    petreport = get_object_or_404(PetReport, pk=petreport_id)
+    if request.user.userprofile.id == petreport.proposed_by.id:
+        if request.method == "POST":
+            if not request.POST.get("g-recaptcha-response"):
+                messages.error(request, "Please fill in the RECAPTCHA.")
+                return redirect(request.path)
+
+            if not recaptcha_ok(request.POST["g-recaptcha-response"]):
+                messages.error(request, "RECAPTCHA was not correct. Please try again.")
+                return redirect(request.path)
+
+            form = PetReunionForm(request.POST, request.FILES)
+            if form.is_valid() == True:
+                petreunion = form.save(commit=False)
+                petreunion.petreport = petreport
+
+                #If this pet was matched with another one, then link the matched pet into the new PetReunion object.
+                if petreport.has_been_successfully_matched() == True:
+                    matched_petreport = petreport.get_matched_PetReport()
+                    petreunion.matched_petreport = matched_petreport
+
+                petreunion.set_images(petreunion.img_path, save=True, rotation=request.POST.get("img_rotation")) #This saves the PetReunion.
+                messages.success(request, "You've successfully closed this Pet Report. Thank you for helping reunite this pet!")
+                print_success_msg("Pet Report closed successfully.")
+                return redirect(URL_HOME)
+            else:
+                messages.error(request, "Something went wrong. Please check the fields and try again.")
+                print_error_msg ("Pet Reunion not submitted successfully")
+        else:
+            form = PetReunionForm()
+
+        return render_to_response(HTML_PETREUNION_FORM, {
+            'form':form,
+            'petreport':petreport,
+            "RECAPTCHA_CLIENT_SECRET": settings.RECAPTCHA_CLIENT_SECRET,
+            "PETREUNION_DESCRIPTION_LENGTH": PETREUNION_DESCRIPTION_LENGTH,
+            "PETREUNION_REASON_LENGTH": PETREUNION_REASON_LENGTH
+        }, RequestContext(request))
+    else:
+        raise Http404
 
 def get_pet_breeds(request):
     if request.is_ajax() == True:
@@ -257,48 +295,29 @@ def get_event_tags(request):
         return JsonResponse({"event_tags":event_tags}, safe=False)
     else:
         raise Http404
-    
-#AJAX Request to bookmark a PetReport
+
 @login_required
 def bookmark(request):
     if request.method == "POST" and request.is_ajax() == True:
         profile = request.user.userprofile
-        petreport_id = request.POST['petreport_id']
-        petreport = get_object_or_404(PetReport, pk=petreport_id)
+        petreport = get_object_or_404(PetReport, pk=request.POST['petreport_id'])
         action = request.POST['action']
-        print_debug_msg("User: %s, Action: %s, petreport: %s" % (profile.user.username, action, petreport))
 
-        #If the user has bookmarked this pet and the action is to remove it...
         if ((petreport.UserProfile_has_bookmarked(profile) == True) and (action == "Remove Bookmark")) :
             petreport.bookmarked_by.remove(profile)
             petreport.save()
-            message = "You have successfully removed the bookmark for this pet." 
+            message = "You have successfully removed the bookmark for this pet."
             text = "Bookmark this Pet"
-
-            print_debug_msg("REMOVING BOOKMARK")
-
-            # Log removing the PetReport bookmark for this UserProfile
             Activity.log_activity("ACTIVITY_PETREPORT_REMOVE_BOOKMARK", profile, source=petreport)
 
-        #If the user has NOT bookmarked this pet and the action is to bookmark it...
         elif ((petreport.UserProfile_has_bookmarked(profile) == False) and (action == "Bookmark this Pet")):
             petreport.bookmarked_by.add(profile)
             petreport.save()
-            print_info_msg ('Bookmarked pet report %s for %s' % (petreport, profile))
-            message = "You have successfully bookmarked this pet!" 
+            message = "You have successfully bookmarked this pet!"
             text = "Remove Bookmark"
-
-            print_debug_msg("ADDING BOOKMARK")
-
-            # Log adding the PetReport bookmark for this UserProfile
             Activity.log_activity("ACTIVITY_PETREPORT_ADD_BOOKMARK", profile, source=petreport)
-
         else:
-            print_info_msg ("User has bookmarked the pet: " + str(petreport.UserProfile_has_bookmarked(profile)))
-            message = "Unable to "+ action + "!"
-            text = action
+            raise Http404
         return JsonResponse({"message":message, "text":text}, safe=False)
     else:
         raise Http404
-
-

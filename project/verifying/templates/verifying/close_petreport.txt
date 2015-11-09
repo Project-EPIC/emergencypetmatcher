@@ -1,0 +1,12 @@
+Hi {{ reunited_pet.proposed_by.user.username }},
+
+Thank you and congratulations to you for helping to reunite {{ reunited_pet.pet_name }}! Please visit the following link to fill out some information on the reunion so that others can see the value of your hard work:
+
+http://{{ site.domain }}{% url 'close_PetReport' reunited_pet.id %}
+
+Keep working on more pets on EmergencyPetMatcher. We need your help!
+
+Thank you,
+---------------------
+The EmergencyPetMatcher Team
+(http://www.emergencypetmatcher.com)

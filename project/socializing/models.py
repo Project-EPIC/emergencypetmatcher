@@ -8,9 +8,9 @@ from datetime import timedelta
 from django import forms
 from django.forms import ModelForm, Textarea
 from django.template.loader import render_to_string
-from django.dispatch import receiver
 from registration.forms import RegistrationFormTermsOfService
 from django.core.exceptions import MultipleObjectsReturned
+from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_save, pre_delete, post_delete, m2m_changed
 from datetime import date, datetime
 from utilities.utils import *
@@ -40,16 +40,18 @@ class UserProfile (models.Model):
     guardian_activation_key = models.CharField(null=True, max_length=40)
 
     def to_DICT(self):
-        return {    "id"                : self.id,
-                    "username"          : self.user.username,
-                    "img_path"          : self.img_path.name,
-                    "thumb_path"        : self.thumb_path.name,
-                    "date_of_birth"     : self.dob.ctime(),
-                    "last_logout"       : self.last_logout.ctime(),
-                    "reputation"        : float(self.reputation),
-                    "description"       : self.description,
-                    "is_social_profile" : self.social_profile,
-                    "is_minor"          : self.is_minor }
+        return {    
+            "id"                : self.id,
+            "username"          : self.user.username,
+            "img_path"          : self.img_path.name,
+            "thumb_path"        : self.thumb_path.name,
+            "date_of_birth"     : self.dob.ctime(),
+            "last_logout"       : self.last_logout.ctime(),
+            "reputation"        : float(self.reputation),
+            "description"       : self.description,
+            "is_social_profile" : self.social_profile,
+            "is_minor"          : self.is_minor 
+        }
                     
     def send_email_message_to_UserProfile (self, target_userprofile, message, test_email=True):
         if email_is_valid(target_userprofile.user.email) or (test_email == True):

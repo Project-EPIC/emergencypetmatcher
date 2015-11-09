@@ -1,447 +1,210 @@
 from django.contrib.auth import authenticate
 from django.test.client import Client
+from django.test import TestCase
 from django.forms.models import model_to_dict
 from utilities.utils import *
 from fixture import *
 from pprint import pprint
-import unittest, string, random, sys, time
 from django.contrib.messages import constants as messages
+import unittest, string, random, sys, time, pdb
 
-'''===================================================================================
-MatchingTesting: Testing for EPM Matching
-==================================================================================='''
-class MatchingTesting (unittest.TestCase):
-
-	#Get rid of all objects in the QuerySet.
+class PetMatchTesting(TestCase):
 	def setUp(self):
 		delete_all(leave_Users=False)
-
-	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
 		delete_all(leave_Users=False)
 
-	'''test if the list of candidate pet reports displayed on the matching interface 
-	is ordered according to the number of matching attributes'''
-	def test_get_ordered_candidate_matches(self):
-		print_testing_name("test_get_ordered_candidate_matches")
-		iteration_time = 0.00
+	def test_save_petmatch(self):
+		user, password = create_random_User()
+		user2, password2 = create_random_User()
+		user3, password3 = create_random_User()
+		pet_type = random.choice(PET_TYPE_CHOICES)[0]
+		pr1 = create_random_PetReport(user2, status = "Lost", pet_type = pet_type)
+		pr2 = create_random_PetReport(user3, status = "Found", pet_type = pet_type)
+		pm = create_random_PetMatch(pr1, pr2, user, pet_type=pet_type)
+		pm_same = PetMatch.objects.get(proposed_by = user.userprofile)
+		self.assertEqual(pm.lost_pet, pm_same.lost_pet)
+		self.assertEqual(pm.found_pet, pm_same.found_pet)
+		self.assertEqual(pm.proposed_by, pm_same.proposed_by)
+		self.assertEqual(pm, pm_same)
 
-		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(delete_all_objects=False, create_petreports=True)
-		users = results['users']
-		clients = results['clients']
-		petreports = results['petreports']
+	def test_save_improperly_saved_petmatch(self):
+		user, password = create_random_User()
+		user2, password2 = create_random_User()
+		user3, password3 = create_random_User()
+		pet_type = random.choice(PET_TYPE_CHOICES)[0]
+		pr_lost = create_random_PetReport(status="Lost")
+		pr_found = create_random_PetReport(status="Found")
+		pm = create_random_PetMatch(lost_pet=pr_found, found_pet=pr_lost)
+		self.assertEquals(pm, None)
+		self.assertEquals(PetMatch.objects.filter(lost_pet=pr_found, found_pet=pr_lost).exists(), False)
 
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-			
-			#objects
-			user, password = random.choice(users)
-			client = random.choice(clients)
-			petreport = random.choice(petreports)
+	def test_save_duplicate_petmatch(self):
+		u1 = create_random_User()
+		u2 = create_random_User()
+		pet_type = random.choice(PET_TYPE_CHOICES)[0]
+		pr_lost = create_random_PetReport(status="Lost")
+		pr_found = create_random_PetReport(status="Found")
+		pm = create_random_PetMatch(lost_pet=pr_lost, found_pet=pr_found, user = u1[0])
+		pm_duplicate = create_random_PetMatch(lost_pet=pr_lost, found_pet=pr_found, user = u2[0])
+		self.assertFalse(pm == None)
+		self.assertEquals(pm_duplicate, None)
+		self.assertEquals(PetMatch.objects.filter(lost_pet=pr_lost, found_pet=pr_found, proposed_by__user = u1[0]).exists(), True)
+		self.assertEquals(PetMatch.objects.filter(lost_pet=pr_lost, found_pet=pr_found, proposed_by__user = u2[0]).exists(), False)
 
-			#Log in First.
-			loggedin = client.login(username = user.username, password = password)
-			self.assertTrue(loggedin == True)
-			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))
+	def test_update_petmatch(self):
+		user, password = create_random_User()
+		user2, password2 = create_random_User()
+		user3, password3 = create_random_User()
+		pet_type = random.choice(PET_TYPE_CHOICES)[0]
+		pr1 = create_random_PetReport(user2, status = "Lost", pet_type = pet_type)
+		pr2 = create_random_PetReport(user3, status = "Found", pet_type = pet_type)
+		pm = create_random_PetMatch(pr1, pr2, user, pet_type=pet_type)
 
-			#From here, go to the matching interface
-			matching_url = URL_MATCHING + str(petreport.id) + "/"
-			#First, make the GET call to the non-ajax view function branch.
-			response = client.get(matching_url)
-			#Next, make the AJAX GET Call to reference those candidate petreports.
-			candidate_strings = client.get(matching_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+		pm.down_votes = create_random_Userlist()
+		pm.up_votes = create_random_Userlist()
+		pm.save()
+		pm_updated = PetMatch.objects.get(proposed_by=user.userprofile, lost_pet=pr1, found_pet=pr2)
+		self.assertEqual(pm, pm_updated)
+		self.assertEqual(len(pm.down_votes.all()), len(pm_updated.down_votes.all()))
+		self.assertEqual(len(pm.up_votes.all()), len(pm_updated.up_votes.all()))
+		self.assertEqual(pm.is_successful(), pm_updated.is_successful())
 
-			if response.status_code == 200:
-				#Generate the PetReport filters for this target PetReport so we take care of the case where there are NO PetReports to match! (causes a 302)
-				candidates = petreport.get_candidate_PetReports()
+	def test_delete_petmatch(self):
+		user, password = create_random_User()
+		user2, password2 = create_random_User()
+		user3, password3 = create_random_User()
+		pet_type = random.choice(PET_TYPE_CHOICES)[0]
+		pr1 = create_random_PetReport(user2, status = "Lost", pet_type = pet_type)
+		pr2 = create_random_PetReport(user3, status = "Found", pet_type = pet_type)
+		pm = create_random_PetMatch(pr1, pr2, user, pet_type=pet_type)
+		PetMatch.objects.all().get(proposed_by = user.userprofile, lost_pet = pr1, found_pet = pr2).delete()
+		self.assertTrue(len(PetMatch.objects.all()) == 0)
 
-				if candidates is None:
-					self.assertEquals(response.status_code, 302)
-					print_test_msg("Oh! There are no PetReports to match this PetReport with - Back to the Home Page!")
-					continue
-
-				candidate_matches = petreport.get_ranked_PetReports(candidates=candidates)
-
-				for k in range (NUMBER_OF_TESTS):
-					a = random.randint(0, len(candidate_matches) - 1)
-					b = random.randint(0, len(candidate_matches) - 1)
-					if (a > b):
-						self.assertTrue(petreport.compare (candidate_matches[a]) <= petreport.compare (candidate_matches[b]))
-					else:
-						self.assertTrue(petreport.compare (candidate_matches[a]) >= petreport.compare (candidate_matches[b]))
-				print_info_msg("Ordering on Attribute-matched candidate pets verified for this petreport!\n")
-
-			end_time = time.clock()
-			iteration_time += end_time - start_time
-			output_update(i + 1)
-		performance_report(iteration_time)
-
-	def test_get_matching_interface(self):
-		print_testing_name("test_get_matching_interface")
-		iteration_time = 0.00
-
-		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(delete_all_objects=False, create_petreports=True)
-		users = results['users']
-		clients = results['clients']
-		petreports = results['petreports']
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-
-			#objects
-			user, password = random.choice(users)
-			client = random.choice(clients)
-			petreport = random.choice(petreports)
-
-			#Log in First.
-			loggedin = client.login(username = user.username, password = password)
-			self.assertTrue(loggedin == True)
-			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))
-
-			#Go to the PRDP Page
-			prdp_url = URL_PRDP + str(petreport.id) + "/"
-			response = client.get(prdp_url)
-			self.assertEquals(response.status_code, 200)
-			self.assertEquals(response.request ['PATH_INFO'], prdp_url)
-			print_success_msg("%s has successfully requested page %s..." % (user, prdp_url))  
-
-			#From here, go to the matching interface
-			matching_url = URL_MATCHING + str(petreport.id) + "/"
-			response = client.get(matching_url)
-
-			if response.status_code == 302:
-				print_test_msg("Oh! There are no PetReports to match this PetReport with - Back to the Home Page!")
-				continue
-			else:
-				self.assertEquals(response.status_code, 200)
-				print_success_msg("%s has successfully requested page %s..." % (user, matching_url))  	
-			
-			self.assertEquals(response.request ['PATH_INFO'], matching_url)	
-			client.logout()	
-			output_update(i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)
-		performance_report(iteration_time)		
-
-	def test_UserProfile_added_to_PetReport_workers_list(self):
-		print_testing_name("test_UserProfile_added_to_PetReport_workers_list")
-		iteration_time = 0.00
-
-		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(delete_all_objects=False, create_petreports=True)
-		users = results['users']
-		clients = results['clients']
-		petreports = results['petreports']
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-
-			#objects
-			user, password = random.choice(users)
-			client = random.choice(clients)
-			petreport = random.choice(petreports)
-
-			#Log in First.
-			loggedin = client.login(username = user.username, password = password)
-			self.assertTrue(loggedin == True)
-			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))
-
-			#Go to the PRDP Page
-			prdp_url = URL_PRDP + str(petreport.id) + "/"
-			response = client.get(prdp_url)
-			self.assertEquals(response.status_code, 200)
-			self.assertEquals(response.request ['PATH_INFO'], prdp_url)
-			print_success_msg("%s has successfully requested page %s..." % (user, prdp_url)) 
-
-			#From here, go to the matching interface
-			matching_url = URL_MATCHING + str(petreport.id) + "/"
-			response = client.get(matching_url)
-
-			if response.status_code == 302:
-				print_test_msg("Oh! There are no PetReports to match this PetReport with - Back to the Home Page!")
-				continue
-			else:
-				self.assertEquals(response.status_code, 200)
-				print_test_msg("%s has successfully requested page %s..." % (user, matching_url))  	
-			
-			self.assertEquals(response.request ['PATH_INFO'], matching_url)	
-			self.assertTrue(user.userprofile in petreport.workers.all())
-			self.assertTrue(petreport in user.userprofile.workers_related.all())
-			client.logout()	
-			output_update(i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)
-		performance_report(iteration_time)				
-
-	def test_get_propose_PetMatch_dialog (self):
-		print_testing_name("test_get_propose_PetMatch_dialog")
-		iteration_time = 0.00
-
-		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(delete_all_objects=False, create_petreports=True)
-		users = results["users"]
-		clients = results["clients"]
-		petreports = results["petreports"]
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-
-			#objects
-			user, password = random.choice(users)
-			client = random.choice(clients)
-			petreport = random.choice(petreports)
-
-			#Log in First.
-			loggedin = client.login(username = user.username, password = password)
-			self.assertTrue(loggedin == True)
-			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))
-
-			#Go to the matching interface
-			matching_url = URL_MATCHING + str(petreport.id) + "/"
-			print matching_url
-			response = client.get(matching_url)
-
-			#Generate the PetReport filters for this target PetReport so we take care of the case where there are NO PetReports to match! (causes a 302)
-			candidates = petreport.get_candidate_PetReports()
-
-			if candidates is None:
-				self.assertEquals(response.status_code, 302)
-				print_test_msg("Oh! There are no PetReports to match this PetReport with - Back to the Home Page!")
-				continue
-
-			filtered_pet_reports = petreport.get_ranked_PetReports(candidates=candidates)
-			self.assertEquals(response.status_code, 200)
-			print_success_msg("%s has successfully requested page %s..." % (user, matching_url))  				
-			candidate_petreport = random.choice(filtered_pet_reports)
-
-			#Go to the propose match dialog
-			propose_match_url = URL_PROPOSE_MATCH + str(petreport.id) + "/" + str(candidate_petreport.id) + "/"
-			response = client.get(propose_match_url)
-			self.assertEquals(response.status_code, 200)
-			self.assertEquals(response.request ['PATH_INFO'], propose_match_url)			
-			output_update(i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)
-		performance_report(iteration_time)	
-
-
-	def test_propose_good_PetMatch (self):
-		print_testing_name("test_propose_good_PetMatch")
-		iteration_time = 0.00
-
-		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(delete_all_objects=False, create_petreports=True)
-		users = results["users"]
-		clients = results["clients"]
-		petreports = results["petreports"]
-		num_petmatches = 0
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-
-			#objects
-			user, password = random.choice(users)
-			client = random.choice(clients)
-			petreport = random.choice(petreports)
-
-			#Log in First.
-			loggedin = client.login(username = user.username, password = password)
-			self.assertTrue(loggedin == True)
-			print_test_msg("%s logs onto %s to enter the matching interface..." % (user, client))			
-
-			#Go to the matching interface
-			matching_url = URL_MATCHING + str(petreport.id) + "/"
-			response = client.get(matching_url)
-
-			#Generate the PetReport filters for this target PetReport so we take care of the case where there are NO PetReports to match! (causes a 302)
-			candidates = petreport.get_candidate_PetReports()
-
-			if candidates is None:
-				self.assertEquals(response.status_code, 302)
-				print_test_msg("Oh! There are no PetReports to match this PetReport with - Back to the Home Page!")
-				continue
-
-			filtered_pet_reports = petreport.get_ranked_PetReports(candidates=candidates)
-			candidate_petreport = random.choice(filtered_pet_reports) 
-			self.assertEquals(response.status_code, 200)
-			print_test_msg("%s has successfully requested page '%s'..." % (user, matching_url)) 
-			
-			#Go to the propose match dialog
-			propose_match_url = URL_PROPOSE_MATCH + str(petreport.id) + "/" + str(candidate_petreport.id) + "/"
-			response = client.get(propose_match_url)
-			print_test_msg("%s has successfully requested page '%s'..." % (user, propose_match_url)) 
-
-			#Make the POST request Call		
-			description = generate_lipsum_paragraph(500)
-			post = {'description': description}
-			response = client.post(propose_match_url, post, follow=True)
-			client.logout()						
-
-			#Grab the PetMatch that has either been posted in the past or has been posted by this User.
-			match = PetMatch.get_PetMatch(petreport, candidate_petreport)
-			if match.UserProfile_has_voted(user.userprofile) == True:
-				print_test_msg("[OK]:A PetMatch already exists with these two PetReports, and so %s has up-voted this match!" % (user))
-			else:
-				print_test_msg("[OK]: has successfully POSTED a new match!" % (user))				
-				num_petmatches += 1
-
-			#Make assertions
-			self.assertEquals(response.status_code, 200)
-			self.assertEquals(response.request ["PATH_INFO"], URL_HOME)				
-			self.assertTrue(len(PetMatch.objects.all()) == num_petmatches or len(PetMatch.objects.all()) <= i)
-			output_update(i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)			
-		performance_report(iteration_time)
-
-'''===================================================================================
-PetMatchTesting: Testing for EPM PetMatch-ing functionality
-==================================================================================='''
-class PetMatchTesting (unittest.TestCase):
-
-	#Get rid of all objects in the QuerySet.
+class MatchingTesting (TestCase):
 	def setUp(self):
 		delete_all(leave_Users=False)
-
-	#Get rid of all objects in the QuerySet.
 	def tearDown(self):
 		delete_all(leave_Users=False)
 
+	def test_get_ordered_candidate_petreports(self):
+		user, pwd = create_random_User()
+		user2, pwd2 = create_random_User()
+		pet_type = random.choice(PET_TYPE_CHOICES)[0]
+		pr1 = create_random_PetReport(user, status="Lost", pet_type=pet_type)
+		pr2 = create_random_PetReport(user2, status="Found", pet_type=pet_type)
+		client = Client(enforce_csrf_checks=False)
+		loggedin = client.login(username = user.username, password=pwd)
 
-	def test_get_PetMatch_dialog_page (self):
-		print_testing_name("test_get_PetMatch_dialog_page")
-		iteration_time = 0.00
+		for i in range(50):
+			create_random_PetReport(pet_type=pet_type)
 
-		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		result = setup_objects(delete_all_objects=False, create_petreports=True, create_petmatches=True)
-		users = result["users"]
-		clients = result["clients"]
-		petreports = result["petreports"]
-		petmatches = result["petmatches"]
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
+		response = client.get(URL_GET_CANDIDATE_PETREPORTS_JSON, {"target_petreport_id": pr1.id, "page":1}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+		json_ids = [pr["ID"] for pr in json.loads(response._container[0])["pet_reports_list"]]
+		candidates = pr1.get_ranked_candidate_PetReports(pr1.get_candidate_PetReports(), page=1)
 
-			#objects
-			user, password = random.choice(users)
-			client = random.choice(clients)
-			petreport = random.choice(petreports)
-			petmatch = random.choice(petmatches)
-			print_test_msg("PetMatch: %s" % petmatch)
+		for i in range(len(candidates)):
+			self.assertEquals(candidates[i].id, json_ids[i])
 
-			#Log in First.
-			loggedin = client.login(username = user.username, password = password)
-			self.assertTrue(loggedin == True)
-			print_test_msg("%s logs onto %s to enter the PMDP..." % (user, client))
+	def test_get_matching_interface_success(self):
+		user, pwd = create_random_User()
+		user2, pwd2 = create_random_User()
+		pet_type = random.choice(PET_TYPE_CHOICES)[0]
+		pr1 = create_random_PetReport(user, status="Lost", pet_type=pet_type)
+		pr2 = create_random_PetReport(user2, status="Found", pet_type=pet_type)
+		client = Client(enforce_csrf_checks=False)
+		loggedin = client.login(username = user.username, password=pwd)
+		response = client.get(URL_MATCHING + str(pr1.id))
+		self.assertEquals(response.status_code, 200)
 
-			#Go to the PRDP
-			prdp_url = URL_PRDP + str(petreport.id) + "/"
-			response = client.get(prdp_url)
+	def test_get_matching_interface_fail(self):
+		user, pwd = create_random_User()
+		user2, pwd2 = create_random_User()
+		pet_type = random.choice(PET_TYPE_CHOICES)[0]
+		pr1 = create_random_PetReport(user, status="Lost", pet_type=pet_type)
+		client = Client(enforce_csrf_checks=False)
+		loggedin = client.login(username = user.username, password=pwd)
+		response = client.get(URL_MATCHING + str(pr1.id))
+		self.assertEquals(response.status_code, 302)
+		self.assertTrue(response.request["PATH_INFO"], URL_HOME)
 
-			#Make assertions
-			self.assertEquals(response.status_code, 200)
-			self.assertEquals(response.request ['PATH_INFO'], prdp_url)
-			print_test_msg("%s enters the Pet Report Detailed Page successfully" % (user))
+	def test_get_propose_petmatch_success (self):
+		user, pwd = create_random_User()
+		user2, pwd2 = create_random_User()
+		pet_type = random.choice(PET_TYPE_CHOICES)[0]
+		pr1 = create_random_PetReport(user, status="Lost", pet_type=pet_type)
+		candidate = create_random_PetReport(user, status="Found", pet_type=pet_type)
+		client = Client(enforce_csrf_checks=False)
+		loggedin = client.login(username = user.username, password=pwd)
+		response = client.get(URL_PROPOSE_PETMATCH + "%d/%d/" % (pr1.id, candidate.id))
+		self.assertEquals(response.status_code, 200)
+		self.assertEquals(response.request["PATH_INFO"], URL_PROPOSE_PETMATCH + "%d/%d/" % (pr1.id, candidate.id))
 
-			#Now go to the PMDP
-			pmdp_url = URL_PMDP + str(petmatch.id) + "/"
-			response = client.get(pmdp_url)
+	def test_get_propose_petmatch_fail (self):
+		user, pwd = create_random_User()
+		user2, pwd2 = create_random_User()
+		pr1 = create_random_PetReport(user, status="Lost", pet_type="Dog")
+		candidate = create_random_PetReport(user, status="Lost", pet_type="Dog")
+		client = Client(enforce_csrf_checks=False)
+		loggedin = client.login(username = user.username, password=pwd)
+		response = client.get(URL_PROPOSE_PETMATCH + "%d/%d/" % (pr1.id, candidate.id), follow=True)
+		self.assertEquals(response.status_code, 200)
+		self.assertTrue(response.request["PATH_INFO"] != URL_PROPOSE_PETMATCH + "%d/%d/" % (pr1.id, candidate.id))
+		candidate = create_random_PetReport(user, status="Found", pet_type="Cat")
+		response = client.get(URL_PROPOSE_PETMATCH + "%d/%d/" % (pr1.id, candidate.id), follow=True)
+		self.assertEquals(response.status_code, 200)
+		self.assertTrue(response.request["PATH_INFO"] != URL_PROPOSE_PETMATCH + "%d/%d/" % (pr1.id, candidate.id))
 
-			#Make assertions
-			self.assertEquals(response.status_code, 200)
-			self.assertEquals(response.request ['PATH_INFO'], pmdp_url)
-			print("%s enters the Pet Match Detailed Page successfully" % (user))
+	def test_propose_petmatch_success(self):
+		user, pwd = create_random_User()
+		user2, pwd2 = create_random_User()
+		pr1 = create_random_PetReport(user, status="Lost", pet_type="Dog")
+		candidate = create_random_PetReport(user, status="Found", pet_type="Dog")
+		client = Client(enforce_csrf_checks=False)
+		loggedin = client.login(username = user.username, password=pwd)
+		settings.RECAPTCHA_SERVER_SECRET=settings.TEST_RECAPTCHA_SERVER_SECRET
+		response = client.post(URL_PROPOSE_PETMATCH + "%d/%d/" % (pr1.id, candidate.id), {"g-recaptcha-response":settings.TEST_RECAPTCHA_CLIENT_SECRET}, follow=True)
+		self.assertEquals(response.status_code, 200)
+		self.assertEquals(response.request["PATH_INFO"], URL_HOME)
 
-			output_update(i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)
-		performance_report(iteration_time)	
+	def test_get_petmatch_page(self):
+		user, pwd = create_random_User()
+		user2, pwd2 = create_random_User()
+		pr1 = create_random_PetReport(user, status="Lost", pet_type="Dog")
+		candidate = create_random_PetReport(user, status="Found", pet_type="Dog")
+		pm = create_random_PetMatch(user=user, lost_pet=pr1, found_pet=candidate)
+		client = Client(enforce_csrf_checks=False)
+		loggedin = client.login(username = user.username, password=pwd)
+		response = client.get(URL_PMDP + "%d/" % (pm.id))
+		self.assertEquals(response.status_code, 200)
+		self.assertEquals(response.request["PATH_INFO"], URL_PMDP + "%d/" % (pm.id))
 
+	def test_upvote_petmatch(self):
+		results = setup_objects(create_users=True, num_users=10)
+		user, pwd = results["users"][0]
+		user2, pwd2 = results["users"][1]
+		pr1 = create_random_PetReport(user, status="Lost", pet_type="Dog")
+		pr2 = create_random_PetReport(user2, status="Found", pet_type="Dog")
+		pm = PetMatch.objects.create(proposed_by=user.userprofile, lost_pet=pr1, found_pet=pr2)
+		client = Client(enforce_csrf_checks=False)
+		loggedin = client.login(username = user.username, password=pwd)
+		response = client.post(URL_VOTE_PETMATCH + str(pm.id), {"vote":"upvote"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+		self.assertEquals(response.status_code, 200)
+		pm = PetMatch.objects.get()
+		self.assertEquals(pm.up_votes.count(), 1)
+		self.assertEquals(pm.down_votes.count(), 0)
 
-	def test_post_good_PetMatch_upvote (self):
-		print_testing_name("test_post_good_PetMatch_upvote")
-		iteration_time = 0.00
-
-		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		result = setup_objects(create_petreports=True, create_petmatches=True)
-		users = result["users"]
-		clients = result["clients"]
-		petreports = result["petreports"]
-		petmatches = result["petmatches"]
-
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-
-			#objects
-			user, password = random.choice(users)
-			client = random.choice(clients)
-			petmatch = random.choice(petmatches)
-
-			#Log in First.
-			loggedin = client.login(username = user.username, password = password)
-			self.assertTrue(loggedin == True)			
-			print_test_msg("%s logs onto %s to enter the PMDP..." % (user, client))
-
-			pmdp_url = URL_PMDP + str(petmatch.id) + "/"
-			print pmdp_url
-			response = client.get(pmdp_url)
-
-			vote_url = URL_VOTE_MATCH
-			post =  {"vote":"upvote", "match_id":petmatch.id, "user_id":user.id}
-			response = client.post(vote_url, post, follow=True)
-
-			#Make assertions
-			self.assertEquals(response.status_code, 200)
-			self.assertEquals(response.request ['PATH_INFO'], vote_url)
-			self.assertTrue(petmatch.UserProfile_has_voted(user.userprofile) == UPVOTE)
-			self.assertEquals(petmatch.up_votes.get(pk = user.id), user.userprofile)
-
-			output_update(i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)
-		performance_report(iteration_time)	
-
-
-	def test_post_good_PetMatch_downvote (self):
-		print_testing_name("test_post_good_PetMatch_downvote")
-		iteration_time = 0.00
-
-		#Need to setup clients, users, and their passwords in order to simulate posting of PetReport objects.
-		results = setup_objects(create_petreports=True, create_petmatches=True)
-		users = results["users"]
-		clients = results["clients"]
-		petreports = results["petreports"]
-		petmatches = results["petmatches"]
-		
-		for i in range (NUMBER_OF_TESTS):
-			start_time = time.clock()
-
-			#objects
-			user, password = random.choice(users)
-			client = random.choice(clients)
-			petmatch = random.choice(petmatches)
-
-			#Log in First.
-			loggedin = client.login(username = user.username, password = password)
-			self.assertTrue(loggedin == True)			
-			print_test_msg("%s logs onto %s to enter the PMDP..." % (user, client))
-
-			pmdp_url = URL_PMDP + str(petmatch.id) + "/"
-			print_test_msg(pmdp_url)
-			response = client.get(pmdp_url)
-
-			vote_url = URL_VOTE_MATCH
-			post =  {"vote":"downvote", "match_id":petmatch.id, "user_id":user.id}
-			response = client.post(vote_url, post, follow=True)
-
-			#Make assertions
-			self.assertEquals(response.status_code, 200)
-			self.assertEquals(response.request ['PATH_INFO'], vote_url)
-			self.assertTrue(petmatch.UserProfile_has_voted(user.userprofile) == DOWNVOTE)
-			self.assertEquals(petmatch.down_votes.get(pk = user.id), user.userprofile)
-
-			output_update(i + 1)
-			end_time = time.clock()
-			iteration_time += (end_time - start_time)
-		performance_report(iteration_time)
+	def test_downvote_petmatch(self):
+		results = setup_objects(create_users=True, num_users=10)
+		user, pwd = results["users"][0]
+		user2, pwd2 = results["users"][1]
+		pr1 = create_random_PetReport(user, status="Lost", pet_type="Dog")
+		pr2 = create_random_PetReport(user2, status="Found", pet_type="Dog")
+		pm = PetMatch.objects.create(proposed_by=user.userprofile, lost_pet=pr1, found_pet=pr2)
+		client = Client(enforce_csrf_checks=False)
+		loggedin = client.login(username = user.username, password=pwd)
+		response = client.post(URL_VOTE_PETMATCH + str(pm.id), {"vote":"downvote"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+		self.assertEquals(response.status_code, 200)
+		pm = PetMatch.objects.get()
+		self.assertEquals(pm.down_votes.count(), 1)
+		self.assertEquals(pm.up_votes.count(), 0)

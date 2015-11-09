@@ -7,16 +7,18 @@
 	<head>
 		<meta charset='utf-8' http-equiv="content-type" content="text/html" />
 		<title>{% block head_title %} EmergencyPetMatcher{% endblock head_title %}</title>
-		<meta name="keywords" content="pet-family reunification, emergency, research, software engineering, disaster, CU Boulder"/>
-		<meta name="description" content="" />
-		<meta property="og:title" content="EmergencyPetMatcher" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://www.emergencypetmatcher.com" />
-		<meta property="og:description" content="EmergencyPetMatcher is a crowdsourcing website designed to help pet advocates and lovers report, match, and verify lost and found pets during and after disaster events." />		
-		<meta property="og:image" content="http://media.dunkedcdn.com/assets/prod/94495/950x0_p19io3jktk13v8lqg1la01t4ocv63.jpg" />		
-		<meta property="og:image:type" content="image/jpeg" />
-		<meta property="og:image:width" content="400" />
-		<meta property="og:image:height" content="300" />
+		{% block meta %}
+			<meta name="keywords" content="pet-family reunification, emergency, research, software engineering, disaster, CU Boulder"/>
+			<meta name="description" content="" />
+			<meta property="og:title" content="EmergencyPetMatcher" />
+			<meta property="og:type" content="website" />
+			<meta property="og:url" content="https://www.emergencypetmatcher.com" />
+			<meta property="og:description" content="EmergencyPetMatcher is a crowdsourcing website designed to help pet advocates and lovers report, match, and verify lost and found pets during and after disaster events." />
+			<meta property="og:image" content="http://media.dunkedcdn.com/assets/prod/94495/950x0_p19io3jktk13v8lqg1la01t4ocv63.jpg" />
+			<meta property="og:image:type" content="image/jpeg" />
+			<meta property="og:image:width" content="400" />
+			<meta property="og:image:height" content="300" />
+		{% endblock meta %}
 		<link rel="shortcut icon" type="image/png" href="{{ MEDIA_URL }}favicon.ico"/>
 
 		{% load pipeline %}
@@ -30,7 +32,7 @@
 
 		{% block css %}{% endblock css %}
 		{% block js %}{% endblock js %}
-	</head>	
+	</head>
 
 	<body id="epm-body">
 		{% block container %}
@@ -49,11 +51,11 @@
 			     	 </div>
 			    {% endfor %}
 			  </ul>
-			{% endblock messages %}  
+			{% endblock messages %}
 
 			<div id="epm-container" class="container-fluid">
 				<!-- Navigation Menu -->
-				{% block nav %} 
+				{% block nav %}
 					<nav id="epm-nav" role="navigation" class="navbar navbar-inverse navbar-fixed-top">
 						<div class="container">
 							<ul class="nav navbar-nav navbar-left">
@@ -69,28 +71,28 @@
 								{% if user.is_authenticated %}
 							    <li class="nav-link-profile" style="padding-top:5px;">
 							    	<img id ="epm-nav-user-thumb" src="{{ MEDIA_URL }}/{{ user.userprofile.thumb_path }}"/>
-							    	<a role="menuitem" style="display:inline-block;" href="{% url 'get_UserProfile_page' user.userprofile.id %}">{{ user.username }}</a>
+							    	<a role="menuitem" style="display:inline-block;" href="{% url 'get_UserProfile' user.userprofile.id %}">{{ user.username }}</a>
 							    </li>
-									<li class="nav-link-pet" style="padding-top:5px;"><a href= "{% url 'submit' %}">New Pet Report</a></li>
+									<li class="nav-link-pet" style="padding-top:5px;"><a href= "{% url 'submit_PetReport' %}">New Pet Report</a></li>
 								{% else %}
 									<li class="nav-link-login" style="padding-top:5px;" ><a href= "{% url 'login_User' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
-								{% endif %}						
+								{% endif %}
 								<li class="nav-link-about" style="padding-top:5px;"><a href="{% url 'about' %}">About</a></li>
 								{% if user.is_authenticated %}
 							    <li class="nav-link-logout" style='padding-top:5px;'>
 							    	<a role="menuitem" href="{% url 'logout_User' %}">Logout</a>
-							    </li>						    					
-							  {% endif %}						
+							    </li>
+							  {% endif %}
 							</ul>
 							{% endblock nav-choices %}
 						</div>
-					</nav>				
-				{% endblock nav %}									          	
-				
-				{% block content %}			
+					</nav>
+				{% endblock nav %}
+
+				{% block content %}
 				{% endblock content %}
-				
-				<footer>&copy;2012-2015 <a href="http://epic.cs.colorado.edu">Project EPIC</a>. All Rights Reserved.</footer>			
+
+				<footer>&copy;2012-2015 <a href="http://epic.cs.colorado.edu">Project EPIC</a>. All Rights Reserved.</footer>
 			</div>
 		{% endblock container %}
 	</body>

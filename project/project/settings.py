@@ -195,15 +195,15 @@ LOGIN_URL = '/login'
 #Variable to specify location of logout
 LOGOUT_URL = '/'
 
+TEST_RUNNER = 'rainbowtests.test.runner.RainbowDiscoverRunner'
+
 #Variable that specifies the exact model representing the user profile for the auth.User model.
 AUTH_PROFILE_MODULE = 'socializing.UserProfile'
 
 ACCOUNT_ACTIVATION_DAYS = 1 # One-week activation window; you may, of course, use a different value.
 
-'''Email Settings'''
+#Email Settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#Swap with the filebased email backend when testing.
-# "django.core.mail.backends.filebased.EmailBackend"
 
 #Email File Path - Used for testing email messages.
 EMAIL_FILE_PATH =  PROJECT_ROOT + "email-test.txt"
@@ -217,6 +217,9 @@ DEFAULT_FROM_EMAIL = "emergencypetmatcher@gmail.com"
 RECAPTCHA_SERVER_SECRET = "6LfkHgITAAAAAF1RcPPIB4ydg-_19xFLmoKvEJIr"
 RECAPTCHA_CLIENT_SECRET = "6LfkHgITAAAAANIuw-RwYMfOWEMBfeVll9nhrdKa"
 RECAPTCHA_SITEVERIFY = "https://www.google.com/recaptcha/api/siteverify"
+
+TEST_RECAPTCHA_CLIENT_SECRET="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+TEST_RECAPTCHA_SERVER_SECRET="6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
 
 AUTHENTICATION_BACKENDS = (
     'social.backends.twitter.TwitterOAuth',
