@@ -26,6 +26,37 @@ from home.constants import *
 from matching.decorators import *
 import datetime, re, json, pdb, urllib, urllib2, ssl
 
+#Display the PetMatch object
+def get(request, petmatch_id):
+    pm = get_object_or_404(PetMatch, pk=petmatch_id)
+    voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
+
+    #Need to check if the user is authenticated (non-anonymous) to find out if he/she has voted on this PetMatch.
+    if request.user.is_authenticated() == True:
+        user_has_voted = pm.UserProfile_has_voted(request.user.userprofile)
+    else:
+        user_has_voted = False
+
+    num_upvotes = len(pm.up_votes.all())
+    num_downvotes = len(pm.down_votes.all())
+
+    ctx = {
+        "petmatch": pm,
+        "site_domain":Site.objects.get_current().domain,
+        "petreport_fields": pm.get_display_fields(),
+        "num_voters": len(voters),
+        "user_has_voted": user_has_voted,
+        "num_upvotes":num_upvotes,
+        "num_downvotes":num_downvotes
+    }
+
+    if pm.lost_pet.closed:
+        ctx["petreunion"] = pm.lost_pet.get_PetReunion()
+    elif pm.found_pet.closed:
+        ctx["petreunion"] = pm.found_pet.get_PetReunion()
+
+    return render_to_response(HTML_PMDP, ctx, RequestContext(request))
+
 #Given a PetMatch ID, just return the PetMatch JSON.
 def get_PetMatch_JSON(request, petmatch_id):
     if (request.method == "GET") and (request.is_ajax() == True):
@@ -60,30 +91,6 @@ def get_PetMatches_JSON(request):
         return JsonResponse({"pet_matches_list":pet_matches, "count":len(pet_matches), "total_count": petmatch_count}, safe=False)
     else:
         raise Http404
-
-#Display the PetMatch object
-def get_PetMatch(request, petmatch_id):
-    pm = get_object_or_404(PetMatch, pk=petmatch_id)
-    voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
-
-    #Need to check if the user is authenticated (non-anonymous) to find out if he/she has voted on this PetMatch.
-    if request.user.is_authenticated() == True:
-        user_has_voted = pm.UserProfile_has_voted(request.user.userprofile)
-    else:
-        user_has_voted = False
-
-    num_upvotes = len(pm.up_votes.all())
-    num_downvotes = len(pm.down_votes.all())
-
-    return render_to_response(HTML_PMDP, {
-        "petmatch": pm,
-        "site_domain":Site.objects.get_current().domain,
-        "petreport_fields": pm.get_display_fields(),
-        "num_voters": len(voters),
-        "user_has_voted": user_has_voted,
-        "num_upvotes":num_upvotes,
-        "num_downvotes":num_downvotes
-    }, RequestContext(request))
 
 @login_required
 @allow_only_before_closing

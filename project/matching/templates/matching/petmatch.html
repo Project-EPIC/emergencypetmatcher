@@ -85,15 +85,13 @@
   <div class="alert alert-warning" role="alert" style="font-weight:bold; text-align:center; margin:20px; font-size:1.3em;">
     Unfortunately, this pet match has been tried and failed. Look for other pet matches!
   </div>
-  {% endif %}
-
-  {% if petmatch.lost_pet.closed %}
+  {% elif petmatch.lost_pet.closed and petreunion %}
     <div class="alert alert-info" role="alert" style="font-weight:bold; text-align:center; margin:20px;">
-      This Pet Match is closed because {{ petmatch.lost_pet.pet_name }} has been <a href="{% url 'get_PetReunion' petmatch.lost_pet.petreunion.id %}">closed</a>.
+      This Pet Match is closed because {{ petmatch.lost_pet.pet_name }} has been <a href="{% url 'get_PetReunion' petreunion.id %}">closed</a>.
     </div>
-  {% elif petmatch.found_pet.closed %}
+  {% elif petmatch.found_pet.closed and petreunion %}
     <div class="alert alert-info" role="alert" style="font-weight:bold; text-align:center; margin:20px;">
-      This Pet Match is closed because {{ petmatch.found_pet.pet_name }} has been <a href="{% url 'get_PetReunion' petmatch.found_pet.petreunion.id %}">closed</a>.
+      This Pet Match is closed because {{ petmatch.found_pet.pet_name }} has been <a href="{% url 'get_PetReunion' petreunion.id %}">closed</a>.
     </div>
   {% else %}
   {% endif %}
