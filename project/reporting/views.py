@@ -30,7 +30,7 @@ from home.constants import *
 from verifying.models import PetReunion, PetReunionForm
 from verifying.constants import *
 from reporting.decorators import *
-import datetime, re, time, json, pdb, urllib, urllib2, ssl
+import datetime, re, time, json, pdb, project.settings
 
 def get(request, petreport_id):
     pet_report = get_object_or_404(PetReport, pk = petreport_id)
@@ -208,7 +208,7 @@ def edit(request, petreport_id):
             pr = form.save(commit=False)
             pet_report.update_fields(pr, request=request.POST)
             messages.success(request, "You've successfully updated your pet report.")
-            return redirect(URL_HOME)
+            return redirect(URL_PRDP + "%d/" % pet_report.id)
         form = PetReportForm(instance=pet_report)
         messages.error(request, "Something went wrong. Please check the fields and try again.")
     else:
@@ -217,6 +217,7 @@ def edit(request, petreport_id):
     return render_to_response(HTML_EDIT_PETREPORT, {
         "form": form,
         "petreport": pet_report,
+        "RECAPTCHA_CLIENT_SECRET": settings.RECAPTCHA_CLIENT_SECRET,
         "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH,
         "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
         "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,

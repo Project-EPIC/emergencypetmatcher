@@ -1,5 +1,4 @@
 $(document).ready(function(){
-
 	$("#epm-nav-links .nav-link-pet").toggleClass("active");
 	//Image Size.
 	var img_size = 0.0;

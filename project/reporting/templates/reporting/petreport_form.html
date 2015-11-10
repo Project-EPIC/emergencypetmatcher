@@ -29,7 +29,9 @@
 		{% endblock content_subtitle %}
 
 		{% block form %}
+    {% block form-header %}
 		<form enctype="multipart/form-data" id="petreport_form" method="POST" action="{% url 'submit_PetReport' %}">
+    {% endblock form-header %}
 			{% csrf_token %}
 
 			<div style="margin-bottom:20px;">
