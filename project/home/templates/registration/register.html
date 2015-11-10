@@ -2,13 +2,13 @@
 {% block head_title %} EPM - Register for an Account{% endblock head_title %}
 
 {% block content %}
-<div id="content" style="width:700px;">
-	{% block content_subtitle %} <h3> Register for an Account Here</h3> {% endblock content_subtitle %}	
+<div id="content" style="width:600px;">
+	{% block content_subtitle %} <h3> Register for an Account Here</h3> {% endblock content_subtitle %}
 	<p> Fields Marked with (<b style="margin:0;" class="required-field-symbol">*</b>) are required. </p>
 
 	<form enctype="multipart/form-data" method = "post" id= "register-form" role="form"  action="{% url 'registration_register' %}">
 		{% csrf_token %}
-	
+
 		<div style="margin-bottom:20px;">
 			{% for error in form.non_field_errors %} <span class="field-error-message"> {{ error }} </span>{% endfor %}
 		</div>
@@ -72,7 +72,7 @@
 
 					<!-- TOS Minor Container -->
 					<div id="tos-minor-container" class="hidden">
-						<textarea disabled="true" class="tos form-control" id="tos_minor_text">{{ consent_form_minor_text }}</textarea>
+						<textarea disabled="true" class="tos form-control" id="tos_minor_text" style="background-color:ivory;">{{ consent_form_minor_text }}</textarea>
 						<div class="form-group" style="width:300px;">
 							<label for="guardian-email">Parent/Guardian Email Address<b class="required-field-symbol">*</b></label>
 							<input type="email" class="form-control" name="guardian_email" placeholder="Enter Parent/Guardian's Email Address">
@@ -81,19 +81,19 @@
 
 					<!-- TOS Adult Container -->
 					<div id="tos-adult-container" class="hidden">
-						<textarea disabled="true" class="tos form-control" id="tos_adult_text">{{ consent_form_adult_text }}</textarea>
+						<textarea disabled="true" class="tos form-control" id="tos_adult_text" style="background-color:ivory;">{{ consent_form_adult_text }}</textarea>
 					</div>
 
 					<label for="tos" style="display:block;">I have read this form. I know the possible risks and benefits of using EPM and I choose to be in this study. I know that being in this study is up to me and I can withdraw at any time.<b class="required-field-symbol">*</b></label>
 					<input id="register-toc" type="checkbox" name="tos">
 				</div>
 			</div>
-			
+
 			<div class ="form-actions">
 				<input type="hidden" name="next" value="{{ next }}">
 				<a href="{% url 'login_User' %}" class="btn btn-default">Back</a>
 				<input id="register-submit" type="submit" class="btn btn-primary" value="Sign Me Up!">
-			</div>		
+			</div>
 			{% endif %}
 		{% endfor %}
 	</form>
@@ -108,6 +108,5 @@
 {% endblock css %}
 
 {% block js %}
-   <script src ={% static "registration/js/epm-register.js" %} type='text/javascript'></script> 
+   <script src ={% static "registration/js/epm-register.js" %} type='text/javascript'></script>
 {% endblock js %}
-

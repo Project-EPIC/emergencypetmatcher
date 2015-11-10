@@ -1,11 +1,12 @@
 
 SOCIAL_AUTH_TWITTER_KEY        = 'K42bozieypTgRCQgDqcJsQ'
 SOCIAL_AUTH_TWITTER_SECRET     = 'XgYnjnsp0eyQgKOCNEJT8c1dETON3p5Uv6mopbAEI'
-FACEBOOK_APP_ID             = '315409715220911'
-FACEBOOK_API_SECRET         = '0d6dccfbd7f042c31a29904222df78a2'
+SOCIAL_AUTH_FACEBOOK_KEY       = '315409715220911'
+SOCIAL_AUTH_FACEBOOK_SECRET    = '0d6dccfbd7f042c31a29904222df78a2'
 
 
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+
 SOCIAL_AUTH_ERROR_KEY = 'social_errors'
 SOCIAL_AUTH_COMPLETE_URL_NAME  = 'socialauth_complete'
 SOCIAL_AUTH_ASSOCIATE_URL_NAME = 'socialauth_associate_complete'
@@ -17,6 +18,10 @@ SOCIAL_AUTH_ERROR_KEY             = 'socialauth_error'
 
 
 FACEBOOK_EXTENDED_PERMISSIONS = ['email', 'first_name', 'last_name']
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+  'locale': 'ru_RU',
+  'fields': 'id, name, email'
+}
 # No permisson for email in Twitter, check this https://dev.twitter.com/discussions/4019
 
 SOCIAL_AUTH_PROTECTED_USER_FIELDS = ['email']

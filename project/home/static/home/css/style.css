@@ -1,4 +1,8 @@
 
+#twitter-signin {
+	vertical-align: text-bottom;
+	padding:5px;
+}
 
 #menu li {
 	display: inline;
@@ -11,7 +15,7 @@
 	padding: 5px 20px;
 	text-decoration: none;
 	border-top: 4px solid #F2EFA2;
-	font-family: Arial, Helvetica, sans-serif; 
+	font-family: Arial, Helvetica, sans-serif;
 	font-weight: bold;
 	font-size: 14px;
 	color: #182C33;
@@ -24,7 +28,7 @@
 	padding: 5px 20px;
 	text-decoration: none;
 	border-top: 4px solid #F2EFA2;
-	font-family: Arial, Helvetica, sans-serif; 
+	font-family: Arial, Helvetica, sans-serif;
 	font-weight: bold;
 	font-size: 14px;
 	color: #182C33;
@@ -33,7 +37,7 @@
 #menu form input {
 
 	text-decoration: none;
-	font-family: Arial, Helvetica, sans-serif; 
+	font-family: Arial, Helvetica, sans-serif;
 	font-weight: bold;
 	font-size: 11px;
 	width:80px;
@@ -82,15 +86,15 @@
 }
 
 .tab-subtitle {
-	margin:10px; 
-	display:block; 
-	font-size:24px; 
-	color:gray; 
+	margin:10px;
+	display:block;
+	font-size:24px;
+	color:gray;
 	text-align:center;
 }
 
 #pet-report-filter-form {
-	margin:0 auto; 
+	margin:0 auto;
 	width:805px;
 }
 
@@ -100,7 +104,7 @@
 }
 
 #tiles-wait {
-	width:200px; 
+	width:200px;
 	text-align: center;
 	margin: 50px auto;
 	display:none;
@@ -263,7 +267,7 @@
 
 #login-form {
 	padding:15px;
-	width:430px;
+	width:450px;
 	margin:20px auto 20px auto;
 }
 
@@ -298,4 +302,3 @@
 #about_images li {
 	display:inline-block;
 }
-
