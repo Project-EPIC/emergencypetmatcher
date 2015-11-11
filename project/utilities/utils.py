@@ -27,11 +27,11 @@ SHA1_RE = re.compile('^[a-f0-9]{40}$')
 def print_info_msg (string):
 	print "[INFO]: %s" % string
 def print_test_msg (string):
-	print "[TEST]: %s" % string	
+	print "[TEST]: %s" % string
 def print_debug_msg (string):
-	print "[DEBUG]: %s" % string	
+	print "[DEBUG]: %s" % string
 def print_success_msg (string):
-	print "[OK]: %s" % string	
+	print "[OK]: %s" % string
 def print_error_msg (string):
 	print "[ERROR]: %s" % string
 
@@ -41,30 +41,30 @@ def email_is_valid(email_address):
 			return True
 	except:
 		return False
-		
+
 def get_objects_by_page(objects, page, limit=25):
     if (page != None and page > 0):
         page = int(page)
         objects = objects[((page-1) * limit):((page-1) * limit + limit)]
-    return objects 
+    return objects
 
 # This function generates two dictionaries: the first representing the original contact for this petreport
 # and the second the cross-posting contact. Both are contingent upon whether contact fields have been
 # prepared for this petreport.
 def generate_pet_contacts(petreport):
-	userprofile_contact = {	"name": petreport.proposed_by.user.username, 
-							"email": petreport.proposed_by.user.email, 
-							"phone": None, 
+	userprofile_contact = {	"name": petreport.proposed_by.user.username,
+							"email": petreport.proposed_by.user.email,
+							"phone": None,
 							"link": None,
 							"guardian_email": petreport.proposed_by.guardian_email }
 
 	if petreport.is_crossposted() == True:
-		return ({	"name": petreport.contact_name, 
-							"email": petreport.contact_email, 
-							"phone": petreport.contact_number, 
+		return ({	"name": petreport.contact_name,
+							"email": petreport.contact_email,
+							"phone": petreport.contact_number,
 							"link": petreport.contact_link }, userprofile_contact)
 	else:
-		return (userprofile_contact, None)		
+		return (userprofile_contact, None)
 
 def create_sha1_hash(username):
 	salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
@@ -83,7 +83,7 @@ def generate_string (size, phone=False, url=False, chars = string.ascii_uppercas
 	elif url == True:
 		return "http://" + ''.join(random.choice(chars) for i in range(size))
 
-	else: 
+	else:
 		return ''.join(random.choice(chars) for i in range(size))
 
 def generate_lipsum_paragraph(max_length):
@@ -160,11 +160,3 @@ def recaptcha_ok(response):
 	if status["success"] == True or (settings.RECAPTCHA_SERVER_SECRET == settings.TEST_RECAPTCHA_SERVER_SECRET):
 		return True
 	return False
-
-
-
-
-
-
-
-

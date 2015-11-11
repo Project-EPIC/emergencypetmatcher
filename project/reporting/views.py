@@ -90,7 +90,7 @@ def get_PetReports_JSON(request):
         filters.pop("page")
         filters = {k:v[0].strip() for k,v in filters.items()}
         #Grab Pets by Filter Options.
-        pet_reports = PetReport.objects.filter(**filters).filter(closed = False).order_by("id").reverse()
+        pet_reports = PetReport.objects.filter(**filters).filter(closed=False).order_by("id").reverse()
         #Get the petreport count for pagination purposes.
         petreport_count = len(pet_reports)
         #Now get just a page of PetReports if page # is available.

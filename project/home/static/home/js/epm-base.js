@@ -46,7 +46,7 @@ $(document).ready(function(){
 			load_pet_breeds(pet_type, function(data){
 				$("#filter-breed").html("").select2({data: {id:null, text: null}});
 				$("#filter-breed").select2({
-					tags: data.breeds,
+					tags: ["All"].concat(data.breeds),
 					maximumSelectionSize:1,
 				});
 			});

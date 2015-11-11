@@ -423,6 +423,31 @@ class HomePageTesting (TestCase):
 		pr_ids = [pr.id for pr in get_objects_by_page(prs, 1, limit=NUM_PETREPORTS_HOMEPAGE)]
 		self.assertEquals(json_ids, pr_ids)
 
+	def test_filter_petreports_breed_all(self):
+		results = setup_objects(num_users=5, create_petreports=True, num_petreports=50)
+		client = Client(enforce_csrf_checks=False)
+		params = {"pet_type":"Dog", "breed":"All", "page":1}
+		response = client.get(URL_GET_PETREPORTS_JSON, params, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+		json_ids = [pr["ID"] for pr in json.loads(response._container[0])["pet_reports_list"]] #Returns nothing
+		params.pop("page")
+		prs = PetReport.objects.filter(closed=False).filter(**params).order_by("id").reverse() #Also Returns nothing
+		for pr in prs:
+			self.assertTrue(pr.pet_type == "Dog")
+		pr_ids = [pr.id for pr in get_objects_by_page(prs, 1, limit=NUM_PETREPORTS_HOMEPAGE)]
+		self.assertEquals(json_ids, pr_ids)
+
+		#Now try replicating the "All" with the absence of it.
+		params = {"pet_type":"Dog", "page":1}
+		response = client.get(URL_GET_PETREPORTS_JSON, params, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+		json_ids = [pr["ID"] for pr in json.loads(response._container[0])["pet_reports_list"]] #Returns nothing
+		params.pop("page")
+		prs = PetReport.objects.filter(closed=False).filter(**params).order_by("id").reverse() #Also Returns nothing
+		for pr in prs:
+			self.assertTrue(pr.pet_type == "Dog")
+		pr_ids = [pr.id for pr in get_objects_by_page(prs, 1, limit=NUM_PETREPORTS_HOMEPAGE)]
+		self.assertEquals(json_ids, pr_ids)
+
+
 
 class RegistrationTesting (TestCase):
 	def setUp(self):
