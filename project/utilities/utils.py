@@ -4,7 +4,7 @@ from datetime import datetime
 from django.core.validators import validate_email
 from reporting.constants import *
 from django.conf import settings
-import os, re, hashlib, random, string, sys, time, json, lipsum, traceback, urllib, urllib2, ssl
+import os, re, hashlib, random, string, sys, time, json, lipsum, traceback, urllib, urllib2, ssl, pdb
 
 '''===================================================================================
 utils.py: Utility Functions for EPM Utility and Testing
@@ -42,11 +42,13 @@ def email_is_valid(email_address):
 	except:
 		return False
 
-def get_objects_by_page(objects, page, limit=25):
-    if (page != None and page > 0):
-        page = int(page)
-        objects = objects[((page-1) * limit):((page-1) * limit + limit)]
-    return objects
+def get_objects_by_page(objects, page=1, limit=25):
+	page = int(page)
+	if page < 1:
+		page = 1
+	if (page != None and page > 0):
+		objects = objects[((page-1) * limit):((page-1) * limit + limit)]
+	return objects
 
 # This function generates two dictionaries: the first representing the original contact for this petreport
 # and the second the cross-posting contact. Both are contingent upon whether contact fields have been

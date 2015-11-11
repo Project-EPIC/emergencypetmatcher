@@ -97,6 +97,18 @@ class PetReunion(models.Model):
 			"img_path" : self.img_path.name,
 			"thumb_path": self.thumb_path.name
 		}
+
+	@staticmethod
+	def filter(params, page=1, limit=25):
+		for key in params:
+			if type(params[key]) == list:
+				params[key] = params[key][0]
+		params = {k:v for k, v in params.iteritems() if (v != "All" and k != "page")}
+		petreunions = PetReunion.objects.filter(**params).order_by("id").reverse()
+		count = len(petreunions)
+		petreunions = get_objects_by_page(petreunions, page, limit)
+		return {"petreunions": petreunions, "count":count}
+
 	def __unicode__ (self):
 		return '{ID{%s}, reason:%s, petreport:%s, matched_petreport:%s}' % (self.id, self.reason, self.petreport, self.matched_petreport)
 

@@ -67,18 +67,10 @@ def get_PetMatch_JSON(request, petmatch_id):
 
 def get_PetMatches_JSON(request):
     if request.is_ajax() == True:
-        page = int(request.GET["page"])
-        if page < 1:
-            page = 1
         filters = dict(request.GET)
-        filters.pop("page")
-        filters = {k:v[0].strip() for k,v in filters.items()}
-        pet_matches = PetMatch.objects.filter(**filters).filter(has_failed=False).order_by("id").reverse()
-        #Get the petmatch count for pagination purposes.
-        petmatch_count = len(pet_matches)
-        #Now get just a page of PetMatches if page # is available.
-        pet_matches = get_objects_by_page(pet_matches, page, limit=NUM_PETMATCHES_HOMEPAGE)
-        #Zip it up in JSON and ship it out as an HTTP Response.
+        filters['has_failed'] = False
+        #Grab Pet Matches by Filter Options.
+        results = PetMatch.filter(filters, page=request.GET["page"], limit=NUM_PETMATCHES_HOMEPAGE)
         pet_matches = [{
             "ID"                    : pm.id,
             "proposed_by_username"  : pm.proposed_by.user.username,
@@ -86,9 +78,9 @@ def get_PetMatches_JSON(request):
             "found_pet_name"        : pm.found_pet.pet_name,
             "lost_pet_img_path"     : pm.lost_pet.thumb_path.name,
             "found_pet_img_path"    : pm.found_pet.thumb_path.name
-        } for pm in pet_matches]
+        } for pm in results["petmatches"]]
 
-        return JsonResponse({"pet_matches_list":pet_matches, "count":len(pet_matches), "total_count": petmatch_count}, safe=False)
+        return JsonResponse({"pet_matches_list":pet_matches, "count":len(pet_matches), "total_count": results["count"]}, safe=False)
     else:
         raise Http404
 

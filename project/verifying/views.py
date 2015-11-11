@@ -51,22 +51,17 @@ def get_PetReunion_JSON(request):
 #Given a Page Number, return a list of PetReports.
 def get_PetReunions_JSON(request):
     if request.is_ajax() == True:
-        page = int(request.GET["page"])
         filters = dict(request.GET)
-        filters.pop("page")
-        filters = {k:v[0].strip() for k,v in filters.items()}
-        pet_reunions = PetReunion.objects.filter(**filters).order_by("id").reverse()
-        petreunion_count = len(pet_reunions)
-        pet_reunions = get_objects_by_page(pet_reunions, page, limit=NUM_PETREUNIONS_HOMEPAGE)
+        results = PetReunion.filter(filters, page=request.GET["page"], limit=NUM_PETREUNIONS_HOMEPAGE)
         pet_reunions = [{
             "ID"                    : pr.id,
             "proposed_by_username"  : pr.petreport.proposed_by.user.username,
             "pet_name"              : pr.petreport.pet_name,
             "img_path"              : pr.thumb_path.name,
             "reason"                : pr.get_display_reason()
-        } for pr in pet_reunions]
+        } for pr in results["petreunions"]]
 
-        return JsonResponse({"pet_reunions_list":pet_reunions, "count":len(pet_reunions), "total_count": petreunion_count}, safe=False)
+        return JsonResponse({"pet_reunions_list":pet_reunions, "count":len(pet_reunions), "total_count": results['count']}, safe=False)
     else:
         raise Http404
 

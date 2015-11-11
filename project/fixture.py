@@ -269,7 +269,6 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 
 #Find all potential PetMatch PetReport (Lost, Found) pairs and return a list of them.
 def get_potential_PetMatch_PetReport_pairs(pet_type=None):
-
 	if pet_type == None:
 		allpets = PetReport.objects.all()
 	else:
@@ -364,7 +363,9 @@ def create_random_PetReunion(save=True, petreport=None, matched_petreport=None):
 		petreport = random.choice(PetReport.objects.exclude(closed=True))
 	if not matched_petreport:
 		if random.random() <= 0.40: #This doesn't happen often, but it's glorious when it does.
-			matched_petreport = random.choice(PetReport.objects.exclude(pk=petreport.id).exclude(status=petreport.status).exclude(closed=True))
+			available_reports = PetReport.objects.exclude(pk=petreport.id).exclude(status=petreport.status).exclude(closed=True)
+			if len(available_reports) > 0:
+				matched_petreport = random.choice(available_reports)
 
 	reasons = ["reunited with its original owner", "rehomed with a new owner", "passed away", "other"]
 	pr = PetReunion(petreport=petreport, reason=random.choice(reasons), matched_petreport=matched_petreport)

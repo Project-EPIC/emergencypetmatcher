@@ -303,6 +303,17 @@ class PetReport(models.Model):
         events = PetReport.objects.values_list("event_tag", flat=True).distinct()
         return [event for event in events if event is not None]
 
+    @staticmethod
+    def filter(params, page=1, limit=25):
+        for key in params:
+            if type(params[key]) == list:
+                params[key] = params[key][0]
+        params = {k:v for k, v in params.iteritems() if (v != "All" and k != "page")}
+        petreports = PetReport.objects.filter(**params).order_by("id").reverse()
+        count = len(petreports)
+        petreports = get_objects_by_page(petreports, page, limit)
+        return {"petreports": petreports, "count":count}
+
     def get_display_fields(self):
         return [
             {"attr": "pet_name", "label": "Pet Name", "value": self.pet_name},

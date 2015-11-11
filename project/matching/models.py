@@ -123,14 +123,15 @@ class PetMatch(models.Model):
             return None
 
     @staticmethod
-    def get_PetMatches_by_page(filtered_petmatches, page):
-        if (page != None and page > 0):
-            page = int(page)
-            filtered_petmatches = filtered_petmatches [((page-1) * NUM_PETMATCHES_HOMEPAGE):((page-1) * NUM_PETMATCHES_HOMEPAGE + NUM_PETMATCHES_HOMEPAGE)]
-
-        #Just return the list of PetReports.
-        return filtered_petmatches
-
+    def filter(params, page=1, limit=25):
+        for key in params:
+            if type(params[key]) == list:
+                params[key] = params[key][0]
+        params = {k:v for k, v in params.iteritems() if (v != "All" and k != "page")}
+        petmatches = PetMatch.objects.filter(**params).order_by("id").reverse()
+        count = len(petmatches)
+        petmatches = get_objects_by_page(petmatches, page, limit)
+        return {"petmatches": petmatches, "count":count}
 
     def is_being_checked(self):
         try:

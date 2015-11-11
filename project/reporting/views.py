@@ -83,19 +83,10 @@ def get_PetReport_JSON(request):
 #Given a Page Number, return a list of PetReports.
 def get_PetReports_JSON(request):
     if request.is_ajax() == True:
-        page = int(request.GET["page"])
-        if page < 1:
-            page = 1
         filters = dict(request.GET)
-        filters.pop("page")
-        filters = {k:v[0].strip() for k,v in filters.items()}
+        filters["closed"] = False
         #Grab Pets by Filter Options.
-        pet_reports = PetReport.objects.filter(**filters).filter(closed=False).order_by("id").reverse()
-        #Get the petreport count for pagination purposes.
-        petreport_count = len(pet_reports)
-        #Now get just a page of PetReports if page # is available.
-        pet_reports = get_objects_by_page(pet_reports, page, limit=NUM_PETREPORTS_HOMEPAGE)
-        #Zip it up in JSON and ship it out as an HTTP Response.
+        results = PetReport.filter(filters, page=request.GET["page"], limit=NUM_PETREPORTS_HOMEPAGE)
         pet_reports = [{
             "ID"                    : pr.id,
             "proposed_by_username"  : pr.proposed_by.user.username,
@@ -103,9 +94,9 @@ def get_PetReports_JSON(request):
             "pet_type"              : pr.pet_type,
             "status"                : pr.status,
             "img_path"              : pr.thumb_path.name
-        } for pr in pet_reports]
+        } for pr in results["petreports"]]
 
-        return JsonResponse({"pet_reports_list":pet_reports, "count":len(pet_reports), "total_count": petreport_count}, safe=False)
+        return JsonResponse({"pet_reports_list":pet_reports, "count":len(pet_reports), "total_count": results["count"]}, safe=False)
     else:
         raise Http404
 
