@@ -12,6 +12,8 @@ URL_REGISTRATION_COMPLETE = "/register/complete/"
 URL_ACTIVATION_COMPLETE = "/accounts/activate/complete/"
 URL_SOCIAL_AUTH_GET_DETAILS = "/social_auth_get_details"
 URL_SOCIAL_AUTH_COMPLETE = "/complete/"
+URL_SOCIAL_AUTH_TWITTER_LOGIN = "/login/twitter"
+URL_SOCIAL_AUTH_FACEBOOK_LOGIN = "/login/facebook"
 
 #HTML File Paths (relative to STATIC_URL) - use for render_to_response calls
 HTML_HOME = "home/index.html"
@@ -53,7 +55,7 @@ NUM_ACTIVITIES_HOMEPAGE = 20
 ACTIVITY_LOG_DIRECTORY = LOGS_DIRECTORY + "activity_logs/"
 
 #Activities with their reward points attached.
-ACTIVITIES = {  
+ACTIVITIES = {
   "ACTIVITY_ACCOUNT_CREATED"                : {"reward": 10,  "source":"userprofile"},
   "ACTIVITY_LOGIN"                          : {"reward":  0,  "source":"userprofile"},
   "ACTIVITY_LOGOUT"                         : {"reward":  0,  "source":"userprofile"},
@@ -61,7 +63,7 @@ ACTIVITIES = {
   "ACTIVITY_USER_SET_PHOTO"                 : {"reward":  2,  "source":"userprofile"},
   "ACTIVITY_SOCIAL_FOLLOW"                  : {"reward":  5,  "source":"userprofile"},
   "ACTIVITY_SOCIAL_UNFOLLOW"                : {"reward":  0,  "source":"userprofile"},
-  "ACTIVITY_SOCIAL_SEND_MESSAGE_TO_USER"    : {"reward":  0,  "source":"userprofile"},                
+  "ACTIVITY_SOCIAL_SEND_MESSAGE_TO_USER"    : {"reward":  0,  "source":"userprofile"},
   "ACTIVITY_PETREPORT_SUBMITTED"            : {"reward": 10,  "source":"petreport"},
   "ACTIVITY_PETREPORT_ADD_BOOKMARK"         : {"reward":  0,  "source":"petreport"},
   "ACTIVITY_PETREPORT_REMOVE_BOOKMARK"      : {"reward":  0,  "source":"petreport"},
@@ -78,9 +80,9 @@ ACTIVITY_SOCIAL_ACTIVITIES = [
   "ACTIVITY_ACCOUNT_CREATED",
   "ACTIVITY_USER_CHANGED_USERNAME",
   "ACTIVITY_USER_SET_PHOTO",
-  "ACTIVITY_PETREPORT_SUBMITTED", 
-  "ACTIVITY_PETMATCH_PROPOSED", 
-  "ACTIVITY_PETMATCH_UPVOTE", 
+  "ACTIVITY_PETREPORT_SUBMITTED",
+  "ACTIVITY_PETMATCH_PROPOSED",
+  "ACTIVITY_PETMATCH_UPVOTE",
   "ACTIVITY_PETMATCH_DOWNVOTE",
   "ACTIVITY_PETMATCHCHECK_VERIFY",
   "ACTIVITY_PETMATCHCHECK_VERIFY_SUCCESS",
@@ -90,25 +92,25 @@ ACTIVITY_SOCIAL_ACTIVITIES = [
 ]
 
 #Activity Model Field Length
-ACTIVITIES_MAX_LENGTH = 50                              
+ACTIVITIES_MAX_LENGTH = 50
 
-CONSENT_FORM_MINOR_TEXT = """Welcome to EmergencyPetMatcher! 
+CONSENT_FORM_MINOR_TEXT = """Welcome to EmergencyPetMatcher!
 
 We are researchers from Project EPIC (Empowering the Public with Information in Crisis) at the University of Colorado Boulder, and we are conducting a study to see how online volunteers help pet owners find their misplaced pets, as often happens when disaster strikes.
 
-For this research, we will keep track of the information you provide to us, like the pets and pet matches you work on, which users you talk to, and how often you log on and use EPM. We will keep all of your information secure and private. Some information, such as your username, needs to be public so others on the web site know who you are. 
+For this research, we will keep track of the information you provide to us, like the pets and pet matches you work on, which users you talk to, and how often you log on and use EPM. We will keep all of your information secure and private. Some information, such as your username, needs to be public so others on the web site know who you are.
 
 If you check the box below, it means that you have read this and that you want to work in EPM and be in this study. You will need to provide your parent/guardian's email address to make sure that they approve. You won't be able to register for EmergencyPetMatcher until we receive your parent's consent as well as yours.
 
 If you don't want to be in the research, don't click the box, and that's okay because it's your choice.
- 
-You can ask questions now or later. You or your parents can contact us at emergencypetmatcher-support@googlegroups.com if you have a question. 
+
+You can ask questions now or later. You or your parents can contact us at emergencypetmatcher-support@googlegroups.com if you have a question.
 
 Thanks!
 Project EPIC
 """
 
-CONSENT_FORM_ADULT_TEXT = """Welcome to EmergencyPetMatcher! 
+CONSENT_FORM_ADULT_TEXT = """Welcome to EmergencyPetMatcher!
 
 By checking the box below you indicate that you have read, understood, and agreed to the following:
 
@@ -157,8 +159,5 @@ Following your agreement below, we take your child's ongoing use of the system t
 Thanks!
 Project EPIC
 
-I have read this consent form. I know the possible risks and benefits of my child using EPM and I choose for him/her to be in this study. I know that being in this study is voluntary. I know that my child can withdraw at any time. 
+I have read this consent form. I know the possible risks and benefits of my child using EPM and I choose for him/her to be in this study. I know that being in this study is voluntary. I know that my child can withdraw at any time.
 """
-
-
-

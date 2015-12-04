@@ -1,11 +1,11 @@
-#register-preview-pic {
+#preview_img {
 	border: 2px dashed gray;
 	width: 255px;
 	height: 255px;
 	margin: 10px 10px 10px 0px;
 }
 
-#register-preview-pic-title {
+#preview_img_title {
 	width:100%;
 	margin-top:50%;
 	display:inline-block;
@@ -13,20 +13,20 @@
 	color:gray;
 }
 
-#register-preview-pic-rotate-instructions {
+#rotate_instructions {
 	display: none;
 	margin: 5px auto 5px auto;
-}
-
-#register-age {
-	height:20px;
-	color:green;
 }
 
 #profile_pic {
 	display:block;
 	width:200px;
 	height:200px;
+}
+
+#preview_img img{
+	width:250px;
+	height:250px;
 }
 
 .tos {

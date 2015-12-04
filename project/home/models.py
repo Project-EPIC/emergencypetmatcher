@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from utilities.utils import *
 from constants import *
-import pdb
+import ipdb
 
 #The Activity Object Model
 class Activity(models.Model):

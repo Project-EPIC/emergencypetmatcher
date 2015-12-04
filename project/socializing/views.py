@@ -4,6 +4,7 @@ from socializing.models import UserProfile, UserProfileForm, EditUserProfile
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.contrib import messages
+from django.http import JsonResponse
 from django.contrib.auth import logout
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
@@ -19,7 +20,7 @@ from socializing.decorators import *
 from home.constants import *
 from utilities.utils import *
 from pprint import pprint
-import pdb
+import ipdb
 
 @login_required
 def get(request, userprofile_id):
@@ -34,8 +35,24 @@ def get(request, userprofile_id):
 
     context["proposed_petreports"] = show_profile.proposed_related.all()
     context["proposed_petmatches"] = show_profile.proposed_by_related.all()
-
     return render_to_response(HTML_USERPROFILE, context, RequestContext(request))
+
+def get_UserProfiles_JSON(request):
+    if request.is_ajax() == True:
+        filters = dict(request.GET)
+        #Grab UserProfiles by Filter Options.
+        results = UserProfile.filter(filters, page=request.GET["page"], limit=10)
+        userprofiles = [{
+            "ID"            : u.id,
+            "username"      : u.user.username,
+            "email"         : u.user.email,
+            "first_name"    : u.user.first_name,
+            "last_name"     : u.user.last_name,
+        } for u in results["userprofiles"]]
+
+        return JsonResponse({"userprofiles_list":userprofiles, "count":len(userprofiles), "total_count": results["count"]}, safe=False)
+    else:
+        raise Http404
 
 @login_required
 def follow(request):
@@ -97,10 +114,10 @@ def message(request):
 @allow_only_userprofile_owner
 def edit(request, userprofile_id):
     if request.method == 'GET':
-        form = UserProfileForm(instance=request.user.userprofile)
+        profile = get_object_or_404(UserProfile, pk=userprofile_id)
         return render_to_response(HTML_EDITUSERPROFILE_FORM, {
-            "form": form,
-            "USERPROFILE_DESCRIPTION_LENGTH": USERPROFILE_DESCRIPTION_LENGTH,
+            "form": UserProfileForm(instance=profile.user),
+            "pic_url": profile.img_path,
             "password_form": PasswordChangeForm(request.user)
         }, RequestContext(request))
     else:
@@ -111,94 +128,86 @@ def update_info(request):
     if request.method == "POST":
         user = request.user
         profile = user.userprofile
-        user_changed = False
-        email_changed = False
-        userprofile_form = UserProfileForm(request.POST, request.FILES)
+        user_changed = email_changed = False
+        #Hack to circumvent UserProfileForm validation.
+        request.POST["password1"] = request.POST["password2"] = "TEST"
+        request.POST["dob"] = profile.dob
+        form = UserProfileForm(request.POST, request.FILES)
 
-        #Check if the form is valid.
-        if userprofile_form.is_valid() == False:
-            return render_to_response(HTML_EDITUSERPROFILE_FORM,
-                {   "form": userprofile_form,
-                    "USERPROFILE_DESCRIPTION_LENGTH": USERPROFILE_DESCRIPTION_LENGTH,
-                    "password_form": PasswordChangeForm(user) }, RequestContext(request))
-
-        #Change the photo
-        if request.FILES.get("photo"):
+        if form.is_valid() == False:
+            return render_to_response(HTML_EDITUSERPROFILE_FORM, {
+                "form": form,
+                "pic_url": profile.img_path,
+                "password_form": PasswordChangeForm(user)
+            }, RequestContext(request))
+            
+        if request.FILES.get("img_path"): #Change the photo
             user_changed = True
-            photo = request.FILES.get("photo")
-            profile.set_images(photo)
+            profile.set_images(request.FILES.get("img_path"), save=True, rotation=request.POST.get("img_rotation"))
             messages.success(request, "Looking good!")
             Activity.log_activity("ACTIVITY_USER_SET_PHOTO", profile)
             profile.update_reputation("ACTIVITY_USER_SET_PHOTO")
 
-        #Check if username has changed.
-        if request.POST ["username"] != user.username:
+        if request.POST ["username"] != user.username: #Check if username has changed
             if UserProfile.get_UserProfile(username=request.POST["username"]) != None:
                 messages.error(request, "Sorry, that username is already being used. Try another one.")
-                return redirect(URL_EDITUSERPROFILE)
+                return redirect(URL_EDITUSERPROFILE + str(profile.id))
             else:
                 user.username = request.POST["username"]
                 Activity.log_activity("ACTIVITY_USER_CHANGED_USERNAME", profile)
                 user_changed = True
 
-        #Check if email has changed.
-        if request.POST["email"] != user.email:
-            activation_key = create_sha1_hash(user.username)
-            print_info_msg ('user: %s \tactivation-key: %s' % (user, activation_key))
+        if request.POST["email"] != user.email: #Check if email has changed.
+            if UserProfile.get_UserProfile(email=request.POST["email"]) != None:
+                messages.error(request, "Sorry, that email is already being used. Try another one.")
+                return redirect(URL_EDITUSERPROFILE + str(profile.id))
+            else:
+                activation_key = create_sha1_hash(user.username)
+                print_info_msg ('user: %s \tactivation-key: %s' % (user, activation_key))
 
-            #Create a new EditUserProfile object for activating a new email address.
-            try:
-                edit_userprofile = EditUserProfile.objects.get(user=user)
-            except:
-                edit_userprofile = EditUserProfile()
-                edit_userprofile.user = user
+                try: #Create a new EditUserProfile object for activating a new email address.
+                    edit_userprofile = EditUserProfile.objects.get(user=user)
+                except:
+                    edit_userprofile = EditUserProfile()
+                    edit_userprofile.user = user
 
-            edit_userprofile.activation_key = activation_key
-            edit_userprofile.new_email = request.POST["email"]
-            edit_userprofile.date_of_change = datetime.now()
-            edit_userprofile.save()
-
-            #Prepare the email for verification.
-            subject = render_to_string(TEXTFILE_EMAIL_CHANGE_SUBJECT, {})
-            ctx = { "site": Site.objects.get_current(),
+                edit_userprofile.activation_key = activation_key
+                edit_userprofile.new_email = request.POST["email"]
+                edit_userprofile.date_of_change = datetime.now()
+                edit_userprofile.save()
+                #Prepare the email for verification.
+                subject = render_to_string(TEXTFILE_EMAIL_CHANGE_SUBJECT, {})
+                ctx = {
+                    "site": Site.objects.get_current(),
                     "activation_key":activation_key,
-                    "expiration_days":settings.ACCOUNT_ACTIVATION_DAYS}
+                    "expiration_days":settings.ACCOUNT_ACTIVATION_DAYS
+                }
 
-            body = render_to_string(TEXTFILE_EMAIL_CHANGE_BODY, ctx)
-            send_mail(subject, body, None, [edit_userprofile.new_email])
-            print_info_msg ("Sent email verification for %s" % user)
-            user_changed = True
-            email_changed = True
+                body = render_to_string(TEXTFILE_EMAIL_CHANGE_BODY, ctx)
+                send_mail(subject, body, None, [edit_userprofile.new_email])
+                print_info_msg ("Sent email verification for %s" % user)
+                user_changed = True
+                email_changed = True
 
-        #First name check.
-        if request.POST ["first_name"] != user.first_name:
+        if request.POST ["first_name"] != user.first_name: #First name check.
             user.first_name = request.POST["first_name"]
             user_changed = True
-
-        #Last name check.
-        if request.POST ["last_name"] != user.last_name:
+        if request.POST ["last_name"] != user.last_name: #Last name check.
             user.last_name = request.POST["last_name"]
             user_changed = True
-
-        #Description check.
-        if request.POST ["description"] != profile.description:
+        if request.POST ["description"] != profile.description: #Description check.
             profile.description = request.POST ["description"]
             user_changed = True
-
-        #If something about the user (or userprofile) has changed...
         if user_changed == True:
             user.save()
             profile.save()
-
             if email_changed == True:
                 messages.success(request, "Your changes have been saved. Please check your email to find an email from us asking to verify your new email address.")
             else:
                 messages.success(request, "Your changes have been saved.")
-            return redirect(URL_USERPROFILE + str(profile.id))
         else:
             messages.info(request, "Nothing was changed!")
-            return redirect(URL_EDITUSERPROFILE)
-
+        return redirect(URL_USERPROFILE + str(profile.id))
     else:
         raise Http404
 

@@ -3,7 +3,7 @@ from reporting.models import PetReport
 from verifying.models import PetMatchCheck
 from django.contrib import messages
 from home.constants import URL_HOME
-import json, pdb
+import json, ipdb
 
 def allow_only_checkers(view_func):
   def _wrapped_view_func(request, *args, **kwargs):

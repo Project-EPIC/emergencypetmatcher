@@ -27,7 +27,7 @@ from registration.models import RegistrationProfile
 from registration.forms import RegistrationFormTermsOfService
 from datetime import datetime
 from models import Activity
-from socializing.models import UserProfile
+from socializing.models import UserProfile, UserProfileForm
 from reporting.models import PetReport
 from matching.models import PetMatch
 from verifying.models import PetReunion, PetMatchCheck
@@ -36,7 +36,7 @@ from reporting.constants import NUM_PETREPORTS_HOMEPAGE, NUM_BOOKMARKS_HOMEPAGE
 from matching.constants import NUM_PETMATCHES_HOMEPAGE
 from utilities.utils import *
 from pprint import pprint
-import oauth2 as oauth, json, pdb, random, urllib, hashlib, random, re, project.settings, registration
+import oauth2 as oauth, json, ipdb, random, urllib, hashlib, random, re, project.settings, registration
 
 def home (request):
     return render_to_response(HTML_HOME, {}, RequestContext(request))
@@ -180,57 +180,56 @@ def registration_activation_complete (request):
     return redirect (URL_LOGIN)
 
 def registration_register (request):
-    #Requesting the Registration Form Page
-    if request.method == "GET":
+    if request.method == "GET": #Requesting the Registration Form Page
         return render_to_response (HTML_REGISTRATION_FORM, {
-            "form":RegistrationFormTermsOfService(),
+            'form':UserProfileForm(),
+            "RECAPTCHA_CLIENT_SECRET": settings.RECAPTCHA_CLIENT_SECRET,
             "consent_form_minor_text":CONSENT_FORM_MINOR_TEXT,
             "consent_form_adult_text":CONSENT_FORM_ADULT_TEXT,
         }, RequestContext (request))
 
-    #Submitting Registration Form Data
-    elif request.method == "POST":
-        form = RegistrationFormTermsOfService(request.POST)
-        pprint(request.POST)
-        success, message = UserProfile.check_registration(post_obj=request.POST, registration_form=form)
-        print_debug_msg(message)
+    elif request.method == "POST": #Submitting Registration Form Data
+        if not request.POST.get("g-recaptcha-response"):
+            messages.error(request, "Please fill in the RECAPTCHA.")
+            return redirect(request.path)
+        if not recaptcha_ok(request.POST.get("g-recaptcha-response")):
+            messages.error(request, "RECAPTCHA was not correct. Please try again.")
+            return redirect(request.path)
+
+        form = UserProfileForm(request.POST, request.FILES)
+        success, message = UserProfile.check_registration(post_obj=request.POST, userprofileform=form)
 
         if success == False:
             messages.error(request, message)
             return render_to_response(HTML_REGISTRATION_FORM, {
                 "form": form,
+                "RECAPTCHA_CLIENT_SECRET": settings.RECAPTCHA_CLIENT_SECRET,
                 "consent_form_minor_text":CONSENT_FORM_MINOR_TEXT,
                 "consent_form_adult_text":CONSENT_FORM_ADULT_TEXT,
             }, RequestContext (request))
 
         #Create a RegistrationProfile object, populate the potential User object, and be ready for activation.
         user = RegistrationProfile.objects.create_inactive_user(request.POST["username"], request.POST["email"], request.POST["password1"], Site.objects.get_current())
-        #Grab the UserProfile object.
-        profile = user.userprofile
 
         #If this user truly is a minor, save some extra information to be checked during activation.
-        if is_minor(request.POST["date_of_birth"]) == True:
-            profile.is_minor = True
-            profile.guardian_email = request.POST.get("guardian_email")
-            profile.guardian_activation_key = create_sha1_hash(user.username)
-            profile.save()
-
+        if is_minor(request.POST.get("dob")) == True:
+            user.userprofile.is_minor = True
+            user.userprofile.guardian_email = request.POST.get("guardian_email")
+            user.userprofile.guardian_activation_key = create_sha1_hash(user.username)
             #Send an email to the guardian with activation key.
             email_subject = render_to_string(TEXTFILE_EMAIL_GUARDIAN_SUBJECT, {})
             email_body = render_to_string(TEXTFILE_EMAIL_GUARDIAN_BODY, {
                 "participant_email": request.POST["email"],
-                "guardian_activation_key": profile.guardian_activation_key,
+                "guardian_activation_key": user.userprofile.guardian_activation_key,
                 "consent_form_guardian_text": CONSENT_FORM_GUARDIAN_TEXT,
                 "site": Site.objects.get_current()
             })
+            send_mail(email_subject, email_body, None, [user.userprofile.guardian_email])
 
-            send_mail(email_subject, email_body, None, [profile.guardian_email])
-
+        user.userprofile.set_images(request.FILES.get("photo"), save=True, rotation=request.POST.get("img_rotation"))
+        user.userprofile.dob = UserProfile.set_date_of_birth(request.POST.get("dob"))
         user.first_name = request.POST.get("first_name")
         user.last_name = request.POST.get("last_name")
-
-        #Format the Date of Birth and store it.
-        profile.set_date_of_birth(request.POST.get("date_of_birth"))
         user.save()
         print_info_msg ("RegistrationProfile now created for inactive user %s" % user)
         return redirect (URL_REGISTRATION_COMPLETE)

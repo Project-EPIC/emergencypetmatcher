@@ -8,6 +8,7 @@ HOME_URLS = {
 
 SOCIALIZING_URLS = {
     "USERPROFILE":          "/users/",
+    "USERPROFILES_JSON":    "/users/get_UserProfiles_JSON",
 }
 
 REPORTING_URLS = {

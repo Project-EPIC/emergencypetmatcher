@@ -6,7 +6,7 @@ from utilities.utils import *
 from fixture import *
 from socializing.models import UserProfile
 from pprint import pprint
-import unittest, string, random, sys, time, project.settings, pdb
+import unittest, string, random, sys, time, project.settings, ipdb
 
 class PetReportTesting (TestCase):
 	def setUp(self):
@@ -130,6 +130,49 @@ class ReportingTesting (TestCase):
 		self.assertEquals(response.status_code, 200)
 		self.assertTrue(response.request ['PATH_INFO'] == URL_PETREPORT_FORM)
 		self.assertTrue(len(PetReport.objects.all()) == 0)
+
+	def test_microchip_matching_good(self):
+		user, pwd = create_random_User()
+		user2, pwd2 = create_random_User()
+		client = Client(enforce_csrf_checks=False)
+		loggedin = client.login(username = user.username, password = pwd)
+		pr = create_random_PetReport(user=user2, pet_type="Dog")
+		pr.microchip_id = generate_string(PETREPORT_MICROCHIP_ID_LENGTH)
+		pr.save() #Save PetReport with particular microchip ID
+		pr2 = create_random_PetReport(user=user, pet_type="Dog", save=False)
+		pr2.microchip_id = pr.microchip_id #Make these microchip IDs the same.
+		pr_dict = model_to_dict(pr2)
+		pr_dict ['img_path'] = None #Nullify the img_path attribute
+		form  = PetReportForm() #Create an unbound form
+		settings.RECAPTCHA_SERVER_SECRET=settings.TEST_RECAPTCHA_SERVER_SECRET
+		post = {'form': form, "g-recaptcha-response":settings.TEST_RECAPTCHA_CLIENT_SECRET}
+		post.update(pr_dict)
+		response = client.post(URL_SUBMIT_PETREPORT, post, follow=True)
+		pr2 = PetReport.objects.last()
+		self.assertEquals(pr2.microchip_id, pr.microchip_id)
+		self.assertEquals(pr2.find_by_microchip_id(), pr)
+
+	def test_microchip_matching_bad(self):
+		user, pwd = create_random_User()
+		user2, pwd2 = create_random_User()
+		client = Client(enforce_csrf_checks=False)
+		loggedin = client.login(username = user.username, password = pwd)
+		pr = create_random_PetReport(user=user2, pet_type="Cat")
+		pr.microchip_id = generate_string(PETREPORT_MICROCHIP_ID_LENGTH)
+		pr.save() #Save PetReport with particular microchip ID
+		pr2 = create_random_PetReport(user=user, pet_type="Dog", save=False)
+		pr2.microchip_id = pr.microchip_id #Make these microchip IDs the same.
+		pr_dict = model_to_dict(pr2)
+		pr_dict ['img_path'] = None #Nullify the img_path attribute
+		form  = PetReportForm() #Create an unbound form
+		settings.RECAPTCHA_SERVER_SECRET=settings.TEST_RECAPTCHA_SERVER_SECRET
+		post = {'form': form, "g-recaptcha-response":settings.TEST_RECAPTCHA_CLIENT_SECRET}
+		post.update(pr_dict)
+		response = client.post(URL_SUBMIT_PETREPORT, post, follow=True)
+		pr2 = PetReport.objects.last()
+		self.assertEquals(pr2.microchip_id, pr.microchip_id)
+		self.assertNotEquals(pr2.find_by_microchip_id(), pr)
+
 
 	def test_add_petreport_bookmark(self):
 		user, pwd = create_random_User()

@@ -1,0 +1,12 @@
+Hi there,
+
+We at EmergencyPetMatcher may have found a match for your newly created pet report ({{ pet.status }} {{ pet.breed }} {{ pet.pet_type }} {{ pet.pet_name }})!
+
+Using microchip-matching, we found that another pet report ({{ other_pet.status }} {{ other_pet.breed }} {{ other_pet.pet_type }} ({{ other_pet.pet_name }})) has the same microchip ID as your pet. To visit this pet report, go here: http://{{ site.domain }}{% url 'get_PetReport' other_pet.id %}.
+
+If you think this is a direct match, please contact the pet contact and determine if this is correct. Then, you can come back and close your pet report here: http://{{ site.domain }}{% url 'close_PetReport' pet.id %}.
+
+We are crossing our fingers!
+---------------------
+The EmergencyPetMatcher Team
+(http://www.emergencypetmatcher.com)

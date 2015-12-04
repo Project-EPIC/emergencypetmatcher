@@ -23,7 +23,7 @@ from matching.constants import *
 from verifying.constants import *
 from utilities.utils import *
 from pprint import pprint
-import random, string, sys, time, datetime, lipsum, traceback, pdb
+import random, string, sys, time, datetime, lipsum, traceback, ipdb
 
 #Control Variables
 NUMBER_OF_TESTS = 10
@@ -205,6 +205,9 @@ def create_random_PetReport(save=True, user=None, status=None, pet_type=None):
 	pr.color = generate_string(PETREPORT_COLOR_LENGTH)
 	pr.event_tag = random.choice(["Valley Fires", "Butte Fires", "Charleston Floods (SC)", "Washington Wildfires"])
 	pr.age = random.choice(AGE_CHOICES)[0]
+
+	if random.random() > 0.65: #Some of the time, pets are microchipped.
+		pr.microchip_id = generate_string(PETREPORT_MICROCHIP_ID_LENGTH)
 
 	#Majority of PetReports are cross-posted, so let's add contact information in.
 	random_var = random.random()

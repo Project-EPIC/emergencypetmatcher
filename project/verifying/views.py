@@ -15,7 +15,6 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import model_to_dict
 from random import choice, uniform
 from django.http import JsonResponse
-from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from pprint import pprint
 from reporting.models import PetReport
@@ -25,7 +24,7 @@ from utilities.utils import *
 from verifying.constants import *
 from verifying.decorators import *
 from home.constants import *
-import datetime, re, json, pdb
+import datetime, re, json, ipdb
 
 def get_PetReunion(request, petreunion_id):
     pet_reunion = get_object_or_404(PetReunion, pk=petreunion_id)
@@ -113,7 +112,7 @@ def verify(request, petmatchcheck_id):
                 if profile == lost_pet.proposed_by:
                     #Send mail to Lost Pet Contact after verification.
                     email_body = render_to_string(TEXTFILE_EMAIL_CLOSE_PETREPORT_BODY, {"site": Site.objects.get_current(), "reunited_pet":lost_pet })
-                    send_mail(TEXTFILE_EMAIL_CLOSE_PETREPORT_SUBJECT, email_body, None, [profile.user.email])
+                    send_email(TEXTFILE_EMAIL_CLOSE_PETREPORT_SUBJECT, email_body, None, [profile.user.email])
                     messages.success(request, "Congratulations on the successful match! Please look out for an email to close your pet report.")
                 else:
                     messages.success(request, "Thanks for your response, and congratulations on the successful match!")

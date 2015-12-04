@@ -270,6 +270,10 @@ header p {
   list-style-type:none;
 }
 
+.field_message {
+	margin-left:5px;
+	display:inline-block;
+}
 
 footer {
   height: 30px;

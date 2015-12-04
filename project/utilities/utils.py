@@ -1,10 +1,12 @@
 from PIL import Image
 from random import randint
 from datetime import datetime
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django.core.validators import validate_email
 from reporting.constants import *
 from django.conf import settings
-import os, re, hashlib, random, string, sys, time, json, lipsum, traceback, urllib, urllib2, ssl, pdb
+import os, re, hashlib, random, string, sys, time, json, lipsum, traceback, urllib, urllib2, ssl, ipdb
 
 '''===================================================================================
 utils.py: Utility Functions for EPM Utility and Testing
@@ -35,6 +37,12 @@ def print_success_msg (string):
 def print_error_msg (string):
 	print "[ERROR]: %s" % string
 
+def send_email(subject, body, cc, to_list):
+	try:
+		send_mail(subject, body, cc, to_list)
+	except SMTPRecipientsRefused:
+		return {"success":False, "message":"Invalid Email Address."}
+
 def email_is_valid(email_address):
 	try:
 		if validate_email(email_address) == None:
@@ -54,17 +62,21 @@ def get_objects_by_page(objects, page=1, limit=25):
 # and the second the cross-posting contact. Both are contingent upon whether contact fields have been
 # prepared for this petreport.
 def generate_pet_contacts(petreport):
-	userprofile_contact = {	"name": petreport.proposed_by.user.username,
-							"email": petreport.proposed_by.user.email,
-							"phone": None,
-							"link": None,
-							"guardian_email": petreport.proposed_by.guardian_email }
+	userprofile_contact = {
+		"name": petreport.proposed_by.user.username,
+		"email": petreport.proposed_by.user.email,
+		"phone": None,
+		"link": None,
+		"guardian_email": petreport.proposed_by.guardian_email
+	}
 
 	if petreport.is_crossposted() == True:
-		return ({	"name": petreport.contact_name,
-							"email": petreport.contact_email,
-							"phone": petreport.contact_number,
-							"link": petreport.contact_link }, userprofile_contact)
+		return ({
+			"name": petreport.contact_name,
+			"email": petreport.contact_email,
+			"phone": petreport.contact_number,
+			"link": petreport.contact_link
+		}, userprofile_contact)
 	else:
 		return (userprofile_contact, None)
 

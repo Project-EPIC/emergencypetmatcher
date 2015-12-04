@@ -22,6 +22,7 @@ from home.models import Activity
 from socializing.models import UserProfile
 from reporting.models import PetReport, PetReportForm
 from matching.models import PetMatch
+from django.template.loader import render_to_string
 from pprint import pprint
 from PIL import Image
 from utilities.utils import *
@@ -30,7 +31,7 @@ from home.constants import *
 from verifying.models import PetReunion, PetReunionForm
 from verifying.constants import *
 from reporting.decorators import *
-import datetime, re, time, json, pdb, project.settings
+import datetime, re, time, json, ipdb, project.settings
 
 def get(request, petreport_id):
     pet_report = get_object_or_404(PetReport, pk = petreport_id)
@@ -152,6 +153,18 @@ def submit(request):
             #Log the PetReport submission for this UserProfile
             Activity.log_activity("ACTIVITY_PETREPORT_SUBMITTED", request.user.userprofile, source=pr)
             print_success_msg("Pet Report submitted successfully")
+
+            #Check to see if there are any matching petreports that have the same microchip ID.
+            matching_pet = pr.find_by_microchip_id()
+            if matching_pet != None: #Send an email about the match!
+                contact1 = generate_pet_contacts(pr)[0]
+                contact2 = generate_pet_contacts(matching_pet)[0]
+                email_body = render_to_string(EMAIL_BODY_MATCH_BY_MICROCHIP_ID, {
+                    "pet": pr,
+                    "other_pet": matching_pet,
+                    "site": Site.objects.get_current()
+                })
+                send_email(EMAIL_SUBJECT_MATCH_BY_MICROCHIP_ID, email_body, None, [contact1["email"]])
             return redirect(URL_HOME)
 
         else:

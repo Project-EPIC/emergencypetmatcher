@@ -1,107 +1,8 @@
 {% extends "home/login.html" %}
-{% block head_title %} EPM - Register for an Account{% endblock head_title %}
-
-{% block content %}
-<div id="content" style="width:600px;">
-	{% block content_subtitle %} <h3> Register for an Account Here</h3> {% endblock content_subtitle %}
-	<p> Fields Marked with (<b style="margin:0;" class="required-field-symbol">*</b>) are required. </p>
-
-	<form enctype="multipart/form-data" method = "post" id= "register-form" role="form"  action="{% url 'registration_register' %}">
-		{% csrf_token %}
-
-		<div style="margin-bottom:20px;">
-			{% for error in form.non_field_errors %} <span class="field-error-message"> {{ error }} </span>{% endfor %}
-		</div>
-
-		{% for field in form %}
-			<!-- Username -->
-			{% if "Username" == field.label %}
-			<div class="form-group" style="width:300px;">
-				<label for="username">Username<b class="required-field-symbol">*</b></label>
-				{% for error in field.errors %} <span class="field-error-message">{{ error }}</span> {% endfor %}
-				<input class="form-control" autofocus="true" name="username" maxlength="30" placeholder="Enter New Username">
-			</div>
-
-			<!-- Email -->
-			{% elif "E-mail" == field.label %}
-			<div class="form-group" style="width:300px;">
-				<label for="email">Email<b class="required-field-symbol">*</b></label>
-				{% for error in field.errors %} <span class="field-error-message">{{ error }}</span> {% endfor %}
-				<input type="email" class="form-control" name="email" placeholder="Enter Email Address">
-			</div>
-
-	    <!-- First Name -->
-	    <div class="form-group" style="width:300px;">
-	      <label for="first_name_id">First Name</label>
-	      <input type="text" name="first_name" class="form-control" maxlength="30" placeholder="Enter First Name" />
-	    </div>
-
-	    <!-- Last Name -->
-	    <div class="form-group" style="width:300px">
-	      <label for="last_name_id">Last Name</label>
-	      <input type="text" name="last_name" class="form-control" maxlength="30" placeholder="Enter Last Name"/>
-	    </div>
-
-			<!-- Date of Birth -->
-			<div class="form-group" style="width:500px;">
-				<label for="date-of-birth">Date of Birth<b class="required-field-symbol">*</b></label>
-				<p id="register-age"></p>
-				<input id="register-dob" style="width:200px;" class="form-control" name="date_of_birth" placeholder="mm/dd/yyyy">
-			</div>
-
-			<!-- Password 1 -->
-			{% elif "Password" == field.label %}
-			<div class="form-group" style="width:300px;">
-				<label for="password1">Password<b class="required-field-symbol">*</b></label>
-				{% for error in field.errors %} <span class="field-error-message">{{ error }}</span> {% endfor %}
-				<p id="register-passwords"></p>
-				<input id="password1" type="password" class="form-control" name="password1" placeholder="Enter Password">
-			</div>
-
-			{% elif "Password (again)" == field.label %}
-			<div class="form-group" style="width:300px;">
-				<label for="password">Password (again)<b class="required-field-symbol">*</b></label>
-				{% for error in field.errors %} <span class="field-error-message">{{ error }}</span> {% endfor %}
-				<input id="password2" type="password" class="form-control" name="password2" placeholder="Enter Password again">
-			</div>
-
-			<!-- Consent Form -->
-			<div class="form-group" style="margin-top:30px;">
-				<div id="tos-container" class="hidden">
-					<strong>Please Read Our Consent Form (Required)<b class="required-field-symbol">*</b></strong>
-
-					<!-- TOS Minor Container -->
-					<div id="tos-minor-container" class="hidden">
-						<textarea disabled="true" class="tos form-control" id="tos_minor_text" style="background-color:ivory;">{{ consent_form_minor_text }}</textarea>
-						<div class="form-group" style="width:300px;">
-							<label for="guardian-email">Parent/Guardian Email Address<b class="required-field-symbol">*</b></label>
-							<input type="email" class="form-control" name="guardian_email" placeholder="Enter Parent/Guardian's Email Address">
-						</div>
-					</div>
-
-					<!-- TOS Adult Container -->
-					<div id="tos-adult-container" class="hidden">
-						<textarea disabled="true" class="tos form-control" id="tos_adult_text" style="background-color:ivory;">{{ consent_form_adult_text }}</textarea>
-					</div>
-
-					<label for="tos" style="display:block;">I have read this form. I know the possible risks and benefits of using EPM and I choose to be in this study. I know that being in this study is up to me and I can withdraw at any time.<b class="required-field-symbol">*</b></label>
-					<input id="register-toc" type="checkbox" name="tos">
-				</div>
-			</div>
-
-			<div class ="form-actions">
-				<input type="hidden" name="next" value="{{ next }}">
-				<a href="{% url 'login_User' %}" class="btn btn-default">Back</a>
-				<input id="register-submit" type="submit" class="btn btn-primary" value="Sign Me Up!">
-			</div>
-			{% endif %}
-		{% endfor %}
-	</form>
-</div>
-{% endblock content %}
-
-<!-- Static Stuff -->
 {% load staticfiles %}
+{% load pdb %}
+
+{% block head_title %} EmergencyPetMatcher - Register{% endblock head_title %}
 
 {% block css %}
 	<link rel="stylesheet" href={% static "registration/css/style.css" %} type="text/css"></link>
@@ -109,4 +10,89 @@
 
 {% block js %}
    <script src ={% static "registration/js/epm-register.js" %} type='text/javascript'></script>
+	 <script src='https://www.google.com/recaptcha/api.js'></script>
 {% endblock js %}
+
+{% block content %}
+<div id="content" style="width:660px;">
+	{% block content_subtitle %} <h3> Register for an Account Here</h3> {% endblock content_subtitle %}
+	<p> Fields Marked with <b style="margin:0;" class="required-field-symbol">*</b> are required. </p>
+
+	{% block form %}
+	{% block form-header %}
+	<form enctype="multipart/form-data" method="post" id="register-form" role="form" action="{% url 'registration_register' %}">
+	{% endblock form-header %}
+		{% csrf_token %}
+
+		<div style="margin-bottom:20px;">
+			{% for error in form.non_field_errors %} <span class="field-error-message"> {{ error }} </span>{% endfor %}
+		</div>
+
+		{% for field in form %}
+			<div class="form-group">
+				{{ field.errors }}
+				<label id="label_{{ field.id_for_label }}" for="{{ field.id_for_label }}" style="display:block;">{{ field.label }}</label>
+
+				{% if "Profile Picture" == field.label %}
+					<div id="preview_img">
+						{% block img_path %}
+							{% if pic_url %}
+								<img src="{{ pic_url }}"/>
+							{% else %}
+							<strong style="width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;">
+								Profile Picture Preview
+							</strong>
+							{% endif %}
+						{% endblock img_path %}
+					</div>
+					<p style="margin:5px auto 5px auto;">
+						{% if pic_url %}
+							<p>(If you like this picture, you don't have to add a new file)</p>
+						{% endif %}
+							(*.jpg, *.png, *.bmp), 3MB maximum
+					</p>
+					<strong id="rotate_instructions" style="display:none; margin:5px auto 5px auto;">Click on the image to rotate it</strong>
+					<input id="id_img_rotation" name="img_rotation" type="hidden" value="0"/>
+				{% endif %}
+
+				<div>
+					{{ field }}
+					<p class="field_message" id="message_{{ field.id_for_label }}"></p>
+				</div>
+			</div>
+		{% endfor %}
+
+		<!-- Consent Form -->
+		<div class="form-group" style="margin-top:30px;">
+			<div id="tos-container" class="hidden">
+				<strong>Please Read Our Consent Form (Required)<b class="required-field-symbol">*</b></strong>
+
+				<!-- TOS Minor Container -->
+				<div id="tos-minor-container" class="hidden">
+					<textarea disabled="true" class="tos form-control" id="tos_minor_text" style="background-color:ivory;">{{ consent_form_minor_text }}</textarea>
+					<div class="form-group" style="width:300px;">
+						<label for="guardian-email">Parent/Guardian Email Address<b class="required-field-symbol">*</b></label>
+						<input type="email" class="form-control" name="guardian_email" placeholder="Enter Parent/Guardian's Email Address">
+					</div>
+				</div>
+
+				<!-- TOS Adult Container -->
+				<div id="tos-adult-container" class="hidden">
+					<textarea disabled="true" class="tos form-control" id="tos_adult_text" style="background-color:ivory;">{{ consent_form_adult_text }}</textarea>
+				</div>
+
+				<label for="tos" style="display:block;">I have read this form. I know the possible risks and benefits of using EPM and I choose to be in this study. I know that being in this study is up to me and I can withdraw at any time.<b class="required-field-symbol">*</b></label>
+				<input id="register-toc" type="checkbox" name="tos">
+			</div>
+		</div>
+
+		<div class ="form-actions">
+			<div hidden class="g-recaptcha" data-sitekey="{{ RECAPTCHA_CLIENT_SECRET }}" data-callback="recaptcha_done" style="margin-bottom:20px;"></div>
+			<input type="hidden" name="next" value="{{ next }}">
+			<a href="{% url 'login_User' %}" class="btn btn-default">Back</a>
+			<input id="id_submit" type="submit" class="btn btn-primary" disabled value="Sign Me Up!">
+		</div>
+	</form>
+	{% endblock form %}
+</div>
+{% endblock content %}

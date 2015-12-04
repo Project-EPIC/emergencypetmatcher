@@ -13,7 +13,7 @@ from socializing.constants import *
 from verifying.constants import *
 from matching.constants import *
 from utilities.utils import *
-import string, random, sys, time, urlparse, project.settings, math, pdb
+import string, random, sys, time, urlparse, project.settings, math, ipdb
 
 class UserProfileTesting (TestCase):
 	def setUp(self):
@@ -443,6 +443,7 @@ class RegistrationTesting (TestCase):
 
 	def test_good_register(self):
 		client = Client(enforce_csrf_checks=False)
+		settings.RECAPTCHA_SERVER_SECRET=settings.TEST_RECAPTCHA_SERVER_SECRET
 		post = {
 			"username":generate_string(10),
 			"email": generate_string(6) + "@test.com",
@@ -452,7 +453,8 @@ class RegistrationTesting (TestCase):
 			"guardian_email": generate_string(6) + "@testguardian.com",
 			"password1": "password",
 			"password2": "password",
-			"date_of_birth": generate_random_birthdate()
+			"dob": generate_random_birthdate(),
+			"g-recaptcha-response":settings.TEST_RECAPTCHA_CLIENT_SECRET
 		}
 		response = client.post(URL_REGISTRATION, post, follow=True)
 		self.assertEquals(response.status_code, 200)

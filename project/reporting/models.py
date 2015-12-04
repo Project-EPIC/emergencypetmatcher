@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from constants import *
 from pprint import pprint
 from utilities.utils import *
-import json, datetime, pdb
+import json, datetime, ipdb
 
 class PetReport(models.Model):
     '''Required Fields'''
@@ -128,6 +128,15 @@ class PetReport(models.Model):
         if self.contact_email and email_is_valid(self.contact_email):
             return True
         return False
+
+    def find_by_microchip_id(self):
+        if self.microchip_id.strip() == "":
+            return None
+        matching_reports = PetReport.objects.filter(microchip_id=self.microchip_id, pet_type=self.pet_type).exclude(pk=self.id)
+        if len(matching_reports) > 0:
+            return matching_reports[0]
+        else:
+            return None
 
     def update_fields(self, pr, request=None):
         self.pet_type           = pr.pet_type

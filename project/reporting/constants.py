@@ -24,6 +24,11 @@ NUM_BOOKMARKS_HOMEPAGE = 25
 DATE_LOWER_BOUND = "2012-01-01"
 DATE_UPPER_BOUND = "2012-08-16"
 
+
+#Email Constants.
+EMAIL_SUBJECT_MATCH_BY_MICROCHIP_ID = "We may have found a potential match for your pet!"
+EMAIL_BODY_MATCH_BY_MICROCHIP_ID = "reporting/email_match_by_microchip_id.txt"
+
 #Enums for Various Model Choice Fields
 PET_TYPE_CHOICES = [('Dog', 'Dog'), ('Cat', 'Cat'), ('Bird', 'Bird'), ('Horse', 'Horse'), ('Rabbit', 'Rabbit'), ('Snake', 'Snake'), ('Turtle', 'Turtle'), ('Other', 'Other')]
 STATUS_CHOICES = [('Lost','Lost'),('Found','Found')]
@@ -40,7 +45,7 @@ PETREPORT_SEX_LENGTH = 6
 PETREPORT_SIZE_LENGTH = 30
 PETREPORT_EVENT_TAG_LENGTH = 100
 PETREPORT_LOCATION_LENGTH = 100
-PETREPORT_PET_NAME_LENGTH = 30 
+PETREPORT_PET_NAME_LENGTH = 30
 PETREPORT_MICROCHIP_ID_LENGTH = 40
 PETREPORT_TAG_INFO_LENGTH = 500
 PETREPORT_CONTACT_NAME_LENGTH = 50
@@ -131,7 +136,3 @@ PETREPORT_SAMPLE_TURTLE_IMAGES = []
 #PetReport Image constants
 PETREPORT_THUMBNAIL_WIDTH = 128
 PETREPORT_THUMBNAIL_HEIGHT = 128
-
-
-
-

@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 from project.settings import TEST_TWITTER_USER, TEST_TWITTER_PASSWORD, TEST_FACEBOOK_USER, TEST_FACEBOOK_PASSWORD, TEST_DOMAIN, EMAIL_FILE_PATH, EMAIL_BACKEND
 from home.constants import *
 from utilities.utils import *
-import unittest, string, random, sys, time, urlparse, project.settings, math, pdb
+import unittest, string, random, sys, time, urlparse, project.settings, math, ipdb
 
 class UserProfileTesting (TestCase):
 	def setUp(self):

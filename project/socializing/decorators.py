@@ -2,7 +2,7 @@ from django.shortcuts import render_to_response, redirect, get_object_or_404
 from socializing.models import UserProfile
 from django.contrib import messages
 from home.constants import URL_HOME
-import json, pdb
+import json, ipdb
 
 def allow_only_userprofile_owner(view_func):
     def _wrapped_view_func(request, *args, **kwargs):

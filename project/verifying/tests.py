@@ -6,7 +6,7 @@ from fixture import *
 from pprint import pprint
 from django.contrib.messages import constants as messages
 from django.test import TestCase
-import unittest, string, random, sys, time, pdb
+import unittest, string, random, sys, time, ipdb
 
 class VerificationTesting (TestCase):
 	def setUp(self):
