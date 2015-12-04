@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 from registration.models import RegistrationProfile
 from urllib import urlopen
 from StringIO import StringIO
-from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.forms.models import model_to_dict
 from home.constants import HTML_SOCIAL_AUTH_FORM, URL_SOCIAL_AUTH_GET_DETAILS, URL_LOGIN, URL_SOCIAL_AUTH_COMPLETE
@@ -102,7 +101,7 @@ def setup_user_details(strategy, backend, uid, response, details, user=None, is_
                 "site": Site.objects.get_current()
             })
 
-            send_mail(email_subject, email_body, None, [profile.guardian_email])
+            send_email(email_subject, email_body, None, [profile.guardian_email])
             print_info_msg ("(SOCIAL AUTH): RegistrationProfile now created for inactive user %s" % user)
 
         user.first_name = details["first_name"]

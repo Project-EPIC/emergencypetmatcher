@@ -15,7 +15,6 @@ from StringIO import StringIO
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
-from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.timezone import now as datetime_now
@@ -170,7 +169,7 @@ def registration_guardian_activate (request, guardian_activation_key):
     registration_profile = RegistrationProfile.objects.get(user=profile.user)
     email_subject = render_to_string(TEXTFILE_EMAIL_POST_GUARDIAN_ACTIVATION_SUBJECT, {})
     email_body = render_to_string(TEXTFILE_EMAIL_POST_GUARDIAN_ACTIVATION_BODY, {"activation_key": registration_profile.activation_key, "site": Site.objects.get_current() })
-    send_mail(email_subject, email_body, None, [profile.user.email])
+    send_email(email_subject, email_body, None, [profile.user.email])
 
     messages.success(request, "All done! Thank you for supporting your child in participating in EmergencyPetMatcher!")
     return redirect(URL_HOME)
@@ -224,7 +223,7 @@ def registration_register (request):
                 "consent_form_guardian_text": CONSENT_FORM_GUARDIAN_TEXT,
                 "site": Site.objects.get_current()
             })
-            send_mail(email_subject, email_body, None, [user.userprofile.guardian_email])
+            send_email(email_subject, email_body, None, [user.userprofile.guardian_email])
 
         user.userprofile.set_images(request.FILES.get("photo"), save=True, rotation=request.POST.get("img_rotation"))
         user.userprofile.dob = UserProfile.set_date_of_birth(request.POST.get("dob"))

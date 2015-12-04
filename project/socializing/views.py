@@ -7,7 +7,6 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth import logout
 from django.contrib.sites.models import Site
-from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.forms import PasswordChangeForm
 from django.template.loader import render_to_string
@@ -140,7 +139,7 @@ def update_info(request):
                 "pic_url": profile.img_path,
                 "password_form": PasswordChangeForm(user)
             }, RequestContext(request))
-            
+
         if request.FILES.get("img_path"): #Change the photo
             user_changed = True
             profile.set_images(request.FILES.get("img_path"), save=True, rotation=request.POST.get("img_rotation"))
@@ -184,7 +183,7 @@ def update_info(request):
                 }
 
                 body = render_to_string(TEXTFILE_EMAIL_CHANGE_BODY, ctx)
-                send_mail(subject, body, None, [edit_userprofile.new_email])
+                send_email(subject, body, None, [edit_userprofile.new_email])
                 print_info_msg ("Sent email verification for %s" % user)
                 user_changed = True
                 email_changed = True

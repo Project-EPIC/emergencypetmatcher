@@ -4,7 +4,7 @@ from matching.models import PetMatch
 from socializing.models import UserProfile
 from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
-from django.core.mail import EmailMessage, send_mail
+from django.core.mail import EmailMessage
 from datetime import datetime
 from django.dispatch import receiver
 from django.db.models.signals import post_save
@@ -189,7 +189,7 @@ class PetMatchCheck(models.Model):
 				"petmatchcheck_id": self.id,
 				"petmatch": petmatch
 			})
-			send_mail(email_subject, email_body, None, [petmatch_owner.user.email])
+			send_email(email_subject, email_body, None, [petmatch_owner.user.email])
 
 		#Iterate through lost and found original and crossposting contacts and email them accordingly. Do this smartly.
 		for (oc, cc, pet, other_oc, other_cc, other_pet) in ((lost_oc, lost_cc, lost_pet, found_oc, found_cc, found_pet),
@@ -203,7 +203,7 @@ class PetMatchCheck(models.Model):
 				cross_posting_phrase = "- A volunteer with username %s has posted your pet on EPM on your behalf, thereby making the match possible." % (cc["name"])
 				cross_posting_reach_out = "Please include %s at %s in your conversations, since this person will make the decision on EPM on your behalf." % (cc["name"], cc["email"])
 				email_body = render_to_string (TEXTFILE_EMAIL_CROSSPOSTER_VERIFY_PETMATCH, {"site":site, "pet": pet, "petmatchcheck_id":self.id, "petmatch": petmatch})
-				send_mail(email_subject, email_body, None, [cc["email"]])
+				send_email(email_subject, email_body, None, [cc["email"]])
 
 			ctx = {
 				"site": site,
