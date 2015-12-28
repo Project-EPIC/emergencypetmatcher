@@ -34,7 +34,7 @@ class PetReport(models.Model):
     geo_location_lat = models.FloatField(null=True, default=0.0)
     geo_location_long = models.FloatField(null=True, default=0.0)
     #Microchip ID of Pet
-    microchip_id = models.CharField(max_length=PETREPORT_MICROCHIP_ID_LENGTH, null=True)
+    microchip_id = models.CharField(max_length=PETREPORT_MICROCHIP_ID_LENGTH, null=True, default="")
     #Pet Tag Information (if available)
     tag_info = models.CharField(max_length=PETREPORT_TAG_INFO_LENGTH, null=True, default="")
     #Contact Name of Person who is sheltering/reporting lost/found Pet (if different than proposed_by UserProfile)
