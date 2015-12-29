@@ -38,7 +38,8 @@ from pprint import pprint
 import oauth2 as oauth, json, ipdb, random, urllib, hashlib, random, re, project.settings, registration
 
 def home (request):
-    return render_to_response(HTML_HOME, {}, RequestContext(request))
+    filters = {k:v for k, v in request.GET.iteritems() if (k in ["breed", "status", "pet_type", "pet_name", "event_tag"])}
+    return render_to_response(HTML_HOME, filters, RequestContext(request))
 
 def get_activities(request):
     if request.is_ajax() == True:
