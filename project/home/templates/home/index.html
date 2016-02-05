@@ -11,6 +11,7 @@
     var STATIC_URL = "{{ STATIC_URL }}";
     var MEDIA_URL = "{{ MEDIA_URL }}";
     var USER_ID = "{{ user.id }}";
+    var BREED = "{{ breed }}";
   </script>
 {% endblock js %}
 
@@ -39,9 +40,9 @@
     <!-- Pet Report Filter form -->
     <div id="pet-report-filter-form">
         {% if pet_name %}
-          <input id="filter-name" type="text" class="pet-filter form-control" value="{{ pet_name }}" style="width:175px;"/>
+          <input id="filter-pet-name" type="text" class="pet-filter form-control" value="{{ pet_name }}" style="width:175px;"/>
         {% else %}
-          <input id="filter-name" type="text" class="pet-filter form-control" placeholder="Search by name..." style="width:175px;"/>
+          <input id="filter-pet-name" type="text" class="pet-filter form-control" placeholder="Search by name..." style="width:175px;"/>
         {% endif %}
       <select id='filter-status' class="pet-filter form-control" style="width:100px;">
         {% if status %}
@@ -59,8 +60,9 @@
         {% else %}
           <option disabled selected>Event Tag</option>
         {% endif %}
+          <option>All</option>
       </select>
-      <select id="filter-type" class='pet-filter form-control' style='width:120px;'>
+      <select id="filter-pet-type" class='pet-filter form-control' style='width:120px;'>
         {% if pet_type %}
           <option selected>{{ pet_type }}</option>
         {% else %}
@@ -80,10 +82,11 @@
         {% if breed %}
           <option selected>{{ breed }}</option>
         {% else %}
-          <option disabled selected>Breed (Choose Pet Type First)</option>
+          <option disabled selected>Breed</option>
         {% endif %}
       </select>
       <button id="filter-submit" class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+      <button id="filter-clear" class="btn btn-default" type="submit"><i class="glyphicon glyphicon-refresh"></i></button>
     </div>
 
     <!-- Loading GIF -->
