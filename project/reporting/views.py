@@ -31,6 +31,7 @@ from home.constants import *
 from verifying.models import PetReunion, PetReunionForm
 from verifying.constants import *
 from reporting.decorators import *
+from crowdwork import EPMCrowdRouter
 import datetime, re, time, json, ipdb, project.settings
 
 def get(request, petreport_id):
@@ -102,101 +103,18 @@ def get_PetReports_JSON(request):
         raise Http404
 
 @login_required
+def new(request):
+    # import ipdb; ipdb.set_trace()
+    cr = EPMCrowdRouter()
+    response = cr.route("ReportingWorkFlow", "ReportingTask", request).response
+    return render_to_response(response["path"], response, RequestContext(request))
+
+@login_required
 def submit(request):
-    if request.method == "POST" and request.POST["g-recaptcha-response"]:
-        if not recaptcha_ok(request.POST["g-recaptcha-response"]):
-            messages.error(request, "CAPTCHA was not correct. Please try again.")
-            return redirect(request.path)
-
-        #Let's make some adjustments to non-textual form fields before converting to a PetReportForm.
-        geo_lat = request.POST ["geo_location_lat"] or ""
-        geo_long = request.POST ["geo_location_long"] or ""
-
-        if (geo_lat == "" or geo_lat == "None") or (geo_long == "" or geo_long == "None"):
-            request.POST ['geo_location_lat'] = 0.00
-            request.POST ['geo_location_long'] = 0.00
-        else:
-            request.POST ["geo_location_lat"] = float("%.5f" % float(geo_lat))
-            request.POST ["geo_location_long"] = float("%.5f" % float(geo_long))
-
-        form = PetReportForm(request.POST, request.FILES)
-
-        if form.is_valid() == True:
-            #Create (but do not save) the Pet Report Object associated with this form data.
-            pr = form.save(commit=False)
-            pr.proposed_by = request.user.userprofile
-
-            #Deal with Contact Information.
-            if pr.contact_name.strip() == "":
-                pr.contact_name = None
-            if pr.contact_email.strip() == "":
-                pr.contact_email = None
-            if pr.contact_number.strip() == "":
-                pr.contact_number = None
-            if pr.contact_link.strip() == "":
-                pr.contact_link = None
-
-            pr.breed = pr.breed.strip()
-            print_info_msg ("Pet Report Image Path: %s" % pr.img_path)
-
-            #Make and save images from img_path and thumb_path AND save the PetReport.
-            pr.set_images(pr.img_path, save=True, rotation=request.POST.get("img_rotation"))
-
-            #Add reputation points for submitting a pet report
-            request.user.userprofile.update_reputation("ACTIVITY_PETREPORT_SUBMITTED")
-            message = "Thank you for your submission. %s %s (%s) is front row on the gallery! " % (pr.status, pr.pet_type, pr.pet_name)
-            if pr.status == 'Lost':
-                messages.success (request, message + "Your contribution will go a long way towards helping volunteers find your lost pet.")
-            else:
-                messages.success (request, message + "Your contribution will go a long way towards helping volunteers match your found pet.")
-
-            #Log the PetReport submission for this UserProfile
-            Activity.log_activity("ACTIVITY_PETREPORT_SUBMITTED", request.user.userprofile, source=pr)
-            print_success_msg("Pet Report submitted successfully")
-
-            #Check to see if there are any matching petreports that have the same microchip ID.
-            matching_pet = pr.find_by_microchip_id()
-            if matching_pet != None: #Send an email about the match!
-                contact1 = generate_pet_contacts(pr)[0]
-                contact2 = generate_pet_contacts(matching_pet)[0]
-                email_body = render_to_string(EMAIL_BODY_MATCH_BY_MICROCHIP_ID, {
-                    "pet": pr,
-                    "other_pet": matching_pet,
-                    "site": Site.objects.get_current()
-                })
-                send_email(EMAIL_SUBJECT_MATCH_BY_MICROCHIP_ID, email_body, None, [contact1["email"]])
-            return redirect(URL_HOME)
-
-        else:
-            messages.error(request, "Something went wrong. Please check the fields and try again.")
-            print_error_msg ("Pet Report not submitted successfully")
-            print_error_msg (form.errors)
-            print_error_msg (form.non_field_errors())
-            return render_to_response(HTML_PETREPORT_FORM, {
-                'form':form,
-                "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH,
-                "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
-                "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
-                "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
-                "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
-                "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH
-            }, RequestContext(request))
-    else:
-        if request.method == "POST" and not request.POST["g-recaptcha-response"]:
-            messages.error (request, "Please fill in the RECAPTCHA.")
-        form = PetReportForm() #Unbound Form
-
-    return render_to_response(HTML_PETREPORT_FORM, {
-        'form':form,
-        "RECAPTCHA_CLIENT_SECRET": settings.RECAPTCHA_CLIENT_SECRET,
-        "PETREPORT_TAG_INFO_LENGTH":PETREPORT_TAG_INFO_LENGTH,
-        "PETREPORT_DESCRIPTION_LENGTH":PETREPORT_DESCRIPTION_LENGTH,
-        "PETREPORT_CONTACT_NAME_LENGTH": PETREPORT_CONTACT_NAME_LENGTH,
-        "PETREPORT_CONTACT_NUMBER_LENGTH": PETREPORT_CONTACT_NUMBER_LENGTH,
-        "PETREPORT_CONTACT_EMAIL_LENGTH": PETREPORT_CONTACT_EMAIL_LENGTH,
-        "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH
-    }, RequestContext(request))
-
+    # import ipdb; ipdb.set_trace()
+    cr = EPMCrowdRouter()
+    response = cr.route("ReportingWorkFlow", "ReportingTask", request).response
+    return redirect(response["path"])
 
 @login_required
 @allow_only_proposer

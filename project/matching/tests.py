@@ -125,7 +125,7 @@ class MatchingTesting (TestCase):
 		client = Client(enforce_csrf_checks=False)
 		loggedin = client.login(username = user.username, password=pwd)
 		response = client.get(URL_MATCHING + str(pr1.id))
-		self.assertEquals(response.status_code, 302)
+		self.assertEquals(response.status_code, 200)
 		self.assertTrue(response.request["PATH_INFO"], URL_HOME)
 
 	def test_get_propose_petmatch_success (self):
@@ -136,6 +136,8 @@ class MatchingTesting (TestCase):
 		candidate = create_random_PetReport(user, status="Found", pet_type=pet_type)
 		client = Client(enforce_csrf_checks=False)
 		loggedin = client.login(username = user.username, password=pwd)
+		response = client.get(URL_MATCHING + "%d" % (pr1.id))
+		response = client.post(URL_MATCHING + "%d" % (pr1.id), {"candidate_id":candidate.id})
 		response = client.get(URL_PROPOSE_PETMATCH + "%d/%d/" % (pr1.id, candidate.id))
 		self.assertEquals(response.status_code, 200)
 		self.assertEquals(response.request["PATH_INFO"], URL_PROPOSE_PETMATCH + "%d/%d/" % (pr1.id, candidate.id))
@@ -163,6 +165,9 @@ class MatchingTesting (TestCase):
 		client = Client(enforce_csrf_checks=False)
 		loggedin = client.login(username = user.username, password=pwd)
 		settings.RECAPTCHA_SERVER_SECRET=settings.TEST_RECAPTCHA_SERVER_SECRET
+		response = client.get(URL_MATCHING + "%d" % (pr1.id))
+		response = client.post(URL_MATCHING + "%d" % (pr1.id), {"candidate_id":candidate.id})
+		response = client.get(URL_PROPOSE_PETMATCH + "%d/%d/" % (pr1.id, candidate.id))
 		response = client.post(URL_PROPOSE_PETMATCH + "%d/%d/" % (pr1.id, candidate.id), {"g-recaptcha-response":settings.TEST_RECAPTCHA_CLIENT_SECRET}, follow=True)
 		self.assertEquals(response.status_code, 200)
 		self.assertEquals(response.request["PATH_INFO"], URL_HOME)

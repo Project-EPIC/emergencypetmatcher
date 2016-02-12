@@ -4,7 +4,7 @@ from project.settings import MEDIA_ROOT
 URL_GET_PETREPORTS_JSON = "/reporting/get_PetReports_JSON"
 URL_PRDP = '/reporting/'
 URL_PETREPORT_FORM ='/reporting/new'
-URL_SUBMIT_PETREPORT="/reporting/new"
+URL_SUBMIT_PETREPORT="/reporting/submit"
 URL_EDIT_PETREPORT ='/reporting/edit/'
 URL_GET_PET_BREEDS = "/reporting/get_pet_breeds"
 URL_BOOKMARK_PETREPORT = "/reporting/bookmark"

@@ -73,7 +73,7 @@
 							    	<img id ="epm-nav-user-thumb" src="{{ MEDIA_URL }}/{{ user.userprofile.thumb_path }}"/>
 							    	<a role="menuitem" style="display:inline-block;" href="{% url 'get_UserProfile' user.userprofile.id %}">{{ user.username }}</a>
 							    </li>
-									<li class="nav-link-pet" style="padding-top:5px;"><a href= "{% url 'submit_PetReport' %}">New Pet Report</a></li>
+									<li class="nav-link-pet" style="padding-top:5px;"><a href= "{% url 'new_PetReport' %}">New Pet Report</a></li>
 								{% else %}
 									<li class="nav-link-login" style="padding-top:5px;" ><a href= "{% url 'login_User' %}?next={% firstof request.path '/' %}">Login/Register</a></li>
 								{% endif %}

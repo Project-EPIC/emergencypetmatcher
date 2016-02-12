@@ -233,6 +233,8 @@ class ActivityTesting (TestCase):
 		pr2 = create_random_PetReport(user=user2, status="Found", pet_type="Dog")
 		settings.RECAPTCHA_SERVER_SECRET=settings.TEST_RECAPTCHA_SERVER_SECRET
 		post = {"g-recaptcha-response": settings.TEST_RECAPTCHA_CLIENT_SECRET}
+		response = client.get(URL_MATCHING + "%d" % (pr1.id))
+		response = client.post(URL_MATCHING + "%d" % (pr1.id), {"candidate_id": pr2.id})
 		response = client.post(URL_PROPOSE_PETMATCH + "%d/%d/" % (pr1.id, pr2.id), post, follow=True)
 		activities = Activity.objects.filter(userprofile=user1.userprofile, activity="ACTIVITY_PETMATCH_PROPOSED")
 		self.assertEquals(response.request ['PATH_INFO'], URL_HOME)
@@ -262,7 +264,7 @@ class ActivityTesting (TestCase):
 		pr1 = create_random_PetReport(user=user1, status="Lost", pet_type="Dog")
 		pr2 = create_random_PetReport(user=user2, status="Found", pet_type="Dog")
 		pm = PetMatch.objects.create(lost_pet=pr1, found_pet=pr2, proposed_by=user1.userprofile)
-		response = client.post(URL_VOTE_PETMATCH + "%d/" % (pm.id), {"vote":"upvote"}, follow=True)
+		response = client.post(URL_VOTE_PETMATCH + "%d" % (pm.id), {"vote":"upvote"}, follow=True)
 		activities = Activity.objects.filter(userprofile=user1.userprofile, source_id=PetMatchCheck.objects.get().id, activity="ACTIVITY_PETMATCHCHECK_VERIFY")
 		self.assertTrue(len(activities) == 1)
 

@@ -117,7 +117,7 @@
         {% csrf_token %}
         <button id="prdp-bookmark" type="button" class="btn btn-default btn-lg">Bookmark</button>
         {% if not pet_report.closed %}
-          <a href="{% url 'match_PetMatch' pet_report.id%}" type="button" class="btn btn-primary btn-lg" style="margin-left:0px;">Match this Pet</a>
+          <a href="{% url 'new_PetMatch' pet_report.id%}" type="button" class="btn btn-primary btn-lg" style="margin-left:0px;">Match this Pet</a>
         {% endif %}
       {% endif %}
     </div>

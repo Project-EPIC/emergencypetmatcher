@@ -7,7 +7,7 @@ $(document).ready(function(){
 	});
 
 	$(window).resize(function() {
-		if(this.resizeTO) 
+		if(this.resizeTO)
 			clearTimeout(this.resizeTO);
 		this.resizeTO = setTimeout(function() {
 			$(this).trigger('resizeEnd');
@@ -20,13 +20,13 @@ $(document).ready(function(){
 	$("#matching-workspace-candidate-img").on("dragenter", handleDragEnter);
 	$("#matching-workspace-candidate-img").on("dragover", handleDragOver);
 	$("#matching-workspace-candidate-img").on("drop", handleDrop);
-	$("#matching-workspace-candidate-img").on("dragleave", handleDragLeave);		
+	$("#matching-workspace-candidate-img").on("dragleave", handleDragLeave);
 
 	//Add more items when user scrolls down!
 	$("#tiles").scroll(function() {
 		if($(this).scrollTop() + $(this).innerHeight() == $(this)[0].scrollHeight - 1)
 			fetch_PetReports(pageNum++);
-	});			
+	});
 
 	//Make the first call to fetch PetReports!
 	fetch_PetReports(pageNum++);
@@ -36,8 +36,8 @@ $(document).ready(function(){
 /******************************* Utility functions *******************************************/
 
 var dragSrcEl = null;
-function handleDragStart(ev){ 
-	this.style.opacity = "0.4"; 
+function handleDragStart(ev){
+	this.style.opacity = "0.4";
 	dragSrcEl = this;
 }
 
@@ -54,7 +54,7 @@ function handleDrop(ev){
 	if (ev.stopPropagation)
 		ev.stopPropagation();
 
-	moveImage(dragSrcEl, $("#matching-workspace-candidate-img"));	
+	moveImage(dragSrcEl, $("#matching-workspace-candidate-img"));
 	return false;
 }
 
@@ -73,15 +73,15 @@ function refresh_layout(){
 	$("#tiles li").attr("draggable", true);
 	$("#tiles li").each(function(i, item){
 		$(item).on("dragstart", handleDragStart);
-		$(item).on("dragend", handleDragEnd);	
+		$(item).on("dragend", handleDragEnd);
 	});
 
 	// Call the layout function.
-	var handler = $('#tiles li');	
+	var handler = $('#tiles li');
 	handler.wookmark(options);
 }
 
-//This function accepts the draggable item and the container within which the item is placed, 
+//This function accepts the draggable item and the container within which the item is placed,
 //and it makes an AJAX call to get the item's inherited PetReport attributes to display.
 function moveImage(item, container) {
 	var petreport_img = $(item).find("img").clone();
@@ -104,11 +104,11 @@ function moveImage(item, container) {
 			pet_link = document.createElement("a");
 			$(pet_link).attr("href", REPORTING_URLS["PETREPORT"] + CANDIDATE_PETREPORT_ID);
 			$(pet_link).html(petreport_img);
-			$(container).html(pet_link);		
+			$(container).html(pet_link);
 
 			//Enable the Propose Match and Clear buttons.
 			$("#button_propose_match").removeAttr("disabled");
-			$("#button_propose_match").attr("href", "/matching/propose/" + TARGET_PETREPORT_ID + "/" + CANDIDATE_PETREPORT_ID);
+			$("#candidate_id").val(petreport.id)
 			$("#button_clear_candidate").removeAttr("disabled");
 
 			//Clear button to remove Candidate from droppable container.
@@ -122,18 +122,18 @@ function moveImage(item, container) {
 			});
 
 			//Create the click handler for this candidate.
-			$("#matching-workspace-candidate-img img").click(function(){ 
+			$("#matching-workspace-candidate-img img").click(function(){
 				$("#epm-modal").modal({
 					"remote": REPORTING_URLS["PETREPORT"] + CANDIDATE_PETREPORT_ID
-				});				
+				});
 			});
 
 			//Fill up the field list.
-			set_PetReport_fields_to_table(petreport, 1, $("#matching-info-table"));	
+			set_PetReport_fields_to_table(petreport, 1, $("#matching-info-table"));
 
 			//Now, iterate through both lists and highlight the matches!
-			highlight_field_matches($("#matching-info-table"));		
-	
+			highlight_field_matches($("#matching-info-table"));
+
 		}
 	});
 }
@@ -157,13 +157,10 @@ function fetch_PetReports(page){
 				$(item).find("a").css("cursor", "move");
 
 				//Finally, add this item to the tiles.
-				$("#tiles").append(item);		
+				$("#tiles").append(item);
 			}
 			//Don't forget to refresh the grid layout.
 			refresh_layout();
 		}
   });
 }
-
-
-
