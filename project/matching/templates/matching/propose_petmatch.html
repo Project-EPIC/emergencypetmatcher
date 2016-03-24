@@ -45,7 +45,7 @@
 
   <div class="modal-footer">
     <!-- Form to create PetMatch -->
-    <form method="post" style="text-align:center;" action="{% url 'propose_PetMatch' target.id candidate.id %}" >
+    <form method="post" style="text-align:center;" action="{{ action }}">
       {% csrf_token %}
       <label>Please verify your submission via RECAPTCHA</label>
       <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_CLIENT_SECRET }}" data-callback='recaptcha_done' style="margin:10px auto; width:300px;"></div>

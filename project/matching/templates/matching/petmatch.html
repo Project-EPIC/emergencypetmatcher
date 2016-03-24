@@ -117,23 +117,20 @@
         <span style="display:block; text-align:center; margin-bottom:10px; color:gray;">
         Casting enough votes will bring this match to the owners' attention. </span>
 
-        <form id="pmdp-vote-actions">
+          <form id="pmdp-vote-actions" method="POST" action="{{ action }}">
           {% csrf_token %}
 
-          <!-- Downvote Button -->
           <div class="pmdp_vote_box" style="display:inline-block;">
             <strong id="pmdp_downvote_number" style="text-align:center; font-size:18px;">{{ num_downvotes }} </strong>
             {% if num_downvotes == 1 %} Downvote {% else %} Downvotes {% endif %}
-            <img id= "pmdp_downvote_button" src={% static "matching/images/button_downvote_active.png" %} alt="Downvote this Pet Match"/>
+  					<input type='submit' id="pmdp_downvote_button" value name='down'/>
           </div>
 
-          <!-- Upvote Button -->
           <div class="pmdp_vote_box" style="display:inline-block;">
             <strong id="pmdp_upvote_number" style="text-align:center; font-size:18px;">{{ num_upvotes }} </strong>
             {% if num_upvotes == 1 %} Upvote {% else %} Upvotes {% endif %}
-            <img id = "pmdp_upvote_button" src={% static "matching/images/button_upvote_active.png" %} alt="Upvote this Pet Match"/>
+            <input type='submit' id="pmdp_upvote_button" value name='up'/>
           </div>
-
         </form>
       {% endif %}
     {% endif %}

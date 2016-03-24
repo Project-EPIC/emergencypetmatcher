@@ -38,7 +38,8 @@ def get(request, petmatch_id):
 def vote(request, petmatch_id):
     cr = EPMCrowdRouter()
     response = cr.route("VotingWorkFlow", "VoteTask", request, petmatch_id=petmatch_id).response
-    return JsonResponse(response, safe=False)
+    messages.success(request, response["message"])
+    return redirect(URL_HOME)
 
 #Given a PetMatch ID, just return the PetMatch JSON.
 def get_PetMatch_JSON(request, petmatch_id):

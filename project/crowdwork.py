@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from reporting.constants import *
 from home.constants import URL_HOME, HTML_HOME
-from matching.constants import HTML_MATCHING, HTML_PMDP, URL_PROPOSE_PETMATCH, HTML_PROPOSE_MATCH, UPVOTE, DOWNVOTE, PETMATCH_OUTCOME_UPDATE, PETMATCH_OUTCOME_DUPLICATE_PETMATCH, PETMATCH_OUTCOME_NEW_PETMATCH
+from matching.constants import HTML_MATCHING, HTML_PMDP, URL_MATCHING, URL_PROPOSE_PETMATCH, URL_VOTE_PETMATCH, HTML_PROPOSE_MATCH, UPVOTE, DOWNVOTE, PETMATCH_OUTCOME_UPDATE, PETMATCH_OUTCOME_DUPLICATE_PETMATCH, PETMATCH_OUTCOME_NEW_PETMATCH
 from home.models import Activity
 from matching.models import PetMatch
 from verifying.models import PetMatchCheck
@@ -16,7 +16,7 @@ from django.conf import settings
 import ipdb
 
 class ReportingTask(AbstractTask):
-    @task("/reporting/new")
+    @task
     def get(self, crowd_request, data, **kwargs):
         return {
             "status": "ok",
@@ -31,9 +31,9 @@ class ReportingTask(AbstractTask):
             "PETREPORT_CONTACT_LINK_LENGTH": PETREPORT_CONTACT_LINK_LENGTH
         }
 
-    @task("/reporting/submit")
+    @task
     def post(self, crowd_request, data, form, **kwargs):
-        request = self.crowd_request.request_strategy.request
+        request = crowd_request.request_strategy.request
         form = PetReportForm(request.POST, request.FILES)
 
         if not request.POST["g-recaptcha-response"]:
@@ -118,10 +118,16 @@ class ReportingTask(AbstractTask):
             }
 
 class MatchTask(AbstractTask):
-    @task("/matching/new/<petreport_id>")
+    @task
     def get(self, crowd_request, data, **kwargs):
-        petreport_id = self.crowd_request.get_data()["petreport_id"]
-        request = self.crowd_request.request_strategy.request
+        if kwargs.get('pipe_data'):
+            petreport_id = kwargs['pipe_data']['petreport_id']
+            action = kwargs['pipe_data']["action"] #Specifies the endpoint that we're using.
+        else:
+            petreport_id = data["petreport_id"]
+            action = URL_MATCHING + str(petreport_id)
+
+        request = crowd_request.request_strategy.request
         target_petreport = get_object_or_404(PetReport, pk=petreport_id)
         #Are there any candidates?
         candidates_count = len(target_petreport.get_candidate_PetReports())
@@ -133,15 +139,21 @@ class MatchTask(AbstractTask):
             return {"status":"fail", "path": HTML_HOME}
         return {
             "status": "ok",
+            "action": action,
             "path": HTML_MATCHING,
             'target_petreport': target_petreport,
             'petreport_fields': target_petreport.get_display_fields(),
             "candidates_count":candidates_count
         }
 
-    @task("/matching/new/<petreport_id>")
+    @task
     def post(self, crowd_request, data, form, **kwargs):
-        target_id = data["petreport_id"]
+        if kwargs.get('pipe_data'):
+            target_id = kwargs['pipe_data']['petreport_id']
+            kwargs['pipe_data']['candidate_id'] = form['candidate_id'] #Cache the candidate ID.
+        else:
+            target_id = data["petreport_id"]
+
         candidate_id = form["candidate_id"]
         target = get_object_or_404(PetReport, pk=target_id)
         candidate = get_object_or_404(PetReport, pk=candidate_id)
@@ -150,7 +162,7 @@ class MatchTask(AbstractTask):
             messages.error(request, "This proposal is invalid! Please try another one.")
             return {"status":"fail", "path": URL_MATCHING + str(target_id)}
 
-        self.crowd_request.request_strategy.data.update({"target_id":target_id, "candidate_id":candidate_id})
+        crowd_request.request_strategy.data.update({"target_id":target_id, "candidate_id":candidate_id})
 
         return {
             "status":"ok",
@@ -160,10 +172,17 @@ class MatchTask(AbstractTask):
         }
 
 class ProposeMatchTask(AbstractTask):
-    @task("/matching/propose/<target_id>/<candidate_id>/")
+    @task
     def get(self, crowd_request, data, **kwargs):
-        target_id = self.crowd_request.get_data()["target_id"]
-        candidate_id = self.crowd_request.get_data()["candidate_id"]
+        if kwargs.get('pipe_data'):
+            target_id = kwargs['pipe_data']['petreport_id']
+            candidate_id = kwargs['pipe_data']['candidate_id']
+            action = kwargs['pipe_data']["action"] #Specifies the endpoint that we're using.
+        else:
+            target_id = crowd_request.get_data()["target_id"]
+            candidate_id = crowd_request.get_data()["candidate_id"]
+            action = URL_PROPOSE_PETMATCH + "%s/%s/" % (str(target_id), str(candidate_id))
+
         target = get_object_or_404(PetReport, pk=target_id)
         candidate = get_object_or_404(PetReport, pk=candidate_id)
 
@@ -176,6 +195,7 @@ class ProposeMatchTask(AbstractTask):
 
         return {
             "status": "ok",
+            "action": action,
             "path": HTML_PROPOSE_MATCH,
             "target": target,
             "candidate": candidate,
@@ -183,13 +203,18 @@ class ProposeMatchTask(AbstractTask):
             "petreport_fields": petreport_fields
         }
 
-    @task("/matching/propose/<target_id>/<candidate_id>/")
+    @task
     def post(self, crowd_request, data, form, **kwargs):
-        target_id = data["target_id"]
-        candidate_id = data["candidate_id"]
+        if kwargs.get('pipe_data'):
+            target_id = kwargs['pipe_data']['petreport_id']
+            candidate_id = kwargs['pipe_data']['candidate_id']
+        else:
+            target_id = data["target_id"]
+            candidate_id = data["candidate_id"]
+
         target = get_object_or_404(PetReport, pk=target_id)
         candidate = get_object_or_404(PetReport, pk=candidate_id)
-        request = self.crowd_request.request_strategy.request
+        request = crowd_request.request_strategy.request
         proposed_by = request.user.userprofile
 
         if not request.POST.get("g-recaptcha-response"):
@@ -263,10 +288,16 @@ class ProposeMatchTask(AbstractTask):
         return {"status": "ok", "path": URL_HOME}
 
 class VoteTask(AbstractTask):
-    @task("/matching/<petmatch_id>/")
+    @task
     def get(self, crowd_request, data, **kwargs):
-        petmatch_id = data["petmatch_id"]
-        request = self.crowd_request.request_strategy.request
+        if kwargs.get('pipe_data'):
+            petmatch_id = kwargs['pipe_data']['petmatch_id']
+            action = kwargs['pipe_data']["action"] #Specifies the endpoint that we're using.
+        else:
+            petmatch_id = data["petmatch_id"]
+            action = URL_VOTE_PETMATCH + str(petmatch_id)
+
+        request = crowd_request.request_strategy.request
         pm = get_object_or_404(PetMatch, pk=petmatch_id)
         voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
 
@@ -281,6 +312,7 @@ class VoteTask(AbstractTask):
 
         ctx = {
             "status":"ok",
+            "action":action,
             "path": HTML_PMDP,
             "petmatch": pm,
             "site_domain":Site.objects.get_current().domain,
@@ -297,11 +329,21 @@ class VoteTask(AbstractTask):
             ctx["petreunion"] = pm.found_pet.get_PetReunion()
         return ctx
 
-    @task("/matching/vote/<petmatch_id>")
+    @task
     def post(self, crowd_request, data, form, **kwargs):
-        petmatch_id = data["petmatch_id"]
-        vote = form['vote']
-        request = self.crowd_request.request_strategy.request
+        if kwargs.get('pipe_data'):
+            petmatch_id = kwargs['pipe_data']['petmatch_id']
+            action = kwargs['pipe_data']["action"] #Specifies the endpoint that we're using.
+        else:
+            petmatch_id = data["petmatch_id"]
+            action = URL_VOTE_PETMATCH
+
+        if form.get('up') != None:
+            vote = "upvote"
+        else:
+            vote = "downvote"
+
+        request = crowd_request.request_strategy.request
         userprofile = request.user.userprofile
         pm = get_object_or_404(PetMatch, pk=petmatch_id)
 
@@ -338,6 +380,7 @@ class VoteTask(AbstractTask):
         return {
             "status":"ok",
             "vote":vote,
+            "path": URL_HOME,
             "message": message,
             "threshold_reached": threshold_reached,
             "num_downvotes": num_downvotes,
@@ -346,40 +389,47 @@ class VoteTask(AbstractTask):
 
 class ReportingWorkFlow(AbstractWorkFlow):
     tasks = [ReportingTask]
-
     def __init__(self, cr):
         self.crowdrouter = cr
-
     @workflow
-    def run(self, task):
-        return task.execute()
+    def run(self, task, crowd_request):
+        return task.execute(crowd_request)
 
 class MatchingWorkFlow(AbstractWorkFlow):
     tasks = [MatchTask, ProposeMatchTask]
-
     def __init__(self, cr):
         self.crowdrouter = cr
-
     @workflow
-    def run(self, task):
-        return self.pipeline(task)
+    def run(self, task, crowd_request):
+        return self.pipeline(crowd_request)
 
 class VotingWorkFlow(AbstractWorkFlow):
     tasks = [VoteTask]
+    def __init__(self, cr):
+        self.crowdrouter = cr
+    @workflow
+    def run(self, task, crowd_request):
+        return task.execute(crowd_request)
+
+class MixedWorkFlow(AbstractWorkFlow):
+    tasks = [VoteTask, MatchTask, ProposeMatchTask, VoteTask]
 
     def __init__(self, cr):
         self.crowdrouter = cr
 
     @workflow
-    def run(self, task):
-        return task.execute()
+    def run(self, task, crowd_request):
+        return self.pipeline(crowd_request)
+
+    def pre_pipeline(self, task, pipe_data):
+        pipe_data["action"] = URL_MIXED
+        pipe_data["petmatch_id"] = PetMatch.objects.filter(has_failed=False, found_pet__closed=False, lost_pet__closed=False).order_by("?").first().id
+        pipe_data["petreport_id"] = PetReport.objects.order_by("?").first().id
 
 class EPMCrowdRouter(AbstractCrowdRouter):
-    workflows = [ReportingWorkFlow, MatchingWorkFlow, VotingWorkFlow]
-
+    workflows = [ReportingWorkFlow, MatchingWorkFlow, VotingWorkFlow, MixedWorkFlow]
     def __init__(self):
         self.enable_crowd_statistics("crowd_stats.db")
-
     @crowdrouter
-    def route(self, crowd_request, workflow):
+    def route(self, workflow, crowd_request):
         return workflow.run(crowd_request)
