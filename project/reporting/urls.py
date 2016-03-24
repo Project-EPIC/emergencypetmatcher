@@ -18,4 +18,5 @@ urlpatterns = patterns('reporting.views',
     url (r'^mixed2/(?P<petreport_id>\d+)/$',                    'mixed2',               name='mixed2'),
     url (r'^mixed3/(?P<target_id>\d+)/(?P<candidate_id>\d+)/$', 'mixed3',               name='mixed3'),
     url (r'^mixed4/(?P<petmatch_id>\d+)/$',                     'mixed4',               name='mixed4'),
+    url (r'^mixed5/(?P<petmatch_id>\d+)/$',                     'mixed5',               name='mixed5'),
 )
