@@ -3,19 +3,11 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.db import models, IntegrityError
-from django.db.models import Min
 from django.contrib import messages
-from django.contrib.messages.api import get_messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.forms import *
-from django.core import mail
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.forms.models import model_to_dict
-from random import choice, uniform
-from pprint import pprint
 from home.models import Activity
 from reporting.models import PetReport
 from matching.models import PetMatch
