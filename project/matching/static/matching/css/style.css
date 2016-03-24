@@ -66,7 +66,7 @@
 }
 
 #matching-workspace-actions {
-	text-align:center; 
+	text-align:center;
 	margin-bottom:20px;
 }
 
@@ -147,9 +147,9 @@
 }
 
 #pmdp-title {
-	display:block; 
+	display:block;
 	text-align: center;
-	font-size:16px; 
+	font-size:16px;
 	margin:10px auto 10px auto;
 }
 
@@ -174,7 +174,7 @@
 	display:block;
 	word-wrap: break-word;
 	overflow-y:auto;
-	overflow-x:auto;	
+	overflow-x:auto;
 }
 
 #pmdp-info-table .pet-info-header {
@@ -260,17 +260,15 @@
 }
 
 #pmdp_downvote_button {
-	height:90px;
+	background: url(/static/matching/images/button_downvote_active.png) no-repeat center;
+	height:100px;
 	width: 85px;
 	cursor: pointer;
 }
 
 #pmdp_upvote_button {
-	height:90px;
+	background: url(/static/matching/images/button_upvote_active.png) no-repeat center;
+	height:100px;
 	width: 85px;
 	cursor:pointer;
 }
-
-
-
-

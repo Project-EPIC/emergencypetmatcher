@@ -28,14 +28,14 @@
 	    </div>
 	  </div>
 	</div>
-	
+
 	{% block messages %}
 	<ul id="messages">
 		{% for message in messages %}
 	    <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
 	    {% endfor %}
 	</ul>
-	{% endblock messages %}	
+	{% endblock messages %}
 
 	<div id="matching-page" style="text-align:center; min-width:1220px;">
 		<!-- Workspace for Placing Pet Report Candidate Matches-->
@@ -44,21 +44,26 @@
 
 			<!-- PetReport Target and Candidates -->
 			<div id="matching-workspace-images">
-				<div id="matching-workspace-target-img" class="pet_img"> 
+				<div id="matching-workspace-target-img" class="pet_img">
 					<a href="{% url 'get_PetReport' target_petreport.id %}">
 						<img src="{{ MEDIA_URL }}{{ target_petreport.img_path }}"/>
 					</a>
 				</div>
 				<div id="matching-workspace-candidate-img" class="pet_img">
-					<strong style="width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;"> Click and Drag a Pet Here </strong>		
+					<strong style="width:100%; margin-top:50%; display:inline-block; text-align:center; color:gray;"> Click and Drag a Pet Here </strong>
 				</div>
 			</div>
 
 			<!--Buttons -->
 			<div id="matching-workspace-actions">
-	   		<a href="#" id="button_propose_match" class="btn btn-primary" disabled>Propose Match</a>
+	   		<!-- <a href="#" class="btn btn-primary" disabled>Propose Match</a> -->
+				<form method="POST" action="{{ action }}">
+					{% csrf_token %}
+					<input type='submit' id="button_propose_match" class='btn btn-primary' value="Propose Match">
+					<input type='hidden' id='candidate_id' name='candidate_id'/>
+				</form>
 	   		<button id="button_clear_candidate" class="btn btn-default" disabled>Clear Pet</button>
-		  </div>	
+		  </div>
 
 	   	<table id="matching-info-table" class="epm-table table table-hover">
 				<tbody>

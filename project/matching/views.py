@@ -42,6 +42,7 @@ def get(request, petmatch_id):
 
     ctx = {
         "petmatch": pm,
+        "action": "/matching/vote/" + str(pm.id),
         "site_domain":Site.objects.get_current().domain,
         "petreport_fields": pm.get_display_fields(),
         "num_voters": len(voters),
@@ -54,7 +55,6 @@ def get(request, petmatch_id):
         ctx["petreunion"] = pm.lost_pet.get_PetReunion()
     elif pm.found_pet.closed:
         ctx["petreunion"] = pm.found_pet.get_PetReunion()
-
     return render_to_response(HTML_PMDP, ctx, RequestContext(request))
 
 #Given a PetMatch ID, just return the PetMatch JSON.
@@ -89,7 +89,11 @@ def get_PetMatches_JSON(request):
 def vote(request, petmatch_id):
     if request.method == "POST":
         userprofile = request.user.userprofile
-        vote = request.POST ['vote']
+        import ipdb; ipdb.set_trace()
+        if request.POST.get("up") != None:
+            vote = "upvote"
+        else:
+            vote = "downvote"
         pm = get_object_or_404(PetMatch, pk=petmatch_id)
 
         if vote == "upvote":
@@ -121,15 +125,8 @@ def vote(request, petmatch_id):
 
         num_upvotes = len(pm.up_votes.all())
         num_downvotes = len(pm.down_votes.all())
-
-        return JsonResponse({
-            "vote":vote,
-            "message":message,
-            "threshold_reached": threshold_reached,
-            "num_downvotes":num_downvotes,
-            "num_upvotes":num_upvotes
-        }, safe=False)
-
+        messages.success(request, message)
+        return redirect(URL_HOME)
     else:
         raise Http404
 
@@ -268,6 +265,7 @@ def propose(request, target_id, candidate_id):
 
         return render_to_response(HTML_PROPOSE_MATCH, {
             'RECAPTCHA_CLIENT_SECRET': settings.RECAPTCHA_CLIENT_SECRET,
+            "action": URL_PROPOSE_PETMATCH + "%s/%s/" % (target.id, candidate.id),
             'target': target,
             'candidate': candidate,
             'petreport_fields': [{'attr':a['attr'], 'label':a['label'], 'lost_pet_value':a['value'], 'found_pet_value':b['value']} for a,b in zip(target.get_display_fields(), candidate.get_display_fields())]

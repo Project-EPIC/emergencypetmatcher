@@ -10,5 +10,4 @@ urlpatterns = patterns('matching.views',
     url (r'^get_candidate_PetReports_JSON$',                        'get_candidate_PetReports',         name='get_candidate_PetReports_JSON'),
     url (r'^vote/(?P<petmatch_id>\d+)',                             "vote",                             name="vote_PetMatch"),
     url (r'^propose/(?P<target_id>\d+)/(?P<candidate_id>\d+)/$',    'propose',                          name='propose_PetMatch'),
-
 )
