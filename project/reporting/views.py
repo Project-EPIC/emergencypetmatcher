@@ -1,30 +1,17 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.forms import *
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect
 from django.http import JsonResponse
-from django.contrib.messages.api import get_messages
-from django.db.models import Min
-from django.contrib.messages.api import get_messages
-from django.db import models, IntegrityError
 from django.http import Http404
-from django.core import mail
-from django.core.urlresolvers import reverse
-from registration.forms import RegistrationForm
-from random import choice, uniform
 from django.contrib import messages
 from matching.views import *
 from django.conf import settings
-from django.forms.models import model_to_dict
 from django.contrib.sites.models import Site
 from home.models import Activity
 from socializing.models import UserProfile
 from reporting.models import PetReport, PetReportForm
 from matching.models import PetMatch
-from django.template.loader import render_to_string
-from pprint import pprint
-from PIL import Image
 from utilities.utils import *
 from constants import *
 from home.constants import *
