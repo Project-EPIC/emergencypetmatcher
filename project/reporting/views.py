@@ -23,8 +23,16 @@ import datetime, re, time, json, ipdb, project.settings
 
 @login_required
 def mixed(request):
-    cr = EPMCrowdRouter()
-    response = cr.pipeline("MixedWorkFlow", request)
+    response = EPMCrowdRouter().pipeline("MixedWorkFlow", request)
+    if response.method == "GET":
+        return render_to_response(response.response["path"], response.response, RequestContext(request))
+    else:
+        messages.success(request, "Thank you for helping!")
+        return redirect(response.response["path"])
+
+@login_required
+def choice(request):
+    response = EPMCrowdRouter().pipeline("ChoiceWorkFlow", request)
     if response.method == "GET":
         return render_to_response(response.response["path"], response.response, RequestContext(request))
     else:

@@ -29,14 +29,6 @@
 	  </div>
 	</div>
 
-	{% block messages %}
-	<ul id="messages">
-		{% for message in messages %}
-	    <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
-	    {% endfor %}
-	</ul>
-	{% endblock messages %}
-
 	<div id="matching-page" style="text-align:center; min-width:1220px;">
 		<!-- Workspace for Placing Pet Report Candidate Matches-->
 		<div id="matching-workspace">

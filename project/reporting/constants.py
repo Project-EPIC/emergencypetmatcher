@@ -3,6 +3,7 @@ from project.settings import MEDIA_ROOT
 #URLs
 URL_GET_PETREPORTS_JSON = "/reporting/get_PetReports_JSON"
 URL_MIXED = '/reporting/mixed'
+URL_CHOICE = "/reporting/choice"
 URL_PRDP = '/reporting/'
 URL_PETREPORT_FORM ='/reporting/new'
 URL_SUBMIT_PETREPORT="/reporting/submit"

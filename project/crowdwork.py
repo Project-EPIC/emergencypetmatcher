@@ -1,5 +1,6 @@
 from crowdrouter import AbstractCrowdRouter, AbstractWorkFlow, AbstractTask
 from crowdrouter.decorators import *
+from crowdrouter.task.abstract_crowd_choice import AbstractCrowdChoice
 from reporting.models import PetReport, PetReportForm
 from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
@@ -174,6 +175,8 @@ class MatchTask(AbstractTask):
 class ProposeMatchTask(AbstractTask):
     @task
     def get(self, crowd_request, data, **kwargs):
+        if not kwargs.get('pipe_data') and crowd_request.get_session()['cr_data']:
+            kwargs['pipe_data'] = crowd_request.get_session()['cr_data']
         if kwargs.get('pipe_data'):
             target_id = kwargs['pipe_data']['petreport_id']
             candidate_id = kwargs['pipe_data']['candidate_id']
@@ -205,12 +208,17 @@ class ProposeMatchTask(AbstractTask):
 
     @task
     def post(self, crowd_request, data, form, **kwargs):
+        if not kwargs.get('pipe_data') and crowd_request.get_session()['cr_data']:
+            kwargs['pipe_data'] = crowd_request.get_session()['cr_data']
         if kwargs.get('pipe_data'):
             target_id = kwargs['pipe_data']['petreport_id']
             candidate_id = kwargs['pipe_data']['candidate_id']
         else:
             target_id = data["target_id"]
             candidate_id = data["candidate_id"]
+
+        if form.get('no-match'): #If no match.
+            return {"path": URL_HOME}
 
         target = get_object_or_404(PetReport, pk=target_id)
         candidate = get_object_or_404(PetReport, pk=candidate_id)
@@ -223,7 +231,7 @@ class ProposeMatchTask(AbstractTask):
 
         if not recaptcha_ok(request.POST["g-recaptcha-response"]):
             messages.error(request, "CAPTCHA was not correct. Please try again.")
-            return redirect(request.path)
+            return {"status":"fail", "path": URL_MATCHING + str(target_id)}
 
         if target.status == "Lost":
             pm = PetMatch(lost_pet=target, found_pet=candidate, proposed_by=proposed_by)
@@ -245,7 +253,6 @@ class ProposeMatchTask(AbstractTask):
 
                 if user_has_voted == UPVOTE or user_has_voted == DOWNVOTE:
                     messages.error(request, "This Pet Match has already been proposed, and you have voted for it already!")
-                    return redirect(URL_MATCHING + target_id + "/")
 
                 # add voting reputation points if the user didn't vote before for this duplicate petmatch
                 # if (proposed_by not in result.up_votes.all()) and (proposed_by not in result.down_votes.all()):
@@ -271,7 +278,6 @@ class ProposeMatchTask(AbstractTask):
 
                 if user_has_voted == UPVOTE or user_has_voted == DOWNVOTE:
                     messages.error(request, "This Pet Match has already been proposed, and you have voted for it already!")
-                    return redirect(URL_MATCHING + target_id + "/")
 
                 # add voting reputation points if the user didn't vote before for this duplicate petmatch
                 if user_has_voted == False:
@@ -285,7 +291,7 @@ class ProposeMatchTask(AbstractTask):
                 messages.error(request, "A Problem was found when trying to propose the PetMatch. We have been notified of the issue and will fix it as soon as possible.")
 
         #Finally, return the redirect.
-        return {"status": "ok", "path": URL_HOME}
+        return {"status": "ok", "path": URL_HOME, "pm": result}
 
 class VoteTask(AbstractTask):
     @task
@@ -412,7 +418,38 @@ class VotingWorkFlow(AbstractWorkFlow):
         return task.execute(crowd_request)
 
 class MixedWorkFlow(AbstractWorkFlow):
-    tasks = [VoteTask, MatchTask, ProposeMatchTask, VoteTask]
+    tasks = [VoteTask, MatchTask, ProposeMatchTask, VoteTask, VoteTask, MatchTask, ProposeMatchTask]
+
+    def __init__(self, cr):
+        self.crowdrouter = cr
+
+    @workflow
+    def run(self, task, crowd_request):
+        return self.pipeline(crowd_request)
+
+    def step_pipeline(self, next_task, prev_task, response, pipe_data):
+        if prev_task.__class__ == ProposeMatchTask and next_task == VoteTask:
+            pipe_data["petmatch_id"] = response.response["pm"].id
+        else:
+            pipe_data["petmatch_id"] = PetMatch.objects.filter(has_failed=False, found_pet__closed=False, lost_pet__closed=False).order_by("?").first().id
+
+    def pre_pipeline(self, task, pipe_data):
+        pipe_data["action"] = URL_MIXED
+        pipe_data["petmatch_id"] = PetMatch.objects.filter(has_failed=False, found_pet__closed=False, lost_pet__closed=False).order_by("?").first().id
+        pipe_data["petreport_id"] = PetReport.objects.order_by("?").first().id
+
+class ChoiceVoteOrMatch(AbstractCrowdChoice):
+    t1 = VoteTask
+    t2 = ProposeMatchTask
+
+    def choice(self, crowd_request):
+        if crowd_request.get_data().get("param"):
+            return self.t1
+        else:
+            return self.t2
+
+class ChoiceWorkFlow(AbstractWorkFlow):
+    tasks = [VoteTask, ChoiceVoteOrMatch]
 
     def __init__(self, cr):
         self.crowdrouter = cr
@@ -422,12 +459,13 @@ class MixedWorkFlow(AbstractWorkFlow):
         return self.pipeline(crowd_request)
 
     def pre_pipeline(self, task, pipe_data):
-        pipe_data["action"] = URL_MIXED
+        pipe_data["action"] = URL_CHOICE
         pipe_data["petmatch_id"] = PetMatch.objects.filter(has_failed=False, found_pet__closed=False, lost_pet__closed=False).order_by("?").first().id
-        pipe_data["petreport_id"] = PetReport.objects.order_by("?").first().id
+        pipe_data["petreport_id"] = PetReport.objects.filter(pet_type="Dog", status="Lost").order_by("?").first().id
+        pipe_data["candidate_id"] = PetReport.objects.filter(pet_type="Dog", status="Found").order_by("?").first().id
 
 class EPMCrowdRouter(AbstractCrowdRouter):
-    workflows = [ReportingWorkFlow, MatchingWorkFlow, VotingWorkFlow, MixedWorkFlow]
+    workflows = [ReportingWorkFlow, MatchingWorkFlow, VotingWorkFlow, MixedWorkFlow, ChoiceWorkFlow]
     def __init__(self):
         self.enable_crowd_statistics("crowd_stats.db")
     @crowdrouter
