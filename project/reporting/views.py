@@ -248,13 +248,8 @@ def mixed4(request, petmatch_id):
 
         num_upvotes = len(pm.up_votes.all())
         num_downvotes = len(pm.down_votes.all())
-        if vote == "upvote":
-            messages.success(request, "Just one more...")
-            petmatch_id = PetMatch.objects.filter(has_failed=False, lost_pet__closed=False, found_pet__closed=False).order_by("?").first().id
-            return redirect("/reporting/mixed5/%s/" % petmatch_id)
-        else:
-            messages.success(request, "Thank you for your input!")
-            return redirect(URL_HOME)
+        petmatch_id = PetMatch.objects.filter(has_failed=False, lost_pet__closed=False, found_pet__closed=False).order_by("?").first().id
+        return redirect("/reporting/mixed5/%s/" % str(petmatch_id))
 
     else:
         pm = get_object_or_404(PetMatch, pk=petmatch_id)
@@ -324,8 +319,8 @@ def mixed5(request, petmatch_id):
 
         num_upvotes = len(pm.up_votes.all())
         num_downvotes = len(pm.down_votes.all())
-        messages.success(request, "Thank you for your input!")
-        return redirect(URL_HOME)
+        petreport_id = PetReport.objects.filter(closed=False).order_by("?").first().id
+        return redirect("/reporting/mixed6/%s/" % str(petreport_id))
 
     else:
         pm = get_object_or_404(PetMatch, pk=petmatch_id)
@@ -356,6 +351,386 @@ def mixed5(request, petmatch_id):
         elif pm.found_pet.closed:
             ctx["petreunion"] = pm.found_pet.get_PetReunion()
         return render_to_response(HTML_PMDP, ctx, RequestContext(request))
+
+def mixed6(request, petreport_id):
+    if request.method == "POST":
+        target = get_object_or_404(PetReport, pk=petreport_id)
+        candidate = get_object_or_404(PetReport, pk=request.POST["candidate_id"])
+        return redirect('/reporting/mixed7/%s/%s/' % (target.id, candidate.id))
+    else:
+        target_petreport = get_object_or_404(PetReport, pk=petreport_id)
+        #Are there any candidates?
+        candidates_count = len(target_petreport.get_candidate_PetReports())
+        #Add the UserProfile to the PetReport's workers list.
+        target_petreport.workers.add(request.user.userprofile)
+
+        if candidates_count == 0:
+            messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added as a worker for this pet.")
+            return redirect(URL_HOME)
+
+        return render_to_response (HTML_MATCHING, {
+            'action': '/reporting/mixed6/%s/' % petreport_id,
+            'target_petreport': target_petreport,
+            'petreport_fields': target_petreport.get_display_fields(),
+            "candidates_count":candidates_count
+        }, RequestContext(request))
+
+
+def mixed7(request, target_id, candidate_id):
+    target = get_object_or_404(PetReport, pk=target_id)
+    candidate = get_object_or_404(PetReport, pk=candidate_id)
+
+    if request.method == "POST" and request.POST.get("g-recaptcha-response"):
+        if not recaptcha_ok(request.POST["g-recaptcha-response"]):
+            messages.error(request, "CAPTCHA was not correct. Please try again.")
+            return redirect(request.path)
+        proposed_by = request.user.userprofile
+
+        if target.status == "Lost":
+            pm = PetMatch(lost_pet=target, found_pet=candidate, proposed_by=proposed_by)
+        else:
+            pm = PetMatch(lost_pet=candidate, found_pet=target, proposed_by=proposed_by)
+
+        #Try saving the PetMatch object.
+        # We will expect the following output:
+        # None --> PetMatch was not inserted properly OR DUPLICATE PETMATCH
+        # PetMatch Object --> Existing PetMatch (UPDATE) OR Brand new PetMatch.
+        # "Existing" means the PetMatch to be saved is the same PetMatch found, "Duplicate" means
+        # another PetMatch with the same Lost+Found Pets were found.
+        (result, outcome) = pm.save()
+
+        if result != None:
+            if outcome == PETMATCH_OUTCOME_UPDATE:
+                #Has the user voted for this PetMatch before?
+                user_has_voted = result.UserProfile_has_voted(proposed_by)
+
+                if user_has_voted == UPVOTE or user_has_voted == DOWNVOTE:
+                    messages.error(request, "This Pet Match has already been proposed, and you have voted for it already!")
+                    return redirect("/reporting/mixed6/%s/" % (target.id))
+
+                # add voting reputation points if the user didn't vote before for this duplicate petmatch
+                # if (proposed_by not in result.up_votes.all()) and (proposed_by not in result.down_votes.all()):
+                if pm.UserProfile_has_voted(userprofile) is False:
+                    proposed_by.update_reputation("ACTIVITY_PETMATCH_UPVOTE")
+
+                result.up_votes.add(proposed_by)
+                result.save()
+                messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully up-voted the existing pet match. Help spread the word about this match!")
+                Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", proposed_by, source=result)
+
+            elif outcome == PETMATCH_OUTCOME_NEW_PETMATCH:
+                messages.success(request, "Congratulations, the pet match was successful! You can view your pet match in the home page and in your profile. Help spread the word about your match!")
+                Activity.log_activity("ACTIVITY_PETMATCH_PROPOSED", proposed_by, source=result)
+                # add reputation points for proposing a new petmatch
+                proposed_by.update_reputation("ACTIVITY_PETMATCH_PROPOSED")
+
+        else:
+            if outcome == PETMATCH_OUTCOME_DUPLICATE_PETMATCH:
+                result = PetMatch.get_PetMatch(target, candidate)
+                #Has the user voted for this PetMatch before?
+                user_has_voted = result.UserProfile_has_voted(proposed_by)
+
+                if user_has_voted == UPVOTE or user_has_voted == DOWNVOTE:
+                    messages.error(request, "This Pet Match has already been proposed, and you have voted for it already!")
+                    return redirect("/reporting/mixed6/%s/" % (target.id))
+
+                # add voting reputation points if the user didn't vote before for this duplicate petmatch
+                if user_has_voted == False:
+                    proposed_by.update_reputation("ACTIVITY_PETMATCH_UPVOTE")
+
+                result.up_votes.add(proposed_by)
+                result.save()
+                messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully up-voted the existing pet match. Help spread the word about this match!")
+                Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", proposed_by, source=result)
+            else:
+                messages.error(request, "A Problem was found when trying to propose the PetMatch. We have been notified of the issue and will fix it as soon as possible.")
+
+        #Finally, return the redirect.
+        messages.success(request, "Thank you for your input!")
+        return redirect(URL_HOME)
+
+    else:
+        if request.method == "POST" and not request.POST["g-recaptcha-response"]:
+            messages.error(request, "Please Fill in the RECAPTCHA.")
+
+        if (target.pet_type != candidate.pet_type) or (target.status == candidate.status):
+            messages.error(request, "This proposal is invalid! Please try another one.")
+            return redirect("/reporting/mixed6/%s/" % (target.id))
+
+        return render_to_response(HTML_PROPOSE_MATCH, {
+            'RECAPTCHA_CLIENT_SECRET': settings.RECAPTCHA_CLIENT_SECRET,
+            'action': '/reporting/mixed7/%s/%s/' % (target_id, candidate_id),
+            'target': target,
+            'candidate': candidate,
+            'petreport_fields': [{'attr':a['attr'], 'label':a['label'], 'lost_pet_value':a['value'], 'found_pet_value':b['value']} for a,b in zip(target.get_display_fields(), candidate.get_display_fields())]
+        }, RequestContext(request))
+
+
+def choice0(request):
+    petmatch_id = PetMatch.objects.filter(has_failed=False, lost_pet__closed=False, found_pet__closed=False).order_by("?").first().id
+    return redirect("/reporting/choice1/%s" % petmatch_id)
+
+def choice1(request, petmatch_id):
+    if request.method == "POST":
+        userprofile = request.user.userprofile
+        if request.POST.get("up") != None:
+            vote = "upvote"
+        else:
+            vote = "downvote"
+        pm = get_object_or_404(PetMatch, pk=petmatch_id)
+
+        if vote == "upvote":
+            if pm.UserProfile_has_voted(userprofile) is False: # If the user is voting for the 1st time, add reputation points
+                userprofile.update_reputation("ACTIVITY_PETMATCH_UPVOTE")
+
+            pm.up_votes.add(userprofile)
+            pm.down_votes.remove(userprofile)
+            Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", userprofile, source=pm)
+            message = "You have upvoted this PetMatch!"
+
+        elif vote == "downvote":
+            if pm.UserProfile_has_voted(userprofile) is False: # If the user is voting for the 1st time, add reputation points
+                userprofile.update_reputation("ACTIVITY_PETMATCH_DOWNVOTE")
+
+            pm.down_votes.add(userprofile)
+            pm.up_votes.remove(userprofile)
+            Activity.log_activity("ACTIVITY_PETMATCH_DOWNVOTE", userprofile, source=pm)
+            message = "You have downvoted this PetMatch!"
+
+        #Was the petmatch triggered for verification? Check here.
+        threshold_reached = pm.has_reached_threshold()
+
+        #If the votes reach the threshold, prepare for pet checking!
+        if threshold_reached == True:
+            new_check = PetMatchCheck.objects.create(petmatch=pm)
+            Activity.log_activity("ACTIVITY_PETMATCHCHECK_VERIFY", userprofile, source=new_check)
+            message = new_check.send_messages_to_contacts()
+
+        num_upvotes = len(pm.up_votes.all())
+        num_downvotes = len(pm.down_votes.all())
+
+        if vote == "upvote":
+            petmatch_id = PetMatch.objects.filter(has_failed=False, lost_pet__closed=False, found_pet__closed=False).order_by("?").first().id
+            return redirect("/reporting/choice2/%s" % petmatch_id)
+        else:
+            petreport_id = PetReport.objects.filter(closed=False).order_by("?").first().id
+            return redirect("/reporting/choice3/%s" % petreport_id)
+
+    else:
+        pm = get_object_or_404(PetMatch, pk=petmatch_id)
+        voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
+
+        #Need to check if the user is authenticated (non-anonymous) to find out if he/she has voted on this PetMatch.
+        if request.user.is_authenticated() == True:
+            user_has_voted = pm.UserProfile_has_voted(request.user.userprofile)
+        else:
+            user_has_voted = False
+
+        num_upvotes = len(pm.up_votes.all())
+        num_downvotes = len(pm.down_votes.all())
+
+        ctx = {
+            "petmatch": pm,
+            "action": "/reporting/choice1/" + str(pm.id) + "/",
+            "site_domain":Site.objects.get_current().domain,
+            "petreport_fields": pm.get_display_fields(),
+            "num_voters": len(voters),
+            "user_has_voted": user_has_voted,
+            "num_upvotes":num_upvotes,
+            "num_downvotes":num_downvotes
+        }
+
+        if pm.lost_pet.closed:
+            ctx["petreunion"] = pm.lost_pet.get_PetReunion()
+        elif pm.found_pet.closed:
+            ctx["petreunion"] = pm.found_pet.get_PetReunion()
+        return render_to_response(HTML_PMDP, ctx, RequestContext(request))
+
+
+def choice2(request, petmatch_id):
+    if request.method == "POST":
+        userprofile = request.user.userprofile
+        if request.POST.get("up") != None:
+            vote = "upvote"
+        else:
+            vote = "downvote"
+        pm = get_object_or_404(PetMatch, pk=petmatch_id)
+
+        if vote == "upvote":
+            if pm.UserProfile_has_voted(userprofile) is False: # If the user is voting for the 1st time, add reputation points
+                userprofile.update_reputation("ACTIVITY_PETMATCH_UPVOTE")
+
+            pm.up_votes.add(userprofile)
+            pm.down_votes.remove(userprofile)
+            Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", userprofile, source=pm)
+            message = "You have upvoted this PetMatch!"
+
+        elif vote == "downvote":
+            if pm.UserProfile_has_voted(userprofile) is False: # If the user is voting for the 1st time, add reputation points
+                userprofile.update_reputation("ACTIVITY_PETMATCH_DOWNVOTE")
+
+            pm.down_votes.add(userprofile)
+            pm.up_votes.remove(userprofile)
+            Activity.log_activity("ACTIVITY_PETMATCH_DOWNVOTE", userprofile, source=pm)
+            message = "You have downvoted this PetMatch!"
+
+        #Was the petmatch triggered for verification? Check here.
+        threshold_reached = pm.has_reached_threshold()
+
+        #If the votes reach the threshold, prepare for pet checking!
+        if threshold_reached == True:
+            new_check = PetMatchCheck.objects.create(petmatch=pm)
+            Activity.log_activity("ACTIVITY_PETMATCHCHECK_VERIFY", userprofile, source=new_check)
+            message = new_check.send_messages_to_contacts()
+
+        num_upvotes = len(pm.up_votes.all())
+        num_downvotes = len(pm.down_votes.all())
+        messages.success(request, "Thanks for your help!")
+        return redirect(URL_HOME)
+
+    else:
+        pm = get_object_or_404(PetMatch, pk=petmatch_id)
+        voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
+
+        #Need to check if the user is authenticated (non-anonymous) to find out if he/she has voted on this PetMatch.
+        if request.user.is_authenticated() == True:
+            user_has_voted = pm.UserProfile_has_voted(request.user.userprofile)
+        else:
+            user_has_voted = False
+
+        num_upvotes = len(pm.up_votes.all())
+        num_downvotes = len(pm.down_votes.all())
+
+        ctx = {
+            "petmatch": pm,
+            "action": "/reporting/choice2/" + str(pm.id) + "/",
+            "site_domain":Site.objects.get_current().domain,
+            "petreport_fields": pm.get_display_fields(),
+            "num_voters": len(voters),
+            "user_has_voted": user_has_voted,
+            "num_upvotes":num_upvotes,
+            "num_downvotes":num_downvotes
+        }
+
+        if pm.lost_pet.closed:
+            ctx["petreunion"] = pm.lost_pet.get_PetReunion()
+        elif pm.found_pet.closed:
+            ctx["petreunion"] = pm.found_pet.get_PetReunion()
+        return render_to_response(HTML_PMDP, ctx, RequestContext(request))
+
+def choice3(request, petreport_id):
+    if request.method == "POST":
+        target = get_object_or_404(PetReport, pk=petreport_id)
+        candidate = get_object_or_404(PetReport, pk=request.POST["candidate_id"])
+        return redirect('/reporting/choice4/%s/%s/' % (target.id, candidate.id))
+    else:
+        target_petreport = get_object_or_404(PetReport, pk=petreport_id)
+        #Are there any candidates?
+        candidates_count = len(target_petreport.get_candidate_PetReports())
+        #Add the UserProfile to the PetReport's workers list.
+        target_petreport.workers.add(request.user.userprofile)
+
+        if candidates_count == 0:
+            messages.info (request, "Sorry, there are no pet reports for the selected pet report to match. However, you have been added as a worker for this pet.")
+            return redirect(URL_HOME)
+
+        return render_to_response (HTML_MATCHING, {
+            'action': '/reporting/choice3/%s/' % petreport_id,
+            'target_petreport': target_petreport,
+            'petreport_fields': target_petreport.get_display_fields(),
+            "candidates_count":candidates_count
+        }, RequestContext(request))
+
+
+def choice4(request, target_id, candidate_id):
+    target = get_object_or_404(PetReport, pk=target_id)
+    candidate = get_object_or_404(PetReport, pk=candidate_id)
+
+    if request.method == "POST" and request.POST.get("g-recaptcha-response"):
+        if not recaptcha_ok(request.POST["g-recaptcha-response"]):
+            messages.error(request, "CAPTCHA was not correct. Please try again.")
+            return redirect(request.path)
+        proposed_by = request.user.userprofile
+
+        if target.status == "Lost":
+            pm = PetMatch(lost_pet=target, found_pet=candidate, proposed_by=proposed_by)
+        else:
+            pm = PetMatch(lost_pet=candidate, found_pet=target, proposed_by=proposed_by)
+
+        #Try saving the PetMatch object.
+        # We will expect the following output:
+        # None --> PetMatch was not inserted properly OR DUPLICATE PETMATCH
+        # PetMatch Object --> Existing PetMatch (UPDATE) OR Brand new PetMatch.
+        # "Existing" means the PetMatch to be saved is the same PetMatch found, "Duplicate" means
+        # another PetMatch with the same Lost+Found Pets were found.
+        (result, outcome) = pm.save()
+
+        if result != None:
+            if outcome == PETMATCH_OUTCOME_UPDATE:
+                #Has the user voted for this PetMatch before?
+                user_has_voted = result.UserProfile_has_voted(proposed_by)
+
+                if user_has_voted == UPVOTE or user_has_voted == DOWNVOTE:
+                    messages.error(request, "This Pet Match has already been proposed, and you have voted for it already!")
+                    return redirect("/reporting/choice3/%s/" % (target.id))
+
+                # add voting reputation points if the user didn't vote before for this duplicate petmatch
+                # if (proposed_by not in result.up_votes.all()) and (proposed_by not in result.down_votes.all()):
+                if pm.UserProfile_has_voted(userprofile) is False:
+                    proposed_by.update_reputation("ACTIVITY_PETMATCH_UPVOTE")
+
+                result.up_votes.add(proposed_by)
+                result.save()
+                messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully up-voted the existing pet match. Help spread the word about this match!")
+                Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", proposed_by, source=result)
+
+            elif outcome == PETMATCH_OUTCOME_NEW_PETMATCH:
+                messages.success(request, "Congratulations, the pet match was successful! You can view your pet match in the home page and in your profile. Help spread the word about your match!")
+                Activity.log_activity("ACTIVITY_PETMATCH_PROPOSED", proposed_by, source=result)
+                # add reputation points for proposing a new petmatch
+                proposed_by.update_reputation("ACTIVITY_PETMATCH_PROPOSED")
+
+        else:
+            if outcome == PETMATCH_OUTCOME_DUPLICATE_PETMATCH:
+                result = PetMatch.get_PetMatch(target, candidate)
+                #Has the user voted for this PetMatch before?
+                user_has_voted = result.UserProfile_has_voted(proposed_by)
+
+                if user_has_voted == UPVOTE or user_has_voted == DOWNVOTE:
+                    messages.error(request, "This Pet Match has already been proposed, and you have voted for it already!")
+                    return redirect("/reporting/choice3/%s/" % (target.id))
+
+                # add voting reputation points if the user didn't vote before for this duplicate petmatch
+                if user_has_voted == False:
+                    proposed_by.update_reputation("ACTIVITY_PETMATCH_UPVOTE")
+
+                result.up_votes.add(proposed_by)
+                result.save()
+                messages.success(request, "Because there was an existing match between the two pet reports that you tried to match, You have successfully up-voted the existing pet match. Help spread the word about this match!")
+                Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", proposed_by, source=result)
+            else:
+                messages.error(request, "A Problem was found when trying to propose the PetMatch. We have been notified of the issue and will fix it as soon as possible.")
+
+        #Finally, return the redirect.
+        messages.success(request, "Thank you for your help!")
+        return redirect(URL_HOME)
+
+    else:
+        if request.method == "POST" and not request.POST["g-recaptcha-response"]:
+            messages.error(request, "Please Fill in the RECAPTCHA.")
+
+        if (target.pet_type != candidate.pet_type) or (target.status == candidate.status):
+            messages.error(request, "This proposal is invalid! Please try another one.")
+            return redirect("/reporting/choice3/%s/" % (target.id))
+
+        return render_to_response(HTML_PROPOSE_MATCH, {
+            'RECAPTCHA_CLIENT_SECRET': settings.RECAPTCHA_CLIENT_SECRET,
+            'action': '/reporting/choice4/%s/%s/' % (target_id, candidate_id),
+            'target': target,
+            'candidate': candidate,
+            'petreport_fields': [{'attr':a['attr'], 'label':a['label'], 'lost_pet_value':a['value'], 'found_pet_value':b['value']} for a,b in zip(target.get_display_fields(), candidate.get_display_fields())]
+        }, RequestContext(request))
+
 
 
 def get(request, petreport_id):
