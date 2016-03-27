@@ -307,6 +307,28 @@ class VotingWorkFlow(AbstractWorkFlow):
     def run(self, task, crowd_request):
         return task.execute(crowd_request)
 
+class MixedWorkFlow(AbstractWorkFlow):
+    tasks = [VoteTask, MatchTask, ProposeMatchTask, VoteTask, VoteTask, MatchTask, ProposeMatchTask]
+
+    def __init__(self, cr):
+        self.crowdrouter = cr
+
+    @workflow
+    def run(self, task, crowd_request):
+        return self.pipeline(crowd_request)
+
+    def step_pipeline(self, next_task, prev_task, response, pipe_data):
+        if prev_task.__class__ == ProposeMatchTask and next_task == VoteTask:
+            pipe_data["petmatch_id"] = response.response["pm"].id
+        else:
+            pipe_data["petmatch_id"] = PetMatch.objects.filter(has_failed=False, found_pet__closed=False, lost_pet__closed=False).order_by("?").first().id
+
+    def pre_pipeline(self, task, pipe_data):
+        pipe_data["action"] = URL_MIXED
+        pipe_data["petmatch_id"] = PetMatch.objects.filter(has_failed=False, found_pet__closed=False, lost_pet__closed=False).order_by("?").first().id
+        pipe_data["petreport_id"] = PetReport.objects.filter(pet_type="Dog", status="Lost").order_by("?").first().id
+        pipe_data["candidate_id"] = PetReport.objects.filter(pet_type="Dog", status="Found").order_by("?").first().id
+
 class EPMCrowdRouter(AbstractCrowdRouter):
     workflows = [MatchingWorkFlow, VotingWorkFlow, MixedWorkFlow, ChoiceWorkFlow]
     def __init__(self):

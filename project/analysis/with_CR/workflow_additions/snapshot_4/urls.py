@@ -14,4 +14,6 @@ urlpatterns = patterns('reporting.views',
     url (r'^bookmark',                      'bookmark',             name='bookmark_PetReport'),
     url (r'^get_pet_breeds$',               'get_pet_breeds',       name="get_pet_breeds"),
     url (r'^get_event_tags$',               'get_event_tags',       name='get_event_tags'),
+    url (r'^mixed',                         'mixed',                name='mixed'),
+    url (r'^choice',                        'choice',               name='choice'),
 )

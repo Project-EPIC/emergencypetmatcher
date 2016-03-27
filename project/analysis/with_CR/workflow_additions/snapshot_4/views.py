@@ -21,6 +21,25 @@ from reporting.decorators import *
 from crowdwork import EPMCrowdRouter
 import datetime, re, time, json, ipdb, project.settings
 
+@login_required
+def mixed(request):
+    response = EPMCrowdRouter().pipeline("MixedWorkFlow", request)
+    if response.method == "GET":
+        return render_to_response(response.response["path"], response.response, RequestContext(request))
+    else:
+        messages.success(request, "Thank you for helping!")
+        return redirect(response.response["path"])
+
+@login_required
+def choice(request):
+    import ipdb; ipdb.set_trace()
+    response = EPMCrowdRouter().pipeline("ChoiceWorkFlow", request)
+    if response.method == "GET":
+        return render_to_response(response.response["path"], response.response, RequestContext(request))
+    else:
+        messages.success(request, "Thank you for helping!")
+        return redirect(response.response["path"])
+
 def get(request, petreport_id):
     pet_report = get_object_or_404(PetReport, pk = petreport_id)
     user_has_bookmarked = False
