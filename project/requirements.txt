@@ -11,3 +11,4 @@ pillow
 selenium
 gunicorn
 mimeparse
+crowdrouter
