@@ -25,9 +25,81 @@ from reporting.decorators import *
 import datetime, re, time, json, ipdb, project.settings
 
 def mixed0(request):
-    target_id = PetReport.objects.filter(pet_type='Dog', closed=False, status='Lost').order_by("?").first().id
-    candidate_id = PetReport.objects.filter(pet_type='Dog', closed=False, status='Found').order_by("?").first().id
-    return redirect("/reporting/mixed1/%s/%s" % (target_id, candidate_id))
+    target_id = PetReport.objects.filter(status = "Lost", pet_type = "Dog", closed=False).order_by("?").first().id
+    candidate_id = PetReport.objects.filter(status="Found", pet_Type="Dog", closed=False).order_by("?").first().id
+    return redirect("/reporting/mixed1/%s/%s" % target_id, candidate_id)
+
+def mixed7(request, petmatch_id):
+    if request.method == "POST":
+        userprofile = request.user.userprofile
+        if request.POST.get("up") != None:
+            vote = "upvote"
+        else:
+            vote = "downvote"
+        pm = get_object_or_404(PetMatch, pk=petmatch_id)
+
+        if vote == "upvote":
+            if pm.UserProfile_has_voted(userprofile) is False: # If the user is voting for the 1st time, add reputation points
+                userprofile.update_reputation("ACTIVITY_PETMATCH_UPVOTE")
+
+            pm.up_votes.add(userprofile)
+            pm.down_votes.remove(userprofile)
+            Activity.log_activity("ACTIVITY_PETMATCH_UPVOTE", userprofile, source=pm)
+            message = "You have upvoted this PetMatch!"
+
+        elif vote == "downvote":
+            if pm.UserProfile_has_voted(userprofile) is False: # If the user is voting for the 1st time, add reputation points
+                userprofile.update_reputation("ACTIVITY_PETMATCH_DOWNVOTE")
+
+            pm.down_votes.add(userprofile)
+            pm.up_votes.remove(userprofile)
+            Activity.log_activity("ACTIVITY_PETMATCH_DOWNVOTE", userprofile, source=pm)
+            message = "You have downvoted this PetMatch!"
+
+        #Was the petmatch triggered for verification? Check here.
+        threshold_reached = pm.has_reached_threshold()
+
+        #If the votes reach the threshold, prepare for pet checking!
+        if threshold_reached == True:
+            new_check = PetMatchCheck.objects.create(petmatch=pm)
+            Activity.log_activity("ACTIVITY_PETMATCHCHECK_VERIFY", userprofile, source=new_check)
+            message = new_check.send_messages_to_contacts()
+
+        num_upvotes = len(pm.up_votes.all())
+        num_downvotes = len(pm.down_votes.all())
+        petreport_id = PetReport.objects.filter(closed=False).order_by("?").first().id
+        messages.success(request, "Thank you!")
+        return redirect(URL_HOME)
+
+    else:
+        pm = get_object_or_404(PetMatch, pk=petmatch_id)
+        voters = list(pm.up_votes.all()) + list(pm.down_votes.all())
+
+        #Need to check if the user is authenticated (non-anonymous) to find out if he/she has voted on this PetMatch.
+        if request.user.is_authenticated() == True:
+            user_has_voted = pm.UserProfile_has_voted(request.user.userprofile)
+        else:
+            user_has_voted = False
+
+        num_upvotes = len(pm.up_votes.all())
+        num_downvotes = len(pm.down_votes.all())
+
+        ctx = {
+            "petmatch": pm,
+            "action": "/reporting/mixed7/" + str(pm.id) + "/",
+            "site_domain":Site.objects.get_current().domain,
+            "petreport_fields": pm.get_display_fields(),
+            "num_voters": len(voters),
+            "user_has_voted": user_has_voted,
+            "num_upvotes":num_upvotes,
+            "num_downvotes":num_downvotes
+        }
+
+        if pm.lost_pet.closed:
+            ctx["petreunion"] = pm.lost_pet.get_PetReunion()
+        elif pm.found_pet.closed:
+            ctx["petreunion"] = pm.found_pet.get_PetReunion()
+        return render_to_response(HTML_PMDP, ctx, RequestContext(request))
 
 def mixed2(request, petreport_id):
     if request.method == "POST":
@@ -284,7 +356,9 @@ def mixed5(request, petmatch_id):
 
 def mixed6(request, petreport_id):
     if request.method == "POST":
-        return redirect(URL_HOME)
+        target = get_object_or_404(PetReport, pk=petreport_id)
+        candidate = get_object_or_404(PetReport, pk=request.POST["candidate_id"])
+        return redirect('/reporting/mixed7/%s/%s/' % (target.id, candidate.id))
     else:
         target_petreport = get_object_or_404(PetReport, pk=petreport_id)
         #Are there any candidates?
@@ -308,17 +382,11 @@ def mixed1(request, target_id, candidate_id):
     target = get_object_or_404(PetReport, pk=target_id)
     candidate = get_object_or_404(PetReport, pk=candidate_id)
 
-    if request.POST.get('no-match'): #If no match.
-        target_id = PetReport.objects.filter(pet_type='Cat', closed=False, status='Lost').order_by("?").first().id
-        return redirect("/reporting/mixed2/%s" % target_id)
-
     if request.method == "POST" and request.POST.get("g-recaptcha-response"):
-
         if not recaptcha_ok(request.POST["g-recaptcha-response"]):
             messages.error(request, "CAPTCHA was not correct. Please try again.")
             return redirect(request.path)
         proposed_by = request.user.userprofile
-
 
         if target.status == "Lost":
             pm = PetMatch(lost_pet=target, found_pet=candidate, proposed_by=proposed_by)
@@ -380,8 +448,8 @@ def mixed1(request, target_id, candidate_id):
                 messages.error(request, "A Problem was found when trying to propose the PetMatch. We have been notified of the issue and will fix it as soon as possible.")
 
         #Finally, return the redirect.
-        target_id = PetReport.objects.filter(pet_type='Cat', closed=False, status='Lost').order_by("?").first().id
-        return redirect("/reporting/mixed2/%s" % target_id)
+        petreport_id = PetReport.objects.filter(status="Found", pet_Type="Cat", closed=False).order_by("?").first().id
+        return redirect("/reporting/mixed2/%s" % petreport_id)
 
     else:
         if request.method == "POST" and not request.POST["g-recaptcha-response"]:
@@ -393,7 +461,7 @@ def mixed1(request, target_id, candidate_id):
 
         return render_to_response(HTML_PROPOSE_MATCH, {
             'RECAPTCHA_CLIENT_SECRET': settings.RECAPTCHA_CLIENT_SECRET,
-            'action': '/reporting/mixed1/%s/%s/' % (target_id, candidate_id),
+            'action': '/reporting/mixed7/%s/%s/' % (target_id, candidate_id),
             'target': target,
             'candidate': candidate,
             'petreport_fields': [{'attr':a['attr'], 'label':a['label'], 'lost_pet_value':a['value'], 'found_pet_value':b['value']} for a,b in zip(target.get_display_fields(), candidate.get_display_fields())]
