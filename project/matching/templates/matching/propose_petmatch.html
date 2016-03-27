@@ -50,7 +50,7 @@
       <label>Please verify your submission via RECAPTCHA</label>
       <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_CLIENT_SECRET }}" data-callback='recaptcha_done' style="margin:10px auto; width:300px;"></div>
       <input id="id_submit" type="Submit" class="btn btn-primary" value="Yes, I believe these are a match!" disabled/>
-      <a href="{% url 'match_PetMatch' target.id %}" type="button" class="btn btn-default" data-dismiss="modal">Nevermind, these are not a match.</a>
+      <input type="Submit" class="btn btn-default" name='no-match' value='These are not a match.'/>
     </form>
   </div>
 </div>
