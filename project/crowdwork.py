@@ -308,7 +308,7 @@ class VotingWorkFlow(AbstractWorkFlow):
         return task.execute(crowd_request)
 
 class EPMCrowdRouter(AbstractCrowdRouter):
-    workflows = [MatchingWorkFlow, VotingWorkFlow, MixedWorkFlow, ChoiceWorkFlow]
+    workflows = [MatchingWorkFlow, VotingWorkFlow]
     def __init__(self):
         self.enable_crowd_statistics("crowd_stats.db")
     @crowdrouter
