@@ -1,8 +1,17 @@
 # Django settings for project project.
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'd14kwqaf8km%hn*yb453lnhez!!t^80dwpxde8gu%#9_!lzd5!'
+
+# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 ADMINS = (
-    ('Mario Barrenechea', 'emergencypetmatcher-support@googlegroups.com'),
+    ('X', 'X'),
 )
 
 MANAGERS = ADMINS
@@ -16,10 +25,6 @@ DATABASES = {
         #'ENGINE':'django.db.backends.postgresql_psycopg2',     # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'ENGINE':'django.db.backends.sqlite3',     # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'epm_db',                      # Or path to database file if using sqlite3.
-        'USER': 'epm_login',                      # Not used with sqlite3.
-        'PASSWORD': '3m3rgEncY',                  # Not used with sqlite3.
-        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -49,29 +54,20 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = False
 
-#Absolute filesystem path to the project directory. Use for creating relative paths.
-PROJECT_ROOT = "/Users/mbarrenecheajr/Documents/Development/code/epm/project"
+STATIC_ROOT = BASE_DIR + "/static/"
+# URL prefix for static files.
+# Example: "http://media.lawrence.com/static/"
+STATIC_URL = '/static/'
+
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = "/Users/mbarrenecheajr/Documents/Development/code/epm/media/"
+MEDIA_ROOT = BASE_DIR + "/media/"
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
 MEDIA_URL = "/media/"
-
-STATIC_ROOT = '/Users/mbarrenecheajr/Documents/Development/code/epm/deployment/static/'
-# URL prefix for static files.
-# Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
-
-# Additional locations of static files
-STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -79,7 +75,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'pipeline.finders.PipelineFinder'
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
@@ -87,68 +82,62 @@ STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '2wmzko%to)il=3(6@0mf_qd8vwh!=%@uti4ml^w9z7rs&amp;xfc0e'
 
-PIPELINE_CSS = {
-    'vendor': {
-        'source_filenames': (
-            'home/css/bootstrap.min.css',
-            'home/css/datepicker.css',
-            'reporting/css/leaflet.css',
-            'reporting/css/select2.min.css',
-            'reporting/css/l.geosearch.css',
-            'reporting/css/select2-bootstrap.css'
-        ),
-        'output_filename': 'css/vendor.css',
-        'variant':'datauri',
-    }
-}
-
-PIPELINE_JS = {
-    'vendor':{
-        'source_filenames':(
-            'home/js/jquery-1.9.1.min.js',
-            'home/js/bootstrap-datepicker.js',
-            'reporting/js/select2.full.min.js',
-            'reporting/js/leaflet.js',
-            'reporting/js/l.control.geosearch.js',
-            'reporting/js/l.geosearch.provider.google.js',
-            'home/js/jquery-imagesloaded.js',
-            'home/js/jquery-rotate.min.js',
-            'home/js/jquery-wookmark.js',
-            'home/js/jquery.zoom.min.js',
-        ),
-        'output_filename': 'js/vendor.js'
+PIPELINE = {
+    "PIPELINE_ENABLED": not DEBUG,
+    "JAVASCRIPT" : {
+        'vendor':{
+            'source_filenames':(
+                'home/js/jquery-1.9.1.min.js',
+                'home/js/bootstrap-datepicker.js',
+                'reporting/js/select2.full.min.js',
+                'reporting/js/leaflet.js',
+                'reporting/js/l.control.geosearch.js',
+                'reporting/js/l.geosearch.provider.google.js',
+                'home/js/jquery-imagesloaded.js',
+                'home/js/jquery-rotate.min.js',
+                'home/js/jquery-wookmark.js',
+                'home/js/jquery.zoom.min.js',
+            ),
+            'output_filename': 'js/vendor.js'
+        }
+    },
+    "STYLESHEETS": {
+        "vendor": {
+            'source_filenames': (
+                'home/css/bootstrap.min.css',
+                'home/css/datepicker.css',
+                'reporting/css/leaflet.css',
+                'reporting/css/select2.min.css',
+                'reporting/css/l.geosearch.css',
+                'reporting/css/select2-bootstrap.css'
+            ),
+            'output_filename': 'css/vendor.css',
+            'variant':'datauri',
+        }
     }
 }
 
 PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.yuglify.YuglifyCompressor'
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.yuglify.YuglifyCompressor'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
-
 TEMPLATES = [
-{
-    'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'DIRS': [],
-    'APP_DIRS': True,
-    'OPTIONS': {
-        'debug': DEBUG,
-        'context_processors': [
-            'django.template.context_processors.debug',
-            'django.template.context_processors.request',
-            'django.contrib.auth.context_processors.auth',
-            'django.template.context_processors.i18n',
-            'django.template.context_processors.media',
-            'django.template.context_processors.static',
-            'django.template.context_processors.tz',
-            'django.contrib.messages.context_processors.messages',
-        ],
-    },
-},]
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    }
+]
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -206,14 +195,9 @@ ACCOUNT_ACTIVATION_DAYS = 1 # One-week activation window; you may, of course, us
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 #Email File Path - Used for testing email messages.
-EMAIL_FILE_PATH =  PROJECT_ROOT + "email-test.txt"
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'emergencypetmatcher@gmail.com'
-EMAIL_HOST_PASSWORD = 'h!5H_3m3rgEncY'
-DEFAULT_FROM_EMAIL = "emergencypetmatcher@gmail.com"
+EMAIL_FILE_PATH =  BASE_DIR + "email-test.txt"
 
+#May need to retrieve separate RECAPTCHA codes.
 RECAPTCHA_SERVER_SECRET = "6LfkHgITAAAAAF1RcPPIB4ydg-_19xFLmoKvEJIr"
 RECAPTCHA_CLIENT_SECRET = "6LfkHgITAAAAANIuw-RwYMfOWEMBfeVll9nhrdKa"
 RECAPTCHA_SITEVERIFY = "https://www.google.com/recaptcha/api/siteverify"
@@ -232,6 +216,7 @@ SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter')
 DOMAIN_URL = 'http://www.emergencypetmatcher.com/'
 
 try:
-    from social_auth_settings import *
+    from social_auth_settings_real import *
+    from email_settings_real import *
 except:
     pass

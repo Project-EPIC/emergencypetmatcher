@@ -2,7 +2,7 @@
 {% load staticfiles %}
 
 {% block js %}
-	<script src = {% static "home/js/epm-about.js" %} type='text/javascript'></script>
+	<script src = "{% static 'home/js/epm-about.js' %}" type='text/javascript'></script>
 {% endblock js %}
 
 {% block head_title %}EPM - About{% endblock head_title %}
@@ -13,7 +13,7 @@
 	{% if petreports %}
 	<div id="about_pets">
 		{% for pet_report in petreports %}
-				<img style="width:50px; height:50px; border:1px solid black;"src="{{ MEDIA_URL }}{{ pet_report.thumb_path }}"/>
+			<img style="width:50px; height:50px; border:1px solid black;" src="{{ MEDIA_URL }}{{ pet_report.thumb_path }}"/>
 		{% endfor %}
 	</div>
 	{% endif %}	

@@ -102,7 +102,7 @@ def login_User(request):
                 login(request, user)
                 messages.success(request, 'Welcome, %s!' % (username))
                 Activity.log_activity("ACTIVITY_LOGIN", user.userprofile)
-                next_url = request.REQUEST ['next']
+                next_url = request.GET.get('next', URL_HOME)
 
                 if "//" in next_url and re.match(r'[^\?]*//', next_url):
                     next_url = settings.LOGIN_REDIRECT_URL
@@ -113,13 +113,9 @@ def login_User(request):
         else:
             messages.error(request, 'Invalid Login credentials. Please try again.')
 
-    try:
-        next = request.REQUEST ['next']
-    except KeyError: #This only happens if the user tries to plug in the login URL without a 'next' parameter...
-        next = URL_HOME
-
+    next_path = request.GET.get('next', URL_HOME)
     form = AuthenticationForm()
-    return render_to_response(HTML_LOGIN, {'form':form}, RequestContext(request, {'next': next}))
+    return render_to_response(HTML_LOGIN, {'form':form}, RequestContext(request, {'next': next_path}))
 
 
 @login_required
@@ -261,10 +257,10 @@ def about (request):
     return render_to_response(HTML_ABOUT, {'petreports':petreports}, RequestContext(request))
 
 def page_not_found(request):
-    return render_to_response(HTML_404)
+    return render_to_response(HTML_404, {}, RequestContext(request))
 
 def error(request):
-    return render_to_response(HTML_500)
+    return render_to_response(HTML_500, {}, RequestContext(request))
 
 def stats(request):
     return render_to_response(HTML_STATS, {
@@ -283,11 +279,3 @@ def stats(request):
         "num_downvotes": PetMatch.objects.aggregate(Count("down_votes")),
         "num_petreunions": PetReunion.objects.count()
     }, RequestContext(request))
-
-class RemoteUserMiddleware(object):
-    def process_response(self, request, response):
-        if hasattr(request, 'user'):
-            if request.user.is_authenticated():
-                response['X-Remote-User-Name'] = request.user.username
-                response['X-Remote-User-Id'] = request.user.id
-        return response

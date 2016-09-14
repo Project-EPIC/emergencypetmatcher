@@ -33,3 +33,5 @@ media/petreunion/
 media/petreport/
 media/userprofile/
 crowd_stats.db
+project/selenium
+static
