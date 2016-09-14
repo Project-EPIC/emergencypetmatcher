@@ -15,4 +15,5 @@ EPM is a Python web application built in Django for reuniting lost and found pet
 5. To create test pet data, just run `python fixture.py setup` to see pet reports, matches, and user profiles generated at random.
 6. In order to properly run EPM, you must fill out email account settings and social auth settings in order for your EPM instance to properly send emails and to authenticate Facebook/Twitter accounts, respectively. Fill out the `social_auth_settings.py` and `email_settings.py` under `project/project`.
 7. Finally, run `python manage.py runserver` to start the development server and go to `localhost:8000` to see the front page of EPM.
+8. If you want to create example pet data to display, just run `python fixture.py setup` on the project directory to launch the fixture script that will create pet reports, matches, and users to the database.
 
